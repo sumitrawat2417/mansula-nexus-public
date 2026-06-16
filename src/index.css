@@ -510,6 +510,7 @@ button, input, select { font-family: inherit; }
 
 /* ══════════ TOAST ══════════ */
 .toast { position: fixed; top: calc(var(--header-height) + 10px); left: 50%; transform: translateX(-50%); z-index: 300; background: var(--brand-accent); color: white; padding: 9px 18px; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 7px; box-shadow: 0 4px 20px rgba(16,185,129,0.35); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.4s forwards; white-space: nowrap; }
+.toast.error { background: var(--brand-danger); box-shadow: 0 4px 20px rgba(239,68,68,0.35); }
 
 /* ══════════ ANIMATIONS ══════════ */
 @keyframes slideUp      { from { opacity: 0; transform: translateY(12px); }   to { opacity: 1; transform: translateY(0); } }
@@ -565,9 +566,10 @@ button, input, select { font-family: inherit; }
 .success-item-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
 .success-total-row { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); font-weight: 800; font-size: 1.1rem; color: var(--text-primary); }
 .success-total-val { color: var(--brand-primary); }
-.success-done-btn { width: 100%; background: var(--brand-primary); color: white; border: none; border-radius: var(--radius-full); padding: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px var(--brand-accent); }
-.success-done-btn:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 6px 16px var(--brand-accent); }
+.success-done-btn { width: 100%; background: var(--brand-primary); color: white; border: none; border-radius: var(--radius-full); padding: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.success-done-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
 .success-done-btn:active { transform: translateY(0); }
+.expand-items-btn { width: 100%; background: transparent; border: none; color: var(--text-muted); font-size: 0.8rem; padding: 6px; cursor: pointer; text-decoration: underline; margin-bottom: 4px; }
 
 /* ══════════ DESKTOP ACTIONS ══════════ */
 .desktop-complete-btn { display: none; background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); border-radius: var(--radius-sm); padding: 4px 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; align-items: center; gap: 4px; transition: all 0.2s; }

@@ -84,6 +84,17 @@ const playSound = (type) => {
       gain.gain.setValueAtTime(0.1, audioCtx.currentTime)
       gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.36)
       osc.start(); osc.stop(audioCtx.currentTime + 0.36)
+    } else if (type === 'alarm') {
+      osc.type = 'square'
+      const t = audioCtx.currentTime
+      for(let i=0; i<6; i++) {
+        osc.frequency.setValueAtTime(800, t + i*0.5)
+        osc.frequency.setValueAtTime(1200, t + i*0.5 + 0.25)
+      }
+      gain.gain.setValueAtTime(0.1, t)
+      gain.gain.linearRampToValueAtTime(0.1, t + 3)
+      gain.gain.linearRampToValueAtTime(0.01, t + 3.1)
+      osc.start(t); osc.stop(t + 3.1)
     }
   } catch (_) {}
 }
@@ -177,9 +188,14 @@ const ordTotal = (order, taxRate) => {
 
 // ─────────────── SUCCESS MODAL ───────────────
 function SuccessModal({ order, onClose, currency, taxRateObj }) {
+  const [expanded, setExpanded] = useState(false)
   if (!order) return null
   const sub = order.items.reduce((s, i) => s + i.price * i.qty, 0)
   const total = sub * (1 + taxRateObj.value)
+
+  const previewCount = 4
+  const hasMore = order.items.length > previewCount
+  const visibleItems = expanded ? order.items : order.items.slice(0, previewCount)
 
   return (
     <div className="drawer-overlay open" style={{ zIndex: 9999, alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
@@ -190,14 +206,19 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
         <h2 className="success-title">Order Complete!</h2>
         <p className="success-subtitle">{formatOrderId(order.id)} has been finalized.</p>
         
-        <div className="success-details">
-          {order.items.map(item => (
-            <div key={item.id} className="success-item-row">
+        <div className="success-details" style={{ textAlign: 'center' }}>
+          {visibleItems.map(item => (
+            <div key={item.id} className="success-item-row" style={{ textAlign: 'left' }}>
               <span>{item.qty}× {item.name}</span>
               <span>{fmt(item.price * item.qty, currency)}</span>
             </div>
           ))}
-          <div className="success-total-row">
+          {!expanded && hasMore && (
+            <button className="expand-items-btn" onClick={() => setExpanded(true)}>
+              + {order.items.length - previewCount} more items
+            </button>
+          )}
+          <div className="success-total-row" style={{ textAlign: 'left' }}>
             <span>Total</span>
             <span className="success-total-val">{fmt(total, currency)}</span>
           </div>
@@ -267,34 +288,38 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
           <div className="watchdog-control" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-surface-2)', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', height: '40px' }} title="Watchdog Timer">
             <I.Clock s={14} color="var(--brand-primary)"/>
             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Watchdog</span>
-            <select 
-              value={isCustomTimer ? 'custom' : watchdogMins}
-              onChange={e => {
-                if (e.target.value === 'custom') {
-                  setIsCustomTimer(true)
-                  onWatchdogMins(watchdogMins === 0 ? 1 : watchdogMins)
-                } else {
-                  setIsCustomTimer(false)
-                  onWatchdogMins(parseInt(e.target.value))
-                }
-              }}
-              style={{ background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', appearance: 'none', cursor: 'pointer', marginLeft: 4 }}
-            >
-              <option value={0}>Off</option>
-              <option value={2}>2m</option>
-              <option value={5}>5m</option>
-              <option value={10}>10m</option>
-              <option value={15}>15m</option>
-              <option value={30}>30m</option>
-              <option value="custom">Custom</option>
-            </select>
-            {isCustomTimer && (
-              <input 
-                type="number" 
-                value={watchdogMins} 
-                onChange={e => onWatchdogMins(Math.max(0, parseInt(e.target.value) || 0))} 
-                style={{ width: 40, background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', textAlign: 'center', borderLeft: '1px solid var(--border-color)', paddingLeft: 6 }}
-              />
+            {isCustomTimer ? (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <input 
+                  type="number" 
+                  value={watchdogMins} 
+                  onChange={e => onWatchdogMins(Math.max(0, parseInt(e.target.value) || 0))} 
+                  style={{ width: 40, background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', textAlign: 'center', marginLeft: 4 }}
+                  autoFocus
+                />
+                <button onClick={() => { setIsCustomTimer(false); onWatchdogMins(0); }} style={{ background:'none', border:'none', cursor:'pointer', padding:'4px', color:'var(--text-muted)' }} title="Clear custom timer"><I.X s={12}/></button>
+              </div>
+            ) : (
+              <select 
+                value={watchdogMins}
+                onChange={e => {
+                  if (e.target.value === 'custom') {
+                    setIsCustomTimer(true)
+                    onWatchdogMins(watchdogMins === 0 ? 1 : watchdogMins)
+                  } else {
+                    onWatchdogMins(parseInt(e.target.value))
+                  }
+                }}
+                style={{ background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', appearance: 'none', cursor: 'pointer', marginLeft: 4 }}
+              >
+                <option value={0}>Off</option>
+                <option value={2}>2m</option>
+                <option value={5}>5m</option>
+                <option value={10}>10m</option>
+                <option value={15}>15m</option>
+                <option value={30}>30m</option>
+                <option value="custom">Custom</option>
+              </select>
             )}
           </div>
         </div>
@@ -615,7 +640,7 @@ export default function App() {
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2800) }
+  const showToast = (msg, type='success') => { setToast({msg, type}); setTimeout(() => setToast(null), 2800) }
 
   // ── Watchdog Timer ──
   useEffect(() => {
@@ -715,7 +740,7 @@ export default function App() {
     const order = orders.find(o => o.id === orderId)
     if (!order) return
     if (order.items.length === 0) {
-      showToast('Cannot complete an empty order.')
+      showToast('Cannot complete an empty order.', 'error')
       return
     }
 
@@ -766,7 +791,7 @@ export default function App() {
   return (
     <>
       {/* Toast */}
-      {toast && <div className="toast" role="status"><I.Check s={15}/> {toast}</div>}
+      {toast && <div className={`toast ${toast.type}`} role="status">{toast.type==='success' ? <I.Check s={15}/> : <I.Clock s={15}/>} {toast.msg}</div>}
 
       {/* Mobile cart overlay */}
       <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true"/>
