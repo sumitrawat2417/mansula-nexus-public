@@ -25,7 +25,20 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
-### v1.0.0-alpha (Current)
+### v1.1.0-alpha — POS Product Grid UI
+*   **Feature: Product Catalog** — 16 sample items across 5 categories (Coffee, Tea, Food, Bakery, Drinks) displayed in a responsive card grid with emoji icons, prices, and "Popular/New" badges.
+*   **Feature: Category Filter** — Horizontally scrollable chip-style category filter bar to quickly browse item types.
+*   **Feature: Search** — Real-time search input that filters items by name instantly.
+*   **Feature: Shopping Cart** — Full cart management with add, increase/decrease quantity, remove, and clear-all functionality.
+*   **Feature: Order Totals** — Live-calculated subtotal, 8% tax, and grand total displayed in the cart panel.
+*   **Feature: Checkout** — "Charge $X.XX" button that clears the cart and shows a confirmation message.
+*   **Feature: Light & Dark Theme** — Full light/dark theme toggle saved to `localStorage`, applied via CSS custom properties on `data-theme` attribute.
+*   **Design: Mobile-First Responsive** — On mobile, cart slides up as a bottom sheet drawer with an FAB (floating action button) to open it. Desktop shows a fixed side-by-side layout.
+*   **Design: Premium UI** — Glassmorphism accents, smooth animations, hover/active micro-interactions on every element.
+
+---
+
+### v1.0.0-alpha — Project Initialization
 *   **Project Initialization**: Set up Vite + React template.
 *   **Base Styling**: Added `index.css` with a premium dark theme, glassmorphism utilities, and brand color tokens.
 *   **CI/CD Pipeline**: Configured `.github/workflows/deploy.yml` to automatically build and push the `dist/` output to the `mansula-nexus-public` repository upon changes to the `main` branch.
