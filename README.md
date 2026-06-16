@@ -25,6 +25,17 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
+### v1.2.0-alpha — UI Polish & UX Improvements
+*   **UX: Collapsible Search** — Search bar is now hidden by default on mobile. A search icon in the category toolbar opens a smooth slide-down search overlay, keeping the toolbar compact.
+*   **UX: Inline Cart Qty on Cards** — Product cards now display the current cart quantity in a badge on the card image. When qty > 0, inline `−` and `+` controls appear; tapping the card always adds; the `−` button removes (shows trash icon at qty 1).
+*   **UX: Toast Notification** — A green toast confirmation pops up on successful checkout instead of a plain header message.
+*   **Design: Compact Mobile Cards** — Reduced image aspect ratio and padding on cards for mobile screens; more items visible without scrolling.
+*   **Design: "In Cart" Card Highlight** — Cards with items in the cart show a subtle indigo border glow to visually indicate active state.
+*   **Design: Dark Theme Refinement** — Deeper dark base (`#0d1117`), improved contrast ratios, border colours, and adjusted brand primary to `#818cf8` for better legibility in dark mode.
+*   **Design: Premium Micro-interactions** — Emoji on cards rotate/scale on hover, add button pulses on click, qty badge animates in with a pop effect.
+
+---
+
 ### v1.1.0-alpha — POS Product Grid UI
 *   **Feature: Product Catalog** — 16 sample items across 5 categories (Coffee, Tea, Food, Bakery, Drinks) displayed in a responsive card grid with emoji icons, prices, and "Popular/New" badges.
 *   **Feature: Category Filter** — Horizontally scrollable chip-style category filter bar to quickly browse item types.
