@@ -175,6 +175,40 @@ const ordTotal = (order, taxRate) => {
   return sub * (1 + taxRate)
 }
 
+// ─────────────── SUCCESS MODAL ───────────────
+function SuccessModal({ order, onClose, currency, taxRateObj }) {
+  if (!order) return null
+  const sub = order.items.reduce((s, i) => s + i.price * i.qty, 0)
+  const total = sub * (1 + taxRateObj.value)
+
+  return (
+    <div className="drawer-overlay open" style={{ zIndex: 9999, alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
+      <div className="success-modal" onClick={e => e.stopPropagation()}>
+        <div className="success-icon-wrap">
+          <div className="success-icon">✅</div>
+        </div>
+        <h2 className="success-title">Order Complete!</h2>
+        <p className="success-subtitle">{formatOrderId(order.id)} has been finalized.</p>
+        
+        <div className="success-details">
+          {order.items.map(item => (
+            <div key={item.id} className="success-item-row">
+              <span>{item.qty}× {item.name}</span>
+              <span>{fmt(item.price * item.qty, currency)}</span>
+            </div>
+          ))}
+          <div className="success-total-row">
+            <span>Total</span>
+            <span className="success-total-val">{fmt(total, currency)}</span>
+          </div>
+        </div>
+        
+        <button className="success-done-btn" onClick={onClose}>Done</button>
+      </div>
+    </div>
+  )
+}
+
 // ─────────────── ORDER CONSOLE ───────────────
 function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onClose, currency, taxRateObj, watchdogMins, onWatchdogMins }) {
   const [expandedId, setExpandedId] = useState(null)
@@ -229,15 +263,35 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
           <button className="new-order-btn" onClick={onNew} id="new-order-btn" style={{ flex: 1 }}>
             <I.Plus s={15}/> New Order
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-surface-2)', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', height: '40px' }} title="Watchdog Timer (minutes)">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-surface-2)', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', height: '40px' }} title="Watchdog Timer">
             <I.Clock s={14}/>
-            <input 
-              type="number" 
-              value={watchdogMins} 
-              onChange={e => onWatchdogMins(Math.max(0, parseInt(e.target.value) || 0))} 
-              style={{ width: 30, background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', textAlign: 'center' }}
-            />
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>min</span>
+            <select 
+              value={![0, 2, 5, 10, 15, 30].includes(watchdogMins) ? 'custom' : watchdogMins}
+              onChange={e => {
+                if (e.target.value === 'custom') {
+                  onWatchdogMins(watchdogMins === 0 ? 1 : watchdogMins)
+                } else {
+                  onWatchdogMins(parseInt(e.target.value))
+                }
+              }}
+              style={{ background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', appearance: 'none', cursor: 'pointer' }}
+            >
+              <option value={0}>Off</option>
+              <option value={2}>2m</option>
+              <option value={5}>5m</option>
+              <option value={10}>10m</option>
+              <option value={15}>15m</option>
+              <option value={30}>30m</option>
+              <option value="custom">Custom</option>
+            </select>
+            {![0, 2, 5, 10, 15, 30].includes(watchdogMins) && (
+              <input 
+                type="number" 
+                value={watchdogMins} 
+                onChange={e => onWatchdogMins(Math.max(0, parseInt(e.target.value) || 0))} 
+                style={{ width: 40, background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', textAlign: 'center', borderLeft: '1px solid var(--border-color)', paddingLeft: 6 }}
+              />
+            )}
           </div>
         </div>
 
@@ -531,6 +585,7 @@ export default function App() {
   const [cartOpen,     setCartOpen]   = useState(false)
   const [menuOpen,     setMenuOpen]   = useState(false)
   const [ordersOpen,   setOrdersOpen] = useState(false)
+  const [successOrder, setSuccessOrder] = useState(null)
   const [watchdogMins, setWatchdogMins] = useState(() => { try { return parseInt(localStorage.getItem('mn-watchdog')) || 5 } catch { return 5 } })
   const [toast,        setToast]      = useState(null)
   const searchRef = useRef(null)
@@ -656,7 +711,7 @@ export default function App() {
     }
 
     playSound('checkout')
-    const t = ordTotal(order, taxRateObj.value)
+    setSuccessOrder(order)
     
     let newCurrentId = currentOrderId
     let newOrders = orders.map(o => o.id === orderId ? { ...o, status: 'completed' } : o)
@@ -678,7 +733,6 @@ export default function App() {
     if (newCurrentId !== currentOrderId) {
       setCurrentOrderId(newCurrentId)
     }
-    showToast(`#${orderId} completed — ${fmt(t, currency)}`)
   }
 
   const handleCheckout = () => {
@@ -708,7 +762,8 @@ export default function App() {
       {/* Mobile cart overlay */}
       <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true"/>
 
-      {/* Drawers */}
+      {/* Drawers & Modals */}
+      {successOrder && <SuccessModal order={successOrder} onClose={() => setSuccessOrder(null)} currency={currency} taxRateObj={taxRateObj} />}
       {menuOpen   && <SettingsDrawer theme={theme} onToggleTheme={toggleTheme} cols={cols} onCols={setCols} currency={currency} onCurrency={setCurrency} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} onClose={() => setMenuOpen(false)}/>}
       {ordersOpen && <OrderConsole orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onSuccess={handleCheckoutOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} currency={currency} taxRateObj={taxRateObj} watchdogMins={watchdogMins} onWatchdogMins={(v) => { setWatchdogMins(v); localStorage.setItem('mn-watchdog', v); }}/>}
 
