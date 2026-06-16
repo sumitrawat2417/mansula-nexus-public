@@ -25,6 +25,17 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
+### v1.4.0-alpha — Customization & Polish
+*   **Feature: Currency Selector** — Choose between INR, USD, EUR, GBP, and AUD from the settings menu. Prices automatically convert.
+*   **Feature: Tax Rate Selector** — Choose between No Tax (0%), and GST tiers (5%, 12%, 18%, 28%).
+*   **Feature: Sound Effects** — Added subtle Web Audio API sound effects for adding items (rising pitch), removing items (falling pitch), and checkout (success chime) for a friendlier UX.
+*   **Feature: Auto Grid Mode** — Added an "Auto" grid option that uses CSS grid auto-fill for responsive layouts by default. Replaces static columns.
+*   **UI Polish: Empty State Cards** — Removed the large `+` button from cards when quantity is 0; the entire card is now cleanly clickable without visual clutter.
+*   **UX: Hamburger Placement** — Moved the menu icon from the left side to the right side of the header for easier thumb access.
+*   **Fix: Cart Overlay Z-Index** — The dark background overlay behind the mobile cart panel now correctly sits behind the panel rather than fading the panel itself.
+
+---
+
 ### v1.3.0-alpha — Orders, Settings & Grid Control
 *   **Feature: Settings Drawer** — 3-bar hamburger menu opens a left slide-in drawer with: dark/light theme toggle, product grid column selector (2/3/4 columns), currency info, and tax rate display.
 *   **Feature: Order System** — Full multi-order management. Each session starts with `ORD-001`. Completing an order marks it as done and auto-creates a new one. Active and completed orders are stored in session.

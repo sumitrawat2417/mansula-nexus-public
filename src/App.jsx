@@ -22,12 +22,69 @@ const PRODUCTS = [
 ]
 
 const CATEGORIES = ['All', 'Coffee', 'Tea', 'Food', 'Bakery', 'Drinks']
-const TAX_RATE   = 0.05   // 5% GST
-const CURRENCY   = '₹'
+
+const CURRENCIES = [
+  { code: 'INR', symbol: '₹', rate: 1 },
+  { code: 'USD', symbol: '$', rate: 0.012 },
+  { code: 'EUR', symbol: '€', rate: 0.011 },
+  { code: 'GBP', symbol: '£', rate: 0.0095 },
+  { code: 'AUD', symbol: 'A$', rate: 0.018 },
+]
+
+const TAX_RATES = [
+  { label: 'No Tax (0%)', value: 0 },
+  { label: 'GST (5%)', value: 0.05 },
+  { label: 'GST (12%)', value: 0.12 },
+  { label: 'GST (18%)', value: 0.18 },
+  { label: 'GST (28%)', value: 0.28 },
+]
 
 let orderCounter = 1
 const makeOrderId  = () => `ORD-${String(orderCounter++).padStart(3, '0')}`
 const makeOrder    = () => ({ id: makeOrderId(), items: [], createdAt: new Date(), status: 'active' })
+
+// ─────────────── SOUND SYSTEM ───────────────
+let audioCtx = null
+const playSound = (type) => {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+    if (audioCtx.state === 'suspended') audioCtx.resume()
+    
+    const osc = audioCtx.createOscillator()
+    const gain = audioCtx.createGain()
+    osc.connect(gain)
+    gain.connect(audioCtx.destination)
+    
+    if (type === 'add') {
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1)
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1)
+      osc.start()
+      osc.stop(audioCtx.currentTime + 0.1)
+    } else if (type === 'remove') {
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(300, audioCtx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1)
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1)
+      osc.start()
+      osc.stop(audioCtx.currentTime + 0.1)
+    } else if (type === 'checkout') {
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime)
+      osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.1)
+      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2)
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime)
+      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3)
+      osc.start()
+      osc.stop(audioCtx.currentTime + 0.3)
+    }
+  } catch (e) {
+    // Ignore audio errors
+  }
+}
 
 // ─────────────── ICONS ───────────────
 const I = {
@@ -86,16 +143,23 @@ const I = {
       <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
     </svg>
   ),
-  Grid2: ({ s = 16 }) => (
+  GridAuto: ({ s = 16 }) => (
     <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="8" height="18" rx="1"/><rect x="13" y="3" width="8" height="18" rx="1"/>
+      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
     </svg>
   ),
-  Grid3: ({ s = 16 }) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="18" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/>
-    </svg>
-  ),
+  GridN: ({ cols = 2, s = 16 }) => {
+    const gap = 2
+    const totalW = 18
+    const w = (totalW - (cols - 1) * gap) / cols
+    return (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {Array.from({length: cols}).map((_, i) => (
+          <rect key={i} x={3 + i * (w + gap)} y="3" width={w} height="18" rx="1" />
+        ))}
+      </svg>
+    )
+  },
   Logo: () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
@@ -114,18 +178,18 @@ const I = {
 }
 
 // ─────────────── HELPERS ───────────────
-const fmt  = (n) => `${CURRENCY}${n.toFixed(0)}`
-const time = (d) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
-const cartTotal = (items) => items.reduce((s, i) => s + i.price * i.qty, 0)
+const time = (d) => d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
 
 // ─────────────── PRODUCT CARD ───────────────
-function ProductCard({ product, qty, onAdd, onDecrease, cols }) {
+function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
   const inCart = qty > 0
 
   const handleCardClick = (e) => {
     if (e.target.closest('.card-overlay-controls')) return
     onAdd(product)
   }
+
+  const fmtPrice = `${currency.symbol}${(product.price * currency.rate).toFixed(currency.rate === 1 ? 0 : 2)}`
 
   return (
     <div
@@ -134,7 +198,7 @@ function ProductCard({ product, qty, onAdd, onDecrease, cols }) {
       role="button"
       tabIndex={0}
       onKeyDown={e => e.key === 'Enter' && onAdd(product)}
-      aria-label={`${product.name} — ${fmt(product.price)}${inCart ? `, ${qty} in cart` : ''}`}
+      aria-label={`${product.name} — ${fmtPrice}${inCart ? `, ${qty} in cart` : ''}`}
     >
       {/* Image area */}
       <div className="product-img-wrap">
@@ -146,8 +210,8 @@ function ProductCard({ product, qty, onAdd, onDecrease, cols }) {
           </span>
         )}
 
-        {/* Overlay qty controls — sits at the bottom of the image */}
-        {inCart ? (
+        {/* Overlay qty controls ONLY when qty > 0 */}
+        {inCart && (
           <div className="card-overlay-controls" onClick={e => e.stopPropagation()}>
             <button
               className="card-ov-btn minus"
@@ -165,30 +229,27 @@ function ProductCard({ product, qty, onAdd, onDecrease, cols }) {
               <I.Plus />
             </button>
           </div>
-        ) : (
-          <div className="card-overlay-add" onClick={e => { e.stopPropagation(); onAdd(product) }}>
-            <I.Plus s={12} />
-          </div>
         )}
       </div>
 
       {/* Info */}
       <div className="product-info">
         <div className="product-name">{product.name}</div>
-        <div className="product-price">{fmt(product.price)}</div>
+        <div className="product-price">{fmtPrice}</div>
       </div>
     </div>
   )
 }
 
 // ─────────────── CART ITEM ───────────────
-function CartItem({ item, onIncrease, onDecrease }) {
+function CartItem({ item, onIncrease, onDecrease, currency }) {
+  const fmtPrice = `${currency.symbol}${(item.price * item.qty * currency.rate).toFixed(currency.rate === 1 ? 0 : 2)}`
   return (
     <div className="cart-item-card" role="listitem">
       <div className="cart-item-emoji">{item.emoji}</div>
       <div className="cart-item-details">
         <div className="cart-item-name" title={item.name}>{item.name}</div>
-        <div className="cart-item-price">{fmt(item.price * item.qty)}</div>
+        <div className="cart-item-price">{fmtPrice}</div>
       </div>
       <div className="cart-item-controls">
         <button className="qty-btn" onClick={() => onDecrease(item.id)}>
@@ -204,9 +265,11 @@ function CartItem({ item, onIncrease, onDecrease }) {
 }
 
 // ─────────────── ORDER CONSOLE ───────────────
-function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose }) {
+function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose, currency, taxRateObj }) {
   const active = orders.filter(o => o.status === 'active')
   const past   = orders.filter(o => o.status === 'completed')
+
+  const fmt = (val) => `${currency.symbol}${(val * currency.rate).toFixed(currency.rate === 1 ? 0 : 2)}`
 
   return (
     <div className="drawer-overlay open" onClick={onClose} aria-hidden="true">
@@ -236,7 +299,8 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose }) {
             <>
               <div className="console-section-label">Active Orders</div>
               {active.map(order => {
-                const total = cartTotal(order.items) * (1 + TAX_RATE)
+                const subtotal = order.items.reduce((s, i) => s + i.price * i.qty, 0)
+                const total = subtotal * (1 + taxRateObj.value)
                 const isCurrent = order.id === currentOrderId
                 return (
                   <button
@@ -266,7 +330,8 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose }) {
             <>
               <div className="console-section-label" style={{ marginTop: 16 }}>Completed Orders</div>
               {past.slice(-10).reverse().map(order => {
-                const total = cartTotal(order.items) * (1 + TAX_RATE)
+                const subtotal = order.items.reduce((s, i) => s + i.price * i.qty, 0)
+                const total = subtotal * (1 + taxRateObj.value)
                 return (
                   <div key={order.id} className="order-row past">
                     <div className="order-row-left">
@@ -299,7 +364,7 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose }) {
 }
 
 // ─────────────── SETTINGS DRAWER ───────────────
-function SettingsDrawer({ theme, onToggleTheme, cols, onCols, onClose }) {
+function SettingsDrawer({ theme, onToggleTheme, cols, onCols, currency, onCurrency, taxRateObj, onTaxRate, onClose }) {
   return (
     <div className="drawer-overlay open" onClick={onClose} aria-hidden="true">
       <div className="settings-drawer" onClick={e => e.stopPropagation()} role="dialog" aria-label="Settings">
@@ -344,47 +409,61 @@ function SettingsDrawer({ theme, onToggleTheme, cols, onCols, onClose }) {
               <div className="setting-label">Product Grid</div>
               <div className="setting-desc">Columns per row</div>
             </div>
-            <div className="grid-picker">
-              {[2, 3, 4].map(n => (
+            <div className="grid-picker" style={{ flexWrap: 'wrap', display: 'flex', gap: 8, width: '100%' }}>
+              {['auto', 2, 3, 4, 5].map(n => (
                 <button
                   key={n}
-                  id={`grid-${n}-btn`}
-                  className={`grid-pick-btn ${cols === n ? 'active' : ''}`}
-                  onClick={() => onCols(n)}
-                  aria-pressed={cols === n}
+                  className={`grid-pick-btn ${cols === String(n) ? 'active' : ''}`}
+                  onClick={() => onCols(String(n))}
+                  aria-pressed={cols === String(n)}
+                  style={{ flex: n === 'auto' ? '1 1 100%' : '1 1 calc(25% - 6px)' }}
                 >
-                  {n === 2 ? <I.Grid2 s={18} /> : n === 3 ? <I.Grid3 s={18} /> : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="4" height="18" rx="1"/><rect x="10" y="3" width="4" height="18" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/>
-                    </svg>
-                  )}
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>{n} col{n > 1 ? 's' : ''}</span>
+                  {n === 'auto' ? <I.GridAuto s={18} /> : <I.GridN cols={n} s={18} />}
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>
+                    {n === 'auto' ? 'Auto (Responsive)' : `${n} cols`}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Currency info */}
-          <div className="setting-row">
+          {/* Currency selection */}
+          <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
             <div>
               <div className="setting-label">Currency</div>
-              <div className="setting-desc">Indian Rupee (₹ INR)</div>
+              <div className="setting-desc">Select billing currency</div>
             </div>
-            <div style={{ fontSize: '1.5rem' }}>🇮🇳</div>
+            <select
+              className="settings-select"
+              value={currency.code}
+              onChange={(e) => onCurrency(CURRENCIES.find(c => c.code === e.target.value))}
+            >
+              {CURRENCIES.map(c => (
+                <option key={c.code} value={c.code}>{c.code} ({c.symbol})</option>
+              ))}
+            </select>
           </div>
 
-          {/* Tax info */}
-          <div className="setting-row">
+          {/* Tax rate selection */}
+          <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
             <div>
               <div className="setting-label">Tax Rate</div>
               <div className="setting-desc">Applied at checkout</div>
             </div>
-            <div style={{ fontWeight: 700, color: 'var(--brand-primary)', fontSize: '0.95rem' }}>5% GST</div>
+            <select
+              className="settings-select"
+              value={taxRateObj.value}
+              onChange={(e) => onTaxRate(TAX_RATES.find(t => t.value === parseFloat(e.target.value)))}
+            >
+              {TAX_RATES.map(t => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
           </div>
 
           {/* App info */}
-          <div className="setting-row" style={{ marginTop: 'auto', flexDirection: 'column', alignItems: 'center', gap: 4, opacity: 0.5, paddingTop: 16 }}>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mansula Nexus v1.3.0-alpha</div>
+          <div className="setting-row" style={{ marginTop: 'auto', flexDirection: 'column', alignItems: 'center', gap: 4, opacity: 0.5, paddingTop: 16, borderBottom: 'none' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mansula Nexus v1.4.0-alpha</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>POS & Billing System</div>
           </div>
         </div>
@@ -395,34 +474,43 @@ function SettingsDrawer({ theme, onToggleTheme, cols, onCols, onClose }) {
 
 // ─────────────── MAIN APP ───────────────
 export default function App() {
-  const [theme,        setTheme]        = useState(() => localStorage.getItem('mn-theme') || 'light')
-  const [cols,         setCols]         = useState(() => parseInt(localStorage.getItem('mn-cols') || '3'))
+  const [theme, setTheme] = useState(() => localStorage.getItem('mn-theme') || 'light')
+  const [cols, setCols] = useState(() => localStorage.getItem('mn-cols') || 'auto')
+  const [currency, setCurrency] = useState(() => {
+    const saved = localStorage.getItem('mn-currency')
+    return saved ? JSON.parse(saved) : CURRENCIES[0]
+  })
+  const [taxRateObj, setTaxRateObj] = useState(() => {
+    const saved = localStorage.getItem('mn-taxrate')
+    return saved ? JSON.parse(saved) : TAX_RATES[1]
+  })
+  
   const [activeCategory, setActiveCat] = useState('All')
-  const [search,       setSearch]       = useState('')
-  const [searchOpen,   setSearchOpen]   = useState(false)
-  const [cartOpen,     setCartOpen]     = useState(false)
-  const [menuOpen,     setMenuOpen]     = useState(false)
-  const [ordersOpen,   setOrdersOpen]   = useState(false)
-  const [toast,        setToast]        = useState(null)
+  const [search, setSearch] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [cartOpen, setCartOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [ordersOpen, setOrdersOpen] = useState(false)
+  const [toast, setToast] = useState(null)
   const searchRef = useRef(null)
 
   // ── Orders ──
-  const [orders,         setOrders]         = useState(() => [makeOrder()])
+  const [orders, setOrders] = useState(() => [makeOrder()])
   const [currentOrderId, setCurrentOrderId] = useState(() => orders[0]?.id)
 
   const currentOrder = orders.find(o => o.id === currentOrderId)
   const cart = currentOrder?.items ?? []
 
-  // Theme effect
+  // Effects
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('mn-theme', theme)
   }, [theme])
 
-  // Cols persistence
   useEffect(() => { localStorage.setItem('mn-cols', cols) }, [cols])
+  useEffect(() => { localStorage.setItem('mn-currency', JSON.stringify(currency)) }, [currency])
+  useEffect(() => { localStorage.setItem('mn-taxrate', JSON.stringify(taxRateObj)) }, [taxRateObj])
 
-  // Auto-focus search
   useEffect(() => {
     if (searchOpen) setTimeout(() => searchRef.current?.focus(), 80)
   }, [searchOpen])
@@ -455,6 +543,7 @@ export default function App() {
 
   // ── Cart actions ──
   const addToCart = (product) => {
+    playSound('add')
     setCartItems(prev => {
       const ex = prev.find(i => i.id === product.id)
       if (ex) return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i)
@@ -462,25 +551,34 @@ export default function App() {
     })
   }
 
-  const increaseQty = (id) => setCartItems(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i))
+  const increaseQty = (id) => {
+    playSound('add')
+    setCartItems(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i))
+  }
 
-  const decreaseQty = (id) => setCartItems(prev => {
-    const item = prev.find(i => i.id === id)
-    if (!item) return prev
-    if (item.qty === 1) return prev.filter(i => i.id !== id)
-    return prev.map(i => i.id === id ? { ...i, qty: i.qty - 1 } : i)
-  })
+  const decreaseQty = (id) => {
+    playSound('remove')
+    setCartItems(prev => {
+      const item = prev.find(i => i.id === id)
+      if (!item) return prev
+      if (item.qty === 1) return prev.filter(i => i.id !== id)
+      return prev.map(i => i.id === id ? { ...i, qty: i.qty - 1 } : i)
+    })
+  }
 
   const clearCart = () => setCartItems([])
 
   // ── Totals ──
   const subtotal   = cart.reduce((s, i) => s + i.price * i.qty, 0)
-  const tax        = subtotal * TAX_RATE
+  const tax        = subtotal * taxRateObj.value
   const total      = subtotal + tax
   const totalItems = cart.reduce((s, i) => s + i.qty, 0)
+  
+  const fmtTotal = `${currency.symbol}${(total * currency.rate).toFixed(currency.rate === 1 ? 0 : 2)}`
 
   // ── Checkout ──
   const handleCheckout = () => {
+    playSound('checkout')
     setOrders(prev => prev.map(o =>
       o.id === currentOrderId ? { ...o, status: 'completed' } : o
     ))
@@ -488,7 +586,7 @@ export default function App() {
     setOrders(prev => [...prev, newOrder])
     setCurrentOrderId(newOrder.id)
     setCartOpen(false)
-    showToast(`Order ${currentOrderId} completed — ${fmt(total)}`)
+    showToast(`Order ${currentOrderId} completed — ${fmtTotal}`)
   }
 
   // ── Filtered products ──
@@ -514,12 +612,12 @@ export default function App() {
         </div>
       )}
 
-      {/* Mobile cart overlay */}
-      <div className={`drawer-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true" style={{ display: cartOpen ? 'block' : 'none' }} />
+      {/* Mobile cart overlay - specific overlay with correct z-index */}
+      <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true" />
 
       {/* Drawers */}
-      {menuOpen    && <SettingsDrawer theme={theme} onToggleTheme={toggleTheme} cols={cols} onCols={setCols} onClose={() => setMenuOpen(false)} />}
-      {ordersOpen  && <OrderConsole   orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} />}
+      {menuOpen    && <SettingsDrawer theme={theme} onToggleTheme={toggleTheme} cols={cols} onCols={setCols} currency={currency} onCurrency={setCurrency} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} onClose={() => setMenuOpen(false)} />}
+      {ordersOpen  && <OrderConsole   orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} currency={currency} taxRateObj={taxRateObj} />}
 
       {/* Search overlay */}
       <div className={`search-overlay ${searchOpen ? 'open' : ''}`} role="search">
@@ -542,15 +640,10 @@ export default function App() {
 
         {/* ── HEADER ── */}
         <header className="app-header">
-          {/* Left: hamburger */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button id="menu-btn" className="icon-btn" onClick={() => setMenuOpen(true)} aria-label="Open menu">
-              <I.Menu s={19} />
-            </button>
-            <div className="header-brand">
-              <div className="header-brand-icon" aria-hidden="true"><I.Logo /></div>
-              <span className="header-brand-name">Mansula <span>Nexus</span></span>
-            </div>
+          {/* Left: Brand */}
+          <div className="header-brand">
+            <div className="header-brand-icon" aria-hidden="true"><I.Logo /></div>
+            <span className="header-brand-name">Mansula <span>Nexus</span></span>
           </div>
 
           {/* Centre: current order ID */}
@@ -567,7 +660,7 @@ export default function App() {
             )}
           </button>
 
-          {/* Right: new order + orders */}
+          {/* Right: new order + orders + menu */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <button
               id="new-order-header-btn"
@@ -585,6 +678,14 @@ export default function App() {
               aria-label="Order console"
             >
               <I.Orders s={17} />
+            </button>
+            <button
+              id="menu-btn"
+              className="icon-btn"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open settings menu"
+            >
+              <I.Menu s={19} />
             </button>
           </div>
         </header>
@@ -627,7 +728,7 @@ export default function App() {
                   <p>No results for <strong>"{search}"</strong></p>
                 </div>
               ) : (
-                <div className={`products-grid grid-cols-${cols}`}>
+                <div className={`products-grid ${cols === 'auto' ? 'grid-cols-auto' : `grid-cols-${cols}`}`}>
                   {filtered.map(p => (
                     <ProductCard
                       key={p.id}
@@ -636,6 +737,7 @@ export default function App() {
                       onAdd={addToCart}
                       onDecrease={decreaseQty}
                       cols={cols}
+                      currency={currency}
                     />
                   ))}
                 </div>
@@ -666,18 +768,27 @@ export default function App() {
               <>
                 <div className="cart-items" role="list">
                   {cart.map(item => (
-                    <CartItem key={item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} />
+                    <CartItem key={item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} currency={currency} />
                   ))}
                 </div>
                 <div className="cart-footer">
                   <div className="cart-totals">
-                    <div className="cart-total-row"><span className="label">Subtotal</span><span className="value">{fmt(subtotal)}</span></div>
-                    <div className="cart-total-row"><span className="label">GST (5%)</span><span className="value">{fmt(tax)}</span></div>
-                    <div className="cart-total-row grand"><span className="label">Total</span><span className="value">{fmt(total)}</span></div>
+                    <div className="cart-total-row">
+                      <span className="label">Subtotal</span>
+                      <span className="value">{currency.symbol}{(subtotal * currency.rate).toFixed(currency.rate === 1 ? 0 : 2)}</span>
+                    </div>
+                    <div className="cart-total-row">
+                      <span className="label">{taxRateObj.label}</span>
+                      <span className="value">{currency.symbol}{(tax * currency.rate).toFixed(currency.rate === 1 ? 0 : 2)}</span>
+                    </div>
+                    <div className="cart-total-row grand">
+                      <span className="label">Total</span>
+                      <span className="value">{fmtTotal}</span>
+                    </div>
                   </div>
                   <button id="checkout-btn" className="checkout-btn" onClick={handleCheckout} disabled={cart.length === 0}>
                     <I.Check s={17} />
-                    Charge {fmt(total)}
+                    Charge {fmtTotal}
                   </button>
                 </div>
               </>

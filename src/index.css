@@ -310,9 +310,11 @@ button, input { font-family: inherit; }
   gap: 10px;
 }
 
+.grid-cols-auto { grid-template-columns: repeat(auto-fill, minmax(152px, 1fr)); }
 .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
 .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
 .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-cols-5 { grid-template-columns: repeat(5, 1fr); }
 
 /* ══════════ PRODUCT CARD ══════════ */
 .product-card {
@@ -371,27 +373,6 @@ button, input { font-family: inherit; }
 
 .product-badge.popular { background: linear-gradient(135deg,#10b981,#059669); color: white; box-shadow: 0 2px 6px rgba(16,185,129,0.35); }
 .product-badge.new     { background: linear-gradient(135deg,#f59e0b,#d97706); color: white; box-shadow: 0 2px 6px rgba(245,158,11,0.35); }
-
-/* ── Overlay Add Button (when qty = 0) ── */
-.card-overlay-add {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(99,102,241,0.4);
-  transition: transform var(--transition), box-shadow var(--transition);
-  cursor: pointer;
-}
-
-.card-overlay-add:hover { transform: scale(1.12); box-shadow: 0 4px 14px rgba(99,102,241,0.5); }
-.card-overlay-add:active { transform: scale(0.9); }
 
 /* ── Overlay Qty Controls (when qty > 0) ── */
 .card-overlay-controls {
@@ -590,6 +571,17 @@ button, input { font-family: inherit; }
   animation: fadeIn 0.2s ease;
 }
 
+/* ══════════ CART OVERLAY ══════════ */
+.cart-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  z-index: 140; /* Sits behind the 150 cart panel */
+  animation: fadeIn 0.2s ease;
+}
+.cart-overlay.open { display: block; }
+
 /* ══════════ SETTINGS DRAWER ══════════ */
 .settings-drawer {
   position: fixed;
@@ -733,6 +725,22 @@ button, input { font-family: inherit; }
 .setting-label { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); }
 .setting-desc  { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
 
+/* Settings Select */
+.settings-select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.settings-select:focus { border-color: var(--brand-primary); }
+
 /* Toggle switch */
 .toggle-switch {
   width: 48px;
@@ -767,10 +775,7 @@ button, input { font-family: inherit; }
 .toggle-switch.on .toggle-knob { transform: translateX(22px); color: #6366f1; }
 
 /* Grid picker */
-.grid-picker { display: flex; gap: 8px; }
-
 .grid-pick-btn {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -881,6 +886,8 @@ button, input { font-family: inherit; }
 
   .products-grid-wrap { padding: 9px 10px; }
 
+  .grid-cols-auto { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  
   .product-img-wrap { aspect-ratio: 1 / 0.75; }
   .product-emoji    { font-size: 2.2rem; }
   .product-info     { padding: 7px 8px 8px; gap: 2px; }
@@ -895,6 +902,7 @@ button, input { font-family: inherit; }
 @media (max-width: 380px) {
   .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
   .grid-cols-4 { grid-template-columns: repeat(3, 1fr); }
+  .grid-cols-5 { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* ══════════ SCROLLBAR ══════════ */
