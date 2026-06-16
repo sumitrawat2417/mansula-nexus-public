@@ -3,40 +3,40 @@ import './App.css'
 
 // ─────────────── DATA ───────────────
 const PRODUCTS = [
-  { id: 1,  name: 'Espresso',         category: 'Coffee',  price: 120,  emoji: '☕', badge: 'popular' },
-  { id: 2,  name: 'Cappuccino',       category: 'Coffee',  price: 180,  emoji: '☕' },
-  { id: 3,  name: 'Latte',            category: 'Coffee',  price: 200,  emoji: '🥛' },
-  { id: 4,  name: 'Cold Brew',        category: 'Coffee',  price: 220,  emoji: '🧊', badge: 'new' },
-  { id: 5,  name: 'Green Tea',        category: 'Tea',     price: 100,  emoji: '🍵' },
-  { id: 6,  name: 'Chai Latte',       category: 'Tea',     price: 160,  emoji: '🫖', badge: 'popular' },
-  { id: 7,  name: 'Croissant',        category: 'Bakery',  price: 140,  emoji: '🥐' },
-  { id: 8,  name: 'Blueberry Muffin', category: 'Bakery',  price: 130,  emoji: '🧁', badge: 'new' },
-  { id: 9,  name: 'Avocado Toast',    category: 'Food',    price: 380,  emoji: '🥑', badge: 'popular' },
-  { id: 10, name: 'Club Sandwich',    category: 'Food',    price: 320,  emoji: '🥪' },
-  { id: 11, name: 'Caesar Salad',     category: 'Food',    price: 280,  emoji: '🥗' },
-  { id: 12, name: 'Orange Juice',     category: 'Drinks',  price: 120,  emoji: '🍊' },
-  { id: 13, name: 'Mango Smoothie',   category: 'Drinks',  price: 180,  emoji: '🥭', badge: 'new' },
-  { id: 14, name: 'Mineral Water',    category: 'Drinks',  price: 60,   emoji: '💧' },
-  { id: 15, name: 'Chocolate Cake',   category: 'Bakery',  price: 200,  emoji: '🎂', badge: 'popular' },
-  { id: 16, name: 'Cheesecake',       category: 'Bakery',  price: 220,  emoji: '🍰' },
+  { id: 1, name: 'Espresso', category: 'Coffee', price: 120, emoji: '☕', badge: 'popular' },
+  { id: 2, name: 'Cappuccino', category: 'Coffee', price: 180, emoji: '☕' },
+  { id: 3, name: 'Latte', category: 'Coffee', price: 200, emoji: '🥛' },
+  { id: 4, name: 'Cold Brew', category: 'Coffee', price: 220, emoji: '🧊', badge: 'new' },
+  { id: 5, name: 'Green Tea', category: 'Tea', price: 100, emoji: '🍵' },
+  { id: 6, name: 'Chai Latte', category: 'Tea', price: 160, emoji: '🫖', badge: 'popular' },
+  { id: 7, name: 'Croissant', category: 'Bakery', price: 140, emoji: '🥐' },
+  { id: 8, name: 'Blueberry Muffin', category: 'Bakery', price: 130, emoji: '🧁', badge: 'new' },
+  { id: 9, name: 'Avocado Toast', category: 'Food', price: 380, emoji: '🥑', badge: 'popular' },
+  { id: 10, name: 'Club Sandwich', category: 'Food', price: 320, emoji: '🥪' },
+  { id: 11, name: 'Caesar Salad', category: 'Food', price: 280, emoji: '🥗' },
+  { id: 12, name: 'Orange Juice', category: 'Drinks', price: 120, emoji: '🍊' },
+  { id: 13, name: 'Mango Smoothie', category: 'Drinks', price: 180, emoji: '🥭', badge: 'new' },
+  { id: 14, name: 'Mineral Water', category: 'Drinks', price: 60, emoji: '💧' },
+  { id: 15, name: 'Chocolate Cake', category: 'Bakery', price: 200, emoji: '🎂', badge: 'popular' },
+  { id: 16, name: 'Cheesecake', category: 'Bakery', price: 220, emoji: '🍰' },
 ]
 
 const CATEGORIES = ['All', 'Coffee', 'Tea', 'Food', 'Bakery', 'Drinks']
 
 const CURRENCIES = [
-  { code: 'INR', symbol: '₹',  rate: 1,      decimals: 0 },
-  { code: 'USD', symbol: '$',  rate: 0.012,  decimals: 2 },
-  { code: 'EUR', symbol: '€',  rate: 0.011,  decimals: 2 },
-  { code: 'GBP', symbol: '£',  rate: 0.0095, decimals: 2 },
-  { code: 'AUD', symbol: 'A$', rate: 0.018,  decimals: 2 },
+  { code: 'INR', symbol: '₹', rate: 1, decimals: 0 },
+  { code: 'USD', symbol: '$', rate: 0.012, decimals: 2 },
+  { code: 'EUR', symbol: '€', rate: 0.011, decimals: 2 },
+  { code: 'GBP', symbol: '£', rate: 0.0095, decimals: 2 },
+  { code: 'AUD', symbol: 'A$', rate: 0.018, decimals: 2 },
 ]
 
 const TAX_RATES = [
-  { label: 'No Tax (0%)',  value: 0    },
-  { label: 'GST 5%',      value: 0.05 },
-  { label: 'GST 12%',     value: 0.12 },
-  { label: 'GST 18%',     value: 0.18 },
-  { label: 'GST 28%',     value: 0.28 },
+  { label: 'No Tax (0%)', value: 0 },
+  { label: 'GST 5%', value: 0.05 },
+  { label: 'GST 12%', value: 0.12 },
+  { label: 'GST 18%', value: 0.18 },
+  { label: 'GST 28%', value: 0.28 },
 ]
 
 // ─────────────── ORDER ID ───────────────
@@ -50,8 +50,8 @@ const makeOrderId = () => {
   const yy = String(d.getFullYear()).slice(-2)
   return `${_oc++}-${dd}/${mm}/${yy}`
 }
-const makeOrder   = () => ({ id: makeOrderId(), items: [], createdAt: new Date(), status: 'active' })
-const INIT_ORDER  = makeOrder() // ← called once at module level → always ORD-001
+const makeOrder = () => ({ id: makeOrderId(), items: [], createdAt: new Date(), status: 'active' })
+const INIT_ORDER = makeOrder() // ← called once at module level → always ORD-001
 
 // ─────────────── SOUND ───────────────
 let audioCtx = null
@@ -59,7 +59,7 @@ const playSound = (type) => {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
     if (audioCtx.state === 'suspended') audioCtx.resume()
-    const osc  = audioCtx.createOscillator()
+    const osc = audioCtx.createOscillator()
     const gain = audioCtx.createGain()
     osc.connect(gain); gain.connect(audioCtx.destination)
     if (type === 'add') {
@@ -78,7 +78,7 @@ const playSound = (type) => {
       osc.start(); osc.stop(audioCtx.currentTime + 0.1)
     } else if (type === 'checkout') {
       osc.type = 'triangle'
-      osc.frequency.setValueAtTime(440,    audioCtx.currentTime)
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime)
       osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.12)
       osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.24)
       gain.gain.setValueAtTime(0.1, audioCtx.currentTime)
@@ -87,16 +87,16 @@ const playSound = (type) => {
     } else if (type === 'alarm') {
       osc.type = 'square'
       const t = audioCtx.currentTime
-      for(let i=0; i<6; i++) {
-        osc.frequency.setValueAtTime(800, t + i*0.5)
-        osc.frequency.setValueAtTime(1200, t + i*0.5 + 0.25)
+      for (let i = 0; i < 6; i++) {
+        osc.frequency.setValueAtTime(800, t + i * 0.5)
+        osc.frequency.setValueAtTime(1200, t + i * 0.5 + 0.25)
       }
       gain.gain.setValueAtTime(0.04, t)
       gain.gain.linearRampToValueAtTime(0.04, t + 3)
       gain.gain.linearRampToValueAtTime(0.01, t + 3.1)
       osc.start(t); osc.stop(t + 3.1)
     }
-  } catch (_) {}
+  } catch (_) { }
 }
 
 // ─────────────── SWIPEABLE ROW ───────────────
@@ -159,27 +159,27 @@ function formatOrderId(id) {
 
 // ─────────────── ICONS ───────────────
 const I = {
-  Search: ({ s=18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
-  X: ({ s=18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>,
-  Menu: ({ s=20 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>,
-  Cart: ({ s=22 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
-  Sun: ({ s=17 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
-  Moon: ({ s=17 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
-  Plus: ({ s=13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>,
-  Minus: ({ s=13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12h14"/></svg>,
-  Trash: ({ s=13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>,
-  Check: ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
-  Orders: ({ s=17 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>,
-  Back: ({ s=17 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
-  ChevRight: ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
-  Clock: ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-  Settings: ({ s=18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-  GridAuto: ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>,
-  Logo: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>,
+  Search: ({ s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>,
+  X: ({ s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>,
+  Menu: ({ s = 20 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M3 12h18M3 6h18M3 18h18" /></svg>,
+  Cart: ({ s = 22 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>,
+  Sun: ({ s = 17 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>,
+  Moon: ({ s = 17 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>,
+  Plus: ({ s = 13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>,
+  Minus: ({ s = 13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12h14" /></svg>,
+  Trash: ({ s = 13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>,
+  Check: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
+  Orders: ({ s = 17 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /><path d="M9 12h6M9 16h4" /></svg>,
+  Back: ({ s = 17 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>,
+  ChevRight: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>,
+  Clock: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
+  Settings: ({ s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>,
+  GridAuto: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /></svg>,
+  Logo: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>,
 }
 
 // ─────────────── HELPERS ───────────────
-const fmt  = (val, cur) => `${cur.symbol}${(val * cur.rate).toFixed(cur.decimals)}`
+const fmt = (val, cur) => `${cur.symbol}${(val * cur.rate).toFixed(cur.decimals)}`
 const fmtD = (d) => d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
 const ordTotal = (order, taxRate) => {
   const sub = order.items.reduce((s, i) => s + i.price * i.qty, 0)
@@ -201,11 +201,11 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
     <div className="drawer-overlay open" style={{ zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
       <div className="success-modal" onClick={e => e.stopPropagation()}>
         <div className="success-icon-wrap">
-          <svg className="success-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <svg className="success-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
         </div>
         <h2 className="success-title">Order Complete!</h2>
         <p className="success-subtitle">{formatOrderId(order.id)} has been finalized.</p>
-        
+
         <div className="success-details" style={{ textAlign: 'center' }}>
           {visibleItems.map(item => (
             <div key={item.id} className="success-item-row" style={{ textAlign: 'left' }}>
@@ -222,8 +222,12 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
             <span>Total</span>
             <span className="success-total-val">{fmt(total, currency)}</span>
           </div>
+          <div className="success-payment-mode" style={{ textAlign: 'left', marginTop: 8, fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
+            <span>Payment Mode</span>
+            <span style={{ fontWeight: 700, color: 'var(--text-primary)', textTransform: 'capitalize' }}>{order.paymentMode || 'Cash'}</span>
+          </div>
         </div>
-        
+
         <button className="success-done-btn" onClick={onClose}>Done</button>
       </div>
     </div>
@@ -235,15 +239,15 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
   const [expandedId, setExpandedId] = useState(null)
   const [isCustomTimer, setIsCustomTimer] = useState(![0, 2, 5, 10, 15, 30].includes(watchdogMins))
 
-  const active    = orders.filter(o => o.status === 'active')
-  const past      = orders.filter(o => o.status === 'completed')
+  const active = orders.filter(o => o.status === 'active')
+  const past = orders.filter(o => o.status === 'completed')
 
   const toggleExpand = (id) => setExpandedId(prev => prev === id ? null : id)
 
   const renderDetailInline = (order) => {
     const subtotal = order.items.reduce((s, i) => s + i.price * i.qty, 0)
-    const tax      = subtotal * taxRateObj.value
-    const total    = subtotal + tax
+    const tax = subtotal * taxRateObj.value
+    const total = subtotal + tax
     return (
       <div className="order-detail-inline">
         <div className="order-detail-items-inline">
@@ -277,30 +281,30 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
     <div className="drawer-overlay open" onClick={onClose} aria-hidden="true">
       <div className="order-console" onClick={e => e.stopPropagation()} role="dialog" aria-label="Order console">
         <div className="console-header">
-          <div className="console-title"><I.Orders s={18}/>Order Console</div>
-          <button className="icon-btn" onClick={onClose} aria-label="Close"><I.X s={17}/></button>
+          <div className="console-title"><I.Orders s={18} />Order Console</div>
+          <button className="icon-btn" onClick={onClose} aria-label="Close"><I.X s={17} /></button>
         </div>
 
         <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: 10, alignItems: 'center' }}>
           <button className="new-order-btn" onClick={onNew} id="new-order-btn" style={{ flex: 1 }}>
-            <I.Plus s={15}/> New Order
+            <I.Plus s={15} /> New Order
           </button>
           <div className="watchdog-control" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-surface-2)', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', height: '40px' }} title="Watchdog Timer">
-            <I.Clock s={14} color="var(--brand-primary)"/>
+            <I.Clock s={14} color="var(--brand-primary)" />
             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Watchdog</span>
             {isCustomTimer ? (
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <input 
-                  type="number" 
-                  value={watchdogMins} 
-                  onChange={e => onWatchdogMins(Math.max(0, parseInt(e.target.value) || 0))} 
+                <input
+                  type="number"
+                  value={watchdogMins}
+                  onChange={e => onWatchdogMins(Math.max(0, parseInt(e.target.value) || 0))}
                   style={{ width: 40, background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', textAlign: 'center', marginLeft: 4 }}
                   autoFocus
                 />
-                <button onClick={() => { setIsCustomTimer(false); onWatchdogMins(0); }} style={{ background:'none', border:'none', cursor:'pointer', padding:'4px', color:'var(--text-muted)' }} title="Clear custom timer"><I.X s={12}/></button>
+                <button onClick={() => { setIsCustomTimer(false); onWatchdogMins(0); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--text-muted)' }} title="Clear custom timer"><I.X s={12} /></button>
               </div>
             ) : (
-              <select 
+              <select
                 value={watchdogMins}
                 onChange={e => {
                   if (e.target.value === 'custom') {
@@ -349,7 +353,7 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
                             {formatOrderId(order.id)}
                           </div>
                           <div className="order-row-meta">
-                            <I.Clock s={12}/> {fmtD(order.createdAt)} · {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                            <I.Clock s={12} /> {fmtD(order.createdAt)} · {order.items.length} item{order.items.length !== 1 ? 's' : ''}
                           </div>
                         </div>
                         <div className="order-row-right">
@@ -360,10 +364,10 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
                           )}
                           {order.items.length > 0 && (
                             <button className="desktop-complete-btn" onClick={(e) => { e.stopPropagation(); onSuccess(order.id); }} title="Complete Order">
-                              <I.Check s={14}/> Complete
+                              <I.Check s={14} /> Complete
                             </button>
                           )}
-                          <span className="expand-indicator" style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14}/></span>
+                          <span className="expand-indicator" style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14} /></span>
                         </div>
                       </div>
                     </SwipeableRow>
@@ -389,13 +393,13 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
                       <div className="order-row-left">
                         <div className="order-row-id">{formatOrderId(order.id)}</div>
                         <div className="order-row-meta">
-                          <I.Clock s={12}/> {fmtD(order.createdAt)} · {order.items.reduce((s,i)=>s+i.qty,0)} items
+                          <I.Clock s={12} /> {fmtD(order.createdAt)} · {order.items.reduce((s, i) => s + i.qty, 0)} items
                         </div>
                       </div>
                       <div className="order-row-right">
                         <div className="order-row-total">{fmt(total, currency)}</div>
                         <span className="order-row-badge done">Done</span>
-                        <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14}/></span>
+                        <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14} /></span>
                       </div>
                     </div>
                     {isExpanded && renderDetailInline(order)}
@@ -421,20 +425,20 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
 function SettingsDrawer({ theme, onToggleTheme, cols, onCols, currency, onCurrency, taxRateObj, onTaxRate, onClose }) {
   const [showDisclaimer, setShowDisclaimer] = useState(false)
   const gridOptions = [
-    { key: 'auto', label: 'Auto', icon: <I.GridAuto s={18}/> },
-    { key: '2',    label: '2 cols', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="8" height="18" rx="1"/><rect x="13" y="3" width="8" height="18" rx="1"/></svg> },
-    { key: '3',    label: '3 cols', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="6" height="18" rx="1"/><rect x="9" y="3" width="6" height="18" rx="1"/><rect x="16" y="3" width="6" height="18" rx="1"/></svg> },
-    { key: '4',    label: '4 cols', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="4" height="18" rx="1"/><rect x="7.33" y="3" width="4" height="18" rx="1"/><rect x="12.67" y="3" width="4" height="18" rx="1"/><rect x="18" y="3" width="4" height="18" rx="1"/></svg> },
-    { key: '5',    label: '5 cols', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="4" height="18" rx="1"/><rect x="6" y="3" width="3.5" height="18" rx="1"/><rect x="10.25" y="3" width="3.5" height="18" rx="1"/><rect x="14.5" y="3" width="3.5" height="18" rx="1"/><rect x="19" y="3" width="4" height="18" rx="1"/></svg> },
+    { key: 'auto', label: 'Auto', icon: <I.GridAuto s={18} /> },
+    { key: '2', label: '2 cols', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="8" height="18" rx="1" /><rect x="13" y="3" width="8" height="18" rx="1" /></svg> },
+    { key: '3', label: '3 cols', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="6" height="18" rx="1" /><rect x="9" y="3" width="6" height="18" rx="1" /><rect x="16" y="3" width="6" height="18" rx="1" /></svg> },
+    { key: '4', label: '4 cols', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="4" height="18" rx="1" /><rect x="7.33" y="3" width="4" height="18" rx="1" /><rect x="12.67" y="3" width="4" height="18" rx="1" /><rect x="18" y="3" width="4" height="18" rx="1" /></svg> },
+    { key: '5', label: '5 cols', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="4" height="18" rx="1" /><rect x="6" y="3" width="3.5" height="18" rx="1" /><rect x="10.25" y="3" width="3.5" height="18" rx="1" /><rect x="14.5" y="3" width="3.5" height="18" rx="1" /><rect x="19" y="3" width="4" height="18" rx="1" /></svg> },
   ]
 
   return (
     <div className="drawer-overlay open" onClick={onClose} aria-hidden="true">
       <div className="settings-drawer" onClick={e => e.stopPropagation()} role="dialog" aria-label="Settings">
-        <div className="drawer-handle"/>
+        <div className="drawer-handle" />
         <div className="console-header">
-          <div className="console-title"><I.Settings s={18}/>Settings</div>
-          <button className="icon-btn" onClick={onClose} aria-label="Close"><I.X s={17}/></button>
+          <div className="console-title"><I.Settings s={18} />Settings</div>
+          <button className="icon-btn" onClick={onClose} aria-label="Close"><I.X s={17} /></button>
         </div>
 
         <div className="console-body">
@@ -451,7 +455,7 @@ function SettingsDrawer({ theme, onToggleTheme, cols, onCols, currency, onCurren
               role="switch"
               aria-checked={theme === 'dark'}
             >
-              <span className="toggle-knob">{theme === 'dark' ? <I.Moon s={11}/> : <I.Sun s={11}/>}</span>
+              <span className="toggle-knob">{theme === 'dark' ? <I.Moon s={11} /> : <I.Sun s={11} />}</span>
             </button>
           </div>
 
@@ -561,7 +565,7 @@ function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
               onClick={(e) => { e.stopPropagation(); onDecrease(product.id); }}
               aria-label={qty === 1 ? 'Remove from cart' : 'Decrease quantity'}
             >
-              {qty === 1 ? <I.Trash/> : <I.Minus/>}
+              {qty === 1 ? <I.Trash /> : <I.Minus />}
             </button>
             <span className="card-ov-qty">{qty}</span>
             <button
@@ -570,7 +574,7 @@ function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
               onClick={(e) => { e.stopPropagation(); onAdd(product); }}
               aria-label="Add one more"
             >
-              <I.Plus/>
+              <I.Plus />
             </button>
           </div>
         )}
@@ -596,11 +600,11 @@ function CartItem({ item, onIncrease, onDecrease, currency }) {
       </div>
       <div className="cart-item-controls">
         <button className="qty-btn" onClick={() => onDecrease(item.id)} aria-label="Decrease">
-          {item.qty === 1 ? <I.Trash/> : <I.Minus/>}
+          {item.qty === 1 ? <I.Trash /> : <I.Minus />}
         </button>
         <span className="qty-value">{item.qty}</span>
         <button className="qty-btn" onClick={() => onIncrease(item.id)} aria-label="Increase">
-          <I.Plus/>
+          <I.Plus />
         </button>
       </div>
     </div>
@@ -609,31 +613,31 @@ function CartItem({ item, onIncrease, onDecrease, currency }) {
 
 // ─────────────── MAIN APP ───────────────
 export default function App() {
-  const [theme,        setTheme]      = useState(() => localStorage.getItem('mn-theme')    || 'light')
-  const [cols,         setCols]       = useState(() => localStorage.getItem('mn-cols')     || 'auto')
-  const [currency,     setCurrency]   = useState(() => { try { return JSON.parse(localStorage.getItem('mn-currency')) || CURRENCIES[0] } catch { return CURRENCIES[0] } })
-  const [taxRateObj,   setTaxRateObj] = useState(() => { try { return JSON.parse(localStorage.getItem('mn-taxrate'))  || TAX_RATES[1] } catch { return TAX_RATES[1] } })
+  const [theme, setTheme] = useState(() => localStorage.getItem('mn-theme') || 'light')
+  const [cols, setCols] = useState(() => localStorage.getItem('mn-cols') || 'auto')
+  const [currency, setCurrency] = useState(() => { try { return JSON.parse(localStorage.getItem('mn-currency')) || CURRENCIES[0] } catch { return CURRENCIES[0] } })
+  const [taxRateObj, setTaxRateObj] = useState(() => { try { return JSON.parse(localStorage.getItem('mn-taxrate')) || TAX_RATES[1] } catch { return TAX_RATES[1] } })
   const [activeCategory, setActiveCat] = useState('All')
-  const [search,       setSearch]     = useState('')
-  const [searchOpen,   setSearchOpen] = useState(false)
-  const [cartOpen,     setCartOpen]   = useState(false)
-  const [menuOpen,     setMenuOpen]   = useState(false)
-  const [ordersOpen,   setOrdersOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [cartOpen, setCartOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [ordersOpen, setOrdersOpen] = useState(false)
   const [successOrder, setSuccessOrder] = useState(null)
   const [watchdogMins, setWatchdogMins] = useState(() => { try { return parseInt(localStorage.getItem('mn-watchdog')) || 5 } catch { return 5 } })
   // Discount / Delivery / Payment
   const [discountType, setDiscountType] = useState('none')   // 'none' | 'flat' | 'percent'
-  const [discountVal,  setDiscountVal]  = useState(0)
+  const [discountVal, setDiscountVal] = useState(0)
   const [deliveryCharge, setDeliveryCharge] = useState(0)
-  const [paymentMode,  setPaymentMode]  = useState('cash')  // 'cash' | 'upi' | 'udhaar' | 'card' | 'other'
-  const [cartStep,     setCartStep]     = useState('cart')   // 'cart' | 'payment'
+  const [paymentMode, setPaymentMode] = useState('cash')  // 'cash' | 'upi' | 'udhaar' | 'card' | 'other'
+  const [cartStep, setCartStep] = useState('cart')   // 'cart' | 'payment'
   const [summaryExpanded, setSummaryExpanded] = useState(false)
-  const [cashNotes,    setCashNotes]    = useState({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })
+  const [cashNotes, setCashNotes] = useState({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })
   const totalCashReceived = Object.entries(cashNotes).reduce((sum, [amt, count]) => sum + (Number(amt) * count), 0)
   const searchRef = useRef(null)
 
   // ── Orders — use module-level INIT_ORDER so ORD-002 is never skipped ──
-  const [orders,         setOrders]         = useState([INIT_ORDER])
+  const [orders, setOrders] = useState([INIT_ORDER])
   const [currentOrderId, setCurrentOrderId] = useState(INIT_ORDER.id)
 
   const currentOrder = orders.find(o => o.id === currentOrderId)
@@ -651,8 +655,8 @@ export default function App() {
   const [toast, setToast] = useState(null)
   const toastTimeout = useRef(null)
 
-  const showToast = (msg, type='success', persistent=false) => { 
-    setToast({msg, type, persistent})
+  const showToast = (msg, type = 'success', persistent = false) => {
+    setToast({ msg, type, persistent })
     if (toastTimeout.current) clearTimeout(toastTimeout.current)
     if (!persistent) {
       toastTimeout.current = setTimeout(() => setToast(null), 2800)
@@ -739,7 +743,7 @@ export default function App() {
     })
   }
 
-  const increaseQty = (id) => { playSound('add');    setCartItems(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i)) }
+  const increaseQty = (id) => { playSound('add'); setCartItems(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i)) }
   const decreaseQty = (id) => {
     playSound('remove')
     setCartItems(prev => {
@@ -752,14 +756,14 @@ export default function App() {
   const clearCart = () => { setCartItems([]); setCartStep('cart') }
 
   // ── Totals ──
-  const subtotal     = cart.reduce((s, i) => s + i.price * i.qty, 0)
-  const tax          = subtotal * taxRateObj.value
-  const discountAmt  = discountType === 'flat'
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0)
+  const tax = subtotal * taxRateObj.value
+  const discountAmt = discountType === 'flat'
     ? Math.min(discountVal, subtotal)
     : subtotal * (discountVal / 100)
-  const delivery     = deliveryCharge
-  const total        = Math.max(0, subtotal + tax - discountAmt + delivery)
-  const totalItems   = cart.reduce((s, i) => s + i.qty, 0)
+  const delivery = deliveryCharge
+  const total = Math.max(0, subtotal + tax - discountAmt + delivery)
+  const totalItems = cart.reduce((s, i) => s + i.qty, 0)
 
   // ── Checkout ──
   const handleCheckoutOrder = (orderId) => {
@@ -781,10 +785,10 @@ export default function App() {
 
     playSound('checkout')
     setSuccessOrder(enrichedOrder)
-    
+
     let newCurrentId = currentOrderId
     let newOrders = orders.map(o => o.id === orderId ? { ...enrichedOrder, status: 'completed' } : o)
-    
+
     if (orderId === currentOrderId) {
       const remainingActive = newOrders.filter(o => o.status === 'active')
       if (remainingActive.length > 0) {
@@ -801,7 +805,7 @@ export default function App() {
       // Reset per-order fields
       setDiscountType('none'); setDiscountVal(0); setDeliveryCharge(0); setPaymentMode('cash'); setCashNotes({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })
     }
-    
+
     setOrders(newOrders)
     if (newCurrentId !== currentOrderId) {
       setCurrentOrderId(newCurrentId)
@@ -823,8 +827,8 @@ export default function App() {
     p.name.toLowerCase().includes(search.toLowerCase())
   ), [activeCategory, search])
 
-  const getQty    = (id)  => cart.find(i => i.id === id)?.qty ?? 0
-  const closeSearch = ()  => { setSearch(''); setSearchOpen(false) }
+  const getQty = (id) => cart.find(i => i.id === id)?.qty ?? 0
+  const closeSearch = () => { setSearch(''); setSearchOpen(false) }
   const activeOrders = orders.filter(o => o.status === 'active')
 
   return (
@@ -832,26 +836,26 @@ export default function App() {
       {/* Toast */}
       {toast && (
         <div className={`toast ${toast.type}`} role="alert">
-          {toast.type==='success' ? <I.Check s={15}/> : <I.Clock s={15}/>} 
+          {toast.type === 'success' ? <I.Check s={15} /> : <I.Clock s={15} />}
           {toast.msg}
           {toast.persistent && (
-            <button className="toast-close-btn" onClick={closeToast} aria-label="Close alert"><I.X s={14}/></button>
+            <button className="toast-close-btn" onClick={closeToast} aria-label="Close alert"><I.X s={14} /></button>
           )}
         </div>
       )}
 
       {/* Mobile cart overlay */}
-      <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true"/>
+      <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true" />
 
       {/* Drawers & Modals */}
       {successOrder && <SuccessModal order={successOrder} onClose={() => setSuccessOrder(null)} currency={currency} taxRateObj={taxRateObj} />}
-      {menuOpen   && <SettingsDrawer theme={theme} onToggleTheme={toggleTheme} cols={cols} onCols={setCols} currency={currency} onCurrency={setCurrency} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} onClose={() => setMenuOpen(false)}/>}
-      {ordersOpen && <OrderConsole orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onSuccess={handleCheckoutOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} currency={currency} taxRateObj={taxRateObj} watchdogMins={watchdogMins} onWatchdogMins={(v) => { setWatchdogMins(v); localStorage.setItem('mn-watchdog', v); }}/>}
+      {menuOpen && <SettingsDrawer theme={theme} onToggleTheme={toggleTheme} cols={cols} onCols={setCols} currency={currency} onCurrency={setCurrency} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} onClose={() => setMenuOpen(false)} />}
+      {ordersOpen && <OrderConsole orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onSuccess={handleCheckoutOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} currency={currency} taxRateObj={taxRateObj} watchdogMins={watchdogMins} onWatchdogMins={(v) => { setWatchdogMins(v); localStorage.setItem('mn-watchdog', v); }} />}
 
       {/* Search overlay */}
       <div className={`search-overlay ${searchOpen ? 'open' : ''}`} role="search">
-        <input ref={searchRef} id="product-search" type="search" className="search-input" placeholder="Search items…" value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => e.key === 'Escape' && closeSearch()} aria-label="Search products"/>
-        <button className="search-close-btn" onClick={closeSearch} aria-label="Close search"><I.X s={17}/></button>
+        <input ref={searchRef} id="product-search" type="search" className="search-input" placeholder="Search items…" value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => e.key === 'Escape' && closeSearch()} aria-label="Search products" />
+        <button className="search-close-btn" onClick={closeSearch} aria-label="Close search"><I.X s={17} /></button>
       </div>
 
       {/* ── APP SHELL ── */}
@@ -861,23 +865,23 @@ export default function App() {
         <header className="app-header">
           {/* Brand */}
           <div className="header-brand">
-            <div className="header-brand-icon"><I.Logo/></div>
+            <div className="header-brand-icon"><I.Logo /></div>
             <span className="header-brand-name">ManSula <span>Nexus</span></span>
           </div>
 
           {/* Current order ID pill (opens console on click) */}
           <button className="order-id-pill" onClick={() => setOrdersOpen(true)} id="current-order-pill">
-            <I.Orders s={13}/> {formatOrderId(currentOrderId)}
+            <I.Orders s={13} /> {formatOrderId(currentOrderId)}
             {activeOrders.length > 1 && <span className="order-id-count">{activeOrders.length}</span>}
           </button>
 
           {/* Right: quick new order + hamburger (opens settings) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <button id="new-order-header-btn" className="icon-btn new-order-quick" onClick={createNewOrder} aria-label="New order" title="New order">
-              <I.Plus s={17}/>
+              <I.Plus s={17} />
             </button>
             <button id="menu-btn" className="icon-btn" onClick={() => setMenuOpen(true)} aria-label="Open settings">
-              <I.Menu s={19}/>
+              <I.Menu s={19} />
             </button>
           </div>
         </header>
@@ -896,7 +900,7 @@ export default function App() {
                 ))}
               </div>
               <button id="search-toggle-btn" className={`icon-btn ${searchOpen ? 'active' : ''}`} onClick={() => setSearchOpen(o => { if (o) setSearch(''); return !o })} aria-label={searchOpen ? 'Close search' : 'Search'}>
-                {searchOpen ? <I.X s={16}/> : <I.Search s={16}/>}
+                {searchOpen ? <I.X s={16} /> : <I.Search s={16} />}
               </button>
             </div>
 
@@ -909,7 +913,7 @@ export default function App() {
               ) : (
                 <div className={`products-grid ${cols === 'auto' ? 'grid-cols-auto' : `grid-cols-${cols}`}`}>
                   {filtered.map(p => (
-                    <ProductCard key={p.id} product={p} qty={getQty(p.id)} onAdd={addToCart} onDecrease={decreaseQty} cols={cols} currency={currency}/>
+                    <ProductCard key={p.id} product={p} qty={getQty(p.id)} onAdd={addToCart} onDecrease={decreaseQty} cols={cols} currency={currency} />
                   ))}
                 </div>
               )}
@@ -920,7 +924,7 @@ export default function App() {
           <aside className={`cart-panel ${cartOpen ? 'open' : ''}`} aria-label="Current order">
             <div className="cart-header">
               <div className="cart-title">
-                <I.Cart s={17}/> {formatOrderId(currentOrderId)}
+                <I.Cart s={17} /> {formatOrderId(currentOrderId)}
                 {totalItems > 0 && <span className="cart-count-badge">{totalItems}</span>}
               </div>
               {cart.length > 0 && <button id="clear-cart-btn" className="cart-clear-btn" onClick={clearCart}>Clear</button>}
@@ -937,7 +941,7 @@ export default function App() {
                 {cartStep === 'cart' ? (
                   <>
                     <div className="cart-items" role="list">
-                      {cart.map(item => <CartItem key={item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} currency={currency}/>)}
+                      {cart.map(item => <CartItem key={item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} currency={currency} />)}
                     </div>
                     <div className="cart-footer">
                       {/* Subtotal / Tax */}
@@ -950,7 +954,7 @@ export default function App() {
                       <div className="cart-extras-card">
                         <div className="cart-extra-row">
                           <div className="cart-extra-label">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-danger)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-danger)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>
                             <span>Discount</span>
                           </div>
                           <div className="cart-extra-controls">
@@ -973,7 +977,7 @@ export default function App() {
                         </div>
                         <div className="cart-extra-row">
                           <div className="cart-extra-label">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="1" /><path d="M16 8h4l3 5v3h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
                             <span>Delivery</span>
                           </div>
                           <div className="cart-extra-controls">
@@ -1007,10 +1011,10 @@ export default function App() {
                     {/* Header */}
                     <div className="payment-screen-header">
                       <button className="payment-back-btn" onClick={() => setCartStep('cart')}>
-                        <I.Back s={15}/> Back
+                        <I.Back s={15} /> Back
                       </button>
                       <div className="payment-screen-title">Payment</div>
-                      <div style={{ width: 60 }}/>
+                      <div style={{ width: 60 }} />
                     </div>
 
                     {/* Scrollable body */}
@@ -1023,7 +1027,7 @@ export default function App() {
                           <div className="payment-summary-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             Order {formatOrderId(currentOrderId)}
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ transform: summaryExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease', opacity: 0.8 }}>
-                              <polyline points="6 9 12 15 18 9"/>
+                              <polyline points="6 9 12 15 18 9" />
                             </svg>
                           </div>
                           <div className="payment-summary-items" style={{ maxHeight: summaryExpanded ? '1000px' : '0px', opacity: summaryExpanded ? 1 : 0, overflow: 'hidden', transition: 'all 0.3s ease', marginTop: summaryExpanded ? '8px' : '0px' }}>
@@ -1041,21 +1045,19 @@ export default function App() {
                           <div className="upi-qr-label">Scan &amp; Pay</div>
                           <div className="upi-qr-wrap">
                             <img
-                              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&qzone=1&color=3730a3&bgcolor=ffffff&data=upi://pay?pa=merchant@upi%26pn=ManSula%20Nexus%26am=${total}%26cu=INR%26tn=Order%20${currentOrderId}`}
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&qzone=1&color=3730a3&bgcolor=ffffff&data=upi://pay?pa=Q860348001@ybl%26pn=ManSula%20Foods%26am=${total}%26cu=INR%26tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`}
                               alt="UPI QR Code"
                               className="upi-qr-img"
                               width={200} height={200}
                             />
                             {/* UPI logo overlay */}
                             <div className="upi-qr-logo">
-                              <svg width="36" height="20" viewBox="0 0 74 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <text x="0" y="30" fontFamily="Arial Black,Arial" fontWeight="900" fontSize="28" fill="#6366f1">UPI</text>
-                              </svg>
+                              <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
                             </div>
                           </div>
                           <div className="upi-qr-meta">
-                            <span className="upi-qr-id">merchant@upi</span>
-                            <span className="upi-qr-amount">{fmt(total, currency)}</span>
+                            <span className="upi-qr-id">Q860348001@ybl</span>
+                            <span className="upi-qr-amount">Total: {fmt(total, currency)}</span>
                           </div>
                         </div>
                       )}
@@ -1067,13 +1069,13 @@ export default function App() {
                           <div className="cash-calc-chips">
                             {[500, 200, 100, 50, 20, 10].map(amt => (
                               <button key={amt} className={`cash-calc-btn ${cashNotes[amt] > 0 ? 'active' : ''}`} onClick={() => setCashNotes(p => ({ ...p, [amt]: p[amt] + 1 }))}>
-                                <span>+{fmt(amt, currency).replace(/\s/g, '')}</span>
+                                <span>{fmt(amt, currency).replace(/\s/g, '')}</span>
                                 {cashNotes[amt] > 0 && <span className="cash-count">{cashNotes[amt]}</span>}
                               </button>
                             ))}
                             <button className="cash-calc-btn clear" onClick={() => setCashNotes({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })}>Clear</button>
                           </div>
-                          
+
                           <div className="cash-calc-result">
                             <div className="cash-received">Total Received: <span className="val">{fmt(totalCashReceived, currency)}</span></div>
                             {totalCashReceived >= total && (
@@ -1094,18 +1096,18 @@ export default function App() {
                     <div className="payment-screen-footer">
                       {/* Payment method label */}
                       <div className="payment-section-label" style={{ marginBottom: 12 }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
                         Select Payment Method
                       </div>
 
                       {/* Payment chips — SVG icons */}
                       <div className="payment-chips-row" style={{ marginBottom: 16 }}>
                         {[
-                          { id: 'cash',   label: 'Cash',   svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M5 8v.01M19 8v.01M5 16v.01M19 16v.01"/></svg> },
-                          { id: 'upi',    label: 'UPI',    svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> },
-                          { id: 'udhaar', label: 'Udhaar', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
-                          { id: 'card',   label: 'Card',   svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/><path d="M5 15h2M10 15h4"/></svg> },
-                          { id: 'other',  label: 'Other',  svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg> },
+                          { id: 'cash', label: 'Cash', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><circle cx="12" cy="12" r="3" /><path d="M5 8v.01M19 8v.01M5 16v.01M19 16v.01" /></svg> },
+                          { id: 'upi', label: 'UPI', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" /><line x1="12" y1="18" x2="12.01" y2="18" /></svg> },
+                          { id: 'udhaar', label: 'Udhaar', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
+                          { id: 'card', label: 'Card', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /><path d="M5 15h2M10 15h4" /></svg> },
+                          { id: 'other', label: 'Other', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg> },
                         ].map(m => (
                           <button key={m.id} className={`payment-chip ${paymentMode === m.id ? 'active' : ''}`}
                             onClick={() => setPaymentMode(m.id)}>
@@ -1116,7 +1118,7 @@ export default function App() {
                       </div>
 
                       <button id="checkout-btn" className="checkout-btn" onClick={handleCheckout}>
-                        <I.Check s={17}/>
+                        <I.Check s={17} />
                         <span>Confirm &amp; Charge {fmt(total, currency)}</span>
                         <span className="checkout-btn-mode">{paymentMode.charAt(0).toUpperCase() + paymentMode.slice(1)}</span>
                       </button>
@@ -1135,13 +1137,13 @@ export default function App() {
         <div className="mobile-cart-bar-wrap">
           <SwipeableRow
             onSwipeRight={totalItems > 0 ? () => handleCheckout() : undefined}
-            rightContent={<><I.Check s={18} style={{marginRight: 4}}/> Complete</>}
+            rightContent={<><I.Check s={18} style={{ marginRight: 4 }} /> Complete</>}
             onSwipeLeft={() => clearCart()}
-            leftContent={<><I.Trash s={18} style={{marginRight: 4}}/> Clear</>}
+            leftContent={<><I.Trash s={18} style={{ marginRight: 4 }} /> Clear</>}
           >
             <button id="mobile-cart-bar" className="mobile-cart-bar" onClick={() => { if (window.innerWidth > 768 && totalItems > 0) handleCheckout(); else setCartOpen(o => !o); }} aria-label={`Cart — ${totalItems} items`} title={window.innerWidth > 768 ? "Click to Checkout" : "Tap to open cart"}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <I.Cart s={20}/>
+                <I.Cart s={20} />
                 <span className="mobile-cart-bar-qty">{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
               </div>
               <div className="mobile-cart-bar-total">{fmt(total, currency)}</div>
@@ -1151,7 +1153,7 @@ export default function App() {
       )}
       {totalItems === 0 && (
         <button id="mobile-cart-fab" className="mobile-cart-fab" onClick={() => setCartOpen(o => !o)} aria-label={`Cart`}>
-          <I.Cart s={24}/>
+          <I.Cart s={24} />
         </button>
       )}
     </>
