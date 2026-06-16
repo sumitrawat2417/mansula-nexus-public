@@ -627,6 +627,7 @@ export default function App() {
   const [deliveryCharge, setDeliveryCharge] = useState(0)
   const [paymentMode,  setPaymentMode]  = useState('cash')  // 'cash' | 'upi' | 'udhaar' | 'card' | 'other'
   const [cartStep,     setCartStep]     = useState('cart')   // 'cart' | 'payment'
+  const [summaryExpanded, setSummaryExpanded] = useState(false)
   const searchRef = useRef(null)
 
   // ── Orders — use module-level INIT_ORDER so ORD-002 is never skipped ──
@@ -794,6 +795,7 @@ export default function App() {
       }
       setCartOpen(false)
       setCartStep('cart')
+      setSummaryExpanded(false)
       // Reset per-order fields
       setDiscountType('none'); setDiscountVal(0); setDeliveryCharge(0); setPaymentMode('cash')
     }
@@ -1013,40 +1015,17 @@ export default function App() {
                     <div className="payment-screen-body">
 
                       {/* Order summary card */}
-                      <div className="payment-order-summary">
+                      <div className="payment-order-summary" onClick={() => setSummaryExpanded(e => !e)} style={{ cursor: cart.length > 3 ? 'pointer' : 'default' }}>
                         <div className="payment-summary-left">
                           <div className="payment-summary-label">Order {formatOrderId(currentOrderId)}</div>
-                          <div className="payment-summary-items">
-                            {cart.slice(0,4).map(i => (
+                          <div className="payment-summary-items" style={{ maxHeight: summaryExpanded ? '1000px' : '45px', transition: 'max-height 0.3s ease' }}>
+                            {cart.slice(0, summaryExpanded ? cart.length : 3).map(i => (
                               <span key={i.id} className="payment-summary-item">{i.qty}× {i.name}</span>
                             ))}
-                            {cart.length > 4 && <span className="payment-summary-more">+{cart.length - 4} more items</span>}
+                            {!summaryExpanded && cart.length > 3 && <span className="payment-summary-more">+{cart.length - 3} more items</span>}
                           </div>
                         </div>
                         <div className="payment-summary-total">{fmt(total, currency)}</div>
-                      </div>
-
-                      {/* Payment method label */}
-                      <div className="payment-section-label">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                        Select Payment Method
-                      </div>
-
-                      {/* Payment chips — SVG icons */}
-                      <div className="payment-chips-row">
-                        {[
-                          { id: 'cash',   label: 'Cash',   svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M5 8v.01M19 8v.01M5 16v.01M19 16v.01"/></svg> },
-                          { id: 'upi',    label: 'UPI',    svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> },
-                          { id: 'udhaar', label: 'Udhaar', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
-                          { id: 'card',   label: 'Card',   svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/><path d="M5 15h2M10 15h4"/></svg> },
-                          { id: 'other',  label: 'Other',  svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg> },
-                        ].map(m => (
-                          <button key={m.id} className={`payment-chip ${paymentMode === m.id ? 'active' : ''}`}
-                            onClick={() => setPaymentMode(m.id)}>
-                            <span className="payment-chip-icon">{m.svg}</span>
-                            <span className="payment-chip-label">{m.label}</span>
-                          </button>
-                        ))}
                       </div>
 
                       {/* UPI QR — shown when UPI selected */}
@@ -1074,10 +1053,35 @@ export default function App() {
                         </div>
                       )}
 
+                      <div style={{ flex: 1 }} />{/* spacer to push payment method down */}
+
                     </div>{/* end body */}
 
-                    {/* Sticky confirm button */}
+                    {/* Sticky footer with Payment Methods and Confirm */}
                     <div className="payment-screen-footer">
+                      {/* Payment method label */}
+                      <div className="payment-section-label" style={{ marginBottom: 12 }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        Select Payment Method
+                      </div>
+
+                      {/* Payment chips — SVG icons */}
+                      <div className="payment-chips-row" style={{ marginBottom: 16 }}>
+                        {[
+                          { id: 'cash',   label: 'Cash',   svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M5 8v.01M19 8v.01M5 16v.01M19 16v.01"/></svg> },
+                          { id: 'upi',    label: 'UPI',    svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> },
+                          { id: 'udhaar', label: 'Udhaar', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+                          { id: 'card',   label: 'Card',   svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/><path d="M5 15h2M10 15h4"/></svg> },
+                          { id: 'other',  label: 'Other',  svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg> },
+                        ].map(m => (
+                          <button key={m.id} className={`payment-chip ${paymentMode === m.id ? 'active' : ''}`}
+                            onClick={() => setPaymentMode(m.id)}>
+                            <span className="payment-chip-icon">{m.svg}</span>
+                            <span className="payment-chip-label">{m.label}</span>
+                          </button>
+                        ))}
+                      </div>
+
                       <button id="checkout-btn" className="checkout-btn" onClick={handleCheckout}>
                         <I.Check s={17}/>
                         <span>Confirm &amp; Charge {fmt(total, currency)}</span>
