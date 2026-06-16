@@ -932,59 +932,94 @@ export default function App() {
                   {cart.map(item => <CartItem key={item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} currency={currency}/>)}
                 </div>
                 <div className="cart-footer">
+
+                  {/* ── Subtotal / Tax rows ── */}
                   <div className="cart-totals">
                     <div className="cart-total-row"><span className="label">Subtotal</span><span className="value">{fmt(subtotal, currency)}</span></div>
                     <div className="cart-total-row"><span className="label">{taxRateObj.label}</span><span className="value">{fmt(tax, currency)}</span></div>
+                  </div>
 
-                    {/* ── Discount ── */}
-                    <div className="cart-total-row">
-                      <span className="label">
-                        <select className="cart-mini-select" value={discountType} onChange={e => { setDiscountType(e.target.value); setDiscountVal(0) }}>
-                          <option value="none">No Discount</option>
-                          <option value="flat">Flat ({currency.symbol})</option>
-                          <option value="percent">Percent (%)</option>
-                        </select>
-                      </span>
-                      <span className="value" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        {discountType !== 'none' ? (
-                          <>
-                            <input className="cart-mini-input" type="number" min="0" value={discountVal || ''} placeholder="0"
+                  {/* ── Extras card ── */}
+                  <div className="cart-extras-card">
+
+                    {/* Discount row */}
+                    <div className="cart-extra-row">
+                      <div className="cart-extra-label">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-danger)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                        <span>Discount</span>
+                      </div>
+                      <div className="cart-extra-controls">
+                        <div className="discount-type-toggle">
+                          <button className={`disc-toggle-btn ${discountType === 'none' ? 'active' : ''}`} onClick={() => { setDiscountType('none'); setDiscountVal(0) }}>Off</button>
+                          <button className={`disc-toggle-btn ${discountType === 'flat' ? 'active' : ''}`} onClick={() => setDiscountType('flat')}>{currency.symbol}</button>
+                          <button className={`disc-toggle-btn ${discountType === 'percent' ? 'active' : ''}`} onClick={() => setDiscountType('percent')}>%</button>
+                        </div>
+                        {discountType !== 'none' && (
+                          <div className="cart-extra-input-wrap">
+                            <span className="cart-extra-unit">{discountType === 'flat' ? currency.symbol : '%'}</span>
+                            <input className="cart-extra-input" type="number" min="0"
+                              max={discountType === 'percent' ? 100 : undefined}
+                              value={discountVal || ''} placeholder="0"
                               onChange={e => setDiscountVal(Math.max(0, parseFloat(e.target.value) || 0))} />
-                            {discountAmt > 0 && <span style={{ color: 'var(--brand-danger)', fontWeight: 700 }}>-{fmt(discountAmt, currency)}</span>}
-                          </>
-                        ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
-                      </span>
+                          </div>
+                        )}
+                        {discountAmt > 0 && <span className="cart-extra-badge danger">-{fmt(discountAmt, currency)}</span>}
+                      </div>
                     </div>
 
-                    {/* ── Delivery ── */}
-                    <div className="cart-total-row">
-                      <span className="label">Delivery</span>
-                      <span className="value" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <input className="cart-mini-input" type="number" min="0" value={deliveryCharge || ''} placeholder="0"
-                          onChange={e => setDeliveryCharge(Math.max(0, parseFloat(e.target.value) || 0))} />
-                        {deliveryCharge > 0 && <span style={{ color: 'var(--brand-accent)', fontWeight: 700 }}>+{fmt(deliveryCharge, currency)}</span>}
-                      </span>
+                    {/* Delivery row */}
+                    <div className="cart-extra-row">
+                      <div className="cart-extra-label">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                        <span>Delivery</span>
+                      </div>
+                      <div className="cart-extra-controls">
+                        <div className="cart-extra-input-wrap">
+                          <span className="cart-extra-unit">{currency.symbol}</span>
+                          <input className="cart-extra-input" type="number" min="0"
+                            value={deliveryCharge || ''} placeholder="0"
+                            onChange={e => setDeliveryCharge(Math.max(0, parseFloat(e.target.value) || 0))} />
+                        </div>
+                        {deliveryCharge > 0 && <span className="cart-extra-badge accent">+{fmt(deliveryCharge, currency)}</span>}
+                      </div>
                     </div>
 
-                    <div className="cart-total-row grand"><span className="label">Total</span><span className="value">{fmt(total, currency)}</span></div>
+                  </div>
 
-                    {/* ── Payment Mode ── */}
-                    <div className="payment-mode-row">
-                      {['cash','upi','udhaar','card','other'].map(mode => (
-                        <button key={mode} className={`payment-chip ${paymentMode === mode ? 'active' : ''}`}
-                          onClick={() => setPaymentMode(mode)}>
-                          {mode === 'cash' && '💵'}
-                          {mode === 'upi'  && '📱'}
-                          {mode === 'udhaar' && '🤝'}
-                          {mode === 'card' && '💳'}
-                          {mode === 'other' && '➕'}
-                          {' '}{mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  {/* ── Grand Total ── */}
+                  <div className="cart-grand-total-row">
+                    <span>Total</span>
+                    <span className="cart-grand-total-val">{fmt(total, currency)}</span>
+                  </div>
+
+                  {/* ── Payment Mode ── */}
+                  <div className="payment-mode-section">
+                    <div className="payment-mode-label">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                      Payment
+                    </div>
+                    <div className="payment-chips-row">
+                      {[
+                        { id: 'cash',   label: 'Cash',   icon: '💵' },
+                        { id: 'upi',    label: 'UPI',    icon: '📱' },
+                        { id: 'udhaar', label: 'Udhaar', icon: '🤝' },
+                        { id: 'card',   label: 'Card',   icon: '💳' },
+                        { id: 'other',  label: 'Other',  icon: '•••' },
+                      ].map(m => (
+                        <button key={m.id} className={`payment-chip ${paymentMode === m.id ? 'active' : ''}`}
+                          onClick={() => setPaymentMode(m.id)}>
+                          <span className="payment-chip-icon">{m.icon}</span>
+                          <span className="payment-chip-label">{m.label}</span>
                         </button>
                       ))}
                     </div>
                   </div>
+
+                  {/* ── Checkout Button ── */}
                   <button id="checkout-btn" className="checkout-btn" onClick={handleCheckout} disabled={cart.length === 0}>
-                    <I.Check s={17}/> Charge {fmt(total, currency)} · {paymentMode.charAt(0).toUpperCase() + paymentMode.slice(1)}
+                    <I.Check s={17}/>
+                    <span>Charge {fmt(total, currency)}</span>
+                    <span className="checkout-btn-mode">{paymentMode.charAt(0).toUpperCase() + paymentMode.slice(1)}</span>
                   </button>
                 </div>
               </>

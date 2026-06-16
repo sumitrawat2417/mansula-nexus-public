@@ -374,17 +374,47 @@ button, input, select { font-family: inherit; }
 .checkout-btn:active { transform: translateY(0); }
 .checkout-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
-/* Cart inline controls */
-.cart-mini-select { background: var(--bg-surface-2); border: 1px solid var(--border-color); border-radius: var(--radius-xs); color: var(--text-primary); font-size: 0.78rem; padding: 3px 6px; cursor: pointer; outline: none; }
-.cart-mini-select:focus { border-color: var(--brand-primary); }
-.cart-mini-input { background: var(--bg-surface-2); border: 1px solid var(--border-color); border-radius: var(--radius-xs); color: var(--text-primary); font-size: 0.82rem; padding: 3px 6px; width: 56px; text-align: right; outline: none; }
-.cart-mini-input:focus { border-color: var(--brand-primary); }
+/* Cart extras card */
+.cart-extras-card { background: var(--bg-surface-2); border: 1px solid var(--border-color); border-radius: var(--radius-md); margin: 10px 0; overflow: hidden; }
+.cart-extra-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; gap: 8px; }
+.cart-extra-row + .cart-extra-row { border-top: 1px solid var(--border-color); }
+.cart-extra-label { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); flex-shrink: 0; }
+.cart-extra-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 
-/* Payment mode chips */
-.payment-mode-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color); }
-.payment-chip { background: var(--bg-surface-2); border: 1.5px solid var(--border-color); border-radius: var(--radius-full); padding: 4px 10px; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-.payment-chip:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
-.payment-chip.active { background: var(--brand-primary); border-color: var(--brand-primary); color: white; }
+/* Discount toggle (Off / ₹ / %) */
+.discount-type-toggle { display: flex; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-sm); overflow: hidden; }
+.disc-toggle-btn { background: none; border: none; padding: 4px 9px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+.disc-toggle-btn:hover { color: var(--text-primary); }
+.disc-toggle-btn.active { background: var(--brand-primary); color: white; }
+
+/* Input with prefix unit */
+.cart-extra-input-wrap { display: flex; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-sm); overflow: hidden; transition: border-color 0.15s; }
+.cart-extra-input-wrap:focus-within { border-color: var(--brand-primary); }
+.cart-extra-unit { padding: 4px 6px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: var(--bg-surface-2); border-right: 1px solid var(--border-color); }
+.cart-extra-input { background: none; border: none; outline: none; color: var(--text-primary); font-size: 0.82rem; font-weight: 600; padding: 4px 6px; width: 52px; text-align: right; }
+
+/* Savings / addition badge */
+.cart-extra-badge { font-size: 0.75rem; font-weight: 800; padding: 2px 7px; border-radius: var(--radius-full); }
+.cart-extra-badge.danger { background: rgba(239,68,68,0.12); color: var(--brand-danger); }
+.cart-extra-badge.accent { background: rgba(16,185,129,0.12); color: var(--brand-accent); }
+
+/* Grand total row */
+.cart-grand-total-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 8px; border-top: 2px solid var(--border-color); margin-top: 2px; font-size: 1rem; font-weight: 800; color: var(--text-primary); }
+.cart-grand-total-val { color: var(--brand-primary); font-size: 1.15rem; }
+
+/* Payment mode section */
+.payment-mode-section { margin-bottom: 10px; }
+.payment-mode-label { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.payment-chips-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.payment-chip { display: flex; flex-direction: column; align-items: center; gap: 2px; background: var(--bg-surface-2); border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 6px 10px; min-width: 52px; cursor: pointer; transition: all 0.15s; flex: 1; }
+.payment-chip:hover { border-color: var(--brand-primary); transform: translateY(-1px); }
+.payment-chip.active { background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); border-color: transparent; color: white; box-shadow: 0 4px 12px rgba(99,102,241,0.35); }
+.payment-chip-icon { font-size: 1rem; line-height: 1; }
+.payment-chip-label { font-size: 0.68rem; font-weight: 700; color: inherit; }
+.payment-chip.active .payment-chip-label { color: white; }
+
+/* Checkout btn payment mode badge */
+.checkout-btn-mode { background: rgba(255,255,255,0.2); border-radius: var(--radius-full); padding: 2px 8px; font-size: 0.72rem; font-weight: 700; margin-left: auto; }
 
 /* ══════════ DRAWER OVERLAY ══════════ */
 .drawer-overlay {
