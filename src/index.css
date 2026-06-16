@@ -416,40 +416,52 @@ button, input, select { font-family: inherit; }
 /* Checkout btn payment mode badge */
 .checkout-btn-mode { background: rgba(255,255,255,0.2); border-radius: var(--radius-full); padding: 2px 8px; font-size: 0.72rem; font-weight: 700; margin-left: auto; }
 
+
 /* ══════════ PAYMENT SCREEN ══════════ */
-.payment-screen { display: flex; flex-direction: column; flex: 1; padding: 0; overflow-y: auto; animation: slideInRight 0.25s cubic-bezier(0.32,0.72,0,1); }
-.payment-screen-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; border-bottom: 1px solid var(--border-color); }
-.payment-back-btn { display: flex; align-items: center; gap: 5px; background: none; border: none; font-size: 0.85rem; font-weight: 600; color: var(--brand-primary); cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm); transition: background 0.15s; }
+.payment-screen { display: flex; flex-direction: column; flex: 1; overflow: hidden; animation: slideInRight 0.25s cubic-bezier(0.32,0.72,0,1); }
+.payment-screen-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 12px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+.payment-back-btn { display: flex; align-items: center; gap: 5px; background: none; border: none; font-size: 0.82rem; font-weight: 700; color: var(--brand-primary); cursor: pointer; padding: 5px 10px; border-radius: var(--radius-sm); transition: background 0.15s; }
 .payment-back-btn:hover { background: rgba(99,102,241,0.1); }
-.payment-screen-title { font-size: 1rem; font-weight: 800; color: var(--text-primary); }
+.payment-screen-title { font-size: 1rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.01em; }
 
-/* Order summary bar */
-.payment-order-summary { display: flex; align-items: center; justify-content: space-between; margin: 12px 16px; background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); border-radius: var(--radius-md); padding: 12px 16px; }
-.payment-summary-items { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.payment-summary-item { font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.payment-summary-more { font-size: 0.72rem; color: rgba(255,255,255,0.65); }
-.payment-summary-total { font-size: 1.3rem; font-weight: 900; color: white; flex-shrink: 0; margin-left: 12px; }
+/* Scrollable body */
+.payment-screen-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 16px; scrollbar-width: thin; scrollbar-color: var(--border-color) transparent; }
 
-/* UPI QR */
-.upi-qr-section { display: flex; flex-direction: column; align-items: center; padding: 16px; background: var(--bg-surface-2); border: 1px solid var(--border-color); margin: 0 16px; border-radius: var(--radius-lg); gap: 8px; animation: slideUp 0.2s ease; }
-.upi-qr-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
-.upi-qr-wrap { background: white; padding: 8px; border-radius: var(--radius-md); box-shadow: 0 4px 20px rgba(99,102,241,0.2); }
-.upi-qr-img { display: block; border-radius: 4px; }
-.upi-qr-id { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-full); padding: 3px 12px; }
-.upi-qr-amount { font-size: 1.1rem; font-weight: 900; color: var(--brand-primary); }
+/* Order summary card */
+.payment-order-summary { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%); border-radius: var(--radius-lg); padding: 16px; box-shadow: 0 6px 24px rgba(99,102,241,0.3); }
+.payment-summary-left { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+.payment-summary-label { font-size: 0.7rem; font-weight: 700; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.08em; }
+.payment-summary-items { display: flex; flex-direction: column; gap: 1px; }
+.payment-summary-item { font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.92); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.payment-summary-more { font-size: 0.72rem; color: rgba(255,255,255,0.55); margin-top: 2px; }
+.payment-summary-total { font-size: 1.5rem; font-weight: 900; color: white; flex-shrink: 0; margin-left: 16px; }
 
-/* Payment chips on payment screen */
-.payment-mode-label { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 12px 16px 0; }
-.payment-chips-row { display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 16px; }
-.payment-chip { display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--bg-surface-2); border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 10px 8px; min-width: 54px; cursor: pointer; transition: all 0.15s; flex: 1; }
-.payment-chip:hover { border-color: var(--brand-primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.15); }
-.payment-chip.active { background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); border-color: transparent; color: white; box-shadow: 0 4px 16px rgba(99,102,241,0.4); transform: translateY(-2px); }
-.payment-chip-icon { font-size: 1.3rem; line-height: 1; }
-.payment-chip-label { font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); }
+/* Section label */
+.payment-section-label { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.09em; }
+
+/* Payment chips */
+.payment-chips-row { display: flex; gap: 8px; }
+.payment-chip { display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--bg-surface-2); border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 6px; cursor: pointer; transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1); flex: 1; }
+.payment-chip:hover { border-color: var(--brand-primary); transform: translateY(-3px); box-shadow: 0 6px 16px rgba(99,102,241,0.18); }
+.payment-chip.active { background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); border-color: transparent; box-shadow: 0 6px 20px rgba(99,102,241,0.4); transform: translateY(-3px); }
+.payment-chip-icon { display: flex; align-items: center; justify-content: center; color: var(--text-secondary); width: 26px; height: 26px; }
+.payment-chip.active .payment-chip-icon { color: white; }
+.payment-chip-label { font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
 .payment-chip.active .payment-chip-label { color: rgba(255,255,255,0.9); }
 
-/* Continue / Confirm button in payment screen */
-.checkout-btn { margin: 0 16px 16px; width: calc(100% - 32px); }
+/* UPI QR */
+.upi-qr-section { display: flex; flex-direction: column; align-items: center; background: var(--bg-surface-2); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px 16px 16px; gap: 10px; animation: slideUp 0.22s ease; }
+.upi-qr-label { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.09em; }
+.upi-qr-wrap { position: relative; background: white; padding: 10px; border-radius: var(--radius-md); box-shadow: 0 8px 32px rgba(99,102,241,0.25); }
+.upi-qr-img { display: block; border-radius: 4px; }
+.upi-qr-logo { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: white; border-radius: 8px; padding: 4px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; }
+.upi-qr-meta { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.upi-qr-id { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-full); padding: 3px 12px; }
+.upi-qr-amount { font-size: 1.3rem; font-weight: 900; color: var(--brand-primary); }
+
+/* Sticky footer with confirm button */
+.payment-screen-footer { flex-shrink: 0; padding: 12px 16px 16px; border-top: 1px solid var(--border-color); background: var(--bg-surface); }
+.payment-screen-footer .checkout-btn { width: 100%; margin: 0; }
 
 /* ══════════ DRAWER OVERLAY ══════════ */
 .drawer-overlay {
