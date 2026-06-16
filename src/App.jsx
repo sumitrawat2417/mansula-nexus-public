@@ -185,7 +185,7 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
     <div className="drawer-overlay open" style={{ zIndex: 9999, alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
       <div className="success-modal" onClick={e => e.stopPropagation()}>
         <div className="success-icon-wrap">
-          <div className="success-icon">✅</div>
+          <svg className="success-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <h2 className="success-title">Order Complete!</h2>
         <p className="success-subtitle">{formatOrderId(order.id)} has been finalized.</p>
@@ -212,6 +212,7 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
 // ─────────────── ORDER CONSOLE ───────────────
 function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onClose, currency, taxRateObj, watchdogMins, onWatchdogMins }) {
   const [expandedId, setExpandedId] = useState(null)
+  const [isCustomTimer, setIsCustomTimer] = useState(![0, 2, 5, 10, 15, 30].includes(watchdogMins))
 
   const active    = orders.filter(o => o.status === 'active')
   const past      = orders.filter(o => o.status === 'completed')
@@ -263,18 +264,21 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
           <button className="new-order-btn" onClick={onNew} id="new-order-btn" style={{ flex: 1 }}>
             <I.Plus s={15}/> New Order
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-surface-2)', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', height: '40px' }} title="Watchdog Timer">
-            <I.Clock s={14}/>
+          <div className="watchdog-control" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-surface-2)', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', height: '40px' }} title="Watchdog Timer">
+            <I.Clock s={14} color="var(--brand-primary)"/>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Watchdog</span>
             <select 
-              value={![0, 2, 5, 10, 15, 30].includes(watchdogMins) ? 'custom' : watchdogMins}
+              value={isCustomTimer ? 'custom' : watchdogMins}
               onChange={e => {
                 if (e.target.value === 'custom') {
+                  setIsCustomTimer(true)
                   onWatchdogMins(watchdogMins === 0 ? 1 : watchdogMins)
                 } else {
+                  setIsCustomTimer(false)
                   onWatchdogMins(parseInt(e.target.value))
                 }
               }}
-              style={{ background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', appearance: 'none', cursor: 'pointer' }}
+              style={{ background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', appearance: 'none', cursor: 'pointer', marginLeft: 4 }}
             >
               <option value={0}>Off</option>
               <option value={2}>2m</option>
@@ -284,7 +288,7 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
               <option value={30}>30m</option>
               <option value="custom">Custom</option>
             </select>
-            {![0, 2, 5, 10, 15, 30].includes(watchdogMins) && (
+            {isCustomTimer && (
               <input 
                 type="number" 
                 value={watchdogMins} 
@@ -329,7 +333,12 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
                           {!isCurrent && (
                             <button className="switch-order-btn-small" onClick={(e) => { e.stopPropagation(); onSwitch(order.id); onClose(); }}>Switch</button>
                           )}
-                          <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14}/></span>
+                          {order.items.length > 0 && (
+                            <button className="desktop-complete-btn" onClick={(e) => { e.stopPropagation(); onSuccess(order.id); }} title="Complete Order">
+                              <I.Check s={14}/> Complete
+                            </button>
+                          )}
+                          <span className="expand-indicator" style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14}/></span>
                         </div>
                       </div>
                     </SwipeableRow>
@@ -881,7 +890,7 @@ export default function App() {
             onSwipeLeft={() => clearCart()}
             leftContent={<><I.Trash s={18} style={{marginRight: 4}}/> Clear</>}
           >
-            <button id="mobile-cart-bar" className="mobile-cart-bar" onClick={() => setCartOpen(o => !o)} aria-label={`Cart — ${totalItems} items`}>
+            <button id="mobile-cart-bar" className="mobile-cart-bar" onClick={() => { if (window.innerWidth > 768 && totalItems > 0) handleCheckout(); else setCartOpen(o => !o); }} aria-label={`Cart — ${totalItems} items`} title={window.innerWidth > 768 ? "Click to Checkout" : "Tap to open cart"}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <I.Cart s={20}/>
                 <span className="mobile-cart-bar-qty">{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
