@@ -1045,7 +1045,7 @@ export default function App() {
                           <div className="upi-qr-label">Scan &amp; Pay</div>
                           <div className="upi-qr-wrap">
                             <img
-                              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&qzone=1&color=3730a3&bgcolor=ffffff&data=upi://pay?pa=Q860348001@ybl%26pn=ManSula%20Foods%26am=${total}%26cu=INR%26tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`}
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=Q860348001@ybl&pn=${encodeURIComponent('ManSula Foods')}&am=${total}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`)}`}
                               alt="UPI QR Code"
                               className="upi-qr-img"
                               width={200} height={200}

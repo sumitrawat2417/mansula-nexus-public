@@ -1343,22 +1343,132 @@ select {
 }
 
 /* Cash Calculator */
-.cash-calc-section { display: flex; flex-direction: column; background: var(--bg-surface-2); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; gap: 12px; animation: slideUp 0.22s ease; margin-top: 4px; }
-.cash-calc-label { font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
-.cash-calc-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.cash-calc-btn { display: flex; align-items: center; justify-content: center; gap: 6px; position: relative; background: var(--bg-surface); border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.85rem; font-weight: 700; color: var(--text-primary); cursor: pointer; flex: 1; min-width: 65px; transition: all 0.15s; box-shadow: var(--shadow-xs); }
-.cash-calc-btn:hover { border-color: var(--brand-primary); color: var(--brand-primary); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-.cash-calc-btn.active { border-color: var(--brand-primary); color: var(--brand-primary); background: var(--brand-primary-light); }
-.cash-count { background: var(--brand-primary); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: var(--radius-full); font-weight: 800; line-height: 1; }
-.cash-calc-btn.clear { background: rgba(239, 68, 68, 0.1); border-color: transparent; color: var(--brand-danger); box-shadow: none; }
-.cash-calc-btn.clear:hover { background: var(--brand-danger); color: white; }
+.cash-calc-section {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  gap: 12px;
+  animation: slideUp 0.22s ease;
+  margin-top: 4px;
+}
 
-.cash-calc-result { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
-.cash-received { font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); display: flex; justify-content: space-between; }
-.cash-received .val { color: var(--text-primary); font-weight: 800; }
-.cash-return { font-size: 0.95rem; font-weight: 700; color: var(--brand-accent); display: flex; justify-content: space-between; padding: 6px 10px; background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-sm); margin-top: 2px; }
-.cash-return .val { font-weight: 900; }
-.cash-short { font-size: 0.85rem; font-weight: 700; color: var(--brand-danger); display: flex; justify-content: space-between; }
+.cash-calc-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cash-calc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cash-calc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  flex: 1;
+  min-width: 65px;
+  transition: all 0.15s;
+  box-shadow: var(--shadow-xs);
+}
+
+.cash-calc-btn:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.cash-calc-btn.active {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  background: var(--brand-primary-light);
+}
+
+.cash-count {
+  background: var(--brand-primary);
+  color: white;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.cash-calc-btn.clear {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: transparent;
+  color: var(--brand-danger);
+  box-shadow: none;
+}
+
+.cash-calc-btn.clear:hover {
+  background: var(--brand-danger);
+  color: white;
+}
+
+.cash-calc-result {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.cash-received {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+}
+
+.cash-received .val {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.cash-return {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--brand-accent);
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: var(--radius-sm);
+  margin-top: 2px;
+}
+
+.cash-return .val {
+  font-weight: 900;
+}
+
+.cash-short {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--brand-danger);
+  display: flex;
+  justify-content: space-between;
+}
 
 /* UPI QR */
 .upi-qr-section {
@@ -1400,12 +1510,13 @@ select {
   left: 50%;
   transform: translate(-50%, -50%);
   background: white;
-  border-radius: 8px;
-  padding: 4px 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  border-radius: 50%;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid #6366f1;
 }
 
 .upi-qr-meta {
