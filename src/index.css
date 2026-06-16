@@ -374,6 +374,18 @@ button, input, select { font-family: inherit; }
 .checkout-btn:active { transform: translateY(0); }
 .checkout-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
+/* Cart inline controls */
+.cart-mini-select { background: var(--bg-surface-2); border: 1px solid var(--border-color); border-radius: var(--radius-xs); color: var(--text-primary); font-size: 0.78rem; padding: 3px 6px; cursor: pointer; outline: none; }
+.cart-mini-select:focus { border-color: var(--brand-primary); }
+.cart-mini-input { background: var(--bg-surface-2); border: 1px solid var(--border-color); border-radius: var(--radius-xs); color: var(--text-primary); font-size: 0.82rem; padding: 3px 6px; width: 56px; text-align: right; outline: none; }
+.cart-mini-input:focus { border-color: var(--brand-primary); }
+
+/* Payment mode chips */
+.payment-mode-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color); }
+.payment-chip { background: var(--bg-surface-2); border: 1.5px solid var(--border-color); border-radius: var(--radius-full); padding: 4px 10px; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.payment-chip:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
+.payment-chip.active { background: var(--brand-primary); border-color: var(--brand-primary); color: white; }
+
 /* ══════════ DRAWER OVERLAY ══════════ */
 .drawer-overlay {
   position: fixed; inset: 0; background: var(--bg-overlay);

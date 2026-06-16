@@ -621,6 +621,11 @@ export default function App() {
   const [ordersOpen,   setOrdersOpen] = useState(false)
   const [successOrder, setSuccessOrder] = useState(null)
   const [watchdogMins, setWatchdogMins] = useState(() => { try { return parseInt(localStorage.getItem('mn-watchdog')) || 5 } catch { return 5 } })
+  // Discount / Delivery / Payment
+  const [discountType, setDiscountType] = useState('none')   // 'none' | 'flat' | 'percent'
+  const [discountVal,  setDiscountVal]  = useState(0)
+  const [deliveryCharge, setDeliveryCharge] = useState(0)
+  const [paymentMode,  setPaymentMode]  = useState('cash')  // 'cash' | 'upi' | 'udhaar' | 'card' | 'other'
   const searchRef = useRef(null)
 
   // ── Orders — use module-level INIT_ORDER so ORD-002 is never skipped ──
@@ -743,10 +748,14 @@ export default function App() {
   const clearCart = () => setCartItems([])
 
   // ── Totals ──
-  const subtotal   = cart.reduce((s, i) => s + i.price * i.qty, 0)
-  const tax        = subtotal * taxRateObj.value
-  const total      = subtotal + tax
-  const totalItems = cart.reduce((s, i) => s + i.qty, 0)
+  const subtotal     = cart.reduce((s, i) => s + i.price * i.qty, 0)
+  const tax          = subtotal * taxRateObj.value
+  const discountAmt  = discountType === 'flat'
+    ? Math.min(discountVal, subtotal)
+    : subtotal * (discountVal / 100)
+  const delivery     = deliveryCharge
+  const total        = Math.max(0, subtotal + tax - discountAmt + delivery)
+  const totalItems   = cart.reduce((s, i) => s + i.qty, 0)
 
   // ── Checkout ──
   const handleCheckoutOrder = (orderId) => {
@@ -757,11 +766,20 @@ export default function App() {
       return
     }
 
+    const enrichedOrder = {
+      ...order,
+      discountType,
+      discountAmt,
+      deliveryCharge: delivery,
+      paymentMode,
+      total
+    }
+
     playSound('checkout')
-    setSuccessOrder(order)
+    setSuccessOrder(enrichedOrder)
     
     let newCurrentId = currentOrderId
-    let newOrders = orders.map(o => o.id === orderId ? { ...o, status: 'completed' } : o)
+    let newOrders = orders.map(o => o.id === orderId ? { ...enrichedOrder, status: 'completed' } : o)
     
     if (orderId === currentOrderId) {
       const remainingActive = newOrders.filter(o => o.status === 'active')
@@ -774,6 +792,8 @@ export default function App() {
         newCurrentId = newOrder.id
       }
       setCartOpen(false)
+      // Reset per-order fields
+      setDiscountType('none'); setDiscountVal(0); setDeliveryCharge(0); setPaymentMode('cash')
     }
     
     setOrders(newOrders)
@@ -915,10 +935,56 @@ export default function App() {
                   <div className="cart-totals">
                     <div className="cart-total-row"><span className="label">Subtotal</span><span className="value">{fmt(subtotal, currency)}</span></div>
                     <div className="cart-total-row"><span className="label">{taxRateObj.label}</span><span className="value">{fmt(tax, currency)}</span></div>
+
+                    {/* ── Discount ── */}
+                    <div className="cart-total-row">
+                      <span className="label">
+                        <select className="cart-mini-select" value={discountType} onChange={e => { setDiscountType(e.target.value); setDiscountVal(0) }}>
+                          <option value="none">No Discount</option>
+                          <option value="flat">Flat ({currency.symbol})</option>
+                          <option value="percent">Percent (%)</option>
+                        </select>
+                      </span>
+                      <span className="value" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        {discountType !== 'none' ? (
+                          <>
+                            <input className="cart-mini-input" type="number" min="0" value={discountVal || ''} placeholder="0"
+                              onChange={e => setDiscountVal(Math.max(0, parseFloat(e.target.value) || 0))} />
+                            {discountAmt > 0 && <span style={{ color: 'var(--brand-danger)', fontWeight: 700 }}>-{fmt(discountAmt, currency)}</span>}
+                          </>
+                        ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
+                      </span>
+                    </div>
+
+                    {/* ── Delivery ── */}
+                    <div className="cart-total-row">
+                      <span className="label">Delivery</span>
+                      <span className="value" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <input className="cart-mini-input" type="number" min="0" value={deliveryCharge || ''} placeholder="0"
+                          onChange={e => setDeliveryCharge(Math.max(0, parseFloat(e.target.value) || 0))} />
+                        {deliveryCharge > 0 && <span style={{ color: 'var(--brand-accent)', fontWeight: 700 }}>+{fmt(deliveryCharge, currency)}</span>}
+                      </span>
+                    </div>
+
                     <div className="cart-total-row grand"><span className="label">Total</span><span className="value">{fmt(total, currency)}</span></div>
+
+                    {/* ── Payment Mode ── */}
+                    <div className="payment-mode-row">
+                      {['cash','upi','udhaar','card','other'].map(mode => (
+                        <button key={mode} className={`payment-chip ${paymentMode === mode ? 'active' : ''}`}
+                          onClick={() => setPaymentMode(mode)}>
+                          {mode === 'cash' && '💵'}
+                          {mode === 'upi'  && '📱'}
+                          {mode === 'udhaar' && '🤝'}
+                          {mode === 'card' && '💳'}
+                          {mode === 'other' && '➕'}
+                          {' '}{mode.charAt(0).toUpperCase() + mode.slice(1)}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <button id="checkout-btn" className="checkout-btn" onClick={handleCheckout} disabled={cart.length === 0}>
-                    <I.Check s={17}/> Charge {fmt(total, currency)}
+                    <I.Check s={17}/> Charge {fmt(total, currency)} · {paymentMode.charAt(0).toUpperCase() + paymentMode.slice(1)}
                   </button>
                 </div>
               </>
