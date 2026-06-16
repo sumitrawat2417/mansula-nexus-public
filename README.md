@@ -25,6 +25,17 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
+### v1.5.0-alpha — Fixes & Order Detail View
+*   **Fix: Card Click** — Clicking anywhere on a product card (including the emoji/image area) now reliably adds the item. Only clicking the `−` button decreases quantity.
+*   **Fix: ORD-002 Missing** — Fixed React StrictMode double-invoke bug by creating the initial order at module scope instead of inside `useState`. ORD-001 → ORD-002 → ORD-003 now work correctly in sequence.
+*   **Feature: Order Detail View** — Clicking any order row in the Order Console opens a detail panel showing the full item list, quantities, subtotal, tax, and total. Active orders also show a "Switch" button. Press back to return to the list.
+*   **Fix: Settings Drawer on Right** — The settings panel now slides in from the right side (matching the hamburger position).
+*   **UI: Removed Duplicate Button** — Removed the redundant orders clipboard icon from the header; the centre `#ORD-XXX` pill already opens the console.
+*   **Feature: GST Disclaimer** — Added a ⚠️ Disclaimer button next to the Tax Rate selector in settings. Tapping it shows a legal notice clarifying that the user is responsible for configuring the correct GST slab, and Mansula Nexus accepts no liability.
+*   **UI: Responsive Overlay Scaling** — Card overlay controls (+/−/qty) and badges (Popular/New) now scale proportionally with the grid column size via `data-cols` CSS selectors.
+
+---
+
 ### v1.4.0-alpha — Customization & Polish
 *   **Feature: Currency Selector** — Choose between INR, USD, EUR, GBP, and AUD from the settings menu. Prices automatically convert.
 *   **Feature: Tax Rate Selector** — Choose between No Tax (0%), and GST tiers (5%, 12%, 18%, 28%).
