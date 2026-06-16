@@ -198,7 +198,7 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
   const visibleItems = expanded ? order.items : order.items.slice(0, previewCount)
 
   return (
-    <div className="drawer-overlay open" style={{ zIndex: 9999, alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
+    <div className="drawer-overlay open" style={{ zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
       <div className="success-modal" onClick={e => e.stopPropagation()}>
         <div className="success-icon-wrap">
           <svg className="success-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
