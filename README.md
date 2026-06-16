@@ -25,6 +25,14 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
+### v1.5.1-alpha — Refinements
+*   **Fix: Card Click Propagation** — Clicking the emoji itself on a product card now correctly triggers the cart addition.
+*   **UI: Inline Order Details** — In the Order Console, clicking an order now expands the details inline (accordion style) rather than opening a new page, with a quick 'Switch' button.
+*   **Fix: Order ID Format** — Orders now use the format `#N-DD/MM/YY` (e.g., `#1-17/06/26`) and start at 1.
+*   **UI: Mobile Brand Name** — The "ManSula Nexus" brand name is now visible on mobile, with correctly stylized casing.
+
+---
+
 ### v1.5.0-alpha — Fixes & Order Detail View
 *   **Fix: Card Click** — Clicking anywhere on a product card (including the emoji/image area) now reliably adds the item. Only clicking the `−` button decreases quantity.
 *   **Fix: ORD-002 Missing** — Fixed React StrictMode double-invoke bug by creating the initial order at module scope instead of inside `useState`. ORD-001 → ORD-002 → ORD-003 now work correctly in sequence.

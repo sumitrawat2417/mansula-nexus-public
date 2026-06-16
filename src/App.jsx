@@ -43,7 +43,13 @@ const TAX_RATES = [
 // Counter lives at MODULE scope so React StrictMode's double-invoke of useState
 // doesn't skip ORD-002. INIT_ORDER is created exactly once when the module loads.
 let _oc = 1
-const makeOrderId = () => `ORD-${String(_oc++).padStart(3, '0')}`
+const makeOrderId = () => {
+  const d = new Date()
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const yy = String(d.getFullYear()).slice(-2)
+  return `${_oc++}-${dd}/${mm}/${yy}`
+}
 const makeOrder   = () => ({ id: makeOrderId(), items: [], createdAt: new Date(), status: 'active' })
 const INIT_ORDER  = makeOrder() // ← called once at module level → always ORD-001
 
@@ -111,91 +117,44 @@ const ordTotal = (order, taxRate) => {
   return sub * (1 + taxRate)
 }
 
-// ─────────────── ORDER DETAIL PANEL ───────────────
-function OrderDetail({ order, onBack, onSwitch, currentOrderId, currency, taxRateObj }) {
-  const subtotal = order.items.reduce((s, i) => s + i.price * i.qty, 0)
-  const tax      = subtotal * taxRateObj.value
-  const total    = subtotal + tax
-  const isCurrent = order.id === currentOrderId
-  const isActive  = order.status === 'active'
-
-  return (
-    <div className="order-detail">
-      {/* Sub-header */}
-      <div className="order-detail-header">
-        <button className="icon-btn" onClick={onBack} aria-label="Back to orders"><I.Back s={16} /></button>
-        <div>
-          <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>#{order.id}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <I.Clock s={12} /> {fmtD(order.createdAt)} · {order.status === 'completed' ? '✅ Completed' : '🟢 Active'}
-          </div>
-        </div>
-        {isCurrent && <span className="order-row-badge" style={{ marginLeft: 'auto' }}>Current</span>}
-        {!isCurrent && isActive && (
-          <button className="switch-order-btn" onClick={() => { onSwitch(order.id); onBack() }}>
-            Switch
-          </button>
-        )}
-      </div>
-
-      {/* Items */}
-      <div className="order-detail-items">
-        {order.items.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: '2rem', marginBottom: 8 }}>🛒</div>
-            <p>No items in this order</p>
-          </div>
-        ) : (
-          order.items.map(item => (
-            <div key={item.id} className="detail-item-row">
-              <span className="detail-item-emoji">{item.emoji}</span>
-              <div className="detail-item-info">
-                <div className="detail-item-name">{item.name}</div>
-                <div className="detail-item-unit">{fmt(item.price, currency)} × {item.qty}</div>
-              </div>
-              <div className="detail-item-total">{fmt(item.price * item.qty, currency)}</div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Totals */}
-      {order.items.length > 0 && (
-        <div className="order-detail-totals">
-          <div className="cart-total-row"><span className="label">Subtotal</span><span className="value">{fmt(subtotal, currency)}</span></div>
-          <div className="cart-total-row"><span className="label">{taxRateObj.label}</span><span className="value">{fmt(tax, currency)}</span></div>
-          <div className="cart-total-row grand"><span className="label">Total</span><span className="value">{fmt(total, currency)}</span></div>
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ─────────────── ORDER CONSOLE ───────────────
 function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose, currency, taxRateObj }) {
-  const [viewingId, setViewingId] = useState(null)
+  const [expandedId, setExpandedId] = useState(null)
 
   const active    = orders.filter(o => o.status === 'active')
   const past      = orders.filter(o => o.status === 'completed')
-  const viewOrder = viewingId ? orders.find(o => o.id === viewingId) : null
 
-  if (viewOrder) {
+  const toggleExpand = (id) => setExpandedId(prev => prev === id ? null : id)
+
+  const renderDetailInline = (order) => {
+    const subtotal = order.items.reduce((s, i) => s + i.price * i.qty, 0)
+    const tax      = subtotal * taxRateObj.value
+    const total    = subtotal + tax
     return (
-      <div className="drawer-overlay open" onClick={onClose} aria-hidden="true">
-        <div className="order-console" onClick={e => e.stopPropagation()} role="dialog" aria-label="Order details">
-          <div className="console-header">
-            <div className="console-title"><I.Orders s={18}/>Order Console</div>
-            <button className="icon-btn" onClick={onClose} aria-label="Close"><I.X s={17}/></button>
-          </div>
-          <OrderDetail
-            order={viewOrder}
-            onBack={() => setViewingId(null)}
-            onSwitch={(id) => { onSwitch(id) }}
-            currentOrderId={currentOrderId}
-            currency={currency}
-            taxRateObj={taxRateObj}
-          />
+      <div className="order-detail-inline">
+        <div className="order-detail-items-inline">
+          {order.items.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '16px', color: 'var(--text-muted)' }}>No items in this order</div>
+          ) : (
+            order.items.map(item => (
+              <div key={item.id} className="detail-item-row-inline">
+                <span className="detail-item-emoji-inline">{item.emoji}</span>
+                <div className="detail-item-info-inline">
+                  <div className="detail-item-name-inline">{item.name}</div>
+                  <div className="detail-item-unit-inline">{fmt(item.price, currency)} × {item.qty}</div>
+                </div>
+                <div className="detail-item-total-inline">{fmt(item.price * item.qty, currency)}</div>
+              </div>
+            ))
+          )}
         </div>
+        {order.items.length > 0 && (
+          <div className="order-detail-totals-inline">
+            <div className="cart-total-row"><span className="label">Subtotal</span><span className="value">{fmt(subtotal, currency)}</span></div>
+            <div className="cart-total-row"><span className="label">{taxRateObj.label}</span><span className="value">{fmt(tax, currency)}</span></div>
+            <div className="cart-total-row grand"><span className="label">Total</span><span className="value">{fmt(total, currency)}</span></div>
+          </div>
+        )}
       </div>
     )
   }
@@ -221,24 +180,30 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose, curren
               {active.map(order => {
                 const total = ordTotal(order, taxRateObj.value)
                 const isCurrent = order.id === currentOrderId
+                const isExpanded = expandedId === order.id
                 return (
-                  <button
-                    key={order.id}
-                    className={`order-row ${isCurrent ? 'current' : ''}`}
-                    onClick={() => setViewingId(order.id)}
-                  >
-                    <div className="order-row-left">
-                      <div className="order-row-id">#{order.id}</div>
-                      <div className="order-row-meta">
-                        <I.Clock s={12}/> {fmtD(order.createdAt)} · {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                  <div key={order.id} className={`order-row-wrap ${isExpanded ? 'expanded' : ''}`}>
+                    <div
+                      className={`order-row ${isCurrent ? 'current' : ''}`}
+                      onClick={() => toggleExpand(order.id)}
+                    >
+                      <div className="order-row-left">
+                        <div className="order-row-id">#{order.id}</div>
+                        <div className="order-row-meta">
+                          <I.Clock s={12}/> {fmtD(order.createdAt)} · {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                        </div>
+                      </div>
+                      <div className="order-row-right">
+                        <div className="order-row-total">{fmt(total, currency)}</div>
+                        {isCurrent && <span className="order-row-badge">Current</span>}
+                        {!isCurrent && (
+                          <button className="switch-order-btn-small" onClick={(e) => { e.stopPropagation(); onSwitch(order.id); onClose(); }}>Switch</button>
+                        )}
+                        <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14}/></span>
                       </div>
                     </div>
-                    <div className="order-row-right">
-                      <div className="order-row-total">{fmt(total, currency)}</div>
-                      {isCurrent && <span className="order-row-badge">Current</span>}
-                      <I.ChevRight s={14}/>
-                    </div>
-                  </button>
+                    {isExpanded && renderDetailInline(order)}
+                  </div>
                 )
               })}
             </>
@@ -249,24 +214,27 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose, curren
               <div className="console-section-label" style={{ marginTop: 16 }}>Completed Orders</div>
               {past.slice(-20).reverse().map(order => {
                 const total = ordTotal(order, taxRateObj.value)
+                const isExpanded = expandedId === order.id
                 return (
-                  <button
-                    key={order.id}
-                    className="order-row past"
-                    onClick={() => setViewingId(order.id)}
-                  >
-                    <div className="order-row-left">
-                      <div className="order-row-id">#{order.id}</div>
-                      <div className="order-row-meta">
-                        <I.Clock s={12}/> {fmtD(order.createdAt)} · {order.items.reduce((s,i)=>s+i.qty,0)} items
+                  <div key={order.id} className={`order-row-wrap ${isExpanded ? 'expanded' : ''}`}>
+                    <div
+                      className="order-row past"
+                      onClick={() => toggleExpand(order.id)}
+                    >
+                      <div className="order-row-left">
+                        <div className="order-row-id">#{order.id}</div>
+                        <div className="order-row-meta">
+                          <I.Clock s={12}/> {fmtD(order.createdAt)} · {order.items.reduce((s,i)=>s+i.qty,0)} items
+                        </div>
+                      </div>
+                      <div className="order-row-right">
+                        <div className="order-row-total">{fmt(total, currency)}</div>
+                        <span className="order-row-badge done">Done</span>
+                        <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14}/></span>
                       </div>
                     </div>
-                    <div className="order-row-right">
-                      <div className="order-row-total">{fmt(total, currency)}</div>
-                      <span className="order-row-badge done">Done</span>
-                      <I.ChevRight s={14}/>
-                    </div>
-                  </button>
+                    {isExpanded && renderDetailInline(order)}
+                  </div>
                 )
               })}
             </>
@@ -395,9 +363,7 @@ function SettingsDrawer({ theme, onToggleTheme, cols, onCols, currency, onCurren
 function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
   const inCart = qty > 0
 
-  const handleAdd = (e) => {
-    // Don't add if user tapped the decrease or remove button
-    if (e.target.closest('.card-ov-btn.minus')) return
+  const handleAdd = () => {
     onAdd(product)
   }
 
@@ -423,10 +389,11 @@ function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
 
         {/* Overlay controls — only shown when qty > 0 */}
         {inCart && (
-          <div className="card-overlay-controls" onClick={e => e.stopPropagation()}>
+          <div className="card-overlay-controls" style={{ pointerEvents: 'none' }}>
             <button
               className="card-ov-btn minus"
-              onClick={() => onDecrease(product.id)}
+              style={{ pointerEvents: 'auto' }}
+              onClick={(e) => { e.stopPropagation(); onDecrease(product.id); }}
               aria-label={qty === 1 ? 'Remove from cart' : 'Decrease quantity'}
             >
               {qty === 1 ? <I.Trash/> : <I.Minus/>}
@@ -434,7 +401,8 @@ function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
             <span className="card-ov-qty">{qty}</span>
             <button
               className="card-ov-btn plus"
-              onClick={() => onAdd(product)}
+              style={{ pointerEvents: 'auto' }}
+              onClick={(e) => { e.stopPropagation(); onAdd(product); }}
               aria-label="Add one more"
             >
               <I.Plus/>
@@ -604,7 +572,7 @@ export default function App() {
           {/* Brand */}
           <div className="header-brand">
             <div className="header-brand-icon"><I.Logo/></div>
-            <span className="header-brand-name">Mansula <span>Nexus</span></span>
+            <span className="header-brand-name">ManSula <span>Nexus</span></span>
           </div>
 
           {/* Current order ID pill (opens console on click) */}
