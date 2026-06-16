@@ -25,6 +25,13 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
+### v1.5.3-alpha — Watchdog & UX Guardrails
+*   **Feature: Watchdog Timer** — Active orders now monitor their age. If they exceed the configured threshold (default 5 minutes, configurable in Settings), they trigger a toast alert and are highlighted with a red pulse in the Order Console.
+*   **UX: Safe Swipe Thresholds** — Swipe-to-action on the cart bar and order rows now requires swiping at least 50% across the screen width, preventing accidental triggers.
+*   **Logic: Empty Order Prevention** — The "New Order" button is now safely disabled with an alert if your currently active order is completely empty.
+
+---
+
 ### v1.5.2-alpha — Swipe Actions & Order ID Polish
 *   **UI: Swipeable Cart Bar** — The floating cart button on mobile expands into a swipeable bar. Swipe left-to-right to checkout, or right-to-left to clear the cart.
 *   **UI: Swipeable Active Orders** — In the Order Console, you can now swipe left-to-right on any active order row to quickly mark it as completed.
