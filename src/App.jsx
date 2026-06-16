@@ -1,147 +1,296 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import './App.css'
 
-// ───── DATA ─────
+// ─────────────── DATA ───────────────
 const PRODUCTS = [
-  { id: 1,  name: 'Espresso',         category: 'Coffee',  price: 2.50, emoji: '☕', badge: 'popular' },
-  { id: 2,  name: 'Cappuccino',       category: 'Coffee',  price: 3.50, emoji: '☕' },
-  { id: 3,  name: 'Latte',            category: 'Coffee',  price: 3.75, emoji: '🥛' },
-  { id: 4,  name: 'Cold Brew',        category: 'Coffee',  price: 4.00, emoji: '🧊', badge: 'new' },
-  { id: 5,  name: 'Green Tea',        category: 'Tea',     price: 2.00, emoji: '🍵' },
-  { id: 6,  name: 'Chai Latte',       category: 'Tea',     price: 3.25, emoji: '🫖', badge: 'popular' },
-  { id: 7,  name: 'Croissant',        category: 'Bakery',  price: 2.75, emoji: '🥐' },
-  { id: 8,  name: 'Blueberry Muffin', category: 'Bakery',  price: 2.50, emoji: '🧁', badge: 'new' },
-  { id: 9,  name: 'Avocado Toast',    category: 'Food',    price: 7.50, emoji: '🥑', badge: 'popular' },
-  { id: 10, name: 'Club Sandwich',    category: 'Food',    price: 8.00, emoji: '🥪' },
-  { id: 11, name: 'Caesar Salad',     category: 'Food',    price: 6.50, emoji: '🥗' },
-  { id: 12, name: 'Orange Juice',     category: 'Drinks',  price: 3.00, emoji: '🍊' },
-  { id: 13, name: 'Mango Smoothie',   category: 'Drinks',  price: 4.50, emoji: '🥭', badge: 'new' },
-  { id: 14, name: 'Mineral Water',    category: 'Drinks',  price: 1.50, emoji: '💧' },
-  { id: 15, name: 'Chocolate Cake',   category: 'Bakery',  price: 4.00, emoji: '🎂', badge: 'popular' },
-  { id: 16, name: 'Cheesecake',       category: 'Bakery',  price: 4.50, emoji: '🍰' },
+  { id: 1,  name: 'Espresso',         category: 'Coffee',  price: 120,  emoji: '☕', badge: 'popular' },
+  { id: 2,  name: 'Cappuccino',       category: 'Coffee',  price: 180,  emoji: '☕' },
+  { id: 3,  name: 'Latte',            category: 'Coffee',  price: 200,  emoji: '🥛' },
+  { id: 4,  name: 'Cold Brew',        category: 'Coffee',  price: 220,  emoji: '🧊', badge: 'new' },
+  { id: 5,  name: 'Green Tea',        category: 'Tea',     price: 100,  emoji: '🍵' },
+  { id: 6,  name: 'Chai Latte',       category: 'Tea',     price: 160,  emoji: '🫖', badge: 'popular' },
+  { id: 7,  name: 'Croissant',        category: 'Bakery',  price: 140,  emoji: '🥐' },
+  { id: 8,  name: 'Blueberry Muffin', category: 'Bakery',  price: 130,  emoji: '🧁', badge: 'new' },
+  { id: 9,  name: 'Avocado Toast',    category: 'Food',    price: 380,  emoji: '🥑', badge: 'popular' },
+  { id: 10, name: 'Club Sandwich',    category: 'Food',    price: 320,  emoji: '🥪' },
+  { id: 11, name: 'Caesar Salad',     category: 'Food',    price: 280,  emoji: '🥗' },
+  { id: 12, name: 'Orange Juice',     category: 'Drinks',  price: 120,  emoji: '🍊' },
+  { id: 13, name: 'Mango Smoothie',   category: 'Drinks',  price: 180,  emoji: '🥭', badge: 'new' },
+  { id: 14, name: 'Mineral Water',    category: 'Drinks',  price: 60,   emoji: '💧' },
+  { id: 15, name: 'Chocolate Cake',   category: 'Bakery',  price: 200,  emoji: '🎂', badge: 'popular' },
+  { id: 16, name: 'Cheesecake',       category: 'Bakery',  price: 220,  emoji: '🍰' },
 ]
 
 const CATEGORIES = ['All', 'Coffee', 'Tea', 'Food', 'Bakery', 'Drinks']
-const TAX_RATE = 0.08
+const TAX_RATE   = 0.05   // 5% GST
+const CURRENCY   = '₹'
 
-// ───── ICONS ─────
-const SearchIcon = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-  </svg>
-)
-const XIcon = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-    <path d="M18 6 6 18M6 6l12 12"/>
-  </svg>
-)
-const CartIcon = ({ size = 22 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
-  </svg>
-)
-const SunIcon = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-  </svg>
-)
-const MoonIcon = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-  </svg>
-)
-const PlusIcon = ({ size = 13 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-    <path d="M12 5v14M5 12h14"/>
-  </svg>
-)
-const MinusIcon = ({ size = 13 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-    <path d="M5 12h14"/>
-  </svg>
-)
-const TrashIcon = ({ size = 13 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-  </svg>
-)
-const CheckIcon = ({ size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12"/>
-  </svg>
-)
-const LogoIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-  </svg>
-)
+let orderCounter = 1
+const makeOrderId  = () => `ORD-${String(orderCounter++).padStart(3, '0')}`
+const makeOrder    = () => ({ id: makeOrderId(), items: [], createdAt: new Date(), status: 'active' })
 
-// ───── PRODUCT CARD ─────
-function ProductCard({ product, qty, onAdd, onDecrease }) {
+// ─────────────── ICONS ───────────────
+const I = {
+  Search: ({ s = 18 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+  ),
+  X: ({ s = 18 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M18 6 6 18M6 6l12 12"/>
+    </svg>
+  ),
+  Menu: ({ s = 20 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M3 12h18M3 6h18M3 18h18"/>
+    </svg>
+  ),
+  Cart: ({ s = 22 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+    </svg>
+  ),
+  Sun: ({ s = 17 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+    </svg>
+  ),
+  Moon: ({ s = 17 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  ),
+  Plus: ({ s = 13 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  ),
+  Minus: ({ s = 13 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+      <path d="M5 12h14"/>
+    </svg>
+  ),
+  Trash: ({ s = 13 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+    </svg>
+  ),
+  Check: ({ s = 16 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  ),
+  Orders: ({ s = 17 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
+    </svg>
+  ),
+  Grid2: ({ s = 16 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="8" height="18" rx="1"/><rect x="13" y="3" width="8" height="18" rx="1"/>
+    </svg>
+  ),
+  Grid3: ({ s = 16 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="18" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/>
+    </svg>
+  ),
+  Logo: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+    </svg>
+  ),
+  ChevRight: ({ s = 16 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  ),
+  Clock: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
+  ),
+}
+
+// ─────────────── HELPERS ───────────────
+const fmt  = (n) => `${CURRENCY}${n.toFixed(0)}`
+const time = (d) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+const cartTotal = (items) => items.reduce((s, i) => s + i.price * i.qty, 0)
+
+// ─────────────── PRODUCT CARD ───────────────
+function ProductCard({ product, qty, onAdd, onDecrease, cols }) {
   const inCart = qty > 0
 
   const handleCardClick = (e) => {
-    // Don't fire add if clicking the minus button
-    if (e.target.closest('.card-qty-btn.minus')) return
+    if (e.target.closest('.card-overlay-controls')) return
     onAdd(product)
-  }
-
-  const handleMinus = (e) => {
-    e.stopPropagation()
-    onDecrease(product.id)
   }
 
   return (
     <div
-      className={`product-card animate-slide-up ${inCart ? 'in-cart' : ''}`}
+      className={`product-card ${inCart ? 'in-cart' : ''} cols-${cols}`}
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
       onKeyDown={e => e.key === 'Enter' && onAdd(product)}
-      aria-label={`${product.name} — $${product.price.toFixed(2)}${inCart ? `, ${qty} in cart` : ''}`}
+      aria-label={`${product.name} — ${fmt(product.price)}${inCart ? `, ${qty} in cart` : ''}`}
     >
+      {/* Image area */}
       <div className="product-img-wrap">
         <span className="product-emoji" aria-hidden="true">{product.emoji}</span>
+
         {product.badge && (
-          <span className={`product-badge ${product.badge}`} aria-label={product.badge}>
+          <span className={`product-badge ${product.badge}`}>
             {product.badge === 'popular' ? 'Popular' : 'New'}
           </span>
         )}
-        {inCart && (
-          <span className="card-qty-indicator" aria-label={`${qty} in cart`}>{qty}</span>
+
+        {/* Overlay qty controls — sits at the bottom of the image */}
+        {inCart ? (
+          <div className="card-overlay-controls" onClick={e => e.stopPropagation()}>
+            <button
+              className="card-ov-btn minus"
+              onClick={() => onDecrease(product.id)}
+              aria-label="Remove one"
+            >
+              {qty === 1 ? <I.Trash /> : <I.Minus />}
+            </button>
+            <span className="card-ov-qty">{qty}</span>
+            <button
+              className="card-ov-btn plus"
+              onClick={() => onAdd(product)}
+              aria-label="Add one more"
+            >
+              <I.Plus />
+            </button>
+          </div>
+        ) : (
+          <div className="card-overlay-add" onClick={e => { e.stopPropagation(); onAdd(product) }}>
+            <I.Plus s={12} />
+          </div>
         )}
       </div>
 
+      {/* Info */}
       <div className="product-info">
         <div className="product-name">{product.name}</div>
-        <div className="product-footer">
-          <span className="product-price">${product.price.toFixed(2)}</span>
-          {inCart ? (
-            <div className="card-controls" onClick={e => e.stopPropagation()}>
-              <button
-                className="card-qty-btn minus"
-                onClick={handleMinus}
-                aria-label="Remove one from cart"
-              >
-                {qty === 1 ? <TrashIcon /> : <MinusIcon />}
-              </button>
-              <span className="card-qty-num">{qty}</span>
-              <button
-                className="card-qty-btn"
-                onClick={e => { e.stopPropagation(); onAdd(product); }}
-                aria-label="Add one more"
-              >
-                <PlusIcon />
-              </button>
+        <div className="product-price">{fmt(product.price)}</div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────── CART ITEM ───────────────
+function CartItem({ item, onIncrease, onDecrease }) {
+  return (
+    <div className="cart-item-card" role="listitem">
+      <div className="cart-item-emoji">{item.emoji}</div>
+      <div className="cart-item-details">
+        <div className="cart-item-name" title={item.name}>{item.name}</div>
+        <div className="cart-item-price">{fmt(item.price * item.qty)}</div>
+      </div>
+      <div className="cart-item-controls">
+        <button className="qty-btn" onClick={() => onDecrease(item.id)}>
+          {item.qty === 1 ? <I.Trash /> : <I.Minus />}
+        </button>
+        <span className="qty-value">{item.qty}</span>
+        <button className="qty-btn" onClick={() => onIncrease(item.id)}>
+          <I.Plus />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────── ORDER CONSOLE ───────────────
+function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose }) {
+  const active = orders.filter(o => o.status === 'active')
+  const past   = orders.filter(o => o.status === 'completed')
+
+  return (
+    <div className="drawer-overlay open" onClick={onClose} aria-hidden="true">
+      <div className="order-console" onClick={e => e.stopPropagation()} role="dialog" aria-label="Order console">
+        {/* Header */}
+        <div className="console-header">
+          <div className="console-title">
+            <I.Orders s={18} />
+            Order Console
+          </div>
+          <button className="icon-btn" onClick={onClose} aria-label="Close">
+            <I.X s={17} />
+          </button>
+        </div>
+
+        {/* New order button */}
+        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)' }}>
+          <button className="new-order-btn" onClick={onNew} id="new-order-btn">
+            <I.Plus s={15} />
+            New Order
+          </button>
+        </div>
+
+        {/* Active orders */}
+        <div className="console-body">
+          {active.length > 0 && (
+            <>
+              <div className="console-section-label">Active Orders</div>
+              {active.map(order => {
+                const total = cartTotal(order.items) * (1 + TAX_RATE)
+                const isCurrent = order.id === currentOrderId
+                return (
+                  <button
+                    key={order.id}
+                    className={`order-row ${isCurrent ? 'current' : ''}`}
+                    onClick={() => { onSwitch(order.id); onClose() }}
+                  >
+                    <div className="order-row-left">
+                      <div className="order-row-id">#{order.id}</div>
+                      <div className="order-row-meta">
+                        <I.Clock s={12} />
+                        {time(order.createdAt)} · {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                      </div>
+                    </div>
+                    <div className="order-row-right">
+                      <div className="order-row-total">{fmt(total)}</div>
+                      {isCurrent && <span className="order-row-badge">Current</span>}
+                      <I.ChevRight s={14} />
+                    </div>
+                  </button>
+                )
+              })}
+            </>
+          )}
+
+          {past.length > 0 && (
+            <>
+              <div className="console-section-label" style={{ marginTop: 16 }}>Completed Orders</div>
+              {past.slice(-10).reverse().map(order => {
+                const total = cartTotal(order.items) * (1 + TAX_RATE)
+                return (
+                  <div key={order.id} className="order-row past">
+                    <div className="order-row-left">
+                      <div className="order-row-id">#{order.id}</div>
+                      <div className="order-row-meta">
+                        <I.Clock s={12} />
+                        {time(order.createdAt)} · {order.items.reduce((s, i) => s + i.qty, 0)} items
+                      </div>
+                    </div>
+                    <div className="order-row-right">
+                      <div className="order-row-total">{fmt(total)}</div>
+                      <span className="order-row-badge done">Done</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </>
+          )}
+
+          {active.length === 0 && past.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px 16px', color: 'var(--text-muted)' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>📋</div>
+              <p style={{ color: 'var(--text-secondary)' }}>No orders yet</p>
             </div>
-          ) : (
-            <button
-              className="product-add-btn"
-              onClick={e => { e.stopPropagation(); onAdd(product); }}
-              aria-label={`Add ${product.name}`}
-            >
-              <PlusIcon />
-            </button>
           )}
         </div>
       </div>
@@ -149,126 +298,228 @@ function ProductCard({ product, qty, onAdd, onDecrease }) {
   )
 }
 
-// ───── CART ITEM ─────
-function CartItem({ item, onIncrease, onDecrease }) {
+// ─────────────── SETTINGS DRAWER ───────────────
+function SettingsDrawer({ theme, onToggleTheme, cols, onCols, onClose }) {
   return (
-    <div className="cart-item-card" role="listitem">
-      <div className="cart-item-emoji" aria-hidden="true">{item.emoji}</div>
-      <div className="cart-item-details">
-        <div className="cart-item-name" title={item.name}>{item.name}</div>
-        <div className="cart-item-price">${(item.price * item.qty).toFixed(2)}</div>
-      </div>
-      <div className="cart-item-controls">
-        <button className="qty-btn" onClick={() => onDecrease(item.id)} aria-label="Decrease quantity">
-          {item.qty === 1 ? <TrashIcon /> : <MinusIcon />}
-        </button>
-        <span className="qty-value">{item.qty}</span>
-        <button className="qty-btn" onClick={() => onIncrease(item.id)} aria-label="Increase quantity">
-          <PlusIcon />
-        </button>
+    <div className="drawer-overlay open" onClick={onClose} aria-hidden="true">
+      <div className="settings-drawer" onClick={e => e.stopPropagation()} role="dialog" aria-label="Settings">
+        {/* Handle */}
+        <div className="drawer-handle" />
+
+        {/* Header */}
+        <div className="console-header">
+          <div className="console-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            Settings
+          </div>
+          <button className="icon-btn" onClick={onClose} aria-label="Close settings"><I.X s={17} /></button>
+        </div>
+
+        <div className="console-body">
+          {/* Theme */}
+          <div className="setting-row">
+            <div>
+              <div className="setting-label">Appearance</div>
+              <div className="setting-desc">{theme === 'dark' ? 'Dark mode on' : 'Light mode on'}</div>
+            </div>
+            <button
+              id="theme-toggle-setting"
+              className={`toggle-switch ${theme === 'dark' ? 'on' : ''}`}
+              onClick={onToggleTheme}
+              role="switch"
+              aria-checked={theme === 'dark'}
+              aria-label="Toggle dark mode"
+            >
+              <span className="toggle-knob">
+                {theme === 'dark' ? <I.Moon s={11} /> : <I.Sun s={11} />}
+              </span>
+            </button>
+          </div>
+
+          {/* Grid size */}
+          <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 12 }}>
+            <div>
+              <div className="setting-label">Product Grid</div>
+              <div className="setting-desc">Columns per row</div>
+            </div>
+            <div className="grid-picker">
+              {[2, 3, 4].map(n => (
+                <button
+                  key={n}
+                  id={`grid-${n}-btn`}
+                  className={`grid-pick-btn ${cols === n ? 'active' : ''}`}
+                  onClick={() => onCols(n)}
+                  aria-pressed={cols === n}
+                >
+                  {n === 2 ? <I.Grid2 s={18} /> : n === 3 ? <I.Grid3 s={18} /> : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="4" height="18" rx="1"/><rect x="10" y="3" width="4" height="18" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/>
+                    </svg>
+                  )}
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>{n} col{n > 1 ? 's' : ''}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Currency info */}
+          <div className="setting-row">
+            <div>
+              <div className="setting-label">Currency</div>
+              <div className="setting-desc">Indian Rupee (₹ INR)</div>
+            </div>
+            <div style={{ fontSize: '1.5rem' }}>🇮🇳</div>
+          </div>
+
+          {/* Tax info */}
+          <div className="setting-row">
+            <div>
+              <div className="setting-label">Tax Rate</div>
+              <div className="setting-desc">Applied at checkout</div>
+            </div>
+            <div style={{ fontWeight: 700, color: 'var(--brand-primary)', fontSize: '0.95rem' }}>5% GST</div>
+          </div>
+
+          {/* App info */}
+          <div className="setting-row" style={{ marginTop: 'auto', flexDirection: 'column', alignItems: 'center', gap: 4, opacity: 0.5, paddingTop: 16 }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mansula Nexus v1.3.0-alpha</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>POS & Billing System</div>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
-// ───── MAIN APP ─────
+// ─────────────── MAIN APP ───────────────
 export default function App() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('mn-theme') || 'light')
-  const [activeCategory, setActiveCategory] = useState('All')
-  const [search, setSearch] = useState('')
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [cart, setCart] = useState([])
-  const [cartOpen, setCartOpen] = useState(false)
-  const [toast, setToast] = useState(null)
+  const [theme,        setTheme]        = useState(() => localStorage.getItem('mn-theme') || 'light')
+  const [cols,         setCols]         = useState(() => parseInt(localStorage.getItem('mn-cols') || '3'))
+  const [activeCategory, setActiveCat] = useState('All')
+  const [search,       setSearch]       = useState('')
+  const [searchOpen,   setSearchOpen]   = useState(false)
+  const [cartOpen,     setCartOpen]     = useState(false)
+  const [menuOpen,     setMenuOpen]     = useState(false)
+  const [ordersOpen,   setOrdersOpen]   = useState(false)
+  const [toast,        setToast]        = useState(null)
   const searchRef = useRef(null)
 
+  // ── Orders ──
+  const [orders,         setOrders]         = useState(() => [makeOrder()])
+  const [currentOrderId, setCurrentOrderId] = useState(() => orders[0]?.id)
+
+  const currentOrder = orders.find(o => o.id === currentOrderId)
+  const cart = currentOrder?.items ?? []
+
+  // Theme effect
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('mn-theme', theme)
   }, [theme])
 
-  // Focus search input when opened
+  // Cols persistence
+  useEffect(() => { localStorage.setItem('mn-cols', cols) }, [cols])
+
+  // Auto-focus search
   useEffect(() => {
-    if (searchOpen && searchRef.current) {
-      setTimeout(() => searchRef.current?.focus(), 100)
-    }
+    if (searchOpen) setTimeout(() => searchRef.current?.focus(), 80)
   }, [searchOpen])
-
-  const toggleSearch = () => {
-    setSearchOpen(o => {
-      if (o) setSearch('')
-      return !o
-    })
-  }
-
-  const closeSearch = () => {
-    setSearch('')
-    setSearchOpen(false)
-  }
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
-  // Filtered products
-  const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter(p => {
-      const matchCat = activeCategory === 'All' || p.category === activeCategory
-      const matchSearch = p.name.toLowerCase().includes(search.toLowerCase())
-      return matchCat && matchSearch
-    })
-  }, [activeCategory, search])
+  const showToast = (msg) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2800)
+  }
 
-  // Get qty for a product id
-  const getQty = (id) => cart.find(i => i.id === id)?.qty ?? 0
+  // ── Order actions ──
+  const setCartItems = useCallback((updater) => {
+    setOrders(prev => prev.map(o =>
+      o.id === currentOrderId ? { ...o, items: typeof updater === 'function' ? updater(o.items) : updater } : o
+    ))
+  }, [currentOrderId])
 
-  // Cart mutations
+  const createNewOrder = () => {
+    const newOrder = makeOrder()
+    setOrders(prev => [...prev, newOrder])
+    setCurrentOrderId(newOrder.id)
+    showToast(`New order ${newOrder.id} started`)
+  }
+
+  const switchOrder = (id) => {
+    setCurrentOrderId(id)
+    showToast(`Switched to order ${id}`)
+  }
+
+  // ── Cart actions ──
   const addToCart = (product) => {
-    setCart(prev => {
-      const existing = prev.find(i => i.id === product.id)
-      if (existing) return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i)
+    setCartItems(prev => {
+      const ex = prev.find(i => i.id === product.id)
+      if (ex) return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i)
       return [...prev, { ...product, qty: 1 }]
     })
   }
 
-  const increaseQty = (id) => setCart(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i))
+  const increaseQty = (id) => setCartItems(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i))
 
-  const decreaseQty = (id) => setCart(prev => {
+  const decreaseQty = (id) => setCartItems(prev => {
     const item = prev.find(i => i.id === id)
     if (!item) return prev
     if (item.qty === 1) return prev.filter(i => i.id !== id)
     return prev.map(i => i.id === id ? { ...i, qty: i.qty - 1 } : i)
   })
 
-  const clearCart = () => setCart([])
+  const clearCart = () => setCartItems([])
 
-  // Totals
-  const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0)
-  const tax = subtotal * TAX_RATE
-  const total = subtotal + tax
-  const totalItems = cart.reduce((sum, i) => sum + i.qty, 0)
+  // ── Totals ──
+  const subtotal   = cart.reduce((s, i) => s + i.price * i.qty, 0)
+  const tax        = subtotal * TAX_RATE
+  const total      = subtotal + tax
+  const totalItems = cart.reduce((s, i) => s + i.qty, 0)
 
-  // Checkout
+  // ── Checkout ──
   const handleCheckout = () => {
-    setCart([])
+    setOrders(prev => prev.map(o =>
+      o.id === currentOrderId ? { ...o, status: 'completed' } : o
+    ))
+    const newOrder = makeOrder()
+    setOrders(prev => [...prev, newOrder])
+    setCurrentOrderId(newOrder.id)
     setCartOpen(false)
-    setToast(`Order of $${total.toFixed(2)} placed!`)
-    setTimeout(() => setToast(null), 2800)
+    showToast(`Order ${currentOrderId} completed — ${fmt(total)}`)
   }
+
+  // ── Filtered products ──
+  const filtered = useMemo(() => PRODUCTS.filter(p => {
+    const matchCat    = activeCategory === 'All' || p.category === activeCategory
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase())
+    return matchCat && matchSearch
+  }), [activeCategory, search])
+
+  const getQty = (id) => cart.find(i => i.id === id)?.qty ?? 0
+
+  // ── Close search ──
+  const closeSearch = () => { setSearch(''); setSearchOpen(false) }
+
+  const activeOrders = orders.filter(o => o.status === 'active')
 
   return (
     <>
       {/* Toast */}
       {toast && (
         <div className="toast" role="status" aria-live="polite">
-          <CheckIcon size={16} /> {toast}
+          <I.Check s={15} /> {toast}
         </div>
       )}
 
-      {/* Mobile overlay */}
-      <div
-        className={`cart-panel-overlay ${cartOpen ? 'open' : ''}`}
-        onClick={() => setCartOpen(false)}
-        aria-hidden="true"
-      />
+      {/* Mobile cart overlay */}
+      <div className={`drawer-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true" style={{ display: cartOpen ? 'block' : 'none' }} />
+
+      {/* Drawers */}
+      {menuOpen    && <SettingsDrawer theme={theme} onToggleTheme={toggleTheme} cols={cols} onCols={setCols} onClose={() => setMenuOpen(false)} />}
+      {ordersOpen  && <OrderConsole   orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} />}
 
       {/* Search overlay */}
       <div className={`search-overlay ${searchOpen ? 'open' : ''}`} role="search">
@@ -283,83 +534,108 @@ export default function App() {
           onKeyDown={e => e.key === 'Escape' && closeSearch()}
           aria-label="Search products"
         />
-        <button className="search-close-btn" onClick={closeSearch} aria-label="Close search">
-          <XIcon />
-        </button>
+        <button className="search-close-btn" onClick={closeSearch} aria-label="Close search"><I.X s={17} /></button>
       </div>
 
+      {/* ── APP SHELL ── */}
       <div className="app-shell">
+
         {/* ── HEADER ── */}
         <header className="app-header">
-          <div className="header-brand" role="banner">
-            <div className="header-brand-icon" aria-hidden="true"><LogoIcon /></div>
-            <span className="header-brand-name">Mansula <span>Nexus</span></span>
+          {/* Left: hamburger */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button id="menu-btn" className="icon-btn" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+              <I.Menu s={19} />
+            </button>
+            <div className="header-brand">
+              <div className="header-brand-icon" aria-hidden="true"><I.Logo /></div>
+              <span className="header-brand-name">Mansula <span>Nexus</span></span>
+            </div>
           </div>
 
-          <div className="header-actions">
-            {totalItems > 0 && (
-              <button
-                className="header-order-summary"
-                onClick={() => setCartOpen(true)}
-                aria-label={`View cart — ${totalItems} items, $${total.toFixed(2)}`}
-                style={{ display: 'none' }} /* shown via CSS on desktop if needed */
-              >
-                <span className="cart-count-badge">{totalItems}</span>
-                <span className="total-text">${total.toFixed(2)}</span>
-              </button>
+          {/* Centre: current order ID */}
+          <button
+            className="order-id-pill"
+            onClick={() => setOrdersOpen(true)}
+            aria-label="View order console"
+            id="current-order-pill"
+          >
+            <I.Orders s={13} />
+            #{currentOrderId}
+            {activeOrders.length > 1 && (
+              <span className="order-id-count">{activeOrders.length}</span>
             )}
-            <button className="icon-btn" onClick={toggleTheme} aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>
-              {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+          </button>
+
+          {/* Right: new order + orders */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <button
+              id="new-order-header-btn"
+              className="icon-btn new-order-quick"
+              onClick={createNewOrder}
+              aria-label="Quick new order"
+              title="New order"
+            >
+              <I.Plus s={17} />
+            </button>
+            <button
+              id="orders-btn"
+              className="icon-btn"
+              onClick={() => setOrdersOpen(true)}
+              aria-label="Order console"
+            >
+              <I.Orders s={17} />
             </button>
           </div>
         </header>
 
         {/* ── BODY ── */}
         <div className="app-body">
+
           {/* ── PRODUCTS ── */}
           <main className="pos-panel">
-            {/* Category bar + search icon */}
-            <div className="pos-toolbar" role="toolbar" aria-label="Filter and search">
-              <nav className="category-scroll" aria-label="Categories">
+            {/* Toolbar */}
+            <div className="pos-toolbar">
+              <div className="category-scroll">
                 {CATEGORIES.map(cat => (
                   <button
                     key={cat}
                     id={`cat-${cat.toLowerCase()}`}
                     className={`chip ${activeCategory === cat ? 'active' : ''}`}
-                    onClick={() => setActiveCategory(cat)}
+                    onClick={() => setActiveCat(cat)}
                     aria-pressed={activeCategory === cat}
                   >
                     {cat}
                   </button>
                 ))}
-              </nav>
+              </div>
               <button
                 id="search-toggle-btn"
                 className={`icon-btn ${searchOpen ? 'active' : ''}`}
-                onClick={toggleSearch}
-                aria-label={searchOpen ? 'Close search' : 'Open search'}
-                aria-expanded={searchOpen}
+                onClick={() => setSearchOpen(o => { if (o) setSearch(''); return !o })}
+                aria-label={searchOpen ? 'Close search' : 'Search products'}
               >
-                {searchOpen ? <XIcon size={17} /> : <SearchIcon size={17} />}
+                {searchOpen ? <I.X s={16} /> : <I.Search s={16} />}
               </button>
             </div>
 
-            {/* Products grid */}
-            <div className="products-grid-wrap" role="main">
-              {filteredProducts.length === 0 ? (
+            {/* Grid */}
+            <div className="products-grid-wrap">
+              {filtered.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-state-emoji">🔍</div>
                   <p>No results for <strong>"{search}"</strong></p>
                 </div>
               ) : (
-                <div className="products-grid" role="list" aria-label="Products">
-                  {filteredProducts.map(product => (
+                <div className={`products-grid grid-cols-${cols}`}>
+                  {filtered.map(p => (
                     <ProductCard
-                      key={product.id}
-                      product={product}
-                      qty={getQty(product.id)}
+                      key={p.id}
+                      product={p}
+                      qty={getQty(p.id)}
                       onAdd={addToCart}
                       onDecrease={decreaseQty}
+                      cols={cols}
                     />
                   ))}
                 </div>
@@ -368,61 +644,40 @@ export default function App() {
           </main>
 
           {/* ── CART ── */}
-          <aside className={`cart-panel ${cartOpen ? 'open' : ''}`} aria-label="Shopping cart">
+          <aside className={`cart-panel ${cartOpen ? 'open' : ''}`} aria-label="Current order">
             <div className="cart-header">
               <div className="cart-title">
-                <CartIcon size={17} />
-                Current Order
+                <I.Cart s={17} />
+                #{currentOrderId}
                 {totalItems > 0 && <span className="cart-count-badge">{totalItems}</span>}
               </div>
               {cart.length > 0 && (
-                <button id="clear-cart-btn" className="cart-clear-btn" onClick={clearCart}>
-                  Clear all
-                </button>
+                <button id="clear-cart-btn" className="cart-clear-btn" onClick={clearCart}>Clear</button>
               )}
             </div>
 
             {cart.length === 0 ? (
               <div className="cart-empty">
-                <div className="cart-empty-icon" aria-hidden="true">🛒</div>
-                <p style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Cart is empty</p>
-                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Tap any item to add it</p>
+                <div className="cart-empty-icon">🛒</div>
+                <p style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>No items yet</p>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Tap a product to add</p>
               </div>
             ) : (
               <>
-                <div className="cart-items" role="list" aria-label="Cart items">
+                <div className="cart-items" role="list">
                   {cart.map(item => (
-                    <CartItem
-                      key={item.id}
-                      item={item}
-                      onIncrease={increaseQty}
-                      onDecrease={decreaseQty}
-                    />
+                    <CartItem key={item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} />
                   ))}
                 </div>
                 <div className="cart-footer">
                   <div className="cart-totals">
-                    <div className="cart-total-row">
-                      <span className="label">Subtotal</span>
-                      <span className="value">${subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="cart-total-row">
-                      <span className="label">Tax (8%)</span>
-                      <span className="value">${tax.toFixed(2)}</span>
-                    </div>
-                    <div className="cart-total-row grand">
-                      <span className="label">Total</span>
-                      <span className="value">${total.toFixed(2)}</span>
-                    </div>
+                    <div className="cart-total-row"><span className="label">Subtotal</span><span className="value">{fmt(subtotal)}</span></div>
+                    <div className="cart-total-row"><span className="label">GST (5%)</span><span className="value">{fmt(tax)}</span></div>
+                    <div className="cart-total-row grand"><span className="label">Total</span><span className="value">{fmt(total)}</span></div>
                   </div>
-                  <button
-                    id="checkout-btn"
-                    className="checkout-btn"
-                    onClick={handleCheckout}
-                    disabled={cart.length === 0}
-                  >
-                    <CheckIcon size={17} />
-                    Charge ${total.toFixed(2)}
+                  <button id="checkout-btn" className="checkout-btn" onClick={handleCheckout} disabled={cart.length === 0}>
+                    <I.Check s={17} />
+                    Charge {fmt(total)}
                   </button>
                 </div>
               </>
@@ -438,7 +693,7 @@ export default function App() {
         onClick={() => setCartOpen(o => !o)}
         aria-label={`${cartOpen ? 'Close' : 'Open'} cart — ${totalItems} items`}
       >
-        <CartIcon size={24} />
+        <I.Cart s={24} />
         {totalItems > 0 && <span className="mobile-cart-badge">{totalItems}</span>}
       </button>
     </>

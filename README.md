@@ -25,6 +25,18 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
+### v1.3.0-alpha — Orders, Settings & Grid Control
+*   **Feature: Settings Drawer** — 3-bar hamburger menu opens a left slide-in drawer with: dark/light theme toggle, product grid column selector (2/3/4 columns), currency info, and tax rate display.
+*   **Feature: Order System** — Full multi-order management. Each session starts with `ORD-001`. Completing an order marks it as done and auto-creates a new one. Active and completed orders are stored in session.
+*   **Feature: Order Console** — Right slide-in panel showing all active and past orders with timestamp, item count, and total. Click to switch between active orders. "New Order" button with dashed green style.
+*   **Feature: Order ID in Header** — Current order ID (`#ORD-001`) displayed as a pill in the header. Clicking it opens the order console.
+*   **Feature: Quick New Order Button** — Green `+` icon in the header creates a new order instantly with a toast confirmation.
+*   **Feature: Grid Size Selector** — Switch between 2, 3, or 4 columns from the settings drawer. Preference saved to `localStorage`.
+*   **Feature: INR Currency + GST** — All prices changed to Indian Rupees (₹). Tax updated to 5% GST.
+*   **Fix: Qty Controls Overlap** — Removed the bottom-of-card quantity controls. Instead, a dark gradient overlay appears at the bottom of the card image with `−`, qty count, and `+` buttons — fully separated from the name/price row.
+
+---
+
 ### v1.2.0-alpha — UI Polish & UX Improvements
 *   **UX: Collapsible Search** — Search bar is now hidden by default on mobile. A search icon in the category toolbar opens a smooth slide-down search overlay, keeping the toolbar compact.
 *   **UX: Inline Cart Qty on Cards** — Product cards now display the current cart quantity in a badge on the card image. When qty > 0, inline `−` and `+` controls appear; tapping the card always adds; the `−` button removes (shows trash icon at qty 1).
