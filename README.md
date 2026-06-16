@@ -25,6 +25,15 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
+### v1.5.10-alpha — Persistent Alerts & UI Polish
+*   **Feature: Persistent Alerts** — Watchdog alerts now stay at the bottom of the screen with a dismiss button instead of auto-hiding.
+*   **UI: Centered Modal** — The checkout success modal is now perfectly centered on the screen and gracefully truncates long item lists with an expandable button.
+*   **UX: Desktop Enhancements** — Added a "Complete" button that appears when hovering over orders in the desktop console, avoiding the need to swipe.
+*   **Fix: Watchdog Config** — The custom watchdog timer input now hides the dropdown cleanly and functions without losing state.
+*   **Polish: Alarms** — The overdue alarm synth sound is now softer and triggers a red error notification.
+
+---
+
 ### v1.5.3-alpha — Watchdog & UX Guardrails
 *   **Feature: Watchdog Timer** — Active orders now monitor their age. If they exceed the configured threshold (default 5 minutes, configurable in Settings), they trigger a toast alert and are highlighted with a red pulse in the Order Console.
 *   **UX: Safe Swipe Thresholds** — Swipe-to-action on the cart bar and order rows now requires swiping at least 50% across the screen width, preventing accidental triggers.
