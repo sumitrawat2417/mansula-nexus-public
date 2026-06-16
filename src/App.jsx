@@ -176,7 +176,7 @@ const ordTotal = (order, taxRate) => {
 }
 
 // ─────────────── ORDER CONSOLE ───────────────
-function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onClose, currency, taxRateObj }) {
+function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onClose, currency, taxRateObj, watchdogMins, onWatchdogMins }) {
   const [expandedId, setExpandedId] = useState(null)
 
   const active    = orders.filter(o => o.status === 'active')
@@ -225,10 +225,20 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
           <button className="icon-btn" onClick={onClose} aria-label="Close"><I.X s={17}/></button>
         </div>
 
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)' }}>
-          <button className="new-order-btn" onClick={onNew} id="new-order-btn">
+        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: 10, alignItems: 'center' }}>
+          <button className="new-order-btn" onClick={onNew} id="new-order-btn" style={{ flex: 1 }}>
             <I.Plus s={15}/> New Order
           </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-surface-2)', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', height: '40px' }} title="Watchdog Timer (minutes)">
+            <I.Clock s={14}/>
+            <input 
+              type="number" 
+              value={watchdogMins} 
+              onChange={e => onWatchdogMins(Math.max(0, parseInt(e.target.value) || 0))} 
+              style={{ width: 30, background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', textAlign: 'center' }}
+            />
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>min</span>
+          </div>
         </div>
 
         <div className="console-body">
@@ -243,7 +253,7 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
                 return (
                   <div key={order.id} className={`order-row-wrap ${isExpanded ? 'expanded' : ''} ${isOverdue ? 'overdue' : ''}`}>
                     <SwipeableRow
-                      onSwipeRight={(e) => { e?.stopPropagation(); onSuccess(order.id) }}
+                      onSwipeRight={order.items.length > 0 ? (e) => { e?.stopPropagation(); onSuccess(order.id) } : undefined}
                       rightContent={<><I.Check s={16} /> Complete</>}
                     >
                       <div
@@ -320,7 +330,7 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
 }
 
 // ─────────────── SETTINGS DRAWER ───────────────
-function SettingsDrawer({ theme, onToggleTheme, cols, onCols, currency, onCurrency, taxRateObj, onTaxRate, watchdogMins, onWatchdogMins, onClose }) {
+function SettingsDrawer({ theme, onToggleTheme, cols, onCols, currency, onCurrency, taxRateObj, onTaxRate, onClose }) {
   const [showDisclaimer, setShowDisclaimer] = useState(false)
   const gridOptions = [
     { key: 'auto', label: 'Auto', icon: <I.GridAuto s={18}/> },
@@ -386,22 +396,6 @@ function SettingsDrawer({ theme, onToggleTheme, cols, onCols, currency, onCurren
             </div>
             <select className="settings-select" value={currency.code} onChange={e => onCurrency(CURRENCIES.find(c => c.code === e.target.value))}>
               {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} — {c.symbol}</option>)}
-            </select>
-          </div>
-
-          {/* Watchdog Timer */}
-          <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
-            <div>
-              <div className="setting-label">Watchdog Timer</div>
-              <div className="setting-desc">Alert if active order exceeds time</div>
-            </div>
-            <select className="settings-select" value={watchdogMins} onChange={e => onWatchdogMins(parseInt(e.target.value))}>
-              <option value={0}>Disabled</option>
-              <option value={2}>2 Minutes</option>
-              <option value={5}>5 Minutes</option>
-              <option value={10}>10 Minutes</option>
-              <option value={15}>15 Minutes</option>
-              <option value={30}>30 Minutes</option>
             </select>
           </div>
 
@@ -569,10 +563,11 @@ export default function App() {
         let newAlarm = false
 
         currentOrders.forEach(o => {
-          if (o.status === 'active' && !o.alarmed) {
+          if (o.status === 'active' && o.items.length > 0) {
             const elapsed = now - o.createdAt.getTime()
-            if (elapsed > threshold) {
-              showToast(`⚠️ Warning: Order #${o.id} has exceeded ${watchdogMins} minutes!`)
+            const timeSinceAlarm = o.lastAlarm ? now - o.lastAlarm : elapsed
+            if (elapsed > threshold && timeSinceAlarm >= 60000) {
+              showToast(`⚠️ Warning: Order #${o.id} is overdue!`)
               newAlarm = true
             }
           }
@@ -581,8 +576,12 @@ export default function App() {
         if (newAlarm) {
           playSound('checkout')
           return currentOrders.map(o => {
-            if (o.status === 'active' && !o.alarmed && (now - o.createdAt.getTime() > threshold)) {
-              return { ...o, alarmed: true }
+            if (o.status === 'active' && o.items.length > 0) {
+              const elapsed = now - o.createdAt.getTime()
+              const timeSinceAlarm = o.lastAlarm ? now - o.lastAlarm : elapsed
+              if (elapsed > threshold && timeSinceAlarm >= 60000) {
+                return { ...o, alarmed: true, lastAlarm: now }
+              }
             }
             return o
           })
@@ -649,22 +648,47 @@ export default function App() {
 
   // ── Checkout ──
   const handleCheckoutOrder = (orderId) => {
-    playSound('checkout')
     const order = orders.find(o => o.id === orderId)
     if (!order) return
+    if (order.items.length === 0) {
+      showToast('Cannot complete an empty order.')
+      return
+    }
+
+    playSound('checkout')
     const t = ordTotal(order, taxRateObj.value)
-    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'completed' } : o))
+    
+    let newCurrentId = currentOrderId
+    let newOrders = orders.map(o => o.id === orderId ? { ...o, status: 'completed' } : o)
     
     if (orderId === currentOrderId) {
-      const newOrder = makeOrder()
-      setOrders(prev => [...prev, newOrder])
-      setCurrentOrderId(newOrder.id)
+      const remainingActive = newOrders.filter(o => o.status === 'active')
+      if (remainingActive.length > 0) {
+        remainingActive.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+        newCurrentId = remainingActive[0].id
+      } else {
+        const newOrder = makeOrder()
+        newOrders.push(newOrder)
+        newCurrentId = newOrder.id
+      }
       setCartOpen(false)
+    }
+    
+    setOrders(newOrders)
+    if (newCurrentId !== currentOrderId) {
+      setCurrentOrderId(newCurrentId)
     }
     showToast(`#${orderId} completed — ${fmt(t, currency)}`)
   }
 
-  const handleCheckout = () => handleCheckoutOrder(currentOrderId)
+  const handleCheckout = () => {
+    const current = orders.find(o => o.id === currentOrderId)
+    if (current && current.items.length === 0) {
+      showToast('Cannot complete an empty order.')
+      return
+    }
+    handleCheckoutOrder(currentOrderId)
+  }
 
   // ── Filter ──
   const filtered = useMemo(() => PRODUCTS.filter(p =>
@@ -685,8 +709,8 @@ export default function App() {
       <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true"/>
 
       {/* Drawers */}
-      {menuOpen   && <SettingsDrawer theme={theme} onToggleTheme={toggleTheme} cols={cols} onCols={setCols} currency={currency} onCurrency={setCurrency} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} watchdogMins={watchdogMins} onWatchdogMins={(v) => { setWatchdogMins(v); localStorage.setItem('mn-watchdog', v); }} onClose={() => setMenuOpen(false)}/>}
-      {ordersOpen && <OrderConsole orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onSuccess={handleCheckoutOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} currency={currency} taxRateObj={taxRateObj}/>}
+      {menuOpen   && <SettingsDrawer theme={theme} onToggleTheme={toggleTheme} cols={cols} onCols={setCols} currency={currency} onCurrency={setCurrency} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} onClose={() => setMenuOpen(false)}/>}
+      {ordersOpen && <OrderConsole orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onSuccess={handleCheckoutOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} currency={currency} taxRateObj={taxRateObj} watchdogMins={watchdogMins} onWatchdogMins={(v) => { setWatchdogMins(v); localStorage.setItem('mn-watchdog', v); }}/>}
 
       {/* Search overlay */}
       <div className={`search-overlay ${searchOpen ? 'open' : ''}`} role="search">
@@ -797,7 +821,7 @@ export default function App() {
       {totalItems > 0 && (
         <div className="mobile-cart-bar-wrap">
           <SwipeableRow
-            onSwipeRight={() => handleCheckout()}
+            onSwipeRight={totalItems > 0 ? () => handleCheckout() : undefined}
             rightContent={<><I.Check s={18} style={{marginRight: 4}}/> Complete</>}
             onSwipeLeft={() => clearCart()}
             leftContent={<><I.Trash s={18} style={{marginRight: 4}}/> Clear</>}
