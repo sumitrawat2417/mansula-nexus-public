@@ -91,8 +91,8 @@ const playSound = (type) => {
         osc.frequency.setValueAtTime(800, t + i*0.5)
         osc.frequency.setValueAtTime(1200, t + i*0.5 + 0.25)
       }
-      gain.gain.setValueAtTime(0.1, t)
-      gain.gain.linearRampToValueAtTime(0.1, t + 3)
+      gain.gain.setValueAtTime(0.04, t)
+      gain.gain.linearRampToValueAtTime(0.04, t + 3)
       gain.gain.linearRampToValueAtTime(0.01, t + 3.1)
       osc.start(t); osc.stop(t + 3.1)
     }
@@ -640,7 +640,21 @@ export default function App() {
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
-  const showToast = (msg, type='success') => { setToast({msg, type}); setTimeout(() => setToast(null), 2800) }
+  const [toast, setToast] = useState(null)
+  const toastTimeout = useRef(null)
+
+  const showToast = (msg, type='success', persistent=false) => { 
+    setToast({msg, type, persistent})
+    if (toastTimeout.current) clearTimeout(toastTimeout.current)
+    if (!persistent) {
+      toastTimeout.current = setTimeout(() => setToast(null), 2800)
+    }
+  }
+
+  const closeToast = () => {
+    setToast(null)
+    if (toastTimeout.current) clearTimeout(toastTimeout.current)
+  }
 
   // ── Watchdog Timer ──
   useEffect(() => {
@@ -656,7 +670,7 @@ export default function App() {
             const elapsed = now - o.createdAt.getTime()
             const timeSinceAlarm = o.lastAlarm ? now - o.lastAlarm : elapsed
             if (elapsed > threshold && timeSinceAlarm >= 60000) {
-              showToast(`⚠️ Warning: Order #${o.id} is overdue!`, 'error')
+              showToast(`⚠️ Warning: Order #${o.id} is overdue!`, 'error', true)
               newAlarm = true
             }
           }
@@ -791,7 +805,15 @@ export default function App() {
   return (
     <>
       {/* Toast */}
-      {toast && <div className={`toast ${toast.type}`} role="status">{toast.type==='success' ? <I.Check s={15}/> : <I.Clock s={15}/>} {toast.msg}</div>}
+      {toast && (
+        <div className={`toast ${toast.type}`} role="alert">
+          {toast.type==='success' ? <I.Check s={15}/> : <I.Clock s={15}/>} 
+          {toast.msg}
+          {toast.persistent && (
+            <button className="toast-close-btn" onClick={closeToast} aria-label="Close alert"><I.X s={14}/></button>
+          )}
+        </div>
+      )}
 
       {/* Mobile cart overlay */}
       <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true"/>
