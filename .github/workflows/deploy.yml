@@ -25,6 +25,9 @@ jobs:
       - name: Build Project
         run: npm run build
 
+      - name: Copy README to build output
+        run: cp README.md dist/
+
       - name: Deploy to External Public Repository
         uses: peaceiris/actions-gh-pages@v3
         with:
