@@ -626,6 +626,7 @@ export default function App() {
   const [discountVal,  setDiscountVal]  = useState(0)
   const [deliveryCharge, setDeliveryCharge] = useState(0)
   const [paymentMode,  setPaymentMode]  = useState('cash')  // 'cash' | 'upi' | 'udhaar' | 'card' | 'other'
+  const [cartStep,     setCartStep]     = useState('cart')   // 'cart' | 'payment'
   const searchRef = useRef(null)
 
   // ── Orders — use module-level INIT_ORDER so ORD-002 is never skipped ──
@@ -745,7 +746,7 @@ export default function App() {
       return prev.map(i => i.id === id ? { ...i, qty: i.qty - 1 } : i)
     })
   }
-  const clearCart = () => setCartItems([])
+  const clearCart = () => { setCartItems([]); setCartStep('cart') }
 
   // ── Totals ──
   const subtotal     = cart.reduce((s, i) => s + i.price * i.qty, 0)
@@ -792,6 +793,7 @@ export default function App() {
         newCurrentId = newOrder.id
       }
       setCartOpen(false)
+      setCartStep('cart')
       // Reset per-order fields
       setDiscountType('none'); setDiscountVal(0); setDeliveryCharge(0); setPaymentMode('cash')
     }
@@ -928,75 +930,115 @@ export default function App() {
               </div>
             ) : (
               <>
-                <div className="cart-items" role="list">
-                  {cart.map(item => <CartItem key={item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} currency={currency}/>)}
-                </div>
-                <div className="cart-footer">
-
-                  {/* ── Subtotal / Tax rows ── */}
-                  <div className="cart-totals">
-                    <div className="cart-total-row"><span className="label">Subtotal</span><span className="value">{fmt(subtotal, currency)}</span></div>
-                    <div className="cart-total-row"><span className="label">{taxRateObj.label}</span><span className="value">{fmt(tax, currency)}</span></div>
-                  </div>
-
-                  {/* ── Extras card ── */}
-                  <div className="cart-extras-card">
-
-                    {/* Discount row */}
-                    <div className="cart-extra-row">
-                      <div className="cart-extra-label">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-danger)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                        <span>Discount</span>
+                {cartStep === 'cart' ? (
+                  <>
+                    <div className="cart-items" role="list">
+                      {cart.map(item => <CartItem key={item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} currency={currency}/>)}
+                    </div>
+                    <div className="cart-footer">
+                      {/* Subtotal / Tax */}
+                      <div className="cart-totals">
+                        <div className="cart-total-row"><span className="label">Subtotal</span><span className="value">{fmt(subtotal, currency)}</span></div>
+                        <div className="cart-total-row"><span className="label">{taxRateObj.label}</span><span className="value">{fmt(tax, currency)}</span></div>
                       </div>
-                      <div className="cart-extra-controls">
-                        <div className="discount-type-toggle">
-                          <button className={`disc-toggle-btn ${discountType === 'none' ? 'active' : ''}`} onClick={() => { setDiscountType('none'); setDiscountVal(0) }}>Off</button>
-                          <button className={`disc-toggle-btn ${discountType === 'flat' ? 'active' : ''}`} onClick={() => setDiscountType('flat')}>{currency.symbol}</button>
-                          <button className={`disc-toggle-btn ${discountType === 'percent' ? 'active' : ''}`} onClick={() => setDiscountType('percent')}>%</button>
-                        </div>
-                        {discountType !== 'none' && (
-                          <div className="cart-extra-input-wrap">
-                            <span className="cart-extra-unit">{discountType === 'flat' ? currency.symbol : '%'}</span>
-                            <input className="cart-extra-input" type="number" min="0"
-                              max={discountType === 'percent' ? 100 : undefined}
-                              value={discountVal || ''} placeholder="0"
-                              onChange={e => setDiscountVal(Math.max(0, parseFloat(e.target.value) || 0))} />
+
+                      {/* Extras card */}
+                      <div className="cart-extras-card">
+                        <div className="cart-extra-row">
+                          <div className="cart-extra-label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-danger)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                            <span>Discount</span>
                           </div>
-                        )}
-                        {discountAmt > 0 && <span className="cart-extra-badge danger">-{fmt(discountAmt, currency)}</span>}
-                      </div>
-                    </div>
-
-                    {/* Delivery row */}
-                    <div className="cart-extra-row">
-                      <div className="cart-extra-label">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                        <span>Delivery</span>
-                      </div>
-                      <div className="cart-extra-controls">
-                        <div className="cart-extra-input-wrap">
-                          <span className="cart-extra-unit">{currency.symbol}</span>
-                          <input className="cart-extra-input" type="number" min="0"
-                            value={deliveryCharge || ''} placeholder="0"
-                            onChange={e => setDeliveryCharge(Math.max(0, parseFloat(e.target.value) || 0))} />
+                          <div className="cart-extra-controls">
+                            <div className="discount-type-toggle">
+                              <button className={`disc-toggle-btn ${discountType === 'none' ? 'active' : ''}`} onClick={() => { setDiscountType('none'); setDiscountVal(0) }}>Off</button>
+                              <button className={`disc-toggle-btn ${discountType === 'flat' ? 'active' : ''}`} onClick={() => setDiscountType('flat')}>{currency.symbol}</button>
+                              <button className={`disc-toggle-btn ${discountType === 'percent' ? 'active' : ''}`} onClick={() => setDiscountType('percent')}>%</button>
+                            </div>
+                            {discountType !== 'none' && (
+                              <div className="cart-extra-input-wrap">
+                                <span className="cart-extra-unit">{discountType === 'flat' ? currency.symbol : '%'}</span>
+                                <input className="cart-extra-input" type="number" min="0"
+                                  max={discountType === 'percent' ? 100 : undefined}
+                                  value={discountVal || ''} placeholder="0"
+                                  onChange={e => setDiscountVal(Math.max(0, parseFloat(e.target.value) || 0))} />
+                              </div>
+                            )}
+                            {discountAmt > 0 && <span className="cart-extra-badge danger">-{fmt(discountAmt, currency)}</span>}
+                          </div>
                         </div>
-                        {deliveryCharge > 0 && <span className="cart-extra-badge accent">+{fmt(deliveryCharge, currency)}</span>}
+                        <div className="cart-extra-row">
+                          <div className="cart-extra-label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                            <span>Delivery</span>
+                          </div>
+                          <div className="cart-extra-controls">
+                            <div className="cart-extra-input-wrap">
+                              <span className="cart-extra-unit">{currency.symbol}</span>
+                              <input className="cart-extra-input" type="number" min="0"
+                                value={deliveryCharge || ''} placeholder="0"
+                                onChange={e => setDeliveryCharge(Math.max(0, parseFloat(e.target.value) || 0))} />
+                            </div>
+                            {deliveryCharge > 0 && <span className="cart-extra-badge accent">+{fmt(deliveryCharge, currency)}</span>}
+                          </div>
+                        </div>
                       </div>
+
+                      {/* Grand Total */}
+                      <div className="cart-grand-total-row">
+                        <span>Total</span>
+                        <span className="cart-grand-total-val">{fmt(total, currency)}</span>
+                      </div>
+
+                      {/* Continue button */}
+                      <button className="checkout-btn" onClick={() => setCartStep('payment')} disabled={cart.length === 0}>
+                        Continue to Payment →
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  /* ── STEP 2: Payment ── */
+                  <div className="payment-screen">
+                    {/* Back header */}
+                    <div className="payment-screen-header">
+                      <button className="payment-back-btn" onClick={() => setCartStep('cart')}>
+                        <I.Back s={16}/> Back
+                      </button>
+                      <div className="payment-screen-title">Payment</div>
                     </div>
 
-                  </div>
+                    {/* Order summary pill */}
+                    <div className="payment-order-summary">
+                      <div className="payment-summary-items">
+                        {cart.slice(0,3).map(i => (
+                          <span key={i.id} className="payment-summary-item">{i.qty}× {i.name}</span>
+                        ))}
+                        {cart.length > 3 && <span className="payment-summary-more">+{cart.length - 3} more</span>}
+                      </div>
+                      <div className="payment-summary-total">{fmt(total, currency)}</div>
+                    </div>
 
-                  {/* ── Grand Total ── */}
-                  <div className="cart-grand-total-row">
-                    <span>Total</span>
-                    <span className="cart-grand-total-val">{fmt(total, currency)}</span>
-                  </div>
+                    {/* UPI QR section (only when upi is selected) */}
+                    {paymentMode === 'upi' && (
+                      <div className="upi-qr-section">
+                        <div className="upi-qr-label">Scan to Pay</div>
+                        <div className="upi-qr-wrap">
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=2&color=6366f1&bgcolor=ffffff&data=upi://pay?pa=merchant@upi%26pn=ManSula%20Nexus%26am=${total}%26cu=INR%26tn=Order%20${currentOrderId}`}
+                            alt="UPI QR Code"
+                            className="upi-qr-img"
+                            width={180} height={180}
+                          />
+                        </div>
+                        <div className="upi-qr-id">merchant@upi</div>
+                        <div className="upi-qr-amount">{fmt(total, currency)}</div>
+                      </div>
+                    )}
 
-                  {/* ── Payment Mode ── */}
-                  <div className="payment-mode-section">
-                    <div className="payment-mode-label">
+                    {/* Payment mode chips */}
+                    <div className="payment-mode-label" style={{ marginBottom: 8, marginTop: paymentMode === 'upi' ? 16 : 0 }}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                      Payment
+                      Select Payment Method
                     </div>
                     <div className="payment-chips-row">
                       {[
@@ -1013,15 +1055,15 @@ export default function App() {
                         </button>
                       ))}
                     </div>
-                  </div>
 
-                  {/* ── Checkout Button ── */}
-                  <button id="checkout-btn" className="checkout-btn" onClick={handleCheckout} disabled={cart.length === 0}>
-                    <I.Check s={17}/>
-                    <span>Charge {fmt(total, currency)}</span>
-                    <span className="checkout-btn-mode">{paymentMode.charAt(0).toUpperCase() + paymentMode.slice(1)}</span>
-                  </button>
-                </div>
+                    {/* Confirm charge button */}
+                    <button id="checkout-btn" className="checkout-btn" style={{ marginTop: 16 }} onClick={handleCheckout}>
+                      <I.Check s={17}/>
+                      <span>Confirm — {fmt(total, currency)}</span>
+                      <span className="checkout-btn-mode">{paymentMode.charAt(0).toUpperCase() + paymentMode.slice(1)}</span>
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </aside>
