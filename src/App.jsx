@@ -656,14 +656,14 @@ export default function App() {
             const elapsed = now - o.createdAt.getTime()
             const timeSinceAlarm = o.lastAlarm ? now - o.lastAlarm : elapsed
             if (elapsed > threshold && timeSinceAlarm >= 60000) {
-              showToast(`⚠️ Warning: Order #${o.id} is overdue!`)
+              showToast(`⚠️ Warning: Order #${o.id} is overdue!`, 'error')
               newAlarm = true
             }
           }
         })
 
         if (newAlarm) {
-          playSound('checkout')
+          playSound('alarm')
           return currentOrders.map(o => {
             if (o.status === 'active' && o.items.length > 0) {
               const elapsed = now - o.createdAt.getTime()
