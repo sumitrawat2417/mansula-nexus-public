@@ -88,6 +88,60 @@ const playSound = (type) => {
   } catch (_) {}
 }
 
+// ─────────────── SWIPEABLE ROW ───────────────
+function SwipeableRow({ children, onSwipeLeft, onSwipeRight, leftContent, rightContent }) {
+  const [startX, setStartX] = useState(null)
+  const [offsetX, setOffsetX] = useState(0)
+  const threshold = 80
+
+  const handleTouchStart = (e) => setStartX(e.touches[0].clientX)
+  const handleTouchMove = (e) => {
+    if (startX === null) return
+    let diff = e.touches[0].clientX - startX
+    if (!onSwipeLeft && diff < 0) diff = 0
+    if (!onSwipeRight && diff > 0) diff = 0
+    setOffsetX(diff)
+  }
+  const handleTouchEnd = () => {
+    if (offsetX > threshold && onSwipeRight) onSwipeRight()
+    else if (offsetX < -threshold && onSwipeLeft) onSwipeLeft()
+    setStartX(null)
+    setOffsetX(0)
+  }
+
+  const bg = offsetX > 0 ? 'var(--brand-accent)' : offsetX < 0 ? '#ef4444' : 'transparent'
+  const isDragging = startX !== null
+
+  return (
+    <div className="swipe-container" style={{ position: 'relative', overflow: 'hidden', borderRadius: 'inherit', width: '100%', display: 'flex' }}>
+      <div className="swipe-background" style={{ position: 'absolute', inset: 0, backgroundColor: bg, display: 'flex', alignItems: 'center', justifyContent: offsetX > 0 ? 'flex-start' : 'flex-end', padding: '0 20px', color: 'white', fontWeight: 600, zIndex: 0 }}>
+        {offsetX > 0 ? rightContent : leftContent}
+      </div>
+      <div
+        className="swipe-content"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ transform: `translateX(${offsetX}px)`, transition: isDragging ? 'none' : 'transform 0.3s ease', zIndex: 1, position: 'relative', width: '100%' }}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function formatOrderId(id) {
+  if (!id) return ''
+  const parts = id.split('-')
+  if (parts.length < 2) return `#${id}`
+  return (
+    <>
+      <span style={{ fontSize: '1.4em' }}>#{parts[0]}</span>
+      <span style={{ opacity: 0.8 }}>-{parts[1]}</span>
+    </>
+  )
+}
+
 // ─────────────── ICONS ───────────────
 const I = {
   Search: ({ s=18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
@@ -118,7 +172,7 @@ const ordTotal = (order, taxRate) => {
 }
 
 // ─────────────── ORDER CONSOLE ───────────────
-function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose, currency, taxRateObj }) {
+function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onClose, currency, taxRateObj }) {
   const [expandedId, setExpandedId] = useState(null)
 
   const active    = orders.filter(o => o.status === 'active')
@@ -183,25 +237,30 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose, curren
                 const isExpanded = expandedId === order.id
                 return (
                   <div key={order.id} className={`order-row-wrap ${isExpanded ? 'expanded' : ''}`}>
-                    <div
-                      className={`order-row ${isCurrent ? 'current' : ''}`}
-                      onClick={() => toggleExpand(order.id)}
+                    <SwipeableRow
+                      onSwipeRight={(e) => { e?.stopPropagation(); onSuccess(order.id) }}
+                      rightContent={<><I.Check s={16} /> Complete</>}
                     >
-                      <div className="order-row-left">
-                        <div className="order-row-id">#{order.id}</div>
-                        <div className="order-row-meta">
-                          <I.Clock s={12}/> {fmtD(order.createdAt)} · {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                      <div
+                        className={`order-row ${isCurrent ? 'current' : ''}`}
+                        onClick={() => toggleExpand(order.id)}
+                      >
+                        <div className="order-row-left">
+                          <div className="order-row-id">{formatOrderId(order.id)}</div>
+                          <div className="order-row-meta">
+                            <I.Clock s={12}/> {fmtD(order.createdAt)} · {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                          </div>
+                        </div>
+                        <div className="order-row-right">
+                          <div className="order-row-total">{fmt(total, currency)}</div>
+                          {isCurrent && <span className="order-row-badge">Current</span>}
+                          {!isCurrent && (
+                            <button className="switch-order-btn-small" onClick={(e) => { e.stopPropagation(); onSwitch(order.id); onClose(); }}>Switch</button>
+                          )}
+                          <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14}/></span>
                         </div>
                       </div>
-                      <div className="order-row-right">
-                        <div className="order-row-total">{fmt(total, currency)}</div>
-                        {isCurrent && <span className="order-row-badge">Current</span>}
-                        {!isCurrent && (
-                          <button className="switch-order-btn-small" onClick={(e) => { e.stopPropagation(); onSwitch(order.id); onClose(); }}>Switch</button>
-                        )}
-                        <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14}/></span>
-                      </div>
-                    </div>
+                    </SwipeableRow>
                     {isExpanded && renderDetailInline(order)}
                   </div>
                 )
@@ -222,7 +281,7 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onNew, onClose, curren
                       onClick={() => toggleExpand(order.id)}
                     >
                       <div className="order-row-left">
-                        <div className="order-row-id">#{order.id}</div>
+                        <div className="order-row-id">{formatOrderId(order.id)}</div>
                         <div className="order-row-meta">
                           <I.Clock s={12}/> {fmtD(order.createdAt)} · {order.items.reduce((s,i)=>s+i.qty,0)} items
                         </div>
@@ -525,16 +584,23 @@ export default function App() {
   const totalItems = cart.reduce((s, i) => s + i.qty, 0)
 
   // ── Checkout ──
-  const handleCheckout = () => {
+  const handleCheckoutOrder = (orderId) => {
     playSound('checkout')
-    const completedId = currentOrderId
-    setOrders(prev => prev.map(o => o.id === completedId ? { ...o, status: 'completed' } : o))
-    const newOrder = makeOrder()
-    setOrders(prev => [...prev, newOrder])
-    setCurrentOrderId(newOrder.id)
-    setCartOpen(false)
-    showToast(`#${completedId} completed — ${fmt(total, currency)}`)
+    const order = orders.find(o => o.id === orderId)
+    if (!order) return
+    const t = ordTotal(order, taxRateObj.value)
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'completed' } : o))
+    
+    if (orderId === currentOrderId) {
+      const newOrder = makeOrder()
+      setOrders(prev => [...prev, newOrder])
+      setCurrentOrderId(newOrder.id)
+      setCartOpen(false)
+    }
+    showToast(`#${orderId} completed — ${fmt(t, currency)}`)
   }
+
+  const handleCheckout = () => handleCheckoutOrder(currentOrderId)
 
   // ── Filter ──
   const filtered = useMemo(() => PRODUCTS.filter(p =>
@@ -556,7 +622,7 @@ export default function App() {
 
       {/* Drawers */}
       {menuOpen   && <SettingsDrawer theme={theme} onToggleTheme={toggleTheme} cols={cols} onCols={setCols} currency={currency} onCurrency={setCurrency} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} onClose={() => setMenuOpen(false)}/>}
-      {ordersOpen && <OrderConsole   orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} currency={currency} taxRateObj={taxRateObj}/>}
+      {ordersOpen && <OrderConsole orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onSuccess={handleCheckoutOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} currency={currency} taxRateObj={taxRateObj}/>}
 
       {/* Search overlay */}
       <div className={`search-overlay ${searchOpen ? 'open' : ''}`} role="search">
@@ -577,7 +643,7 @@ export default function App() {
 
           {/* Current order ID pill (opens console on click) */}
           <button className="order-id-pill" onClick={() => setOrdersOpen(true)} id="current-order-pill">
-            <I.Orders s={13}/> #{currentOrderId}
+            <I.Orders s={13}/> {formatOrderId(currentOrderId)}
             {activeOrders.length > 1 && <span className="order-id-count">{activeOrders.length}</span>}
           </button>
 
@@ -630,7 +696,7 @@ export default function App() {
           <aside className={`cart-panel ${cartOpen ? 'open' : ''}`} aria-label="Current order">
             <div className="cart-header">
               <div className="cart-title">
-                <I.Cart s={17}/> #{currentOrderId}
+                <I.Cart s={17}/> {formatOrderId(currentOrderId)}
                 {totalItems > 0 && <span className="cart-count-badge">{totalItems}</span>}
               </div>
               {cart.length > 0 && <button id="clear-cart-btn" className="cart-clear-btn" onClick={clearCart}>Clear</button>}
@@ -664,10 +730,29 @@ export default function App() {
       </div>
 
       {/* Mobile FAB */}
-      <button id="mobile-cart-fab" className="mobile-cart-fab" onClick={() => setCartOpen(o => !o)} aria-label={`Cart — ${totalItems} items`}>
-        <I.Cart s={24}/>
-        {totalItems > 0 && <span className="mobile-cart-badge">{totalItems}</span>}
-      </button>
+      {totalItems > 0 && (
+        <div className="mobile-cart-bar-wrap">
+          <SwipeableRow
+            onSwipeRight={() => handleCheckout()}
+            rightContent={<><I.Check s={18} style={{marginRight: 4}}/> Complete</>}
+            onSwipeLeft={() => clearCart()}
+            leftContent={<><I.Trash s={18} style={{marginRight: 4}}/> Clear</>}
+          >
+            <button id="mobile-cart-bar" className="mobile-cart-bar" onClick={() => setCartOpen(o => !o)} aria-label={`Cart — ${totalItems} items`}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <I.Cart s={20}/>
+                <span className="mobile-cart-bar-qty">{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="mobile-cart-bar-total">{fmt(total, currency)}</div>
+            </button>
+          </SwipeableRow>
+        </div>
+      )}
+      {totalItems === 0 && (
+        <button id="mobile-cart-fab" className="mobile-cart-fab" onClick={() => setCartOpen(o => !o)} aria-label={`Cart`}>
+          <I.Cart s={24}/>
+        </button>
+      )}
     </>
   )
 }

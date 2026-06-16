@@ -25,6 +25,13 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
+### v1.5.2-alpha — Swipe Actions & Order ID Polish
+*   **UI: Swipeable Cart Bar** — The floating cart button on mobile expands into a swipeable bar. Swipe left-to-right to checkout, or right-to-left to clear the cart.
+*   **UI: Swipeable Active Orders** — In the Order Console, you can now swipe left-to-right on any active order row to quickly mark it as completed.
+*   **Polish: Order ID Font** — The starting integer of the Order ID (e.g. the `1` in `#1-17...`) is now styled with a significantly larger font size for easier readability.
+
+---
+
 ### v1.5.1-alpha — Refinements
 *   **Fix: Card Click Propagation** — Clicking the emoji itself on a product card now correctly triggers the cart addition.
 *   **UI: Inline Order Details** — In the Order Console, clicking an order now expands the details inline (accordion style) rather than opening a new page, with a quick 'Switch' button.
