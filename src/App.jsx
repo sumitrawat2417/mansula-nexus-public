@@ -628,6 +628,8 @@ export default function App() {
   const [paymentMode,  setPaymentMode]  = useState('cash')  // 'cash' | 'upi' | 'udhaar' | 'card' | 'other'
   const [cartStep,     setCartStep]     = useState('cart')   // 'cart' | 'payment'
   const [summaryExpanded, setSummaryExpanded] = useState(false)
+  const [cashNotes,    setCashNotes]    = useState({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })
+  const totalCashReceived = Object.entries(cashNotes).reduce((sum, [amt, count]) => sum + (Number(amt) * count), 0)
   const searchRef = useRef(null)
 
   // ── Orders — use module-level INIT_ORDER so ORD-002 is never skipped ──
@@ -797,7 +799,7 @@ export default function App() {
       setCartStep('cart')
       setSummaryExpanded(false)
       // Reset per-order fields
-      setDiscountType('none'); setDiscountVal(0); setDeliveryCharge(0); setPaymentMode('cash')
+      setDiscountType('none'); setDiscountVal(0); setDeliveryCharge(0); setPaymentMode('cash'); setCashNotes({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })
     }
     
     setOrders(newOrders)
@@ -1015,17 +1017,22 @@ export default function App() {
                     <div className="payment-screen-body">
 
                       {/* Order summary card */}
-                      <div className="payment-order-summary" onClick={() => setSummaryExpanded(e => !e)} style={{ cursor: cart.length > 3 ? 'pointer' : 'default' }}>
+                      {/* Order summary card */}
+                      <div className="payment-order-summary" onClick={() => setSummaryExpanded(e => !e)} style={{ cursor: 'pointer', alignItems: summaryExpanded ? 'flex-start' : 'center' }}>
                         <div className="payment-summary-left">
-                          <div className="payment-summary-label">Order {formatOrderId(currentOrderId)}</div>
-                          <div className="payment-summary-items" style={{ maxHeight: summaryExpanded ? '1000px' : '45px', transition: 'max-height 0.3s ease' }}>
-                            {cart.slice(0, summaryExpanded ? cart.length : 3).map(i => (
+                          <div className="payment-summary-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            Order {formatOrderId(currentOrderId)}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ transform: summaryExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease', opacity: 0.8 }}>
+                              <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                          </div>
+                          <div className="payment-summary-items" style={{ maxHeight: summaryExpanded ? '1000px' : '0px', opacity: summaryExpanded ? 1 : 0, overflow: 'hidden', transition: 'all 0.3s ease', marginTop: summaryExpanded ? '8px' : '0px' }}>
+                            {cart.map(i => (
                               <span key={i.id} className="payment-summary-item">{i.qty}× {i.name}</span>
                             ))}
-                            {!summaryExpanded && cart.length > 3 && <span className="payment-summary-more">+{cart.length - 3} more items</span>}
                           </div>
                         </div>
-                        <div className="payment-summary-total">{fmt(total, currency)}</div>
+                        <div className="payment-summary-total" style={{ marginTop: summaryExpanded ? '2px' : '0px', transition: 'margin-top 0.3s ease' }}>{fmt(total, currency)}</div>
                       </div>
 
                       {/* UPI QR — shown when UPI selected */}
@@ -1049,6 +1056,32 @@ export default function App() {
                           <div className="upi-qr-meta">
                             <span className="upi-qr-id">merchant@upi</span>
                             <span className="upi-qr-amount">{fmt(total, currency)}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Cash Calculator — shown when Cash selected */}
+                      {paymentMode === 'cash' && (
+                        <div className="cash-calc-section">
+                          <div className="cash-calc-label">Received from customer</div>
+                          <div className="cash-calc-chips">
+                            {[500, 200, 100, 50, 20, 10].map(amt => (
+                              <button key={amt} className={`cash-calc-btn ${cashNotes[amt] > 0 ? 'active' : ''}`} onClick={() => setCashNotes(p => ({ ...p, [amt]: p[amt] + 1 }))}>
+                                <span>+{fmt(amt, currency).replace(/\s/g, '')}</span>
+                                {cashNotes[amt] > 0 && <span className="cash-count">{cashNotes[amt]}</span>}
+                              </button>
+                            ))}
+                            <button className="cash-calc-btn clear" onClick={() => setCashNotes({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })}>Clear</button>
+                          </div>
+                          
+                          <div className="cash-calc-result">
+                            <div className="cash-received">Total Received: <span className="val">{fmt(totalCashReceived, currency)}</span></div>
+                            {totalCashReceived >= total && (
+                              <div className="cash-return">Return Change: <span className="val">{fmt(totalCashReceived - total, currency)}</span></div>
+                            )}
+                            {totalCashReceived > 0 && totalCashReceived < total && (
+                              <div className="cash-short">Short by: <span className="val">{fmt(total - totalCashReceived, currency)}</span></div>
+                            )}
                           </div>
                         </div>
                       )}

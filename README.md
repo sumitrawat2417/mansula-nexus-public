@@ -25,6 +25,15 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
+### v1.5.16-alpha — Cash Calculator & Payment Screen Polish
+*   **Feature: Cash Note Calculator** — The cash payment screen now tracks the exact quantity of each currency note received (+₹500, +₹200, etc.) and automatically computes the total cash and required change.
+*   **UI: Payment Screen Layout** — Reordered the payment screen so the active UPI QR and amount are fixed to the top, making the screen scannable without scrolling.
+*   **UI: Expandable Order Summary** — The order summary bar on the payment screen defaults to a compact view showing only the total and order ID. Tapping it smoothly expands to reveal the full item list.
+*   **UX: Mobile Cart Drawer** — Increased the maximum height of the mobile cart drawer to 92dvh to ensure the entire payment interface, including QR codes, fits comfortably on screen without internal scrolling.
+*   **Fix: Note Wrapping** — Fixed an issue where currency amounts on chips would break onto a second line.
+
+---
+
 ### v1.5.10-alpha — Persistent Alerts & UI Polish
 *   **Feature: Persistent Alerts** — Watchdog alerts now stay at the bottom of the screen with a dismiss button instead of auto-hiding.
 *   **UI: Centered Modal** — The checkout success modal is now perfectly centered on the screen and gracefully truncates long item lists with an expandable button.
