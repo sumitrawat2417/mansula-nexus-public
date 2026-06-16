@@ -29,7 +29,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.DEPLOY_PAT }}
-          external_repository: sumitrawat2417/mansula-nexus-v1.0-public
+          external_repository: sumitrawat2417/mansula-nexus-public
           publish_branch: main
           publish_dir: ./dist
           keep_files: false

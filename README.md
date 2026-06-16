@@ -1,16 +1,32 @@
-# React + Vite
+# Mansula Nexus (POS & Billing System)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Mansula Nexus is a modern, premium web-based Point of Sale (POS) and Billing System built with React and Vite. It is designed to be highly responsive, aesthetically pleasing, and easy to use.
 
-Currently, two official plugins are available:
+## Architecture
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+This project uses a dual-repository deployment strategy:
+1. **Private Repository (`mansula-nexus`)**: Houses the source code and development history.
+2. **Public Repository (`mansula-nexus-public`)**: Hosts the compiled build output (`dist/` folder) for public viewing via GitHub Actions.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+*   **Frontend Framework**: React (Vite)
+*   **Styling**: Premium Vanilla CSS (Custom properties, Glassmorphism, Dark Theme)
+*   **Typography**: Google Fonts (Outfit)
 
-## Expanding the ESLint configuration
+## Development Setup
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Clone the repository.
+2. Run `npm install` to install dependencies.
+3. Run `npm run dev` to start the local development server.
+4. Run `npm run build` to compile the project.
+
+---
+
+## Changelog
+
+### v1.0.0-alpha (Current)
+*   **Project Initialization**: Set up Vite + React template.
+*   **Base Styling**: Added `index.css` with a premium dark theme, glassmorphism utilities, and brand color tokens.
+*   **CI/CD Pipeline**: Configured `.github/workflows/deploy.yml` to automatically build and push the `dist/` output to the `mansula-nexus-public` repository upon changes to the `main` branch.
+*   **UI Foundation**: Cleared base template to prepare for step-by-step feature implementation.
