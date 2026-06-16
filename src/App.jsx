@@ -621,7 +621,6 @@ export default function App() {
   const [ordersOpen,   setOrdersOpen] = useState(false)
   const [successOrder, setSuccessOrder] = useState(null)
   const [watchdogMins, setWatchdogMins] = useState(() => { try { return parseInt(localStorage.getItem('mn-watchdog')) || 5 } catch { return 5 } })
-  const [toast,        setToast]      = useState(null)
   const searchRef = useRef(null)
 
   // ── Orders — use module-level INIT_ORDER so ORD-002 is never skipped ──
