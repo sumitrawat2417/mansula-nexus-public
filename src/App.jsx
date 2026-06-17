@@ -640,6 +640,7 @@ export default function App() {
   const [splitCash, setSplitCash] = useState(0)
   const [chipPage, setChipPage] = useState(0)
   const touchStartX = useRef(null)
+  const cartHandleTouchStart = useRef(null)
   const totalCashReceived = Object.entries(cashNotes).reduce((sum, [amt, count]) => sum + (Number(amt) * count), 0)
   const searchRef = useRef(null)
 
@@ -930,6 +931,18 @@ export default function App() {
 
           {/* ── CART ── */}
           <aside className={`cart-panel ${cartOpen ? 'open' : ''}`} aria-label="Current order">
+            <div 
+              className="cart-drag-handle" 
+              onClick={() => setCartOpen(false)}
+              onTouchStart={e => { cartHandleTouchStart.current = e.touches[0].clientY; }}
+              onTouchMove={e => {
+                if (cartHandleTouchStart.current && (e.touches[0].clientY - cartHandleTouchStart.current) > 40) {
+                  setCartOpen(false);
+                  cartHandleTouchStart.current = null;
+                }
+              }}
+              onTouchEnd={() => { cartHandleTouchStart.current = null; }}
+            />
             {cartStep === 'cart' && (
               <div className="cart-header">
                 <div className="cart-title">

@@ -705,6 +705,10 @@ select {
   transition: background 0.3s, border-color 0.3s;
 }
 
+.cart-drag-handle {
+  display: none;
+}
+
 .cart-header {
   padding: 12px 14px;
   border-bottom: 1px solid var(--border-color);
@@ -2280,6 +2284,17 @@ select {
 
   .cart-panel.open {
     transform: translateY(0);
+  }
+
+  .cart-drag-handle {
+    display: block;
+    width: 48px;
+    height: 5px;
+    background: var(--border-color);
+    border-radius: 4px;
+    margin: 12px auto 4px;
+    cursor: pointer;
+    touch-action: none;
   }
 
   .mobile-cart-fab {
