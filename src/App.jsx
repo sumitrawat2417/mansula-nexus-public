@@ -303,7 +303,6 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
                   value={watchdogMins}
                   onChange={e => onWatchdogMins(Math.max(0, parseInt(e.target.value) || 0))}
                   style={{ width: 40, background: 'transparent', border: 'none', color: 'inherit', fontSize: '0.9rem', outline: 'none', textAlign: 'center', marginLeft: 4 }}
-                  autoFocus
                 />
                 <button onClick={() => { setIsCustomTimer(false); onWatchdogMins(0); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--text-muted)' }} title="Clear custom timer"><I.X s={12} /></button>
               </div>
