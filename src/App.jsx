@@ -1175,23 +1175,59 @@ export default function App() {
                         Select Payment Method
                       </div>
 
-                      {/* Payment chips — SVG icons */}
-                      <div className="payment-chips-row" style={{ marginBottom: 16 }}>
-                        {[
+                      {/* Payment chips — paginated 4-per-page carousel */}
+                      {(() => {
+                        const allModes = [
                           { id: 'cash', label: 'Cash', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><circle cx="12" cy="12" r="3" /><path d="M5 8v.01M19 8v.01M5 16v.01M19 16v.01" /></svg> },
                           { id: 'upi', label: 'UPI', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" /><line x1="12" y1="18" x2="12.01" y2="18" /></svg> },
                           { id: 'split', label: 'Split', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> },
                           { id: 'udhaar', label: 'Udhaar', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
                           { id: 'card', label: 'Card', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /><path d="M5 15h2M10 15h4" /></svg> },
                           { id: 'other', label: 'Other', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg> },
-                        ].map(m => (
-                          <button key={m.id} className={`payment-chip ${paymentMode === m.id ? 'active' : ''}`}
-                            onClick={() => setPaymentMode(m.id)}>
-                            <span className="payment-chip-icon">{m.svg}</span>
-                            <span className="payment-chip-label">{m.label}</span>
-                          </button>
-                        ))}
-                      </div>
+                        ];
+                        const PAGE_SIZE = 4;
+                        const totalPages = Math.ceil(allModes.length / PAGE_SIZE);
+                        const page = allModes.findIndex(m => m.id === paymentMode) >= 0
+                          ? Math.floor(allModes.findIndex(m => m.id === paymentMode) / PAGE_SIZE)
+                          : 0;
+                        const [chipPage, setChipPage] = React.useState(page);
+                        const touchStartX = React.useRef(null);
+                        const visibleModes = allModes.slice(chipPage * PAGE_SIZE, chipPage * PAGE_SIZE + PAGE_SIZE);
+                        return (
+                          <div style={{ marginBottom: 16 }}>
+                            <div
+                              style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}
+                              onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+                              onTouchEnd={e => {
+                                if (touchStartX.current === null) return;
+                                const dx = touchStartX.current - e.changedTouches[0].clientX;
+                                if (dx > 40 && chipPage < totalPages - 1) setChipPage(p => p + 1);
+                                else if (dx < -40 && chipPage > 0) setChipPage(p => p - 1);
+                                touchStartX.current = null;
+                              }}
+                            >
+                              {visibleModes.map(m => (
+                                <button key={m.id} className={`payment-chip ${paymentMode === m.id ? 'active' : ''}`}
+                                  onClick={() => setPaymentMode(m.id)}>
+                                  <span className="payment-chip-icon">{m.svg}</span>
+                                  <span className="payment-chip-label">{m.label}</span>
+                                </button>
+                              ))}
+                            </div>
+                            {totalPages > 1 && (
+                              <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 8 }}>
+                                {Array.from({ length: totalPages }).map((_, i) => (
+                                  <div key={i} onClick={() => setChipPage(i)} style={{
+                                    width: i === chipPage ? 16 : 6, height: 6,
+                                    borderRadius: 3, cursor: 'pointer', transition: 'all 0.2s',
+                                    background: i === chipPage ? 'var(--brand-primary)' : 'var(--border-color)'
+                                  }} />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
 
                       <button id="checkout-btn" className="checkout-btn" onClick={handleCheckout}>
                         <I.Check s={17} />
