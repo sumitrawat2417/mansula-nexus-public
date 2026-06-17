@@ -638,6 +638,8 @@ export default function App() {
   const [summaryExpanded, setSummaryExpanded] = useState(false)
   const [cashNotes, setCashNotes] = useState({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })
   const [splitCash, setSplitCash] = useState(0)
+  const [chipPage, setChipPage] = useState(0)
+  const touchStartX = useRef(null)
   const totalCashReceived = Object.entries(cashNotes).reduce((sum, [amt, count]) => sum + (Number(amt) * count), 0)
   const searchRef = useRef(null)
 
@@ -1187,11 +1189,6 @@ export default function App() {
                         ];
                         const PAGE_SIZE = 4;
                         const totalPages = Math.ceil(allModes.length / PAGE_SIZE);
-                        const page = allModes.findIndex(m => m.id === paymentMode) >= 0
-                          ? Math.floor(allModes.findIndex(m => m.id === paymentMode) / PAGE_SIZE)
-                          : 0;
-                        const [chipPage, setChipPage] = React.useState(page);
-                        const touchStartX = React.useRef(null);
                         const visibleModes = allModes.slice(chipPage * PAGE_SIZE, chipPage * PAGE_SIZE + PAGE_SIZE);
                         return (
                           <div style={{ marginBottom: 16 }}>
