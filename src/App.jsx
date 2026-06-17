@@ -942,7 +942,11 @@ export default function App() {
                 }
               }}
               onTouchEnd={() => { cartHandleTouchStart.current = null; }}
-            />
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
             {cartStep === 'cart' && (
               <div className="cart-header">
                 <div className="cart-title">
