@@ -1106,10 +1106,6 @@ select {
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 6px;
-  margin-left: -16px;
-  margin-right: -16px;
-  padding-left: 16px;
-  padding-right: 16px;
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
@@ -1130,8 +1126,8 @@ select {
   border: 1.5px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 8px 4px;
-  /* exactly 4 chips visible: (100% container - 3 gaps of 8px - 32px side padding) / 4 */
-  flex: 0 0 calc(25% - 8px);
+  /* show exactly 4 chips: footer width is (100vw - 32px side padding). each chip = (that - 3*8px gap) / 4 */
+  flex: 0 0 calc((100vw - 32px - 24px) / 4);
   min-width: 0;
   scroll-snap-align: start;
   cursor: pointer;
@@ -1571,6 +1567,7 @@ select {
   border-top: 1px solid var(--border-color);
   background: var(--bg-surface);
   animation: slideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: hidden;
 }
 
 .payment-screen-footer .checkout-btn {
