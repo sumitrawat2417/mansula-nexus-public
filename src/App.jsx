@@ -224,7 +224,11 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
           </div>
           <div className="success-payment-mode" style={{ textAlign: 'left', marginTop: 8, fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
             <span>Payment Mode</span>
-            <span style={{ fontWeight: 700, color: 'var(--text-primary)', textTransform: 'capitalize' }}>{order.paymentMode || 'Cash'}</span>
+            <span style={{ fontWeight: 700, color: 'var(--text-primary)', textTransform: 'capitalize' }}>
+              {order.paymentMode === 'split' && order.paymentDetails
+                ? `Split (Cash: ${fmt(order.paymentDetails.cash, currency)}, UPI: ${fmt(order.paymentDetails.upi, currency)})`
+                : order.paymentMode || 'Cash'}
+            </span>
           </div>
         </div>
 
@@ -633,6 +637,7 @@ export default function App() {
   const [cartStep, setCartStep] = useState('cart')   // 'cart' | 'payment'
   const [summaryExpanded, setSummaryExpanded] = useState(false)
   const [cashNotes, setCashNotes] = useState({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })
+  const [splitCash, setSplitCash] = useState(0)
   const totalCashReceived = Object.entries(cashNotes).reduce((sum, [amt, count]) => sum + (Number(amt) * count), 0)
   const searchRef = useRef(null)
 
@@ -780,6 +785,7 @@ export default function App() {
       discountAmt,
       deliveryCharge: delivery,
       paymentMode,
+      paymentDetails: paymentMode === 'split' ? { cash: splitCash, upi: Math.max(0, total - splitCash) } : null,
       total
     }
 
@@ -922,13 +928,16 @@ export default function App() {
 
           {/* ── CART ── */}
           <aside className={`cart-panel ${cartOpen ? 'open' : ''}`} aria-label="Current order">
-            <div className="cart-header">
-              <div className="cart-title">
-                <I.Cart s={17} /> {formatOrderId(currentOrderId)}
-                {totalItems > 0 && <span className="cart-count-badge">{totalItems}</span>}
+            {cartStep === 'cart' && (
+              <div className="cart-header">
+                <div className="cart-title">
+                  <I.Cart s={17} /> {formatOrderId(currentOrderId)}
+                  {totalItems > 0 && <span className="cart-count-badge">{totalItems}</span>}
+                </div>
+                {cart.length > 0 && <button id="clear-cart-btn" className="cart-clear-btn" onClick={clearCart}>Clear</button>}
               </div>
-              {cart.length > 0 && <button id="clear-cart-btn" className="cart-clear-btn" onClick={clearCart}>Clear</button>}
-            </div>
+            )}
+
 
             {cart.length === 0 ? (
               <div className="cart-empty">
@@ -1045,10 +1054,10 @@ export default function App() {
                           <div className="upi-qr-label">Scan &amp; Pay</div>
                           <div className="upi-qr-wrap">
                             <img
-                              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=Q860348001@ybl&pn=${encodeURIComponent('ManSula Foods')}&am=${total}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`)}`}
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=Q860348001@ybl&pn=${encodeURIComponent('ManSula Foods')}&am=${total}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`)}`}
                               alt="UPI QR Code"
                               className="upi-qr-img"
-                              width={200} height={200}
+                              width={180} height={180}
                             />
                             {/* UPI logo overlay */}
                             <div className="upi-qr-logo">
@@ -1088,6 +1097,72 @@ export default function App() {
                         </div>
                       )}
 
+                      {/* Split Pay — shown when Split selected */}
+                      {paymentMode === 'split' && (
+                        <div className="cash-calc-section" style={{ padding: '8px 12px' }}>
+                          <div className="cash-calc-label" style={{ fontSize: '0.7rem', marginBottom: 2 }}>Cash Received</div>
+                          <div className="split-cash-input-wrap">
+                            <span className="split-cash-unit">{currency.symbol}</span>
+                            <input
+                              className="split-cash-input"
+                              type="number"
+                              min="0"
+                              max={total}
+                              value={splitCash === 0 ? '' : splitCash}
+                              placeholder="0"
+                              onChange={e => setSplitCash(Math.min(total, Math.max(0, parseFloat(e.target.value) || 0)))}
+                              autoFocus
+                            />
+                          </div>
+
+                          <div style={{ padding: '0 4px', marginBottom: 6 }}>
+                            <input 
+                              type="range" 
+                              min="0" 
+                              max={total} 
+                              step="10" 
+                              value={splitCash || 0} 
+                              onChange={e => setSplitCash(Number(e.target.value))} 
+                              style={{ width: '100%', accentColor: 'var(--brand-primary)', cursor: 'pointer', height: 12 }} 
+                            />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: 0, fontWeight: 600 }}>
+                              <span>{fmt(0, currency)}</span>
+                              <span>{fmt(total, currency)}</span>
+                            </div>
+                          </div>
+
+                          <div className="cash-calc-chips" style={{ justifyContent: 'center', gap: 4 }}>
+                            {[500, 200, 100, 50, 20, 10].map(amt => (
+                              <button key={amt} className="cash-calc-btn" onClick={() => setSplitCash(p => Math.min(total, p + amt))} style={{ flex: '0 1 auto', minWidth: '36px', padding: '3px 4px', fontSize: '0.75rem', borderRadius: 4 }}>
+                                +{amt}
+                              </button>
+                            ))}
+                            <button className="cash-calc-btn clear" onClick={() => setSplitCash(0)} style={{ flex: '0 1 auto', padding: '3px 4px', fontSize: '0.75rem', borderRadius: 4 }}>Clear</button>
+                          </div>
+                          
+                          {splitCash < total ? (
+                            <div className="upi-qr-section" style={{ marginTop: 2, padding: '4px 0 0' }}>
+                              <div className="upi-qr-label" style={{ color: 'var(--brand-accent)', fontSize: '0.75rem', marginBottom: 4 }}>Remaining via UPI: {fmt(total - splitCash, currency)}</div>
+                              <div className="upi-qr-wrap" style={{ margin: '0 auto', boxShadow: 'none', border: '1px solid var(--border-color)', padding: 4 }}>
+                                <img
+                                  src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=Q860348001@ybl&pn=${encodeURIComponent('ManSula Foods')}&am=${total - splitCash}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`)}`}
+                                  alt="UPI QR Code"
+                                  className="upi-qr-img"
+                                  width={170} height={170}
+                                />
+                                <div className="upi-qr-logo">
+                                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="cash-calc-result" style={{ marginTop: 4 }}>
+                              <div className="cash-return">Return Change: <span className="val">{fmt(splitCash - total, currency)}</span></div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <div style={{ flex: 1 }} />{/* spacer to push payment method down */}
 
                     </div>{/* end body */}
@@ -1105,6 +1180,7 @@ export default function App() {
                         {[
                           { id: 'cash', label: 'Cash', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><circle cx="12" cy="12" r="3" /><path d="M5 8v.01M19 8v.01M5 16v.01M19 16v.01" /></svg> },
                           { id: 'upi', label: 'UPI', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" /><line x1="12" y1="18" x2="12.01" y2="18" /></svg> },
+                          { id: 'split', label: 'Split', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> },
                           { id: 'udhaar', label: 'Udhaar', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
                           { id: 'card', label: 'Card', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /><path d="M5 15h2M10 15h4" /></svg> },
                           { id: 'other', label: 'Other', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg> },
