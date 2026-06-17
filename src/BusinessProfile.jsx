@@ -1,0 +1,523 @@
+import { useState, useEffect, useRef } from 'react'
+import { dbGet, dbSet } from './db.js'
+
+// ── Keys ──
+export const KEY_BUSINESS   = 'mn-business'
+export const KEY_PRODUCTS   = 'mn-products'
+export const KEY_CATEGORIES = 'mn-categories'
+
+// ── Default data ──
+export const DEFAULT_BUSINESS = {
+  name: '', type: 'Café', tagline: '', phone: '', email: '', address: '', gstin: '', logo: '🏪',
+}
+export const DEFAULT_CATEGORIES = ['Coffee', 'Tea', 'Food', 'Bakery', 'Drinks']
+export const DEFAULT_PRODUCTS = [
+  { id: 1,  name: 'Espresso',         category: 'Coffee', price: 120, emoji: '☕', badge: 'popular' },
+  { id: 2,  name: 'Cappuccino',       category: 'Coffee', price: 180, emoji: '☕' },
+  { id: 3,  name: 'Latte',            category: 'Coffee', price: 200, emoji: '🥛' },
+  { id: 4,  name: 'Cold Brew',        category: 'Coffee', price: 220, emoji: '🧊', badge: 'new' },
+  { id: 5,  name: 'Green Tea',        category: 'Tea',    price: 100, emoji: '🍵' },
+  { id: 6,  name: 'Chai Latte',       category: 'Tea',    price: 160, emoji: '🫖', badge: 'popular' },
+  { id: 7,  name: 'Croissant',        category: 'Bakery', price: 140, emoji: '🥐' },
+  { id: 8,  name: 'Blueberry Muffin', category: 'Bakery', price: 130, emoji: '🧁', badge: 'new' },
+  { id: 9,  name: 'Avocado Toast',    category: 'Food',   price: 380, emoji: '🥑', badge: 'popular' },
+  { id: 10, name: 'Club Sandwich',    category: 'Food',   price: 320, emoji: '🥪' },
+  { id: 11, name: 'Caesar Salad',     category: 'Food',   price: 280, emoji: '🥗' },
+  { id: 12, name: 'Orange Juice',     category: 'Drinks', price: 120, emoji: '🍊' },
+  { id: 13, name: 'Mango Smoothie',   category: 'Drinks', price: 180, emoji: '🥭', badge: 'new' },
+  { id: 14, name: 'Mineral Water',    category: 'Drinks', price: 60,  emoji: '💧' },
+  { id: 15, name: 'Chocolate Cake',   category: 'Bakery', price: 200, emoji: '🎂', badge: 'popular' },
+  { id: 16, name: 'Cheesecake',       category: 'Bakery', price: 220, emoji: '🍰' },
+]
+
+// ── Icons ──
+const Ic = {
+  Back:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
+  Save:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
+  Plus:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>,
+  Edit:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  Trash:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>,
+  X:        () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>,
+  Check:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  Store:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  Menu:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>,
+  Tag:      () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
+  Search:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
+  Download: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+  Upload:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+  Phone:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 15 15.91l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+  Mail:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+  MapPin:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+  Receipt:  () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><path d="M16 8H8M16 12H8M12 16H8"/></svg>,
+  AlertTri: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+}
+
+const BUSINESS_TYPES = ['Café', 'Restaurant', 'Retail Shop', 'Grocery', 'Pharmacy', 'Bakery', 'Food Truck', 'Hotel', 'Other']
+const BADGE_OPTIONS  = [{ value: '', label: 'None' }, { value: 'popular', label: '🔥 Popular' }, { value: 'new', label: '✨ New' }]
+
+// ─── PRODUCT FORM ───
+function ProductForm({ product, categories, onSave, onCancel }) {
+  const isNew = !product?.id
+  const [form, setForm] = useState({
+    name:     product?.name     || '',
+    category: product?.category || (categories[0] || 'Coffee'),
+    price:    product?.price    || '',
+    emoji:    product?.emoji    || '🍽️',
+    badge:    product?.badge    || '',
+  })
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  const handleSave = () => {
+    if (!form.name.trim()) return
+    const price = parseFloat(form.price)
+    if (isNaN(price) || price <= 0) return
+    onSave({
+      ...(product || {}),
+      id:       product?.id || Date.now(),
+      name:     form.name.trim(),
+      category: form.category,
+      price,
+      emoji:    form.emoji || '🍽️',
+      badge:    form.badge || undefined,
+    })
+  }
+
+  return (
+    <div className="bp-form-overlay" onClick={onCancel}>
+      <div className="bp-form-sheet" onClick={e => e.stopPropagation()}>
+        <div className="bp-form-handle" />
+        <div className="bp-form-header">
+          <div className="bp-form-title">{isNew ? 'Add Product' : 'Edit Product'}</div>
+          <button className="bp-icon-btn" onClick={onCancel}><Ic.X /></button>
+        </div>
+        <div className="bp-form-body">
+          <div className="bp-field">
+            <label className="bp-label">Emoji</label>
+            <input className="bp-input bp-emoji-input" value={form.emoji} onChange={e => set('emoji', e.target.value)} maxLength={2} placeholder="🍽️" />
+          </div>
+          <div className="bp-field">
+            <label className="bp-label">Name *</label>
+            <input className="bp-input" value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Masala Chai" autoFocus />
+          </div>
+          <div className="bp-field">
+            <label className="bp-label">Category *</label>
+            <select className="bp-select" value={form.category} onChange={e => set('category', e.target.value)}>
+              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="bp-field">
+            <label className="bp-label">Price (₹) *</label>
+            <input className="bp-input" type="number" inputMode="decimal" value={form.price} onChange={e => set('price', e.target.value)} placeholder="0" min="0" />
+          </div>
+          <div className="bp-field">
+            <label className="bp-label">Badge</label>
+            <div className="bp-badge-row">
+              {BADGE_OPTIONS.map(b => (
+                <button key={b.value} className={`bp-badge-opt ${form.badge === b.value ? 'active' : ''}`} onClick={() => set('badge', b.value)} type="button">{b.label}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="bp-form-footer">
+          <button className="bp-btn-ghost" onClick={onCancel}>Cancel</button>
+          <button className="bp-btn-primary" onClick={handleSave} disabled={!form.name.trim() || !form.price}>
+            <Ic.Check /> {isNew ? 'Add Product' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── CATEGORY FORM ───
+function CategoryForm({ categories, onAdd, onDelete }) {
+  const [newCat, setNewCat] = useState('')
+  const handleAdd = () => {
+    const val = newCat.trim()
+    if (!val || categories.includes(val)) return
+    onAdd(val); setNewCat('')
+  }
+  return (
+    <div className="bp-cat-section">
+      <div className="bp-section-label">Categories</div>
+      <div className="bp-cat-list">
+        {categories.map(cat => (
+          <div key={cat} className="bp-cat-row">
+            <span className="bp-cat-name">{cat}</span>
+            <button className="bp-icon-btn bp-icon-btn-danger" onClick={() => onDelete(cat)} title={`Remove ${cat}`}><Ic.Trash /></button>
+          </div>
+        ))}
+      </div>
+      <div className="bp-cat-add-row">
+        <input className="bp-input" value={newCat} onChange={e => setNewCat(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAdd()} placeholder="New category name…" />
+        <button className="bp-btn-primary bp-btn-sm" onClick={handleAdd}><Ic.Plus /> Add</button>
+      </div>
+    </div>
+  )
+}
+
+// ─── PROFILE VIEW (read-only) ───
+function ProfileView({ business, onEdit }) {
+  const hasData = business.name || business.phone || business.email
+
+  if (!hasData) {
+    return (
+      <div className="bp-profile-empty">
+        <div className="bp-profile-empty-logo">🏪</div>
+        <div className="bp-profile-empty-title">No business info yet</div>
+        <div className="bp-profile-empty-sub">Set up your business name, contact, and legal details to get started.</div>
+        <button className="bp-btn-primary" onClick={onEdit}><Ic.Edit /> Set Up Business</button>
+      </div>
+    )
+  }
+
+  const InfoRow = ({ icon: IcComp, label, value }) => value ? (
+    <div className="bp-info-row">
+      <span className="bp-info-icon"><IcComp /></span>
+      <div className="bp-info-content">
+        <div className="bp-info-label">{label}</div>
+        <div className="bp-info-value">{value}</div>
+      </div>
+    </div>
+  ) : null
+
+  return (
+    <div className="bp-profile-view">
+      {/* Hero card */}
+      <div className="bp-profile-hero">
+        <div className="bp-profile-hero-logo">{business.logo || '🏪'}</div>
+        <div className="bp-profile-hero-name">{business.name || '—'}</div>
+        {business.type && <div className="bp-profile-hero-type">{business.type}</div>}
+        {business.tagline && <div className="bp-profile-hero-tagline">"{business.tagline}"</div>}
+        <button className="bp-profile-edit-btn" onClick={onEdit}><Ic.Edit /> Edit Profile</button>
+      </div>
+
+      {/* Info rows */}
+      <div className="bp-info-card">
+        <div className="bp-info-card-title">Contact Details</div>
+        <InfoRow icon={Ic.Phone}  label="Phone"   value={business.phone} />
+        <InfoRow icon={Ic.Mail}   label="Email"   value={business.email} />
+        <InfoRow icon={Ic.MapPin} label="Address" value={business.address} />
+      </div>
+
+      {(business.gstin) && (
+        <div className="bp-info-card">
+          <div className="bp-info-card-title">Tax & Legal</div>
+          <InfoRow icon={Ic.Receipt} label="GSTIN" value={business.gstin} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── MAIN COMPONENT ───
+export default function BusinessProfile({ onClose }) {
+  const [tab, setTab]           = useState('info')
+  const [infoMode, setInfoMode] = useState('view')   // 'view' | 'edit'
+  const [business, setBusiness] = useState(DEFAULT_BUSINESS)
+  const [products, setProducts] = useState(DEFAULT_PRODUCTS)
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
+  const [loaded, setLoaded]     = useState(false)
+  const [saved, setSaved]       = useState(false)
+  const [editProduct, setEditProduct] = useState(null)
+  const [searchQ, setSearchQ]   = useState('')
+  const [filterCat, setFilterCat] = useState('All')
+  const [importStatus, setImportStatus] = useState(null) // null | 'ok' | 'err'
+  const importRef = useRef(null)
+
+  // Load from IDB
+  useEffect(() => {
+    async function load() {
+      const [b, p, c] = await Promise.all([dbGet(KEY_BUSINESS), dbGet(KEY_PRODUCTS), dbGet(KEY_CATEGORIES)])
+      if (b) setBusiness({ ...DEFAULT_BUSINESS, ...b })
+      if (p) setProducts(p)
+      if (c) setCategories(c)
+      setLoaded(true)
+    }
+    load()
+  }, [])
+
+  // Save business info
+  const saveBusiness = async () => {
+    await dbSet(KEY_BUSINESS, business)
+    setSaved(true)
+    setInfoMode('view')
+    setTimeout(() => setSaved(false), 2500)
+  }
+
+  // ── Export backup ──
+  const handleExport = () => {
+    const payload = {
+      _version: 1,
+      _exported: new Date().toISOString(),
+      business,
+      products,
+      categories,
+    }
+    const json = JSON.stringify(payload, null, 2)
+    const blob = new Blob([json], { type: 'application/json' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    const name = (business.name || 'mansula-nexus').replace(/\s+/g, '-').toLowerCase()
+    a.href     = url
+    a.download = `${name}-backup-${new Date().toISOString().slice(0,10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // ── Import backup ──
+  const handleImport = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const text = await file.text()
+      const data = JSON.parse(text)
+      if (!data._version) throw new Error('Invalid backup')
+      if (data.business)   { setBusiness({ ...DEFAULT_BUSINESS, ...data.business }); await dbSet(KEY_BUSINESS,   data.business) }
+      if (data.products)   { setProducts(data.products);   await dbSet(KEY_PRODUCTS,   data.products) }
+      if (data.categories) { setCategories(data.categories); await dbSet(KEY_CATEGORIES, data.categories) }
+      setImportStatus('ok')
+      setInfoMode('view')
+    } catch {
+      setImportStatus('err')
+    }
+    e.target.value = ''
+    setTimeout(() => setImportStatus(null), 3500)
+  }
+
+  // Product mutations
+  const saveProduct = async (prod) => {
+    const next = editProduct === 'new' ? [...products, prod] : products.map(p => p.id === prod.id ? prod : p)
+    setProducts(next); await dbSet(KEY_PRODUCTS, next); setEditProduct(null)
+  }
+  const deleteProduct = async (id) => {
+    const next = products.filter(p => p.id !== id); setProducts(next); await dbSet(KEY_PRODUCTS, next)
+  }
+  const addCategory = async (cat) => {
+    const next = [...categories, cat]; setCategories(next); await dbSet(KEY_CATEGORIES, next)
+  }
+  const deleteCategory = async (cat) => {
+    const next = categories.filter(c => c !== cat); setCategories(next); await dbSet(KEY_CATEGORIES, next)
+  }
+
+  const filteredProducts = products.filter(p => {
+    const matchQ   = !searchQ || p.name.toLowerCase().includes(searchQ.toLowerCase())
+    const matchCat = filterCat === 'All' || p.category === filterCat
+    return matchQ && matchCat
+  })
+
+  const tabs = [
+    { id: 'info',       label: 'Profile',    Icon: Ic.Store },
+    { id: 'menu',       label: 'Menu',       Icon: Ic.Menu  },
+    { id: 'categories', label: 'Categories', Icon: Ic.Tag   },
+    { id: 'backup',     label: 'Backup',     Icon: Ic.Download },
+  ]
+
+  if (!loaded) {
+    return <div className="bp-root"><div className="bp-loading">Loading…</div></div>
+  }
+
+  return (
+    <div className="bp-root">
+      {/* Hidden file input for import */}
+      <input ref={importRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
+
+      {/* Product form sheet */}
+      {editProduct !== null && (
+        <ProductForm product={editProduct === 'new' ? null : editProduct} categories={categories} onSave={saveProduct} onCancel={() => setEditProduct(null)} />
+      )}
+
+      {/* Header */}
+      <header className="bp-header">
+        <button className="bp-back-btn" onClick={onClose}><Ic.Back /></button>
+        <div className="bp-header-title">
+          <div className="bp-header-main">Business Profile</div>
+          <div className="bp-header-sub">{business.name || 'Set up your business'}</div>
+        </div>
+        {tab === 'info' && infoMode === 'edit' && (
+          <button className={`bp-save-btn ${saved ? 'saved' : ''}`} onClick={saveBusiness}>
+            {saved ? <><Ic.Check /> Saved</> : <><Ic.Save /> Save</>}
+          </button>
+        )}
+      </header>
+
+      {/* Import status toast */}
+      {importStatus && (
+        <div className={`bp-import-toast ${importStatus}`}>
+          {importStatus === 'ok' ? <><Ic.Check /> Backup restored successfully!</> : <><Ic.AlertTri /> Invalid backup file</>}
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="bp-tabs">
+        {tabs.map(t => (
+          <button key={t.id} className={`bp-tab ${tab === t.id ? 'active' : ''}`} onClick={() => { setTab(t.id); if (t.id !== 'info') setInfoMode('view') }}>
+            <span className="bp-tab-icon"><t.Icon /></span>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Tab: Profile (view / edit) ── */}
+      {tab === 'info' && (
+        <div className="bp-body">
+          {infoMode === 'view' ? (
+            <ProfileView business={business} onEdit={() => setInfoMode('edit')} />
+          ) : (
+            <>
+              {/* Edit form */}
+              <div className="bp-logo-section">
+                <div className="bp-logo-preview"><span>{business.logo || '🏪'}</span></div>
+                <div className="bp-logo-hint">Change logo emoji below</div>
+                <input className="bp-input bp-logo-input" value={business.logo} onChange={e => setBusiness(b => ({ ...b, logo: e.target.value }))} maxLength={2} placeholder="🏪" />
+              </div>
+
+              <div className="bp-section-label">Basic Info</div>
+              <div className="bp-field">
+                <label className="bp-label">Business Name</label>
+                <input className="bp-input" value={business.name} onChange={e => setBusiness(b => ({ ...b, name: e.target.value }))} placeholder="e.g. Mansu's Café" />
+              </div>
+              <div className="bp-field">
+                <label className="bp-label">Business Type</label>
+                <select className="bp-select" value={business.type} onChange={e => setBusiness(b => ({ ...b, type: e.target.value }))}>
+                  {BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div className="bp-field">
+                <label className="bp-label">Tagline</label>
+                <input className="bp-input" value={business.tagline} onChange={e => setBusiness(b => ({ ...b, tagline: e.target.value }))} placeholder="e.g. Fresh brews, warm smiles" />
+              </div>
+
+              <div className="bp-section-label">Contact</div>
+              <div className="bp-field">
+                <label className="bp-label">Phone</label>
+                <input className="bp-input" type="tel" inputMode="numeric" value={business.phone} onChange={e => setBusiness(b => ({ ...b, phone: e.target.value }))} placeholder="+91 98765 43210" />
+              </div>
+              <div className="bp-field">
+                <label className="bp-label">Email</label>
+                <input className="bp-input" type="email" inputMode="email" value={business.email} onChange={e => setBusiness(b => ({ ...b, email: e.target.value }))} placeholder="hello@yourbusiness.com" />
+              </div>
+              <div className="bp-field">
+                <label className="bp-label">Address</label>
+                <textarea className="bp-input bp-textarea" value={business.address} onChange={e => setBusiness(b => ({ ...b, address: e.target.value }))} placeholder="Shop No., Street, City, State — PIN" rows={2} />
+              </div>
+
+              <div className="bp-section-label">Tax &amp; Legal</div>
+              <div className="bp-field">
+                <label className="bp-label">GSTIN</label>
+                <input className="bp-input" value={business.gstin} onChange={e => setBusiness(b => ({ ...b, gstin: e.target.value.toUpperCase() }))} placeholder="22AAAAA0000A1Z5" maxLength={15} style={{ fontFamily: 'monospace', letterSpacing: '0.06em' }} />
+              </div>
+
+              <div className="bp-edit-actions">
+                <button className="bp-btn-ghost" onClick={() => setInfoMode('view')}>Cancel</button>
+                <button className="bp-btn-primary bp-save-full" style={{ flex: 2 }} onClick={saveBusiness}>
+                  {saved ? <><Ic.Check /> Saved!</> : <><Ic.Save /> Save Profile</>}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── Tab: Menu ── */}
+      {tab === 'menu' && (
+        <div className="bp-body">
+          <div className="bp-menu-toolbar">
+            <div className="bp-search-wrap">
+              <span className="bp-search-icon"><Ic.Search /></span>
+              <input className="bp-search-input" value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Search products…" />
+            </div>
+            <button className="bp-btn-primary bp-btn-sm" onClick={() => setEditProduct('new')}><Ic.Plus /> Add</button>
+          </div>
+          <div className="bp-cat-chips">
+            {['All', ...categories].map(c => (
+              <button key={c} className={`bp-cat-chip ${filterCat === c ? 'active' : ''}`} onClick={() => setFilterCat(c)}>{c}</button>
+            ))}
+          </div>
+          <div className="bp-product-list">
+            {filteredProducts.length === 0 && (
+              <div className="bp-empty">
+                <div className="bp-empty-icon">🍽️</div>
+                <div className="bp-empty-text">No products yet</div>
+                <div className="bp-empty-sub">Tap "Add" to create your first menu item</div>
+              </div>
+            )}
+            {filteredProducts.map(prod => (
+              <div key={prod.id} className="bp-product-row">
+                <div className="bp-product-emoji">{prod.emoji}</div>
+                <div className="bp-product-info">
+                  <div className="bp-product-name">
+                    {prod.name}
+                    {prod.badge && <span className={`bp-badge bp-badge-${prod.badge}`}>{prod.badge}</span>}
+                  </div>
+                  <div className="bp-product-meta">{prod.category} · ₹{prod.price}</div>
+                </div>
+                <div className="bp-product-actions">
+                  <button className="bp-icon-btn" onClick={() => setEditProduct(prod)} title="Edit"><Ic.Edit /></button>
+                  <button className="bp-icon-btn bp-icon-btn-danger" onClick={() => deleteProduct(prod.id)} title="Delete"><Ic.Trash /></button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Tab: Categories ── */}
+      {tab === 'categories' && (
+        <div className="bp-body">
+          <p className="bp-hint-text">Categories organise your menu. Removing a category won't delete products — they'll still appear under their original category.</p>
+          <CategoryForm categories={categories} onAdd={addCategory} onDelete={deleteCategory} />
+        </div>
+      )}
+
+      {/* ── Tab: Backup ── */}
+      {tab === 'backup' && (
+        <div className="bp-body">
+          {/* Export */}
+          <div className="bp-backup-card bp-backup-export">
+            <div className="bp-backup-card-icon"><Ic.Download /></div>
+            <div className="bp-backup-card-info">
+              <div className="bp-backup-card-title">Save Backup to Device</div>
+              <div className="bp-backup-card-desc">Downloads a <code>.json</code> file containing your business profile, full product catalogue, and category list. Keep it safe — you can restore everything from this file.</div>
+            </div>
+            <button className="bp-btn-primary" onClick={handleExport}>
+              <Ic.Download /> Download Backup
+            </button>
+          </div>
+
+          {/* Import */}
+          <div className="bp-backup-card bp-backup-import">
+            <div className="bp-backup-card-icon"><Ic.Upload /></div>
+            <div className="bp-backup-card-info">
+              <div className="bp-backup-card-title">Restore from Backup</div>
+              <div className="bp-backup-card-desc">Upload a previously downloaded <code>.json</code> backup file to restore your business data, products, and categories. This will overwrite your current data.</div>
+            </div>
+            <button className="bp-btn-outline" onClick={() => importRef.current?.click()}>
+              <Ic.Upload /> Restore Backup
+            </button>
+          </div>
+
+          {/* Warning */}
+          <div className="bp-backup-warning">
+            <span className="bp-backup-warning-icon"><Ic.AlertTri /></span>
+            <div>
+              <strong>When to use this</strong><br />
+              If you clear browser storage, reset the app, or switch to a new device, use your downloaded backup to restore all your data instantly.
+            </div>
+          </div>
+
+          {/* What's included */}
+          <div className="bp-backup-info-box">
+            <div className="bp-backup-info-title">📦 Backup includes</div>
+            <ul className="bp-backup-info-list">
+              <li>✅ Business name, type, contact & GSTIN</li>
+              <li>✅ Full product menu ({products.length} items)</li>
+              <li>✅ All categories ({categories.length} total)</li>
+              <li>❌ Orders & sales history (not stored yet)</li>
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

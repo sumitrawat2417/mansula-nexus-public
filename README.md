@@ -25,6 +25,17 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
+### v1.6.0-alpha — Persistent Data, Home UI & Business Setup
+*   **Feature: Home Hub** — A new premium Home screen with interactive tool cards. The app now boots to the Home screen instead of directly to the POS.
+*   **Feature: Business Profile Tool** — New tool to manage business name, logo, contact info, and tax/legal details. Includes a read-only profile view and an edit mode.
+*   **Feature: Dynamic Menu Management** — Add, edit, and delete products and categories directly from the Business Profile. Changes instantly sync to the POS.
+*   **Feature: Persistent Storage** — Implemented IndexedDB (`db.js`) to persistently store the business profile, products, and categories across sessions.
+*   **Feature: Backup & Restore** — Added an export/import feature to download your business data as a `.json` backup file and restore it on any device.
+*   **Feature: App Data Reset** — Added a "Reset App Data" option with a 2-step confirmation in the Home settings to wipe all local storage and IndexedDB data.
+*   **UI Polish: Seamless Navigation** — Cleaned up POS header; clicking the brand logo now intuitively navigates back to the Home Hub.
+
+---
+
 ### v1.5.16-alpha — Cash Calculator & Payment Screen Polish
 *   **Feature: Cash Note Calculator** — The cash payment screen now tracks the exact quantity of each currency note received (+₹500, +₹200, etc.) and automatically computes the total cash and required change.
 *   **UI: Payment Screen Layout** — Reordered the payment screen so the active UPI QR and amount are fixed to the top, making the screen scannable without scrolling.

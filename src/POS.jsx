@@ -1,27 +1,10 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import './App.css'
+import { dbGet } from './db.js'
+import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES } from './BusinessProfile.jsx'
 
-// ─────────────── DATA ───────────────
-const PRODUCTS = [
-  { id: 1, name: 'Espresso', category: 'Coffee', price: 120, emoji: '☕', badge: 'popular' },
-  { id: 2, name: 'Cappuccino', category: 'Coffee', price: 180, emoji: '☕' },
-  { id: 3, name: 'Latte', category: 'Coffee', price: 200, emoji: '🥛' },
-  { id: 4, name: 'Cold Brew', category: 'Coffee', price: 220, emoji: '🧊', badge: 'new' },
-  { id: 5, name: 'Green Tea', category: 'Tea', price: 100, emoji: '🍵' },
-  { id: 6, name: 'Chai Latte', category: 'Tea', price: 160, emoji: '🫖', badge: 'popular' },
-  { id: 7, name: 'Croissant', category: 'Bakery', price: 140, emoji: '🥐' },
-  { id: 8, name: 'Blueberry Muffin', category: 'Bakery', price: 130, emoji: '🧁', badge: 'new' },
-  { id: 9, name: 'Avocado Toast', category: 'Food', price: 380, emoji: '🥑', badge: 'popular' },
-  { id: 10, name: 'Club Sandwich', category: 'Food', price: 320, emoji: '🥪' },
-  { id: 11, name: 'Caesar Salad', category: 'Food', price: 280, emoji: '🥗' },
-  { id: 12, name: 'Orange Juice', category: 'Drinks', price: 120, emoji: '🍊' },
-  { id: 13, name: 'Mango Smoothie', category: 'Drinks', price: 180, emoji: '🥭', badge: 'new' },
-  { id: 14, name: 'Mineral Water', category: 'Drinks', price: 60, emoji: '💧' },
-  { id: 15, name: 'Chocolate Cake', category: 'Bakery', price: 200, emoji: '🎂', badge: 'popular' },
-  { id: 16, name: 'Cheesecake', category: 'Bakery', price: 220, emoji: '🍰' },
-]
+// ─────────────── DATA (loaded from IDB, fallback to defaults) ───────────────
 
-const CATEGORIES = ['All', 'Coffee', 'Tea', 'Food', 'Bakery', 'Drinks']
 
 const CURRENCIES = [
   { code: 'INR', symbol: '₹', rate: 1, decimals: 0 },
@@ -175,6 +158,7 @@ const I = {
   Clock: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
   Settings: ({ s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>,
   GridAuto: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /></svg>,
+  Home: ({ s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
   Logo: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>,
 }
 
@@ -425,8 +409,7 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
 }
 
 // ─────────────── SETTINGS DRAWER ───────────────
-function SettingsDrawer({ theme, onToggleTheme, cols, onCols, currency, onCurrency, taxRateObj, onTaxRate, onClose }) {
-  const [showDisclaimer, setShowDisclaimer] = useState(false)
+function SettingsDrawer({ cols, onCols, onExit, onClose }) {
   const gridOptions = [
     { key: 'auto', label: 'Auto', icon: <I.GridAuto s={18} /> },
     { key: '2', label: '2 cols', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="8" height="18" rx="1" /><rect x="13" y="3" width="8" height="18" rx="1" /></svg> },
@@ -445,22 +428,21 @@ function SettingsDrawer({ theme, onToggleTheme, cols, onCols, currency, onCurren
         </div>
 
         <div className="console-body">
-          {/* Appearance */}
-          <div className="setting-row">
-            <div>
-              <div className="setting-label">Appearance</div>
-              <div className="setting-desc">{theme === 'dark' ? 'Dark mode on' : 'Light mode on'}</div>
+          {/* Go Home */}
+          {onExit && (
+            <div className="setting-row" style={{ cursor: 'pointer', padding: '14px 16px', background: 'var(--brand-primary-light)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-primary)', marginBottom: 12 }} onClick={onExit}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ background: 'var(--brand-primary)', color: 'white', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <I.Home s={16} />
+                </div>
+                <div>
+                  <div className="setting-label" style={{ color: 'var(--brand-primary)' }}>Back to Home</div>
+                  <div className="setting-desc" style={{ color: 'var(--text-secondary)' }}>Exit POS &amp; return to dashboard</div>
+                </div>
+              </div>
+              <I.ChevRight s={18} color="var(--brand-primary)" />
             </div>
-            <button
-              id="theme-toggle-setting"
-              className={`toggle-switch ${theme === 'dark' ? 'on' : ''}`}
-              onClick={onToggleTheme}
-              role="switch"
-              aria-checked={theme === 'dark'}
-            >
-              <span className="toggle-knob">{theme === 'dark' ? <I.Moon s={11} /> : <I.Sun s={11} />}</span>
-            </button>
-          </div>
+          )}
 
           {/* Grid */}
           <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
@@ -483,47 +465,10 @@ function SettingsDrawer({ theme, onToggleTheme, cols, onCols, currency, onCurren
             </div>
           </div>
 
-          {/* Currency */}
-          <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
-            <div>
-              <div className="setting-label">Currency</div>
-              <div className="setting-desc">Select billing currency</div>
-            </div>
-            <select className="settings-select" value={currency.code} onChange={e => onCurrency(CURRENCIES.find(c => c.code === e.target.value))}>
-              {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} — {c.symbol}</option>)}
-            </select>
-          </div>
-
-          {/* Tax Rate */}
-          <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-              <div>
-                <div className="setting-label">Tax / GST Rate</div>
-                <div className="setting-desc">Applied at checkout</div>
-              </div>
-              <button className="disclaimer-link" onClick={() => setShowDisclaimer(d => !d)}>
-                ⚠️ Disclaimer
-              </button>
-            </div>
-            <select className="settings-select" value={taxRateObj.value} onChange={e => onTaxRate(TAX_RATES.find(t => t.value === parseFloat(e.target.value)))}>
-              {TAX_RATES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
-
-            {showDisclaimer && (
-              <div className="gst-disclaimer">
-                <p><strong>⚠️ GST Disclaimer</strong></p>
-                <p>The tax rate shown is manually configured by the operator. Mansula Nexus does not verify, validate, or guarantee the accuracy of the selected GST slab for any product or transaction.</p>
-                <p>Users are solely responsible for ensuring compliance with applicable GST laws. Mansula Nexus and its developers accept <strong>no liability</strong> for incorrect tax rates applied, tax filings, penalties, or disputes arising from the use of this software.</p>
-                <p>Please consult a qualified tax professional for your correct GST obligations.</p>
-                <button className="disclaimer-close" onClick={() => setShowDisclaimer(false)}>Got it</button>
-              </div>
-            )}
-          </div>
-
           {/* About */}
           <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'center', gap: 4, opacity: 0.5, paddingTop: 16, borderBottom: 'none', marginTop: 'auto' }}>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mansula Nexus v1.5.0-alpha</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>POS & Billing System</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mansula Nexus v1.6.0-alpha</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>POS &amp; Billing System</div>
           </div>
         </div>
       </div>
@@ -615,11 +560,21 @@ function CartItem({ item, onIncrease, onDecrease, currency }) {
 }
 
 // ─────────────── MAIN POS ───────────────
-export default function POS({ onExit }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem('mn-theme') || 'light')
+export default function POS({ onExit, currency, taxRateObj }) {
   const [cols, setCols] = useState(() => localStorage.getItem('mn-cols') || 'auto')
-  const [currency, setCurrency] = useState(() => { try { return JSON.parse(localStorage.getItem('mn-currency')) || CURRENCIES[0] } catch { return CURRENCIES[0] } })
-  const [taxRateObj, setTaxRateObj] = useState(() => { try { return JSON.parse(localStorage.getItem('mn-taxrate')) || TAX_RATES[1] } catch { return TAX_RATES[1] } })
+  const [products, setProducts] = useState(DEFAULT_PRODUCTS)
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
+
+  // Load products/categories from IDB on mount
+  useEffect(() => {
+    async function load() {
+      const [p, c] = await Promise.all([dbGet(KEY_PRODUCTS), dbGet(KEY_CATEGORIES)])
+      if (p && p.length > 0) setProducts(p)
+      if (c && c.length > 0) setCategories(c)
+    }
+    load()
+  }, [])
+
   const [activeCategory, setActiveCat] = useState('All')
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
@@ -650,10 +605,7 @@ export default function POS({ onExit }) {
   const cart = currentOrder?.items ?? []
 
   // Persist settings
-  useEffect(() => { document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('mn-theme', theme) }, [theme])
   useEffect(() => { localStorage.setItem('mn-cols', cols) }, [cols])
-  useEffect(() => { localStorage.setItem('mn-currency', JSON.stringify(currency)) }, [currency])
-  useEffect(() => { localStorage.setItem('mn-taxrate', JSON.stringify(taxRateObj)) }, [taxRateObj])
   useEffect(() => { if (searchOpen) setTimeout(() => searchRef.current?.focus(), 80) }, [searchOpen])
   useEffect(() => {
     if (!cartOpen) {
@@ -662,7 +614,7 @@ export default function POS({ onExit }) {
     }
   }, [cartOpen])
 
-  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
+  const toggleTheme = () => {}
 
   const [toast, setToast] = useState(null)
   const toastTimeout = useRef(null)
@@ -835,10 +787,10 @@ export default function POS({ onExit }) {
   }
 
   // ── Filter ──
-  const filtered = useMemo(() => PRODUCTS.filter(p =>
+  const filtered = useMemo(() => products.filter(p =>
     (activeCategory === 'All' || p.category === activeCategory) &&
     p.name.toLowerCase().includes(search.toLowerCase())
-  ), [activeCategory, search])
+  ), [activeCategory, search, products])
 
   const getQty = (id) => cart.find(i => i.id === id)?.qty ?? 0
   const closeSearch = () => { setSearch(''); setSearchOpen(false) }
@@ -862,7 +814,7 @@ export default function POS({ onExit }) {
 
       {/* Drawers & Modals */}
       {successOrder && <SuccessModal order={successOrder} onClose={() => setSuccessOrder(null)} currency={currency} taxRateObj={taxRateObj} />}
-      {menuOpen && <SettingsDrawer theme={theme} onToggleTheme={toggleTheme} cols={cols} onCols={setCols} currency={currency} onCurrency={setCurrency} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} onClose={() => setMenuOpen(false)} />}
+      {menuOpen && <SettingsDrawer cols={cols} onCols={setCols} onExit={onExit} onClose={() => setMenuOpen(false)} />}
       {ordersOpen && <OrderConsole orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onSuccess={handleCheckoutOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} currency={currency} taxRateObj={taxRateObj} watchdogMins={watchdogMins} onWatchdogMins={(v) => { setWatchdogMins(v); localStorage.setItem('mn-watchdog', v); }} />}
 
       {/* Search overlay */}
@@ -876,13 +828,7 @@ export default function POS({ onExit }) {
 
         {/* ── HEADER ── */}
         <header className="app-header">
-          {/* Back to Home */}
-          <div className="header-brand">
-            {onExit && (
-              <button className="pos-home-btn" onClick={onExit} aria-label="Back to home" title="Back to home">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-              </button>
-            )}
+          <div className="header-brand" onClick={onExit} style={{ cursor: onExit ? 'pointer' : 'default' }}>
             <div className="header-brand-icon"><I.Logo /></div>
             <span className="header-brand-name">ManSula <span>Nexus</span></span>
           </div>
@@ -911,7 +857,7 @@ export default function POS({ onExit }) {
           <main className="pos-panel">
             <div className="pos-toolbar">
               <div className="category-scroll">
-                {CATEGORIES.map(cat => (
+                {['All', ...categories].map(cat => (
                   <button key={cat} id={`cat-${cat.toLowerCase()}`} className={`chip ${activeCategory === cat ? 'active' : ''}`} onClick={() => setActiveCat(cat)} aria-pressed={activeCategory === cat}>
                     {cat}
                   </button>
