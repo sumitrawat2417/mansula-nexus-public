@@ -1110,27 +1110,29 @@ select {
   margin-right: -16px;
   padding-left: 16px;
   padding-right: 16px;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
 }
 
 .payment-chips-row::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
 }
 
 .payment-chip {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  justify-content: center;
+  gap: 4px;
   background: var(--bg-surface-2);
   border: 1.5px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 6px 10px;
-  flex: 0 0 auto;
-  min-width: 65px;
+  padding: 8px 4px;
+  /* exactly 4 chips visible: (100% container - 3 gaps of 8px - 32px side padding) / 4 */
+  flex: 0 0 calc(25% - 8px);
+  min-width: 0;
   scroll-snap-align: start;
   cursor: pointer;
   transition: all 0.15s;
@@ -1151,12 +1153,18 @@ select {
 .payment-chip-icon {
   font-size: 1rem;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .payment-chip-label {
-  font-size: 0.68rem;
+  font-size: 0.6rem;
   font-weight: 700;
   color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
 }
 
 .payment-chip.active .payment-chip-label {
