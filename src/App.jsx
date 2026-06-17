@@ -50,7 +50,7 @@ export default function App() {
   }
 
   if (screen === 'business') {
-    return <BusinessProfile onClose={() => setScreen('home')} />
+    return <BusinessProfile onClose={() => setScreen('home')} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} taxRates={TAX_RATES} />
   }
 
   return (
@@ -60,10 +60,7 @@ export default function App() {
       onToggleTheme={toggleTheme}
       currency={currency}
       onCurrency={setCurrency}
-      taxRateObj={taxRateObj}
-      onTaxRate={setTaxRateObj}
       currencies={CURRENCIES}
-      taxRates={TAX_RATES}
     />
   )
 }

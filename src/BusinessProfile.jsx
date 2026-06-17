@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { dbGet, dbSet } from './db.js'
 
+import { Html5Qrcode } from 'html5-qrcode'
+
 // ── Keys ──
 export const KEY_BUSINESS   = 'mn-business'
 export const KEY_PRODUCTS   = 'mn-products'
@@ -8,7 +10,7 @@ export const KEY_CATEGORIES = 'mn-categories'
 
 // ── Default data ──
 export const DEFAULT_BUSINESS = {
-  name: '', type: 'Café', tagline: '', phone: '', email: '', address: '', gstin: '', logo: '🏪',
+  name: '', type: 'Café', tagline: '', phone: '', email: '', address: '', gstin: '', upiId: '', logo: '🏪',
 }
 export const DEFAULT_CATEGORIES = ['Coffee', 'Tea', 'Food', 'Bakery', 'Drinks']
 export const DEFAULT_PRODUCTS = [
@@ -50,10 +52,89 @@ const Ic = {
   MapPin:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
   Receipt:  () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><path d="M16 8H8M16 12H8M12 16H8"/></svg>,
   AlertTri: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  QrCode:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="9" y="9" width="6" height="6"/></svg>,
 }
 
 const BUSINESS_TYPES = ['Café', 'Restaurant', 'Retail Shop', 'Grocery', 'Pharmacy', 'Bakery', 'Food Truck', 'Hotel', 'Other']
 const BADGE_OPTIONS  = [{ value: '', label: 'None' }, { value: 'popular', label: '🔥 Popular' }, { value: 'new', label: '✨ New' }]
+
+// ─── UPI SCANNER ───
+function UpiScanner({ onScan, onClose }) {
+  const scannerRef = useRef(null)
+  const fileRef = useRef(null)
+
+  const processScan = (decodedText, scanner) => {
+    try {
+      const url = new URL(decodedText)
+      if (url.protocol === 'upi:') {
+        const pa = url.searchParams.get('pa')
+        if (pa) {
+          if (scanner && scanner.isScanning) scanner.stop().then(() => onScan(pa)).catch(() => onScan(pa))
+          else onScan(pa)
+        }
+      }
+    } catch(e) {
+      if (decodedText.includes('@')) {
+        if (scanner && scanner.isScanning) scanner.stop().then(() => onScan(decodedText)).catch(() => onScan(decodedText))
+        else onScan(decodedText)
+      }
+    }
+  }
+
+  useEffect(() => {
+    const html5QrCode = new Html5Qrcode("reader")
+    scannerRef.current = html5QrCode
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      (text) => processScan(text, html5QrCode),
+      () => {}
+    ).catch(console.error)
+
+    return () => {
+      if (html5QrCode.isScanning) {
+        html5QrCode.stop().catch(() => {})
+      }
+      scannerRef.current = null
+    }
+  }, [onScan])
+
+  const handleFileUpload = async (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0]
+      if (!scannerRef.current) return
+      try {
+        const decodedText = await scannerRef.current.scanFile(file, true)
+        processScan(decodedText, scannerRef.current)
+      } catch (err) {
+        alert("Couldn't find a valid QR code in this image.")
+      }
+      e.target.value = ''
+    }
+  }
+
+  return (
+    <div className="bp-form-overlay" style={{ zIndex: 600 }}>
+      <div className="bp-form-sheet" style={{ alignItems: 'center', padding: '20px' }}>
+        <div className="bp-form-header" style={{ width: '100%', padding: '0 0 10px', borderBottom: 'none' }}>
+          <div className="bp-form-title">Scan UPI QR</div>
+          <button className="bp-icon-btn" onClick={onClose}><Ic.X /></button>
+        </div>
+        
+        <div id="reader" style={{ width: '100%', maxWidth: '300px', borderRadius: '12px', overflow: 'hidden' }}></div>
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 12, marginBottom: 16 }}>Point camera at any UPI QR code.</p>
+        
+        <div style={{ width: '100%', textAlign: 'center', borderTop: '1px solid var(--border-color)', paddingTop: 16 }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>Or upload an image</span>
+          <input type="file" ref={fileRef} accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
+          <button className="bp-btn-outline" onClick={() => fileRef.current?.click()} style={{ width: '100%' }}>
+            <Ic.Upload /> Upload QR Image
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // ─── PRODUCT FORM ───
 function ProductForm({ product, categories, onSave, onCancel }) {
@@ -67,10 +148,48 @@ function ProductForm({ product, categories, onSave, onCancel }) {
   })
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
+  // ── Variants state ──
+  const [variants, setVariants] = useState(product?.variants || [])
+  // newGroup form: { name, required, type }
+  const [newGroup, setNewGroup] = useState(null) // null = hidden, obj = visible
+  // newOption form per group: { [groupId]: { label, price } }
+  const [newOpts, setNewOpts] = useState({})
+  
+  // variantsMatrix: { 'o1|o2': price }
+  const [variantsMatrix, setVariantsMatrix] = useState(product?.variantsMatrix || {})
+
+  const addGroup = () => {
+    if (!newGroup?.name?.trim()) return
+    const g = { 
+      id: `g-${Date.now()}`, 
+      name: newGroup.name.trim(), 
+      required: newGroup.required ?? true, 
+      type: newGroup.type || 'price',
+      options: [] 
+    }
+    setVariants(vs => [...vs, g])
+    setNewGroup(null)
+  }
+
+  const removeGroup = (gid) => setVariants(vs => vs.filter(g => g.id !== gid))
+
+  const addOption = (gid) => {
+    const opt = newOpts[gid]
+    if (!opt?.label?.trim()) return
+    const o = { id: `o-${Date.now()}`, label: opt.label.trim(), price: parseFloat(opt.price) || 0 }
+    setVariants(vs => vs.map(g => g.id === gid ? { ...g, options: [...g.options, o] } : g))
+    setNewOpts(prev => ({ ...prev, [gid]: { label: '', price: '' } }))
+  }
+
+  const removeOption = (gid, oid) => setVariants(vs => vs.map(g => g.id === gid ? { ...g, options: g.options.filter(o => o.id !== oid) } : g))
+
   const handleSave = () => {
     if (!form.name.trim()) return
     const price = parseFloat(form.price)
-    if (isNaN(price) || price <= 0) return
+    // If they have a 'price' variant, the base price can be 0 or anything.
+    // We only enforce base price > 0 if there are NO variants that set the price.
+    const hasPriceVariant = variants.some(g => g.type === 'price')
+    if (isNaN(price) || (price <= 0 && !hasPriceVariant)) return
     onSave({
       ...(product || {}),
       id:       product?.id || Date.now(),
@@ -79,6 +198,8 @@ function ProductForm({ product, categories, onSave, onCancel }) {
       price,
       emoji:    form.emoji || '🍽️',
       badge:    form.badge || undefined,
+      variants: variants.length > 0 ? variants : undefined,
+      variantsMatrix: Object.keys(variantsMatrix).length > 0 ? variantsMatrix : undefined,
     })
   }
 
@@ -106,8 +227,9 @@ function ProductForm({ product, categories, onSave, onCancel }) {
             </select>
           </div>
           <div className="bp-field">
-            <label className="bp-label">Price (₹) *</label>
+            <label className="bp-label">Default Price (₹) *</label>
             <input className="bp-input" type="number" inputMode="decimal" value={form.price} onChange={e => set('price', e.target.value)} placeholder="0" min="0" />
+            <span className="bp-label" style={{ fontSize: '0.72rem', marginTop: 4, color: 'var(--text-muted)', display: 'block' }}>Used if no "Price" variants are added</span>
           </div>
           <div className="bp-field">
             <label className="bp-label">Badge</label>
@@ -117,10 +239,213 @@ function ProductForm({ product, categories, onSave, onCancel }) {
               ))}
             </div>
           </div>
+
+          {/* ── Variants ── */}
+          <div className="bp-section-label" style={{ marginTop: 8 }}>
+            Variants
+            <span className="bp-variant-hint">optional — for items with sizes, fillings, etc.</span>
+          </div>
+
+          {variants.map(g => (
+            <div key={g.id} className="bp-variant-group">
+              <div className="bp-variant-group-header">
+                <div className="bp-variant-group-name">
+                  {g.name}
+                  {g.required && <span className="bp-variant-req">Required</span>}
+                  <span className="bp-variant-hint" style={{marginLeft: 4}}>{g.type === 'price' ? 'Sets Item Price' : 'Adds to Price'}</span>
+                </div>
+                <button className="bp-icon-btn bp-icon-btn-danger" onClick={() => removeGroup(g.id)} title="Remove group"><Ic.Trash /></button>
+              </div>
+
+              <div className="bp-variant-options">
+                {g.options.map(o => {
+                  const val = o.price !== undefined ? o.price : (o.priceAdj || 0)
+                  return (
+                    <div key={o.id} className="bp-variant-opt-row">
+                      <span className="bp-variant-opt-label">{o.label}</span>
+                      {g.type !== 'price' && (
+                        <span className="bp-variant-opt-price">
+                          {val > 0 ? `+₹${val}` : val < 0 ? `-₹${Math.abs(val)}` : 'Free'}
+                        </span>
+                      )}
+                      <button className="bp-icon-btn bp-icon-btn-sm" onClick={() => removeOption(g.id, o.id)} title="Remove"><Ic.X /></button>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Add option row */}
+              <div className="bp-variant-add-opt">
+                <input
+                  className="bp-input bp-input-sm"
+                  placeholder="Option label (e.g. 200g)"
+                  value={newOpts[g.id]?.label || ''}
+                  style={{ flex: 1 }}
+                  onChange={e => setNewOpts(p => ({ ...p, [g.id]: { ...p[g.id], label: e.target.value } }))}
+                  onKeyDown={e => e.key === 'Enter' && addOption(g.id)}
+                />
+                {g.type !== 'price' && (
+                  <input
+                    className="bp-input bp-input-sm bp-input-price"
+                    placeholder="+₹ Extra"
+                    type="number"
+                    value={newOpts[g.id]?.price || ''}
+                    onChange={e => setNewOpts(p => ({ ...p, [g.id]: { ...p[g.id], price: e.target.value } }))}
+                    onKeyDown={e => e.key === 'Enter' && addOption(g.id)}
+                  />
+                )}
+                <button className="bp-btn-primary bp-btn-xs" onClick={() => addOption(g.id)}><Ic.Plus /></button>
+              </div>
+            </div>
+          ))}
+
+          {/* Add variant group */}
+          {newGroup ? (
+            <div className="bp-variant-new-group">
+              <input
+                className="bp-input"
+                placeholder="Group name (e.g. Size, Filling)"
+                value={newGroup.name || ''}
+                autoFocus
+                onChange={e => setNewGroup(g => ({ ...g, name: e.target.value }))}
+                onKeyDown={e => e.key === 'Enter' && addGroup()}
+              />
+              <div className="bp-variant-req-row" style={{ marginTop: 4 }}>
+                <select 
+                  className="bp-select" 
+                  style={{ fontSize: '0.85rem', padding: '8px 12px' }}
+                  value={newGroup.type} 
+                  onChange={e => setNewGroup(g => ({ ...g, type: e.target.value }))}
+                >
+                  <option value="price">This variant sets the Item Price (e.g. Size)</option>
+                  <option value="addon">This variant adds an Extra Charge (e.g. Toppings)</option>
+                </select>
+              </div>
+              <div className="bp-variant-req-row">
+                <label className="bp-variant-req-label">
+                  <input
+                    type="checkbox"
+                    checked={newGroup.required ?? true}
+                    onChange={e => setNewGroup(g => ({ ...g, required: e.target.checked }))}
+                    style={{ marginRight: 6 }}
+                  />
+                  Required (must select before adding to cart)
+                </label>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="bp-btn-ghost" style={{ flex: 1 }} onClick={() => setNewGroup(null)}>Cancel</button>
+                <button className="bp-btn-primary" style={{ flex: 2 }} onClick={addGroup} disabled={!newGroup?.name?.trim()}>
+                  <Ic.Check /> Add Group
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button className="bp-variant-add-group-btn" onClick={() => setNewGroup({ name: '', required: true, type: 'price' })}>
+              <Ic.Plus /> Add Variant Group
+            </button>
+          )}
+
+          {/* ── Matrix Pricing Table ── */}
+          {(() => {
+            const priceGroups = variants.filter(g => g.type === 'price' && g.options.length > 0)
+            if (priceGroups.length === 0) return null
+
+            let combos = []
+            combos = priceGroups.reduce((acc, group) => {
+              const opts = group.options
+              if (acc.length === 0) return opts.map(o => [o])
+              const newAcc = []
+              acc.forEach(combo => {
+                opts.forEach(o => {
+                  newAcc.push([...combo, o])
+                })
+              })
+              return newAcc
+            }, [])
+
+            return (
+              <div className="bp-matrix-container">
+                <div className="bp-section-label" style={{ marginTop: 24, marginBottom: 8 }}>Price Matrix</div>
+                <div className="bp-matrix-table-wrap">
+                  {priceGroups.length === 2 ? (
+                    <table className="bp-matrix-table">
+                      <thead>
+                        <tr>
+                          <th>{priceGroups[0].name} \ {priceGroups[1].name}</th>
+                          {priceGroups[1].options.map(c => <th key={c.id}>{c.label}</th>)}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {priceGroups[0].options.map(r => (
+                          <tr key={r.id}>
+                            <td><strong>{r.label}</strong></td>
+                            {priceGroups[1].options.map(c => {
+                              const key = `${r.id}|${c.id}`
+                              // Fallback support for old data where price was on the option itself
+                              let fallbackPrice = ''
+                              if (!variantsMatrix[key]) {
+                                fallbackPrice = r.price !== undefined ? r.price : (c.price !== undefined ? c.price : '')
+                              }
+                              return (
+                                <td key={c.id}>
+                                  <div className="bp-matrix-input-wrap">
+                                    <span>₹</span>
+                                    <input 
+                                      type="number" 
+                                      value={variantsMatrix[key] !== undefined ? variantsMatrix[key] : fallbackPrice} 
+                                      onChange={e => setVariantsMatrix(m => ({ ...m, [key]: parseFloat(e.target.value) || '' }))} 
+                                    />
+                                  </div>
+                                </td>
+                              )
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <table className="bp-matrix-table">
+                      <thead>
+                        <tr>
+                          <th>Combination</th>
+                          <th>Price</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {combos.map(combo => {
+                          const key = combo.map(c => c.id).join('|')
+                          let fallbackPrice = ''
+                          if (!variantsMatrix[key]) {
+                             fallbackPrice = combo[0].price !== undefined ? combo[0].price : ''
+                          }
+                          return (
+                            <tr key={key}>
+                              <td>{combo.map(c => c.label).join(' · ')}</td>
+                              <td>
+                                <div className="bp-matrix-input-wrap">
+                                  <span>₹</span>
+                                  <input 
+                                    type="number" 
+                                    value={variantsMatrix[key] !== undefined ? variantsMatrix[key] : fallbackPrice} 
+                                    onChange={e => setVariantsMatrix(m => ({ ...m, [key]: parseFloat(e.target.value) || '' }))} 
+                                  />
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
+
         </div>
         <div className="bp-form-footer">
           <button className="bp-btn-ghost" onClick={onCancel}>Cancel</button>
-          <button className="bp-btn-primary" onClick={handleSave} disabled={!form.name.trim() || !form.price}>
+          <button className="bp-btn-primary" onClick={handleSave} disabled={!form.name.trim() || isNaN(parseFloat(form.price))}>
             <Ic.Check /> {isNew ? 'Add Product' : 'Save Changes'}
           </button>
         </div>
@@ -157,7 +482,7 @@ function CategoryForm({ categories, onAdd, onDelete }) {
 }
 
 // ─── PROFILE VIEW (read-only) ───
-function ProfileView({ business, onEdit }) {
+function ProfileView({ business, taxRateObj, onEdit }) {
   const hasData = business.name || business.phone || business.email
 
   if (!hasData) {
@@ -200,10 +525,12 @@ function ProfileView({ business, onEdit }) {
         <InfoRow icon={Ic.MapPin} label="Address" value={business.address} />
       </div>
 
-      {(business.gstin) && (
+      {(business.gstin || business.upiId || taxRateObj) && (
         <div className="bp-info-card">
-          <div className="bp-info-card-title">Tax & Legal</div>
+          <div className="bp-info-card-title">Tax & Legal / Payments</div>
           <InfoRow icon={Ic.Receipt} label="GSTIN" value={business.gstin} />
+          <InfoRow icon={Ic.QrCode} label="UPI ID" value={business.upiId} />
+          {taxRateObj && <InfoRow icon={Ic.Tag} label="Tax Rate" value={taxRateObj.label} />}
         </div>
       )}
     </div>
@@ -211,7 +538,7 @@ function ProfileView({ business, onEdit }) {
 }
 
 // ─── MAIN COMPONENT ───
-export default function BusinessProfile({ onClose }) {
+export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRates }) {
   const [tab, setTab]           = useState('info')
   const [infoMode, setInfoMode] = useState('view')   // 'view' | 'edit'
   const [business, setBusiness] = useState(DEFAULT_BUSINESS)
@@ -223,6 +550,7 @@ export default function BusinessProfile({ onClose }) {
   const [searchQ, setSearchQ]   = useState('')
   const [filterCat, setFilterCat] = useState('All')
   const [importStatus, setImportStatus] = useState(null) // null | 'ok' | 'err'
+  const [showScanner, setShowScanner] = useState(false)
   const importRef = useRef(null)
 
   // Load from IDB
@@ -319,6 +647,16 @@ export default function BusinessProfile({ onClose }) {
 
   return (
     <div className="bp-root">
+      {showScanner && (
+        <UpiScanner 
+          onClose={() => setShowScanner(false)} 
+          onScan={(id) => { 
+            setBusiness(b => ({ ...b, upiId: id }))
+            setShowScanner(false)
+          }} 
+        />
+      )}
+
       {/* Hidden file input for import */}
       <input ref={importRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
 
@@ -362,7 +700,7 @@ export default function BusinessProfile({ onClose }) {
       {tab === 'info' && (
         <div className="bp-body">
           {infoMode === 'view' ? (
-            <ProfileView business={business} onEdit={() => setInfoMode('edit')} />
+            <ProfileView business={business} taxRateObj={taxRateObj} onEdit={() => setInfoMode('edit')} />
           ) : (
             <>
               {/* Edit form */}
@@ -402,10 +740,25 @@ export default function BusinessProfile({ onClose }) {
                 <textarea className="bp-input bp-textarea" value={business.address} onChange={e => setBusiness(b => ({ ...b, address: e.target.value }))} placeholder="Shop No., Street, City, State — PIN" rows={2} />
               </div>
 
-              <div className="bp-section-label">Tax &amp; Legal</div>
+              <div className="bp-section-label">Tax &amp; Legal / Payments</div>
+              <div className="bp-field">
+                <label className="bp-label">Tax / GST Rate (applied at checkout)</label>
+                <select className="bp-input" value={taxRateObj.value} onChange={e => onTaxRate(taxRates.find(t => t.value === parseFloat(e.target.value)))}>
+                  {taxRates.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </div>
               <div className="bp-field">
                 <label className="bp-label">GSTIN</label>
                 <input className="bp-input" value={business.gstin} onChange={e => setBusiness(b => ({ ...b, gstin: e.target.value.toUpperCase() }))} placeholder="22AAAAA0000A1Z5" maxLength={15} style={{ fontFamily: 'monospace', letterSpacing: '0.06em' }} />
+              </div>
+              <div className="bp-field">
+                <label className="bp-label">UPI ID</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input className="bp-input" style={{ flex: 1 }} value={business.upiId} onChange={e => setBusiness(b => ({ ...b, upiId: e.target.value }))} placeholder="e.g. 9876543210@ybl" />
+                  <button className="bp-btn-outline" style={{ padding: '0 14px' }} onClick={() => setShowScanner(true)}>
+                    <Ic.QrCode /> Scan
+                  </button>
+                </div>
               </div>
 
               <div className="bp-edit-actions">
@@ -449,8 +802,11 @@ export default function BusinessProfile({ onClose }) {
                   <div className="bp-product-name">
                     {prod.name}
                     {prod.badge && <span className={`bp-badge bp-badge-${prod.badge}`}>{prod.badge}</span>}
+                    {prod.variants?.length > 0 && <span className="bp-badge variant-badge" style={{marginLeft: 6}}>Variants</span>}
                   </div>
-                  <div className="bp-product-meta">{prod.category} · ₹{prod.price}</div>
+                  <div className="bp-product-meta">
+                    {prod.category} · {prod.variants?.length > 0 ? `from ₹${prod.price}` : `₹${prod.price}`}
+                  </div>
                 </div>
                 <div className="bp-product-actions">
                   <button className="bp-icon-btn" onClick={() => setEditProduct(prod)} title="Edit"><Ic.Edit /></button>

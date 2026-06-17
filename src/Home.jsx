@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { dbClearAll } from './db.js'
+import { dbClearAll, dbGet } from './db.js'
 
 // ── Greeting ──
 function getGreeting() {
@@ -39,8 +39,7 @@ const TOOLS = [
 ]
 
 // ── Home Settings Modal ──
-function HomeSettings({ theme, onToggleTheme, currency, onCurrency, taxRateObj, onTaxRate, currencies, taxRates, onClose }) {
-  const [showDisclaimer, setShowDisclaimer] = useState(false)
+function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, onClose }) {
   const [resetStep, setResetStep] = useState(0) // 0=idle 1=confirm 2=done
 
   const handleReset = async () => {
@@ -98,32 +97,6 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, taxRateObj, 
             </select>
           </div>
 
-          {/* Tax Rate */}
-          <div className="hn-srow" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-              <div className="hn-srow-info">
-                <div className="hn-srow-label">Tax / GST Rate</div>
-                <div className="hn-srow-desc">Applied at checkout</div>
-              </div>
-              <button className="hn-disclaimer-link" onClick={() => setShowDisclaimer(d => !d)}>⚠️ Disclaimer</button>
-            </div>
-            <select
-              className="hn-sselect"
-              value={taxRateObj.value}
-              onChange={e => onTaxRate(taxRates.find(t => t.value === parseFloat(e.target.value)))}
-            >
-              {taxRates.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
-            {showDisclaimer && (
-              <div className="hn-disclaimer-box">
-                <strong>⚠️ GST Disclaimer</strong>
-                <p>The tax rate is manually configured by the operator. Mansula Nexus does not verify, validate, or guarantee accuracy of the selected GST slab.</p>
-                <p>Users are solely responsible for GST compliance. Mansula Nexus accepts <strong>no liability</strong> for incorrect tax rates, filings, or penalties.</p>
-                <button className="hn-disclaimer-close" onClick={() => setShowDisclaimer(false)}>Got it</button>
-              </div>
-            )}
-          </div>
-
           {/* Reset */}
           <div className="hn-srow hn-srow-reset">
             <div className="hn-srow-info">
@@ -163,12 +136,16 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, taxRateObj, 
   )
 }
 
-export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurrency, taxRateObj, onTaxRate, currencies, taxRates }) {
+export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurrency, currencies }) {
   const [time, setTime] = useState(new Date())
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [businessName, setBusinessName] = useState('')
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 60000)
+    dbGet('mn-business').then(b => {
+      if (b && b.name) setBusinessName(b.name)
+    })
     return () => clearInterval(t)
   }, [])
 
@@ -184,10 +161,7 @@ export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurre
           onToggleTheme={onToggleTheme}
           currency={currency}
           onCurrency={onCurrency}
-          taxRateObj={taxRateObj}
-          onTaxRate={onTaxRate}
           currencies={currencies}
-          taxRates={taxRates}
           onClose={() => setSettingsOpen(false)}
         />
       )}
@@ -219,7 +193,7 @@ export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurre
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             {timeStr} · {dateStr}
           </div>
-          <h1 className="hn-greeting">{greeting}, Mansu</h1>
+          <h1 className="hn-greeting">{greeting}{businessName ? `, ${businessName}` : ''}</h1>
           <p className="hn-tagline">Your business hub is ready</p>
         </div>
       </div>

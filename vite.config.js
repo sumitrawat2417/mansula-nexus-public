@@ -5,4 +5,17 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: './',
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('html5-qrcode')) return 'vendor-scanner';
+            return 'vendor';
+          }
+        }
+      }
+    }
+  }
 })

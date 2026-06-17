@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import './App.css'
 import { dbGet } from './db.js'
-import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES } from './BusinessProfile.jsx'
+import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES, KEY_BUSINESS, DEFAULT_BUSINESS } from './BusinessProfile.jsx'
 
 // ─────────────── DATA (loaded from IDB, fallback to defaults) ───────────────
 
@@ -192,8 +192,11 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
 
         <div className="success-details" style={{ textAlign: 'center' }}>
           {visibleItems.map(item => (
-            <div key={item.id} className="success-item-row" style={{ textAlign: 'left' }}>
-              <span>{item.qty}× {item.name}</span>
+            <div key={item.id} className="success-item-row" style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between' }}>
+              <div>
+                <span>{item.qty}× {item.name}</span>
+                {item.variantLabel && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '1.2rem', marginTop: 2 }}>{item.variantLabel}</div>}
+              </div>
               <span>{fmt(item.price * item.qty, currency)}</span>
             </div>
           ))}
@@ -246,7 +249,10 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
               <div key={item.id} className="detail-item-row-inline">
                 <span className="detail-item-emoji-inline">{item.emoji}</span>
                 <div className="detail-item-info-inline">
-                  <div className="detail-item-name-inline">{item.name}</div>
+                  <div className="detail-item-name-inline">
+                    {item.name}
+                    {item.variantLabel && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: 6, fontWeight: 500 }}>({item.variantLabel})</span>}
+                  </div>
                   <div className="detail-item-unit-inline">{fmt(item.price, currency)} × {item.qty}</div>
                 </div>
                 <div className="detail-item-total-inline">{fmt(item.price * item.qty, currency)}</div>
@@ -476,13 +482,131 @@ function SettingsDrawer({ cols, onCols, onExit, onClose }) {
   )
 }
 
+// ─────────────── PRODUCT CARD ───────────────// ─────────────── VARIANT MODAL ───────────────
+function VariantModal({ product, currency, onConfirm, onClose }) {
+  // selections[groupId] = optionId
+  const [selections, setSelections] = useState({})
+
+  const allRequired = (product.variants || []).filter(g => g.required).every(g => selections[g.id])
+
+  let base = product.price
+  const priceGroups = (product.variants || []).filter(g => g.type === 'price')
+  
+  if (priceGroups.length > 0) {
+    const matrixKey = priceGroups.map(g => selections[g.id] || '').join('|')
+    if (product.variantsMatrix && product.variantsMatrix[matrixKey] !== undefined) {
+      base = product.variantsMatrix[matrixKey]
+    } else if (priceGroups.length === 1) {
+      // fallback for old data or incomplete selection
+      const sel = priceGroups[0].options.find(o => o.id === selections[priceGroups[0].id])
+      if (sel) base = sel.price !== undefined ? sel.price : (sel.priceAdj || 0)
+    }
+  }
+
+  const resolvedPrice = (product.variants || []).reduce((sum, g) => {
+    if (g.type === 'price') return sum // already handled as base via matrix
+    const sel = g.options.find(o => o.id === selections[g.id])
+    if (!sel) return sum
+    const val = sel.price !== undefined ? sel.price : (sel.priceAdj || 0)
+    return sum + val
+  }, base)
+
+  const variantKey = (product.variants || []).map(g => selections[g.id] || '').join('|')
+  const variantLabel = (product.variants || []).map(g => {
+    const sel = g.options.find(o => o.id === selections[g.id])
+    return sel ? sel.label : ''
+  }).filter(Boolean).join(' · ')
+
+  const handleAdd = () => {
+    if (!allRequired) return
+    onConfirm({
+      ...product,
+      unitPrice: resolvedPrice,
+      price: resolvedPrice,
+      variantKey,
+      variantLabel,
+    })
+  }
+
+  return (
+    <div className="var-overlay" onClick={onClose}>
+      <div className="var-sheet" onClick={e => e.stopPropagation()}>
+        <div className="var-handle" />
+        <div className="var-header">
+          <div className="var-emoji">{product.emoji}</div>
+          <div className="var-info">
+            <div className="var-name">{product.name}</div>
+            <div className="var-base-price">from {fmt(product.price, currency)}</div>
+          </div>
+          <button className="var-close" onClick={onClose}><I.X /></button>
+        </div>
+
+        <div className="var-body">
+          {(product.variants || []).map(g => (
+            <div key={g.id} className="var-group">
+              <div className="var-group-label">
+                {g.name}
+                {g.required && <span className="var-req-badge">Required</span>}
+              </div>
+              <div className="var-opts">
+                {g.options.map(o => {
+                  let val = o.price !== undefined ? o.price : (o.priceAdj || 0)
+                  let showPrice = false
+                  
+                  if (g.type === 'price') {
+                    if (priceGroups.length === 1) {
+                      // If there's only 1 price group, we can show its explicit price
+                      if (product.variantsMatrix && product.variantsMatrix[o.id] !== undefined) {
+                        val = product.variantsMatrix[o.id]
+                      }
+                      showPrice = true
+                    }
+                    // If > 1 price group, we don't show individual prices because it's a matrix combination
+                  }
+
+                  return (
+                    <button
+                      key={o.id}
+                      className={`var-opt ${selections[g.id] === o.id ? 'selected' : ''}`}
+                      onClick={() => setSelections(s => ({ ...s, [g.id]: o.id }))}
+                    >
+                      <span className="var-opt-label">{o.label}</span>
+                      {g.type === 'price' ? (
+                        showPrice && <span className="var-opt-adj">{fmt(val, currency)}</span>
+                      ) : (
+                        val !== 0 && (
+                          <span className="var-opt-adj">{val > 0 ? `+${fmt(val, currency)}` : `-${fmt(Math.abs(val), currency)}`}</span>
+                        )
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="var-footer">
+          <div className="var-total">
+            <span className="var-total-label">Total</span>
+            <span className="var-total-price">{fmt(resolvedPrice, currency)}</span>
+          </div>
+          <button className="var-add-btn" onClick={handleAdd} disabled={!allRequired}>
+            Add to Cart
+            {!allRequired && <span className="var-add-hint"> — select all required options</span>}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─────────────── PRODUCT CARD ───────────────
 function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
   const inCart = qty > 0
+  const hasVariants = product.variants && product.variants.length > 0
 
-  const handleAdd = () => {
-    onAdd(product)
-  }
+  const handleAdd = () => onAdd(product)
 
   return (
     <div
@@ -502,6 +626,9 @@ function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
           <span className={`product-badge ${product.badge}`} aria-label={product.badge}>
             {product.badge === 'popular' ? 'Popular' : 'New'}
           </span>
+        )}
+        {hasVariants && (
+          <span className="product-badge variant-badge" title="Has variants">Options</span>
         )}
 
         {/* Overlay controls — only shown when qty > 0 */}
@@ -531,7 +658,9 @@ function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
       {/* ── INFO ── */}
       <div className="product-info">
         <div className="product-name">{product.name}</div>
-        <div className="product-price">{fmt(product.price, currency)}</div>
+        <div className="product-price">
+          {hasVariants ? `from ${fmt(product.price, currency)}` : fmt(product.price, currency)}
+        </div>
       </div>
     </div>
   )
@@ -544,14 +673,15 @@ function CartItem({ item, onIncrease, onDecrease, currency }) {
       <div className="cart-item-emoji">{item.emoji}</div>
       <div className="cart-item-details">
         <div className="cart-item-name" title={item.name}>{item.name}</div>
+        {item.variantLabel && <div className="cart-item-variant">{item.variantLabel}</div>}
         <div className="cart-item-price">{fmt(item.price * item.qty, currency)}</div>
       </div>
       <div className="cart-item-controls">
-        <button className="qty-btn" onClick={() => onDecrease(item.id)} aria-label="Decrease">
+        <button className="qty-btn" onClick={() => onDecrease(item.variantKey ? `${item.id}|${item.variantKey}` : item.id)} aria-label="Decrease">
           {item.qty === 1 ? <I.Trash /> : <I.Minus />}
         </button>
         <span className="qty-value">{item.qty}</span>
-        <button className="qty-btn" onClick={() => onIncrease(item.id)} aria-label="Increase">
+        <button className="qty-btn" onClick={() => onIncrease(item.variantKey ? `${item.id}|${item.variantKey}` : item.id)} aria-label="Increase">
           <I.Plus />
         </button>
       </div>
@@ -564,13 +694,15 @@ export default function POS({ onExit, currency, taxRateObj }) {
   const [cols, setCols] = useState(() => localStorage.getItem('mn-cols') || 'auto')
   const [products, setProducts] = useState(DEFAULT_PRODUCTS)
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
+  const [business, setBusiness] = useState(DEFAULT_BUSINESS)
 
-  // Load products/categories from IDB on mount
+  // Load products/categories/business from IDB on mount
   useEffect(() => {
     async function load() {
-      const [p, c] = await Promise.all([dbGet(KEY_PRODUCTS), dbGet(KEY_CATEGORIES)])
+      const [p, c, b] = await Promise.all([dbGet(KEY_PRODUCTS), dbGet(KEY_CATEGORIES), dbGet(KEY_BUSINESS)])
       if (p && p.length > 0) setProducts(p)
       if (c && c.length > 0) setCategories(c)
+      if (b) setBusiness({ ...DEFAULT_BUSINESS, ...b })
     }
     load()
   }, [])
@@ -578,6 +710,7 @@ export default function POS({ onExit, currency, taxRateObj }) {
   const [activeCategory, setActiveCat] = useState('All')
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
+  const [variantProduct, setVariantProduct] = useState(null)
   const [cartOpen, setCartOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [ordersOpen, setOrdersOpen] = useState(false)
@@ -699,22 +832,32 @@ export default function POS({ onExit, currency, taxRateObj }) {
 
   // ── Cart mutations ──
   const addToCart = (product) => {
+    // If product has variants, open selection modal instead
+    if (product.variants && product.variants.length > 0 && !product.variantKey) {
+      setVariantProduct(product)
+      return
+    }
     playSound('add')
+    const cartKey = product.variantKey ? `${product.id}|${product.variantKey}` : product.id
     setCartItems(prev => {
-      const ex = prev.find(i => i.id === product.id)
-      if (ex) return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i)
+      const ex = prev.find(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) === cartKey)
+      if (ex) return prev.map(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) === cartKey ? { ...i, qty: i.qty + 1 } : i)
       return [...prev, { ...product, qty: 1 }]
     })
   }
 
-  const increaseQty = (id) => { playSound('add'); setCartItems(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i)) }
-  const decreaseQty = (id) => {
+  const increaseQty = (cartKey) => {
+    playSound('add')
+    setCartItems(prev => prev.map(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) === cartKey ? { ...i, qty: i.qty + 1 } : i))
+  }
+
+  const decreaseQty = (cartKey) => {
     playSound('remove')
     setCartItems(prev => {
-      const item = prev.find(i => i.id === id)
+      const item = prev.find(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) === cartKey)
       if (!item) return prev
-      if (item.qty === 1) return prev.filter(i => i.id !== id)
-      return prev.map(i => i.id === id ? { ...i, qty: i.qty - 1 } : i)
+      if (item.qty === 1) return prev.filter(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) !== cartKey)
+      return prev.map(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) === cartKey ? { ...i, qty: i.qty - 1 } : i)
     })
   }
   const clearCart = () => { setCartItems([]); setCartStep('cart') }
@@ -792,7 +935,8 @@ export default function POS({ onExit, currency, taxRateObj }) {
     p.name.toLowerCase().includes(search.toLowerCase())
   ), [activeCategory, search, products])
 
-  const getQty = (id) => cart.find(i => i.id === id)?.qty ?? 0
+  // For variant products: sum qty across ALL variant combos of that product
+  const getQty = (id) => cart.filter(i => i.id === id).reduce((s, i) => s + i.qty, 0)
   const closeSearch = () => { setSearch(''); setSearchOpen(false) }
   const activeOrders = orders.filter(o => o.status === 'active')
 
@@ -816,6 +960,17 @@ export default function POS({ onExit, currency, taxRateObj }) {
       {successOrder && <SuccessModal order={successOrder} onClose={() => setSuccessOrder(null)} currency={currency} taxRateObj={taxRateObj} />}
       {menuOpen && <SettingsDrawer cols={cols} onCols={setCols} onExit={onExit} onClose={() => setMenuOpen(false)} />}
       {ordersOpen && <OrderConsole orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onSuccess={handleCheckoutOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} currency={currency} taxRateObj={taxRateObj} watchdogMins={watchdogMins} onWatchdogMins={(v) => { setWatchdogMins(v); localStorage.setItem('mn-watchdog', v); }} />}
+      {variantProduct && (
+        <VariantModal
+          product={variantProduct}
+          currency={currency}
+          onClose={() => setVariantProduct(null)}
+          onConfirm={(resolved) => {
+            setVariantProduct(null)
+            addToCart(resolved)
+          }}
+        />
+      )}
 
       {/* Search overlay */}
       <div className={`search-overlay ${searchOpen ? 'open' : ''}`} role="search">
@@ -1031,22 +1186,28 @@ export default function POS({ onExit, currency, taxRateObj }) {
                       {paymentMode === 'upi' && (
                         <div className="upi-qr-section">
                           <div className="upi-qr-label">Scan &amp; Pay</div>
-                          <div className="upi-qr-wrap">
-                            <img
-                              src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=Q860348001@ybl&pn=${encodeURIComponent('ManSula Foods')}&am=${total}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`)}`}
-                              alt="UPI QR Code"
-                              className="upi-qr-img"
-                              width={180} height={180}
-                            />
-                            {/* UPI logo overlay */}
-                            <div className="upi-qr-logo">
-                              <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
-                            </div>
-                          </div>
-                          <div className="upi-qr-meta">
-                            <span className="upi-qr-id">Q860348001@ybl</span>
-                            <span className="upi-qr-amount">Total: {fmt(total, currency)}</span>
-                          </div>
+                          {business.upiId ? (
+                            <>
+                              <div className="upi-qr-wrap">
+                                <img
+                                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'Mansula Nexus')}&am=${total}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`)}`}
+                                  alt="UPI QR Code"
+                                  className="upi-qr-img"
+                                  width={180} height={180}
+                                />
+                                {/* UPI logo overlay */}
+                                <div className="upi-qr-logo">
+                                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
+                                </div>
+                              </div>
+                              <div className="upi-qr-meta">
+                                <span className="upi-qr-id">{business.upiId}</span>
+                                <span className="upi-qr-amount">Total: {fmt(total, currency)}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>UPI ID not configured in Business Profile</div>
+                          )}
                         </div>
                       )}
 
@@ -1122,17 +1283,24 @@ export default function POS({ onExit, currency, taxRateObj }) {
                           {splitCash < total ? (
                             <div className="upi-qr-section" style={{ marginTop: 2, padding: '4px 0 0' }}>
                               <div className="upi-qr-label" style={{ color: 'var(--brand-accent)', fontSize: '0.75rem', marginBottom: 4 }}>Remaining via UPI: {fmt(total - splitCash, currency)}</div>
-                              <div className="upi-qr-wrap" style={{ margin: '0 auto', boxShadow: 'none', border: '1px solid var(--border-color)', padding: 4 }}>
-                                <img
-                                  src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=Q860348001@ybl&pn=${encodeURIComponent('ManSula Foods')}&am=${total - splitCash}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`)}`}
-                                  alt="UPI QR Code"
-                                  className="upi-qr-img"
-                                  width={170} height={170}
-                                />
-                                <div className="upi-qr-logo">
-                                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
-                                </div>
-                              </div>
+                              {business.upiId ? (
+                                <>
+                                  <div className="upi-qr-wrap" style={{ margin: '0 auto', boxShadow: 'none', border: '1px solid var(--border-color)', padding: 4 }}>
+                                    <img
+                                      src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'Mansula Nexus')}&am=${total - splitCash}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`)}`}
+                                      alt="UPI QR Code"
+                                      className="upi-qr-img"
+                                      width={170} height={170}
+                                    />
+                                    <div className="upi-qr-logo">
+                                      <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
+                                    </div>
+                                  </div>
+                                  <div style={{ textAlign: 'center', marginTop: 4, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>{business.upiId}</div>
+                                </>
+                              ) : (
+                                <div style={{ padding: '10px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>UPI ID not configured</div>
+                              )}
                             </div>
                           ) : (
                             <div className="cash-calc-result" style={{ marginTop: 4 }}>
