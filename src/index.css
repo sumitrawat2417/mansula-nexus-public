@@ -705,10 +705,6 @@ select {
   transition: background 0.3s, border-color 0.3s;
 }
 
-.cart-drag-handle {
-  display: none;
-}
-
 .cart-header {
   padding: 12px 14px;
   border-bottom: 1px solid var(--border-color);
@@ -751,6 +747,10 @@ select {
 .cart-clear-btn:hover {
   background: rgba(239, 68, 68, 0.08);
   border-color: var(--brand-danger);
+}
+
+.mobile-close-btn {
+  display: none;
 }
 
 .cart-items {
@@ -2286,43 +2286,6 @@ select {
     transform: translateY(0);
   }
 
-  .cart-drag-handle {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    margin: 12px 0 0;
-    cursor: pointer;
-    touch-action: none;
-    color: var(--text-muted);
-    gap: 4px;
-  }
-
-  .cart-drag-pill {
-    width: 48px;
-    height: 5px;
-    background: var(--border-color);
-    border-radius: 4px;
-    transition: background 0.2s;
-  }
-
-  .cart-drag-handle:hover .cart-drag-pill,
-  .cart-drag-handle:active .cart-drag-pill {
-    background: var(--text-muted);
-  }
-
-  .cart-drag-handle svg {
-    opacity: 0.7;
-    transition: opacity 0.2s;
-  }
-
-  .cart-drag-handle:hover svg,
-  .cart-drag-handle:active svg {
-    opacity: 1;
-    color: var(--text-primary);
-  }
-
   .mobile-cart-fab {
     display: flex;
   }
@@ -2337,6 +2300,22 @@ select {
 
   .grid-cols-auto {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+
+  .mobile-close-btn {
+    display: flex;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 4px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .mobile-close-btn:active {
+    background: var(--bg-surface-2);
   }
 
   .product-img-wrap {

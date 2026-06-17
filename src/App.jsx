@@ -640,7 +640,6 @@ export default function App() {
   const [splitCash, setSplitCash] = useState(0)
   const [chipPage, setChipPage] = useState(0)
   const touchStartX = useRef(null)
-  const cartHandleTouchStart = useRef(null)
   const totalCashReceived = Object.entries(cashNotes).reduce((sum, [amt, count]) => sum + (Number(amt) * count), 0)
   const searchRef = useRef(null)
 
@@ -930,33 +929,33 @@ export default function App() {
           </main>
 
           {/* ── CART ── */}
+          <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true" />
           <aside className={`cart-panel ${cartOpen ? 'open' : ''}`} aria-label="Current order">
             <div 
-              className="cart-drag-handle" 
-              onClick={() => setCartOpen(false)}
-              onTouchStart={e => { cartHandleTouchStart.current = e.touches[0].clientY; }}
-              onTouchMove={e => {
-                if (cartHandleTouchStart.current && (e.touches[0].clientY - cartHandleTouchStart.current) > 40) {
-                  setCartOpen(false);
-                  cartHandleTouchStart.current = null;
-                }
+              onTouchStart={e => { window._cartTouchY = e.touches[0].clientY }}
+              onTouchEnd={e => {
+                if (window._cartTouchY == null) return;
+                const dy = e.changedTouches[0].clientY - window._cartTouchY;
+                if (dy > 40) setCartOpen(false);
+                window._cartTouchY = null;
               }}
-              onTouchEnd={() => { cartHandleTouchStart.current = null; }}
             >
-              <div className="cart-drag-pill" />
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </div>
-            {cartStep === 'cart' && (
-              <div className="cart-header">
-                <div className="cart-title">
-                  <I.Cart s={17} /> {formatOrderId(currentOrderId)}
-                  {totalItems > 0 && <span className="cart-count-badge">{totalItems}</span>}
+              <div className="drawer-handle" onClick={() => setCartOpen(false)} style={{ display: window.innerWidth <= 768 ? 'block' : 'none', cursor: 'pointer', marginBottom: '8px' }} />
+              {cartStep === 'cart' && (
+                <div className="cart-header">
+                  <div className="cart-title">
+                    <I.Cart s={17} /> {formatOrderId(currentOrderId)}
+                    {totalItems > 0 && <span className="cart-count-badge">{totalItems}</span>}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {cart.length > 0 && <button id="clear-cart-btn" className="cart-clear-btn" onClick={clearCart}>Clear</button>}
+                    <button className="mobile-close-btn" onClick={() => setCartOpen(false)} aria-label="Close">
+                      <I.X s={20} />
+                    </button>
+                  </div>
                 </div>
-                {cart.length > 0 && <button id="clear-cart-btn" className="cart-clear-btn" onClick={clearCart}>Clear</button>}
-              </div>
-            )}
+              )}
+            </div>
 
 
             {cart.length === 0 ? (
@@ -1043,7 +1042,11 @@ export default function App() {
                         <I.Back s={15} /> Back
                       </button>
                       <div className="payment-screen-title">Payment</div>
-                      <div style={{ width: 60 }} />
+                      <div style={{ width: 60, display: 'flex', justifyContent: 'flex-end' }}>
+                        <button className="mobile-close-btn" onClick={() => setCartOpen(false)} aria-label="Close">
+                          <I.X s={20} />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Scrollable body */}
