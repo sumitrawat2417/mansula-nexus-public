@@ -531,11 +531,63 @@ function SettingsDrawer({ theme, onToggleTheme, cols, onCols, currency, onCurren
   )
 }
 
+// ─────────────── CART PARTICLE ANIMATION ───────────────
+function fireCartParticles(e) {
+  const STARS = ['✦', '★', '⬟', '✸', '✺', '⊹']
+  const colors = ['#7c3aed', '#a78bfa', '#fb923c', '#facc15', '#34d399', '#f472b6']
+  const origin = { x: e.clientX, y: e.clientY }
+
+  // Find cart target: bar on mobile, cart panel header on desktop
+  const cartEl =
+    document.getElementById('mobile-cart-bar') ||
+    document.getElementById('mobile-cart-fab') ||
+    document.querySelector('.cart-panel .cart-header')
+  const target = cartEl
+    ? (() => { const r = cartEl.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 } })()
+    : { x: window.innerWidth - 40, y: window.innerHeight - 80 }
+
+  const N = 6
+  for (let i = 0; i < N; i++) {
+    const el = document.createElement('div')
+    const star = STARS[Math.floor(Math.random() * STARS.length)]
+    const color = colors[Math.floor(Math.random() * colors.length)]
+    const size = 10 + Math.random() * 8
+    const delay = i * 18  // stagger each star slightly
+    el.textContent = star
+    el.style.cssText = [
+      'position:fixed',
+      `left:${origin.x}px`,
+      `top:${origin.y}px`,
+      `color:${color}`,
+      `font-size:${size}px`,
+      'pointer-events:none',
+      'z-index:99999',
+      'will-change:transform,opacity',
+      `transition:transform ${360 + delay}ms cubic-bezier(0.4,0,0.6,1),opacity ${360 + delay}ms ease`,
+      'opacity:1',
+      'transform:translate(-50%,-50%) scale(1)',
+    ].join(';')
+    document.body.appendChild(el)
+
+    // Force reflow then start animation
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const dx = target.x - origin.x
+        const dy = target.y - origin.y
+        el.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.3)`
+        el.style.opacity = '0'
+        setTimeout(() => el.remove(), 420 + delay)
+      })
+    })
+  }
+}
+
 // ─────────────── PRODUCT CARD ───────────────
 function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
   const inCart = qty > 0
 
-  const handleAdd = () => {
+  const handleAdd = (e) => {
+    fireCartParticles(e)
     onAdd(product)
   }
 
@@ -574,7 +626,7 @@ function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
             <button
               className="card-ov-btn plus"
               style={{ pointerEvents: 'auto' }}
-              onClick={(e) => { e.stopPropagation(); onAdd(product); }}
+              onClick={(e) => { e.stopPropagation(); fireCartParticles(e); onAdd(product); }}
               aria-label="Add one more"
             >
               <I.Plus />
