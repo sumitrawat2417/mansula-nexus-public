@@ -656,6 +656,12 @@ export default function App() {
   useEffect(() => { localStorage.setItem('mn-currency', JSON.stringify(currency)) }, [currency])
   useEffect(() => { localStorage.setItem('mn-taxrate', JSON.stringify(taxRateObj)) }, [taxRateObj])
   useEffect(() => { if (searchOpen) setTimeout(() => searchRef.current?.focus(), 80) }, [searchOpen])
+  useEffect(() => {
+    if (!cartOpen) {
+      setCartStep('cart')
+      setSummaryExpanded(false)
+    }
+  }, [cartOpen])
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
