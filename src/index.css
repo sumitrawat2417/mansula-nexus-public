@@ -1106,6 +1106,10 @@ select {
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 6px;
+  margin-left: -16px;
+  margin-right: -16px;
+  padding-left: 16px;
+  padding-right: 16px;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
   -webkit-overflow-scrolling: touch;
