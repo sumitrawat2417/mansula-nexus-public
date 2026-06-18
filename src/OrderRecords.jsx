@@ -399,6 +399,59 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit }) {
   )
 }
 
+}
+
+// ── Export Modal ──
+function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef }) {
+  return (
+    <div className="or-modal-overlay" onClick={onClose} style={{ zIndex: 10000 }}>
+      <div className="or-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 450, padding: 0 }}>
+        <div className="or-modal-header" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>Data & Export</div>
+          <button className="or-modal-close" onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><I.X s={20} /></button>
+        </div>
+        
+        <div className="or-modal-body" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          
+          <div className="bp-backup-card bp-backup-export">
+            <div className="bp-backup-card-icon" style={{ background: 'rgba(100,116,139,0.12)', color: '#64748b' }}><I.Receipt s={22} /></div>
+            <div className="bp-backup-card-info">
+              <div className="bp-backup-card-title">Export CSV</div>
+              <div className="bp-backup-card-desc">Download a spreadsheet of your orders for the currently selected date range.</div>
+            </div>
+            <button className="bp-btn-primary" style={{ background: '#64748b', color: '#fff', border: 'none', padding: '10px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem' }} onClick={onExportCSV}>
+              <I.Export s={15} /> Download CSV
+            </button>
+          </div>
+
+          <div className="bp-backup-card bp-backup-export">
+            <div className="bp-backup-card-icon"><I.Download s={22} /></div>
+            <div className="bp-backup-card-info">
+              <div className="bp-backup-card-title">Save Backup to Device</div>
+              <div className="bp-backup-card-desc">Downloads a <code>.json</code> file containing all your order records. Keep it safe to restore later.</div>
+            </div>
+            <button className="bp-btn-primary" style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '10px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem' }} onClick={onBackup}>
+              <I.Download s={15} /> Download Backup
+            </button>
+          </div>
+
+          <div className="bp-backup-card bp-backup-import">
+            <div className="bp-backup-card-icon"><I.Upload s={22} /></div>
+            <div className="bp-backup-card-info">
+              <div className="bp-backup-card-title">Restore from Backup</div>
+              <div className="bp-backup-card-desc">Upload a previously downloaded <code>.json</code> backup file to restore your historical order records.</div>
+            </div>
+            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '10px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem' }} onClick={() => onRestoreRef.current?.click()}>
+              <I.Upload s={15} /> Restore Backup
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main OrderRecords ──
 export default function OrderRecords({ onClose, currency, onEdit }) {
   const [records, setRecords]           = useState([])
@@ -416,6 +469,7 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
   const [filterPayment, setFilterPayment] = useState('all')
   const [sortDesc, setSortDesc]         = useState(true)
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
+  const [exportModalOpen, setExportModalOpen] = useState(false)
   const [viewRecord, setViewRecord]     = useState(null)
   const [storageInfo, setStorageInfo]   = useState({ usage: 0, quota: 0 })
 
@@ -506,7 +560,7 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `mansula-orders-backup-${new Date().toISOString().slice(0, 10)}.gz`
+    a.download = `mansula-orders-backup-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -519,6 +573,7 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
     if (count < 0) alert('Restore failed. Invalid format or error.')
     else {
       alert(`Successfully restored ${count} orders!`)
+      setExportModalOpen(false)
       loadPage(); loadStats()
     }
   }
@@ -536,17 +591,21 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
           onClose={() => setFilterDrawerOpen(false)}
         />
       )}
+      {exportModalOpen && (
+        <ExportModal 
+          onClose={() => setExportModalOpen(false)} 
+          onExportCSV={() => { exportCSV(); setExportModalOpen(false); }} 
+          onBackup={() => { handleBackup(); setExportModalOpen(false); }} 
+          onRestoreRef={fileInputRef} 
+        />
+      )}
 
       {/* Header */}
       <header className="or-header">
         <button className="or-back-btn" onClick={onClose} aria-label="Back"><I.Back s={20} /></button>
         <div className="or-header-title"><I.Receipt s={19} /> Order Records</div>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <button className="or-icon-btn" onClick={exportCSV} title="Export CSV"><I.Export s={15} /></button>
-          <button className="or-icon-btn" onClick={handleBackup} title="Backup Database (.gz)"><I.Download s={15} /></button>
-          <button className="or-icon-btn" onClick={() => fileInputRef.current?.click()} title="Restore Database"><I.Upload s={15} /></button>
-          <input type="file" accept=".gz,.json" style={{ display: 'none' }} ref={fileInputRef} onChange={handleRestore} />
-        </div>
+        <button className="or-export-btn" onClick={() => setExportModalOpen(true)} title="Data & Export"><I.DB s={15} /> Data</button>
+        <input type="file" accept=".json" style={{ display: 'none' }} ref={fileInputRef} onChange={handleRestore} />
       </header>
 
       {/* Storage Bar */}
