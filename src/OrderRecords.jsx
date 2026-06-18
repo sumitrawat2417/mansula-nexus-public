@@ -399,8 +399,6 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit }) {
   )
 }
 
-}
-
 // ── Export Modal ──
 function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef }) {
   return (
