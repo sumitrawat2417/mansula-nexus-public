@@ -230,6 +230,58 @@ export async function getOrdersByMonth(monthKey) {
   } catch { return [] }
 }
 
+// Backup all orders as a compressed file
+export async function exportOrdersBackup() {
+  try {
+    const records = await getAllOrderRecords()
+    const jsonStr = JSON.stringify(records)
+    
+    if (typeof CompressionStream !== 'undefined') {
+      const stream = new Blob([jsonStr], { type: 'application/json' }).stream()
+      const compressedStream = stream.pipeThrough(new CompressionStream('gzip'))
+      return await new Response(compressedStream).blob()
+    } else {
+      return new Blob([jsonStr], { type: 'application/json' })
+    }
+  } catch (err) {
+    console.error('Backup failed:', err)
+    return null
+  }
+}
+
+// Restore orders from a file
+export async function restoreOrdersBackup(file) {
+  try {
+    let jsonStr = ''
+    if (file.name.endsWith('.gz') && typeof DecompressionStream !== 'undefined') {
+      const stream = file.stream()
+      const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'))
+      jsonStr = await new Response(decompressedStream).text()
+    } else {
+      jsonStr = await file.text()
+    }
+    
+    const records = JSON.parse(jsonStr)
+    if (!Array.isArray(records)) throw new Error('Invalid backup format')
+    
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('orders', 'readwrite')
+      const store = tx.objectStore('orders')
+      let count = 0
+      records.forEach(r => {
+        store.put(r)
+        count++
+      })
+      tx.oncomplete = () => resolve(count)
+      tx.onerror = () => resolve(-1)
+    })
+  } catch (err) {
+    console.error('Restore failed:', err)
+    return -1
+  }
+}
+
 // Delete a single order record by orderId
 export async function deleteOrderRecord(orderId) {
   try {

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   getOrdersByDateRange, getStatsForDateRange,
-  deleteOrderRecord, updateOrderRecord, getStorageEstimate, getAllOrderRecords, dbGet
+  deleteOrderRecord, updateOrderRecord, getStorageEstimate, getAllOrderRecords, dbGet,
+  exportOrdersBackup, restoreOrdersBackup
 } from './db.js'
 
 // ── SVG Icon Library ──
@@ -16,6 +17,8 @@ const I = {
   DB:        ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
   Cash:      ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>,
   Export:    ({ s=15 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+  Upload:    ({ s=15 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+  Download:  ({ s=15 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
   ChevL:     ({ s=18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>,
   ChevR:     ({ s=18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
   ChevD:     ({ s=13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
@@ -419,6 +422,7 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
   const sym = currency?.symbol || '₹'
   const searchTimer = useRef(null)
   const sentinelRef = useRef(null)
+  const fileInputRef = useRef(null)
 
   const loadPage = useCallback(async () => {
     setLoading(true)
@@ -496,6 +500,29 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
     URL.revokeObjectURL(url)
   }
 
+  const handleBackup = async () => {
+    const blob = await exportOrdersBackup()
+    if (!blob) return alert('Backup failed')
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `mansula-orders-backup-${new Date().toISOString().slice(0, 10)}.gz`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleRestore = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const count = await restoreOrdersBackup(file)
+    e.target.value = null // reset
+    if (count < 0) alert('Restore failed. Invalid format or error.')
+    else {
+      alert(`Successfully restored ${count} orders!`)
+      loadPage(); loadStats()
+    }
+  }
+
   return (
     <div className="or-root">
       {viewRecord && (
@@ -514,7 +541,12 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
       <header className="or-header">
         <button className="or-back-btn" onClick={onClose} aria-label="Back"><I.Back s={20} /></button>
         <div className="or-header-title"><I.Receipt s={19} /> Order Records</div>
-        <button className="or-export-btn" onClick={exportCSV} title="Export CSV"><I.Export s={15} /> Export</button>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <button className="or-icon-btn" onClick={exportCSV} title="Export CSV"><I.Export s={15} /></button>
+          <button className="or-icon-btn" onClick={handleBackup} title="Backup Database (.gz)"><I.Download s={15} /></button>
+          <button className="or-icon-btn" onClick={() => fileInputRef.current?.click()} title="Restore Database"><I.Upload s={15} /></button>
+          <input type="file" accept=".gz,.json" style={{ display: 'none' }} ref={fileInputRef} onChange={handleRestore} />
+        </div>
       </header>
 
       {/* Storage Bar */}
