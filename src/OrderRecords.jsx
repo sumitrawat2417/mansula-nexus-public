@@ -401,7 +401,7 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit }) {
 
 // ── Export Modal ──
 function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll }) {
-  const cardStyle = { padding: '12px 14px', gap: '10px' };
+  const cardStyle = { padding: '12px 16px', gap: '10px' };
   const iconStyle = { width: 36, height: 36, flexShrink: 0 };
 
   return (
@@ -415,7 +415,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll 
         <div className="or-modal-body" style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           
           <div className="bp-backup-card bp-backup-export" style={cardStyle}>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
               <div className="bp-backup-card-icon" style={{ ...iconStyle, background: 'rgba(100,116,139,0.12)', color: '#64748b' }}><I.Receipt s={18} /></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Export CSV</div>
@@ -428,7 +428,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll 
           </div>
 
           <div className="bp-backup-card bp-backup-export" style={cardStyle}>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
               <div className="bp-backup-card-icon" style={iconStyle}><I.Download s={18} /></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Save Backup to Device</div>
@@ -441,7 +441,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll 
           </div>
 
           <div className="bp-backup-card bp-backup-import" style={cardStyle}>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
               <div className="bp-backup-card-icon" style={iconStyle}><I.Upload s={18} /></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Restore from Backup</div>
@@ -454,7 +454,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll 
           </div>
 
           <div className="bp-backup-card" style={{ ...cardStyle, borderColor: 'rgba(239,68,68,0.3)' }}>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
               <div className="bp-backup-card-icon" style={{ ...iconStyle, background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}><I.Trash s={18} /></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', color: '#ef4444', marginBottom: 2 }}>Wipe Order Data</div>
