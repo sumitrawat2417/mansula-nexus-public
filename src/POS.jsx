@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import './App.css'
-import { dbGet } from './db.js'
+import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth } from './db.js'
 import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES, KEY_BUSINESS, DEFAULT_BUSINESS } from './BusinessProfile.jsx'
 
 // ─────────────── DATA (loaded from IDB, fallback to defaults) ───────────────
@@ -23,18 +23,24 @@ const TAX_RATES = [
 ]
 
 // ─────────────── ORDER ID ───────────────
-// Counter lives at MODULE scope so React StrictMode's double-invoke of useState
-// doesn't skip ORD-002. INIT_ORDER is created exactly once when the module loads.
-let _oc = 1
-const makeOrderId = () => {
-  const d = new Date()
+// Async monthly counter: queries IDB for count of orders this month, then +1
+// Synchronous fallback uses Date.now() suffix for uniqueness
+function getMonthKey(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+function makeDateSuffix(d = new Date()) {
   const dd = String(d.getDate()).padStart(2, '0')
   const mm = String(d.getMonth() + 1).padStart(2, '0')
   const yy = String(d.getFullYear()).slice(-2)
-  return `${_oc++}-${dd}/${mm}/${yy}`
+  return `${dd}/${mm}/${yy}`
 }
-const makeOrder = () => ({ id: makeOrderId(), items: [], createdAt: new Date(), status: 'active' })
-const INIT_ORDER = makeOrder() // ← called once at module level → always ORD-001
+
+// Synchronous temp id (replaced after async resolves)
+let _tempCounter = 1
+const makeTempOrderId = () => `T${_tempCounter++}-${makeDateSuffix()}`
+
+const makeOrder = (id) => ({ id: id || makeTempOrderId(), items: [], createdAt: new Date(), status: 'active' })
+const INIT_ORDER = makeOrder() // created once at module level
 
 // ─────────────── SOUND ───────────────
 let audioCtx = null
@@ -174,8 +180,13 @@ const ordTotal = (order, taxRate) => {
 function SuccessModal({ order, onClose, currency, taxRateObj }) {
   const [expanded, setExpanded] = useState(false)
   if (!order) return null
-  const sub = order.items.reduce((s, i) => s + i.price * i.qty, 0)
-  const total = sub * (1 + taxRateObj.value)
+  
+  // Use stored values if available, otherwise fallback to basic calculation
+  const sub = order.subtotal !== undefined ? order.subtotal : order.items.reduce((s, i) => s + i.price * i.qty, 0)
+  const tax = order.taxAmt !== undefined ? order.taxAmt : sub * taxRateObj.value
+  const discount = order.discountAmt || 0
+  const delivery = order.deliveryCharge || 0
+  const total = order.total !== undefined ? order.total : (sub + tax - discount + delivery)
 
   const previewCount = 4
   const hasMore = order.items.length > previewCount
@@ -192,7 +203,7 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
 
         <div className="success-details" style={{ textAlign: 'center' }}>
           {visibleItems.map(item => (
-            <div key={item.id} className="success-item-row" style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between' }}>
+            <div key={item.variantKey ? `${item.id}-${item.variantKey}` : item.id} className="success-item-row" style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between' }}>
               <div>
                 <span>{item.qty}× {item.name}</span>
                 {item.variantLabel && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '1.2rem', marginTop: 2 }}>{item.variantLabel}</div>}
@@ -205,7 +216,33 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
               + {order.items.length - previewCount} more items
             </button>
           )}
-          <div className="success-total-row" style={{ textAlign: 'left' }}>
+
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border-color)', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ color: 'var(--text-muted)' }}>Subtotal</span>
+              <span>{fmt(sub, currency)}</span>
+            </div>
+            {tax > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ color: 'var(--text-muted)' }}>{order.taxLabel || taxRateObj.label}</span>
+                <span>{fmt(tax, currency)}</span>
+              </div>
+            )}
+            {discount > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: 'var(--brand-danger)' }}>
+                <span>Discount</span>
+                <span>-{fmt(discount, currency)}</span>
+              </div>
+            )}
+            {delivery > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: 'var(--brand-accent)' }}>
+                <span>Delivery</span>
+                <span>+{fmt(delivery, currency)}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="success-total-row" style={{ textAlign: 'left', marginTop: 8, paddingTop: 8, borderTop: '1.5px solid var(--border-color)' }}>
             <span>Total</span>
             <span className="success-total-val">{fmt(total, currency)}</span>
           </div>
@@ -228,43 +265,68 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
 // ─────────────── ORDER CONSOLE ───────────────
 function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onClose, currency, taxRateObj, watchdogMins, onWatchdogMins }) {
   const [expandedId, setExpandedId] = useState(null)
+  const [showAllItems, setShowAllItems] = useState(false)
   const [isCustomTimer, setIsCustomTimer] = useState(![0, 2, 5, 10, 15, 30].includes(watchdogMins))
 
   const active = orders.filter(o => o.status === 'active')
-  const past = orders.filter(o => o.status === 'completed')
+  const past = orders.filter(o => o.status === 'completed').sort((a, b) => b.completedAt - a.completedAt)
 
-  const toggleExpand = (id) => setExpandedId(prev => prev === id ? null : id)
+  const toggleExpand = (id) => {
+    setExpandedId(prev => prev === id ? null : id)
+    setShowAllItems(false)
+  }
 
   const renderDetailInline = (order) => {
-    const subtotal = order.items.reduce((s, i) => s + i.price * i.qty, 0)
-    const tax = subtotal * taxRateObj.value
-    const total = subtotal + tax
+    // Read from stored values or recalculate if missing (for legacy or active orders)
+    const subtotal = order.subtotal !== undefined ? order.subtotal : order.items.reduce((s, i) => s + i.price * i.qty, 0)
+    const tax = order.taxAmt !== undefined ? order.taxAmt : subtotal * taxRateObj.value
+    const discount = order.discountAmt || 0
+    const delivery = order.deliveryCharge || 0
+    const total = order.total !== undefined ? order.total : (subtotal + tax - discount + delivery)
+
+    const PREVIEW_COUNT = 3
+    const visibleItems = showAllItems ? order.items : order.items.slice(0, PREVIEW_COUNT)
+    const hasMore = order.items.length > PREVIEW_COUNT
+
     return (
       <div className="order-detail-inline">
         <div className="order-detail-items-inline">
           {order.items.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '16px', color: 'var(--text-muted)' }}>No items in this order</div>
           ) : (
-            order.items.map(item => (
-              <div key={item.id} className="detail-item-row-inline">
-                <span className="detail-item-emoji-inline">{item.emoji}</span>
-                <div className="detail-item-info-inline">
-                  <div className="detail-item-name-inline">
-                    {item.name}
-                    {item.variantLabel && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: 6, fontWeight: 500 }}>({item.variantLabel})</span>}
+            <>
+              {visibleItems.map(item => (
+                <div key={item.variantKey ? `${item.id}-${item.variantKey}` : item.id} className="detail-item-row-inline">
+                  <span className="detail-item-emoji-inline">{item.emoji}</span>
+                  <div className="detail-item-info-inline">
+                    <div className="detail-item-name-inline">
+                      {item.name}
+                      {item.variantLabel && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: 6, fontWeight: 500 }}>({item.variantLabel})</span>}
+                    </div>
+                    <div className="detail-item-unit-inline">{fmt(item.price, currency)} × {item.qty}</div>
                   </div>
-                  <div className="detail-item-unit-inline">{fmt(item.price, currency)} × {item.qty}</div>
+                  <div className="detail-item-total-inline">{fmt(item.price * item.qty, currency)}</div>
                 </div>
-                <div className="detail-item-total-inline">{fmt(item.price * item.qty, currency)}</div>
-              </div>
-            ))
+              ))}
+              {!showAllItems && hasMore && (
+                <button 
+                  className="expand-items-btn" 
+                  onClick={() => setShowAllItems(true)}
+                  style={{ width: '100%', marginTop: 8 }}
+                >
+                  + {order.items.length - PREVIEW_COUNT} more items
+                </button>
+              )}
+            </>
           )}
         </div>
         {order.items.length > 0 && (
-          <div className="order-detail-totals-inline">
-            <div className="cart-total-row"><span className="label">Subtotal</span><span className="value">{fmt(subtotal, currency)}</span></div>
-            <div className="cart-total-row"><span className="label">{taxRateObj.label}</span><span className="value">{fmt(tax, currency)}</span></div>
-            <div className="cart-total-row grand"><span className="label">Total</span><span className="value">{fmt(total, currency)}</span></div>
+          <div className="order-detail-totals-inline" style={{ marginTop: 8, paddingTop: 8, borderTop: '1px dashed var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div className="cart-total-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}><span className="label" style={{ color: 'var(--text-muted)' }}>Subtotal</span><span className="value">{fmt(subtotal, currency)}</span></div>
+            {tax > 0 && <div className="cart-total-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}><span className="label" style={{ color: 'var(--text-muted)' }}>{order.taxLabel || taxRateObj.label}</span><span className="value">{fmt(tax, currency)}</span></div>}
+            {discount > 0 && <div className="cart-total-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--brand-danger)' }}><span className="label">Discount</span><span className="value">-{fmt(discount, currency)}</span></div>}
+            {delivery > 0 && <div className="cart-total-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--brand-accent)' }}><span className="label">Delivery</span><span className="value">+{fmt(delivery, currency)}</span></div>}
+            <div className="cart-total-row grand" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 8, paddingTop: 8, borderTop: '1.5px solid var(--border-color)' }}><span className="label">Total</span><span className="value">{fmt(total, currency)}</span></div>
           </div>
         )}
       </div>
@@ -374,7 +436,7 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
           {past.length > 0 && (
             <>
               <div className="console-section-label" style={{ marginTop: 16 }}>Completed Orders</div>
-              {past.slice(-20).reverse().map(order => {
+              {past.slice(0, 20).map(order => {
                 const total = ordTotal(order, taxRateObj.value)
                 const isExpanded = expandedId === order.id
                 return (
@@ -627,9 +689,6 @@ function ProductCard({ product, qty, onAdd, onDecrease, cols, currency }) {
             {product.badge === 'popular' ? 'Popular' : 'New'}
           </span>
         )}
-        {hasVariants && (
-          <span className="product-badge variant-badge" title="Has variants">Options</span>
-        )}
 
         {/* Overlay controls — only shown when qty > 0 */}
         {inCart && (
@@ -690,22 +749,13 @@ function CartItem({ item, onIncrease, onDecrease, currency }) {
 }
 
 // ─────────────── MAIN POS ───────────────
-export default function POS({ onExit, currency, taxRateObj }) {
+export default function POS({ onExit, currency, taxRateObj, editingRecord, onClearEditing }) {
   const [cols, setCols] = useState(() => localStorage.getItem('mn-cols') || 'auto')
   const [products, setProducts] = useState(DEFAULT_PRODUCTS)
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
   const [business, setBusiness] = useState(DEFAULT_BUSINESS)
 
-  // Load products/categories/business from IDB on mount
-  useEffect(() => {
-    async function load() {
-      const [p, c, b] = await Promise.all([dbGet(KEY_PRODUCTS), dbGet(KEY_CATEGORIES), dbGet(KEY_BUSINESS)])
-      if (p && p.length > 0) setProducts(p)
-      if (c && c.length > 0) setCategories(c)
-      if (b) setBusiness({ ...DEFAULT_BUSINESS, ...b })
-    }
-    load()
-  }, [])
+
 
   const [activeCategory, setActiveCat] = useState('All')
   const [search, setSearch] = useState('')
@@ -730,12 +780,98 @@ export default function POS({ onExit, currency, taxRateObj }) {
   const totalCashReceived = Object.entries(cashNotes).reduce((sum, [amt, count]) => sum + (Number(amt) * count), 0)
   const searchRef = useRef(null)
 
-  // ── Orders — use module-level INIT_ORDER so ORD-002 is never skipped ──
+  // ── Orders — start with INIT_ORDER; ids get assigned proper monthly nums async ──
   const [orders, setOrders] = useState([INIT_ORDER])
   const [currentOrderId, setCurrentOrderId] = useState(INIT_ORDER.id)
 
   const currentOrder = orders.find(o => o.id === currentOrderId)
   const cart = currentOrder?.items ?? []
+  
+  const hasLoaded = useRef(false)
+
+  // Load products/categories/business from IDB on mount
+  // Also load any persisted active orders and fix the INIT_ORDER id
+  useEffect(() => {
+    async function load() {
+      const [p, c, b, activeOrders, monthOrders] = await Promise.all([
+        dbGet(KEY_PRODUCTS),
+        dbGet(KEY_CATEGORIES),
+        dbGet(KEY_BUSINESS),
+        dbGet('mn-active-orders'),
+        getOrdersByMonth(getMonthKey()),
+      ])
+      if (p && p.length > 0) setProducts(p)
+      if (c && c.length > 0) setCategories(c)
+      if (b) setBusiness({ ...DEFAULT_BUSINESS, ...b })
+
+      // Restore persisted active orders (survive refresh)
+      let loadedOrders = (activeOrders && activeOrders.length > 0)
+        ? activeOrders.map(o => ({ ...o, createdAt: new Date(o.createdAt) }))
+        : [INIT_ORDER]
+
+      // Replace any temporary 'T' IDs with proper sequential IDs
+      const mk = getMonthKey()
+      let nextNum = await getNextOrderNum(mk)
+      let newCurrentId = loadedOrders[0]?.id || INIT_ORDER.id
+
+      loadedOrders = loadedOrders.map(o => {
+        if (o.id.startsWith('T')) {
+          const properid = `${nextNum++}-${makeDateSuffix()}`
+          if (o.id === newCurrentId) newCurrentId = properid
+          return { ...o, id: properid }
+        }
+        return o
+      })
+
+      // Also restore completed orders for TODAY so the Order Console shows them
+      const todayStr = new Date().toDateString()
+      let todayCompleted = (monthOrders || [])
+        .filter(o => new Date(o.completedAt).toDateString() === todayStr)
+        .sort((a, b) => a.completedAt - b.completedAt) // sort chronologically
+        .map(o => ({
+          ...o,
+          id: o.orderId, // map DB schema back to POS schema
+          createdAt: new Date(o.createdAt),
+          status: 'completed'
+        }))
+
+      if (editingRecord) {
+        const existing = loadedOrders.find(o => o.id === editingRecord.orderId)
+        if (!existing) {
+          const orderToEdit = {
+            id: editingRecord.orderId,
+            items: editingRecord.items || [],
+            createdAt: new Date(editingRecord.createdAt || Date.now()),
+            originalCompletedAt: editingRecord.completedAt,
+            status: 'active',
+            alarmed: false
+          }
+          loadedOrders.push(orderToEdit)
+        }
+        newCurrentId = editingRecord.orderId
+        
+        // Remove from todayCompleted so it's not duplicated
+        todayCompleted = todayCompleted.filter(o => o.id !== editingRecord.orderId)
+        
+        setDiscountType(editingRecord.discountAmt > 0 ? 'flat' : 'none')
+        setDiscountVal(editingRecord.discountAmt || 0)
+        setDeliveryCharge(editingRecord.deliveryCharge || 0)
+        setPaymentMode(editingRecord.paymentMode || 'cash')
+        if (editingRecord.paymentDetails?.cash) {
+          setSplitCash(editingRecord.paymentDetails.cash)
+        }
+        if (onClearEditing) onClearEditing()
+      }
+
+      setOrders([...loadedOrders, ...todayCompleted])
+      setCurrentOrderId(newCurrentId)
+      hasLoaded.current = true
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+
 
   // Persist settings
   useEffect(() => { localStorage.setItem('mn-cols', cols) }, [cols])
@@ -813,16 +949,20 @@ export default function POS({ onExit, currency, taxRateObj }) {
     ))
   }, [currentOrderId])
 
-  const createNewOrder = () => {
+  const createNewOrder = async () => {
     const current = orders.find(o => o.id === currentOrderId)
     if (current && current.items.length === 0) {
       showToast('Current order is empty. Cannot create new.')
       return
     }
-    const newOrder = makeOrder()
+    // Get proper monthly sequential ID
+    const mk = getMonthKey()
+    const num = await getNextOrderNum(mk)
+    const properid = `${num}-${makeDateSuffix()}`
+    const newOrder = makeOrder(properid)
     setOrders(prev => [...prev, newOrder])
     setCurrentOrderId(newOrder.id)
-    showToast(`New order #${newOrder.id} started`)
+    showToast(`New order ${newOrder.id} started`)
   }
 
   const switchOrder = (id) => {
@@ -872,8 +1012,17 @@ export default function POS({ onExit, currency, taxRateObj }) {
   const total = Math.max(0, subtotal + tax - discountAmt + delivery)
   const totalItems = cart.reduce((s, i) => s + i.qty, 0)
 
+  // ── Persist active orders to IDB so they survive refresh ──
+  useEffect(() => {
+    if (!hasLoaded.current) return
+    const activeOrders = orders.filter(o => o.status === 'active')
+    // Serialize Dates to timestamps for storage
+    const serialized = activeOrders.map(o => ({ ...o, createdAt: o.createdAt instanceof Date ? o.createdAt.getTime() : o.createdAt }))
+    dbSet('mn-active-orders', serialized)
+  }, [orders])
+
   // ── Checkout ──
-  const handleCheckoutOrder = (orderId) => {
+  const handleCheckoutOrder = async (orderId) => {
     const order = orders.find(o => o.id === orderId)
     if (!order) return
     if (order.items.length === 0) {
@@ -881,15 +1030,24 @@ export default function POS({ onExit, currency, taxRateObj }) {
       return
     }
 
+    // eslint-disable-next-line react-hooks/purity
+    const completedAt = order.originalCompletedAt || Date.now()
     const enrichedOrder = {
       ...order,
+      subtotal,
       discountType,
       discountAmt,
       deliveryCharge: delivery,
       paymentMode,
       paymentDetails: paymentMode === 'split' ? { cash: splitCash, upi: Math.max(0, total - splitCash) } : null,
-      total
+      total,
+      completedAt,
+      taxLabel: taxRateObj.label,
+      taxAmt: subtotal * taxRateObj.value,
     }
+
+    // Save to permanent order records
+    await saveOrderRecord(enrichedOrder)
 
     playSound('checkout')
     setSuccessOrder(enrichedOrder)
@@ -900,17 +1058,24 @@ export default function POS({ onExit, currency, taxRateObj }) {
     if (orderId === currentOrderId) {
       const remainingActive = newOrders.filter(o => o.status === 'active')
       if (remainingActive.length > 0) {
-        remainingActive.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+        remainingActive.sort((a, b) => {
+          const at = a.createdAt instanceof Date ? a.createdAt.getTime() : a.createdAt
+          const bt = b.createdAt instanceof Date ? b.createdAt.getTime() : b.createdAt
+          return at - bt
+        })
         newCurrentId = remainingActive[0].id
       } else {
-        const newOrder = makeOrder()
+        // Create next order with proper monthly ID
+        const mk = getMonthKey()
+        const num = await getNextOrderNum(mk)
+        const properid = `${num}-${makeDateSuffix()}`
+        const newOrder = makeOrder(properid)
         newOrders.push(newOrder)
         newCurrentId = newOrder.id
       }
       setCartOpen(false)
       setCartStep('cart')
       setSummaryExpanded(false)
-      // Reset per-order fields
       setDiscountType('none'); setDiscountVal(0); setDeliveryCharge(0); setPaymentMode('cash'); setCashNotes({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })
     }
 
@@ -1080,7 +1245,7 @@ export default function POS({ onExit, currency, taxRateObj }) {
                 {cartStep === 'cart' ? (
                   <>
                     <div className="cart-items" role="list">
-                      {cart.map(item => <CartItem key={item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} currency={currency} />)}
+                      {cart.map(item => <CartItem key={item.variantKey ? `${item.id}-${item.variantKey}` : item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} currency={currency} />)}
                     </div>
                     <div className="cart-footer">
                       {/* Subtotal / Tax */}
@@ -1163,24 +1328,7 @@ export default function POS({ onExit, currency, taxRateObj }) {
                     {/* Scrollable body */}
                     <div className="payment-screen-body">
 
-                      {/* Order summary card */}
-                      {/* Order summary card */}
-                      <div className="payment-order-summary" onClick={() => setSummaryExpanded(e => !e)} style={{ cursor: 'pointer', alignItems: summaryExpanded ? 'flex-start' : 'center' }}>
-                        <div className="payment-summary-left">
-                          <div className="payment-summary-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            Order {formatOrderId(currentOrderId)}
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ transform: summaryExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease', opacity: 0.8 }}>
-                              <polyline points="6 9 12 15 18 9" />
-                            </svg>
-                          </div>
-                          <div className="payment-summary-items" style={{ maxHeight: summaryExpanded ? '1000px' : '0px', opacity: summaryExpanded ? 1 : 0, overflow: 'hidden', transition: 'all 0.3s ease', marginTop: summaryExpanded ? '8px' : '0px' }}>
-                            {cart.map(i => (
-                              <span key={i.id} className="payment-summary-item">{i.qty}× {i.name}</span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="payment-summary-total" style={{ marginTop: summaryExpanded ? '2px' : '0px', transition: 'margin-top 0.3s ease' }}>{fmt(total, currency)}</div>
-                      </div>
+
 
                       {/* UPI QR — shown when UPI selected */}
                       {paymentMode === 'upi' && (
@@ -1311,6 +1459,24 @@ export default function POS({ onExit, currency, taxRateObj }) {
                       )}
 
                       <div style={{ flex: 1 }} />{/* spacer to push payment method down */}
+
+                      {/* Order summary card moved to bottom */}
+                      <div className="payment-order-summary" onClick={() => setSummaryExpanded(e => !e)} style={{ cursor: 'pointer', alignItems: summaryExpanded ? 'flex-start' : 'center', marginTop: 16 }}>
+                        <div className="payment-summary-left">
+                          <div className="payment-summary-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            Order {formatOrderId(currentOrderId)}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ transform: summaryExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease', opacity: 0.8 }}>
+                              <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                          </div>
+                          <div className="payment-summary-items" style={{ maxHeight: summaryExpanded ? '1000px' : '0px', opacity: summaryExpanded ? 1 : 0, overflow: 'hidden', transition: 'all 0.3s ease', marginTop: summaryExpanded ? '8px' : '0px' }}>
+                            {cart.map(i => (
+                              <span key={i.variantKey ? `${i.id}-${i.variantKey}` : i.id} className="payment-summary-item">{i.qty}× {i.name}</span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="payment-summary-total" style={{ marginTop: summaryExpanded ? '2px' : '0px', transition: 'margin-top 0.3s ease' }}>{fmt(total, currency)}</div>
+                      </div>
 
                     </div>{/* end body */}
 

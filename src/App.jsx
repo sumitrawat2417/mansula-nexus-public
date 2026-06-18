@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Home from './Home.jsx'
 import POS from './POS.jsx'
 import BusinessProfile from './BusinessProfile.jsx'
+import OrderRecords from './OrderRecords.jsx'
 
 export const CURRENCIES = [
   { code: 'INR', symbol: '₹', rate: 1, decimals: 0 },
@@ -21,6 +22,7 @@ export const TAX_RATES = [
 
 export default function App() {
   const [screen, setScreen] = useState('home')
+  const [editingRecord, setEditingRecord] = useState(null)
   const [theme, setTheme] = useState(() => localStorage.getItem('mn-theme') || 'light')
   const [currency, setCurrency] = useState(() => {
     try { return JSON.parse(localStorage.getItem('mn-currency')) || CURRENCIES[0] } catch { return CURRENCIES[0] }
@@ -42,15 +44,25 @@ export default function App() {
   if (screen === 'pos') {
     return (
       <POS
-        onExit={() => setScreen('home')}
+        onExit={() => { setScreen('home'); setEditingRecord(null); }}
         currency={currency}
         taxRateObj={taxRateObj}
+        editingRecord={editingRecord}
+        onClearEditing={() => setEditingRecord(null)}
       />
     )
   }
 
   if (screen === 'business') {
     return <BusinessProfile onClose={() => setScreen('home')} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} taxRates={TAX_RATES} />
+  }
+
+  if (screen === 'records') {
+    return <OrderRecords
+             onClose={() => setScreen('home')}
+             currency={currency}
+             onEdit={(record) => { setEditingRecord(record); setScreen('pos'); }}
+           />
   }
 
   return (

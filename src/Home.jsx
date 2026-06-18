@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { dbClearAll, dbGet } from './db.js'
+import { dbClearAll, dbGet, injectStressTestData } from './db.js'
 
 // ── Greeting ──
 function getGreeting() {
@@ -26,16 +26,18 @@ const Icon = {
   Rocket:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>,
   Reset:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>,
   Warn:      () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  OrderRec:  () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>,
 }
 
 // ── Tool definitions ──
 const TOOLS = [
   { id: 'business',  name: 'Business Profile', desc: 'Setup info, menu & categories', Icon: Icon.Business,  color: '#6366f1', bg: 'linear-gradient(135deg,#6366f1,#8b5cf6)', active: true },
-  { id: 'analytics', name: 'Analytics',         desc: 'Sales trends & insights',       Icon: Icon.Analytics,  color: '#0ea5e9', bg: 'linear-gradient(135deg,#0ea5e9,#2dd4bf)', active: false },
-  { id: 'reports',   name: 'Reports',            desc: 'Daily, weekly & monthly',       Icon: Icon.Reports,    color: '#10b981', bg: 'linear-gradient(135deg,#10b981,#059669)', active: false },
-  { id: 'inventory', name: 'Inventory',          desc: 'Stock & supplier mgmt',         Icon: Icon.Inventory,  color: '#f59e0b', bg: 'linear-gradient(135deg,#f59e0b,#ef4444)', active: false },
-  { id: 'staff',     name: 'Staff',              desc: 'Team roles & shifts',           Icon: Icon.Staff,      color: '#ec4899', bg: 'linear-gradient(135deg,#ec4899,#f43f5e)', active: false },
-  { id: 'customers', name: 'Customers',          desc: 'Udhaar ledger & CRM',           Icon: Icon.Customers,  color: '#06b6d4', bg: 'linear-gradient(135deg,#06b6d4,#0284c7)', active: false },
+  { id: 'records',   name: 'Order Records',    desc: 'View, edit & export all orders', Icon: Icon.OrderRec,  color: '#10b981', bg: 'linear-gradient(135deg,#10b981,#059669)', active: true },
+  { id: 'analytics', name: 'Analytics',        desc: 'Sales trends & insights',        Icon: Icon.Analytics,  color: '#0ea5e9', bg: 'linear-gradient(135deg,#0ea5e9,#2dd4bf)', active: false },
+  { id: 'reports',   name: 'Reports',           desc: 'Daily, weekly & monthly',        Icon: Icon.Reports,    color: '#f59e0b', bg: 'linear-gradient(135deg,#f59e0b,#ef4444)', active: false },
+  { id: 'inventory', name: 'Inventory',         desc: 'Stock & supplier mgmt',          Icon: Icon.Inventory,  color: '#ec4899', bg: 'linear-gradient(135deg,#ec4899,#f43f5e)', active: false },
+  { id: 'staff',     name: 'Staff',             desc: 'Team roles & shifts',            Icon: Icon.Staff,      color: '#06b6d4', bg: 'linear-gradient(135deg,#06b6d4,#0284c7)', active: false },
+  { id: 'customers', name: 'Customers',         desc: 'Udhaar ledger & CRM',            Icon: Icon.Customers,  color: '#64748b', bg: 'linear-gradient(135deg,#64748b,#475569)', active: false },
 ]
 
 // ── Home Settings Modal ──
@@ -153,6 +155,18 @@ export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurre
   const timeStr = time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
   const dateStr = time.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })
 
+  const [stressing, setStressing] = useState(false)
+
+  const handleStressTest = async () => {
+    if (confirm('This will inject 10,000 fake orders into your database to stress test the UI. Proceed?')) {
+      setStressing(true)
+      const num = await injectStressTestData(10000)
+      setStressing(false)
+      if (num > 0) alert(`Successfully injected ${num} orders! Open Order Records to see the load.`)
+      else alert('Stress test failed.')
+    }
+  }
+
   return (
     <div className="hn-root">
       {settingsOpen && (
@@ -253,6 +267,15 @@ export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurre
               </div>
             ))}
           </div>
+
+          <button 
+            className="or-btn-ghost" 
+            style={{ width: '100%', marginTop: '20px', color: 'var(--text-muted)' }}
+            onClick={handleStressTest}
+            disabled={stressing}
+          >
+            {stressing ? 'Injecting 10,000 orders...' : '⚙️ Run Stress Test (10k Orders)'}
+          </button>
         </div>
 
         <div className="hn-footer">

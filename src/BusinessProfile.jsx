@@ -482,7 +482,7 @@ function CategoryForm({ categories, onAdd, onDelete }) {
 }
 
 // ─── PROFILE VIEW (read-only) ───
-function ProfileView({ business, taxRateObj, onEdit }) {
+function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
   const hasData = business.name || business.phone || business.email
 
   if (!hasData) {
@@ -492,6 +492,11 @@ function ProfileView({ business, taxRateObj, onEdit }) {
         <div className="bp-profile-empty-title">No business info yet</div>
         <div className="bp-profile-empty-sub">Set up your business name, contact, and legal details to get started.</div>
         <button className="bp-btn-primary" onClick={onEdit}><Ic.Edit /> Set Up Business</button>
+        <div className="bp-profile-empty-divider">or</div>
+        <button className="bp-btn-outline" onClick={onRestoreBackup} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px', fontSize: '0.9rem' }}>
+          <Ic.Upload /> Restore from Backup
+        </button>
+        <div className="bp-profile-empty-sub" style={{ marginTop: 0 }}>Have a previously downloaded <code>.json</code> backup file? Upload it to restore all your data instantly.</div>
       </div>
     )
   }
@@ -700,7 +705,7 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
       {tab === 'info' && (
         <div className="bp-body">
           {infoMode === 'view' ? (
-            <ProfileView business={business} taxRateObj={taxRateObj} onEdit={() => setInfoMode('edit')} />
+            <ProfileView business={business} taxRateObj={taxRateObj} onEdit={() => setInfoMode('edit')} onRestoreBackup={() => importRef.current?.click()} />
           ) : (
             <>
               {/* Edit form */}
