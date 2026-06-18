@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   getOrdersByDateRange, getStatsForDateRange,
   deleteOrderRecord, updateOrderRecord, getStorageEstimate, getAllOrderRecords, dbGet,
-  exportOrdersBackup, restoreOrdersBackup
+  exportOrdersBackup, restoreOrdersBackup, clearAllOrderRecords
 } from './db.js'
 
 // ── SVG Icon Library ──
@@ -400,7 +400,7 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit }) {
 }
 
 // ── Export Modal ──
-function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef }) {
+function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll }) {
   return (
     <div className="or-modal-overlay" onClick={onClose} style={{ zIndex: 10000 }}>
       <div className="or-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 450, padding: 0 }}>
@@ -441,6 +441,17 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef }) {
             </div>
             <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '10px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem' }} onClick={() => onRestoreRef.current?.click()}>
               <I.Upload s={15} /> Restore Backup
+            </button>
+          </div>
+
+          <div className="bp-backup-card" style={{ borderColor: 'rgba(239,68,68,0.3)' }}>
+            <div className="bp-backup-card-icon" style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}><I.Trash s={22} /></div>
+            <div className="bp-backup-card-info">
+              <div className="bp-backup-card-title" style={{ color: '#ef4444' }}>Wipe Order Data</div>
+              <div className="bp-backup-card-desc">Permanently delete all order records and reset the order counter to #1. This cannot be undone.</div>
+            </div>
+            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444', padding: '10px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem' }} onClick={onClearAll}>
+              <I.Trash s={15} /> Reset Order Records
             </button>
           </div>
 
@@ -576,6 +587,19 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
     }
   }
 
+  const handleClearAll = async () => {
+    if (!window.confirm("Are you sure you want to permanently delete all order records? This will also reset the order counter to #1. This action cannot be undone.")) return
+    
+    const success = await clearAllOrderRecords()
+    if (success) {
+      alert('All order records have been wiped.')
+      setExportModalOpen(false)
+      loadPage(); loadStats()
+    } else {
+      alert('Failed to clear order records.')
+    }
+  }
+
   return (
     <div className="or-root">
       {viewRecord && (
@@ -594,7 +618,8 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
           onClose={() => setExportModalOpen(false)} 
           onExportCSV={() => { exportCSV(); setExportModalOpen(false); }} 
           onBackup={() => { handleBackup(); setExportModalOpen(false); }} 
-          onRestoreRef={fileInputRef} 
+          onRestoreRef={fileInputRef}
+          onClearAll={handleClearAll}
         />
       )}
 

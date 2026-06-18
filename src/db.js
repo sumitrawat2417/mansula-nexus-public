@@ -268,6 +268,19 @@ export async function restoreOrdersBackup(file) {
   }
 }
 
+// Delete all order records (reset to 1)
+export async function clearAllOrderRecords() {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('orders', 'readwrite')
+      tx.objectStore('orders').clear()
+      tx.oncomplete = () => resolve(true)
+      tx.onerror = () => resolve(false)
+    })
+  } catch { return false }
+}
+
 // Delete a single order record by orderId
 export async function deleteOrderRecord(orderId) {
   try {
