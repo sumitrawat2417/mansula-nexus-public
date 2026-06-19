@@ -43,6 +43,40 @@ const TOOLS = [
 // ── Home Settings Modal ──
 function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, onClose }) {
   const [resetStep, setResetStep] = useState(0) // 0=idle 1=confirm 2=done
+  const [perms, setPerms] = useState({ camera: 'prompt', microphone: 'prompt', notifications: 'prompt' })
+
+  useEffect(() => {
+    const check = async (name) => {
+      try {
+        const p = await navigator.permissions.query({ name })
+        setPerms(prev => ({ ...prev, [name]: p.state }))
+        p.onchange = () => setPerms(prev => ({ ...prev, [name]: p.state }))
+      } catch (e) { }
+    }
+    check('camera')
+    check('microphone')
+    check('notifications')
+  }, [])
+
+  const requestPerm = async (name) => {
+    try {
+      if (name === 'camera') {
+        const s = await navigator.mediaDevices.getUserMedia({ video: true })
+        s.getTracks().forEach(t => t.stop())
+      } else if (name === 'microphone') {
+        const s = await navigator.mediaDevices.getUserMedia({ audio: true })
+        s.getTracks().forEach(t => t.stop())
+      } else if (name === 'notifications') {
+        const p = await Notification.requestPermission()
+        setPerms(prev => ({ ...prev, notifications: p }))
+      }
+      // Re-check
+      const p = await navigator.permissions.query({ name })
+      setPerms(prev => ({ ...prev, [name]: p.state }))
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   const handleReset = async () => {
     if (resetStep === 0) { setResetStep(1); return }
@@ -97,6 +131,57 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
             >
               {currencies.map(c => <option key={c.code} value={c.code}>{c.code} — {c.symbol}</option>)}
             </select>
+          </div>
+
+          {/* App Permissions */}
+          <div className="hn-srow" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
+            <div className="hn-srow-info" style={{ marginBottom: 4 }}>
+              <div className="hn-srow-label">App Permissions</div>
+              <div className="hn-srow-desc">Manage system access for POS features</div>
+            </div>
+            
+            {/* Camera */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
+              <div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Camera</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For barcode scanning</div>
+              </div>
+              <button 
+                onClick={() => requestPerm('camera')}
+                disabled={perms.camera === 'denied'}
+                style={{ background: perms.camera === 'granted' ? '#10b981' : (perms.camera === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.camera === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.camera === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
+                {perms.camera === 'granted' ? 'Granted' : perms.camera === 'denied' ? 'Denied' : 'Allow'}
+              </button>
+            </div>
+
+            {/* Microphone */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
+              <div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Microphone</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For voice commands</div>
+              </div>
+              <button 
+                onClick={() => requestPerm('microphone')}
+                disabled={perms.microphone === 'denied'}
+                style={{ background: perms.microphone === 'granted' ? '#10b981' : (perms.microphone === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.microphone === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.microphone === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
+                {perms.microphone === 'granted' ? 'Granted' : perms.microphone === 'denied' ? 'Denied' : 'Allow'}
+              </button>
+            </div>
+
+            {/* Notifications */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
+              <div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Notifications</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For order alerts & updates</div>
+              </div>
+              <button 
+                onClick={() => requestPerm('notifications')}
+                disabled={perms.notifications === 'denied'}
+                style={{ background: perms.notifications === 'granted' ? '#10b981' : (perms.notifications === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.notifications === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.notifications === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
+                {perms.notifications === 'granted' ? 'Granted' : perms.notifications === 'denied' ? 'Denied' : 'Allow'}
+              </button>
+            </div>
+
           </div>
 
           {/* Reset */}
