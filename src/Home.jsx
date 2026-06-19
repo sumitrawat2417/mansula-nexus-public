@@ -201,6 +201,29 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
             </select>
           </div>
 
+          {/* Reset */}
+          <div className="hn-srow hn-srow-reset">
+            <div className="hn-srow-info">
+              <div className="hn-srow-label hn-srow-label-danger">Reset App Data</div>
+              <div className="hn-srow-desc">Clears all settings, products & saved data</div>
+            </div>
+            <button
+              className={`hn-reset-btn ${resetStep === 1 ? 'confirm' : ''} ${resetStep === 2 ? 'done' : ''}`}
+              onClick={handleReset}
+            >
+              {resetStep === 0 && <><Icon.Reset /> Reset</>}
+              {resetStep === 1 && <><Icon.Warn /> Confirm?</>}
+              {resetStep === 2 && '↺ Reloading…'}
+            </button>
+          </div>
+
+          {resetStep === 1 && (
+            <div className="hn-reset-warning">
+              ⚠️ This will permanently clear all your business data, products, and settings. This cannot be undone.
+              <button className="hn-reset-cancel" onClick={() => setResetStep(0)}>Cancel</button>
+            </div>
+          )}
+
           {/* App Permissions */}
           <div className="hn-srow" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
             <div className="hn-srow-info" style={{ marginBottom: 4 }}>
@@ -235,6 +258,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                 {perms.notifications === 'granted' ? 'Granted' : perms.notifications === 'denied' ? 'Denied' : 'Allow'}
               </button>
             </div>
+
             {/* Sound */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
               <div>
@@ -245,19 +269,6 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                 onClick={() => requestPerm('sound')}
                 style={{ background: perms.sound === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
                 {perms.sound === 'granted' ? 'Granted' : 'Allow'}
-              </button>
-            </div>
-
-            {/* Browse files */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Browse Files</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For importing/exporting data</div>
-              </div>
-              <button 
-                onClick={() => requestPerm('files')}
-                style={{ background: perms.files === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
-                {perms.files === 'granted' ? 'Granted' : 'Allow'}
               </button>
             </div>
 
@@ -287,29 +298,6 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               </button>
             </div>
           </div>
-
-          {/* Reset */}
-          <div className="hn-srow hn-srow-reset">
-            <div className="hn-srow-info">
-              <div className="hn-srow-label hn-srow-label-danger">Reset App Data</div>
-              <div className="hn-srow-desc">Clears all settings, products & saved data</div>
-            </div>
-            <button
-              className={`hn-reset-btn ${resetStep === 1 ? 'confirm' : ''} ${resetStep === 2 ? 'done' : ''}`}
-              onClick={handleReset}
-            >
-              {resetStep === 0 && <><Icon.Reset /> Reset</>}
-              {resetStep === 1 && <><Icon.Warn /> Confirm?</>}
-              {resetStep === 2 && '↺ Reloading…'}
-            </button>
-          </div>
-
-          {resetStep === 1 && (
-            <div className="hn-reset-warning">
-              ⚠️ This will permanently clear all your business data, products, and settings. This cannot be undone.
-              <button className="hn-reset-cancel" onClick={() => setResetStep(0)}>Cancel</button>
-            </div>
-          )}
 
           {/* About */}
           <div className="hn-settings-about">
