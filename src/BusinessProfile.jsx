@@ -45,6 +45,7 @@ const Ic = {
   Menu:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>,
   Tag:      () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
   Search:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
+  Share:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
   Download: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
   Upload:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
   Phone:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 15 15.91l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
@@ -485,6 +486,34 @@ function CategoryForm({ categories, onAdd, onDelete }) {
 function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
   const hasData = business.name || business.phone || business.email
 
+  const handleDownloadQR = () => {
+    try {
+      const url = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`
+      fetch(url).then(res => res.blob()).then(blob => {
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = `${(business.name || 'Business').replace(/\s+/g, '-')}-UPI-QR.png`
+        a.click()
+      }).catch(e => alert('Failed to download QR'))
+    } catch (e) { alert('Failed to download QR') }
+  }
+
+  const handleShareQR = async () => {
+    try {
+      const url = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const file = new File([blob], 'upi-qr.png', { type: 'image/png' })
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ title: 'Pay via UPI', files: [file] })
+      } else {
+        handleDownloadQR()
+      }
+    } catch (e) {
+      handleDownloadQR()
+    }
+  }
+
   if (!hasData) {
     return (
       <div className="bp-profile-empty">
@@ -532,37 +561,35 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
 
       {(business.gstin || business.upiId || taxRateObj) && (
         <div className="bp-info-card">
-          <div className="bp-info-card-title">Tax & Legal / Payments</div>
+          <div className="bp-info-card-title">Tax &amp; Legal / Payments</div>
           <InfoRow icon={Ic.Receipt} label="GSTIN" value={business.gstin} />
           <InfoRow icon={Ic.QrCode} label="UPI ID" value={business.upiId} />
-          {taxRateObj && <InfoRow icon={Ic.Tag} label="Tax Rate" value={taxRateObj.label} />}
-        </div>
-      )}
-
-      {/* UPI QR Card */}
-      {business.upiId && (
-        <div className="bp-info-card" style={{ textAlign: 'center' }}>
-          <div className="bp-info-card-title" style={{ textAlign: 'left' }}>UPI Payment QR</div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, paddingTop: 8, paddingBottom: 4 }}>
-            <div style={{ position: 'relative', display: 'inline-block' }}>
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`}
-                alt="UPI QR Code"
-                style={{ width: 200, height: 200, borderRadius: 12, display: 'block', boxShadow: '0 4px 20px rgba(99,102,241,0.18)', border: '2px solid #e0e7ff' }}
-              />
-              {/* UPI badge */}
-              <div style={{ position: 'absolute', bottom: -12, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #6366f1, #a855f7)', borderRadius: 20, padding: '3px 14px', fontSize: '0.7rem', fontWeight: 700, color: '#fff', letterSpacing: 1, boxShadow: '0 2px 8px rgba(99,102,241,0.35)', whiteSpace: 'nowrap' }}>
-                UPI
+          
+          {business.upiId && (
+            <div className="upi-qr-section" style={{ margin: '12px 16px', border: '1px dashed var(--border-color)', background: 'var(--bg-subtle, rgba(0,0,0,0.02))' }}>
+              <div className="upi-qr-wrap" style={{ width: 180, height: 180 }}>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`}
+                  alt="UPI QR Code"
+                  className="upi-qr-img"
+                  width={180} height={180}
+                />
+                <div className="upi-qr-logo">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                <button className="bp-btn-outline" style={{ fontSize: '0.8rem', padding: '6px 12px' }} onClick={handleShareQR}>
+                  <Ic.Share /> Share
+                </button>
+                <button className="bp-btn-outline" style={{ fontSize: '0.8rem', padding: '6px 12px' }} onClick={handleDownloadQR}>
+                  <Ic.Download /> Download
+                </button>
               </div>
             </div>
-            <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>{business.name || 'ManSula Nexus'}</div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginTop: 2 }}>{business.upiId}</div>
-            </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', background: 'var(--bg-subtle, rgba(0,0,0,0.04))', borderRadius: 8, padding: '6px 14px' }}>
-              Scan to pay · No amount pre-filled
-            </div>
-          </div>
+          )}
+
+          {taxRateObj && <InfoRow icon={Ic.Tag} label="Tax Rate" value={taxRateObj.label} />}
         </div>
       )}
     </div>
