@@ -513,12 +513,23 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
       ctx.restore()
 
       // ── Load App Logo ──
+      let loadedLogo = false
       const logoImg = new Image(); logoImg.crossOrigin = 'anonymous'
-      await new Promise((res) => { logoImg.onload = res; logoImg.onerror = res; logoImg.src = '/favicon.svg' })
+      await new Promise((res) => { 
+        logoImg.onload = () => { loadedLogo = true; res() }
+        logoImg.onerror = res
+        logoImg.src = 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg' 
+      })
 
       // ── App logo ──
-      const topLogoSize = 48
-      if (logoImg.width) {
+      const topLogoSize = 38
+      if (loadedLogo) {
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(W / 2, 34 + topLogoSize / 2, topLogoSize / 2 + 8, 0, Math.PI * 2)
+        ctx.fillStyle = '#ffffff'
+        ctx.fill()
+        ctx.restore()
         ctx.drawImage(logoImg, W / 2 - topLogoSize / 2, 34, topLogoSize, topLogoSize)
       } else {
         ctx.font = 'bold 40px serif'
@@ -602,8 +613,8 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
       ctx.restore()
       
       // Draw Logo
-      const centerLogoSize = 34
-      if (logoImg.width) {
+      const centerLogoSize = 32
+      if (loadedLogo) {
         ctx.drawImage(logoImg, lx - centerLogoSize / 2, ly - centerLogoSize / 2, centerLogoSize, centerLogoSize)
       } else {
         ctx.font = '26px serif'
