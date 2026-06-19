@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import { dbGet, dbSet } from './db.js'
 
 import { Html5Qrcode } from 'html5-qrcode'
-import { QRCodeSVG } from 'qrcode.react'
 
 // ── Keys ──
 export const KEY_BUSINESS   = 'mn-business'
@@ -536,39 +535,34 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
           <div className="bp-info-card-title">Tax & Legal / Payments</div>
           <InfoRow icon={Ic.Receipt} label="GSTIN" value={business.gstin} />
           <InfoRow icon={Ic.QrCode} label="UPI ID" value={business.upiId} />
-
-          {/* UPI QR inside the card */}
-          {business.upiId && (
-            <div style={{
-              margin: '4px 0 4px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              borderRadius: 14,
-              padding: '16px 16px 20px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 12,
-            }}>
-              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Scan & Pay</div>
-              <div className="upi-qr-wrap" style={{ padding: 10 }}>
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`}
-                  alt="UPI QR Code"
-                  className="upi-qr-img"
-                  width={200} height={200}
-                />
-                <div className="upi-qr-logo">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="UPI" width="22" height="22" />
-                </div>
-              </div>
-              <div className="upi-qr-meta">
-                <span className="upi-qr-id" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>{business.upiId}</span>
-              </div>
-              <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>Scan to pay via any UPI app</div>
-            </div>
-          )}
-
           {taxRateObj && <InfoRow icon={Ic.Tag} label="Tax Rate" value={taxRateObj.label} />}
+        </div>
+      )}
+
+      {/* UPI QR Card */}
+      {business.upiId && (
+        <div className="bp-info-card" style={{ textAlign: 'center' }}>
+          <div className="bp-info-card-title" style={{ textAlign: 'left' }}>UPI Payment QR</div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, paddingTop: 8, paddingBottom: 4 }}>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`}
+                alt="UPI QR Code"
+                style={{ width: 200, height: 200, borderRadius: 12, display: 'block', boxShadow: '0 4px 20px rgba(99,102,241,0.18)', border: '2px solid #e0e7ff' }}
+              />
+              {/* UPI badge */}
+              <div style={{ position: 'absolute', bottom: -12, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #6366f1, #a855f7)', borderRadius: 20, padding: '3px 14px', fontSize: '0.7rem', fontWeight: 700, color: '#fff', letterSpacing: 1, boxShadow: '0 2px 8px rgba(99,102,241,0.35)', whiteSpace: 'nowrap' }}>
+                UPI
+              </div>
+            </div>
+            <div style={{ marginTop: 16 }}>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>{business.name || 'ManSula Nexus'}</div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginTop: 2 }}>{business.upiId}</div>
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', background: 'var(--bg-subtle, rgba(0,0,0,0.04))', borderRadius: 8, padding: '6px 14px' }}>
+              Scan to pay · No amount pre-filled
+            </div>
+          </div>
         </div>
       )}
     </div>
