@@ -4,8 +4,8 @@ import { dbGet, dbSet } from './db.js'
 import { Html5Qrcode } from 'html5-qrcode'
 
 // ── Keys ──
-export const KEY_BUSINESS   = 'mn-business'
-export const KEY_PRODUCTS   = 'mn-products'
+export const KEY_BUSINESS = 'mn-business'
+export const KEY_PRODUCTS = 'mn-products'
 export const KEY_CATEGORIES = 'mn-categories'
 
 // ── Default data ──
@@ -14,50 +14,50 @@ export const DEFAULT_BUSINESS = {
 }
 export const DEFAULT_CATEGORIES = ['Coffee', 'Tea', 'Food', 'Bakery', 'Drinks']
 export const DEFAULT_PRODUCTS = [
-  { id: 1,  name: 'Espresso',         category: 'Coffee', price: 120, emoji: '☕', badge: 'popular' },
-  { id: 2,  name: 'Cappuccino',       category: 'Coffee', price: 180, emoji: '☕' },
-  { id: 3,  name: 'Latte',            category: 'Coffee', price: 200, emoji: '🥛' },
-  { id: 4,  name: 'Cold Brew',        category: 'Coffee', price: 220, emoji: '🧊', badge: 'new' },
-  { id: 5,  name: 'Green Tea',        category: 'Tea',    price: 100, emoji: '🍵' },
-  { id: 6,  name: 'Chai Latte',       category: 'Tea',    price: 160, emoji: '🫖', badge: 'popular' },
-  { id: 7,  name: 'Croissant',        category: 'Bakery', price: 140, emoji: '🥐' },
-  { id: 8,  name: 'Blueberry Muffin', category: 'Bakery', price: 130, emoji: '🧁', badge: 'new' },
-  { id: 9,  name: 'Avocado Toast',    category: 'Food',   price: 380, emoji: '🥑', badge: 'popular' },
-  { id: 10, name: 'Club Sandwich',    category: 'Food',   price: 320, emoji: '🥪' },
-  { id: 11, name: 'Caesar Salad',     category: 'Food',   price: 280, emoji: '🥗' },
-  { id: 12, name: 'Orange Juice',     category: 'Drinks', price: 120, emoji: '🍊' },
-  { id: 13, name: 'Mango Smoothie',   category: 'Drinks', price: 180, emoji: '🥭', badge: 'new' },
-  { id: 14, name: 'Mineral Water',    category: 'Drinks', price: 60,  emoji: '💧' },
-  { id: 15, name: 'Chocolate Cake',   category: 'Bakery', price: 200, emoji: '🎂', badge: 'popular' },
-  { id: 16, name: 'Cheesecake',       category: 'Bakery', price: 220, emoji: '🍰' },
+  { id: 1, name: 'Espresso', category: 'Coffee', price: 120, emoji: '☕', badge: 'popular' },
+  { id: 2, name: 'Cappuccino', category: 'Coffee', price: 180, emoji: '☕' },
+  { id: 3, name: 'Latte', category: 'Coffee', price: 200, emoji: '🥛' },
+  { id: 4, name: 'Cold Brew', category: 'Coffee', price: 220, emoji: '🧊', badge: 'new' },
+  { id: 5, name: 'Green Tea', category: 'Tea', price: 100, emoji: '🍵' },
+  { id: 6, name: 'Chai Latte', category: 'Tea', price: 160, emoji: '🫖', badge: 'popular' },
+  { id: 7, name: 'Croissant', category: 'Bakery', price: 140, emoji: '🥐' },
+  { id: 8, name: 'Blueberry Muffin', category: 'Bakery', price: 130, emoji: '🧁', badge: 'new' },
+  { id: 9, name: 'Avocado Toast', category: 'Food', price: 380, emoji: '🥑', badge: 'popular' },
+  { id: 10, name: 'Club Sandwich', category: 'Food', price: 320, emoji: '🥪' },
+  { id: 11, name: 'Caesar Salad', category: 'Food', price: 280, emoji: '🥗' },
+  { id: 12, name: 'Orange Juice', category: 'Drinks', price: 120, emoji: '🍊' },
+  { id: 13, name: 'Mango Smoothie', category: 'Drinks', price: 180, emoji: '🥭', badge: 'new' },
+  { id: 14, name: 'Mineral Water', category: 'Drinks', price: 60, emoji: '💧' },
+  { id: 15, name: 'Chocolate Cake', category: 'Bakery', price: 200, emoji: '🎂', badge: 'popular' },
+  { id: 16, name: 'Cheesecake', category: 'Bakery', price: 220, emoji: '🍰' },
 ]
 
 // ── Icons ──
 const Ic = {
-  Back:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
-  Save:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
-  Plus:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>,
-  Edit:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
-  Trash:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>,
-  X:        () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>,
-  Check:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
-  Store:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
-  Menu:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>,
-  Tag:      () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
-  Search:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
-  Share:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
-  Download: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
-  Upload:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
-  Phone:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 15 15.91l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
-  Mail:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
-  MapPin:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
-  Receipt:  () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><path d="M16 8H8M16 12H8M12 16H8"/></svg>,
-  AlertTri: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-  QrCode:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="9" y="9" width="6" height="6"/></svg>,
+  Back: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>,
+  Save: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>,
+  Plus: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>,
+  Edit: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>,
+  Trash: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>,
+  X: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>,
+  Check: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
+  Store: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>,
+  Menu: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M3 12h18M3 18h18" /></svg>,
+  Tag: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>,
+  Search: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>,
+  Share: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>,
+  Download: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>,
+  Upload: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>,
+  Phone: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 15 15.91l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>,
+  Mail: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>,
+  MapPin: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>,
+  Receipt: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z" /><path d="M16 8H8M16 12H8M12 16H8" /></svg>,
+  AlertTri: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
+  QrCode: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="9" y="9" width="6" height="6" /></svg>,
 }
 
 const BUSINESS_TYPES = ['Café', 'Restaurant', 'Retail Shop', 'Grocery', 'Pharmacy', 'Bakery', 'Food Truck', 'Hotel', 'Other']
-const BADGE_OPTIONS  = [{ value: '', label: 'None' }, { value: 'popular', label: '🔥 Popular' }, { value: 'new', label: '✨ New' }]
+const BADGE_OPTIONS = [{ value: '', label: 'None' }, { value: 'popular', label: '🔥 Popular' }, { value: 'new', label: '✨ New' }]
 
 // ─── UPI SCANNER ───
 function UpiScanner({ onScan, onClose }) {
@@ -74,7 +74,7 @@ function UpiScanner({ onScan, onClose }) {
           else onScan(pa)
         }
       }
-    } catch(e) {
+    } catch (e) {
       if (decodedText.includes('@')) {
         if (scanner && scanner.isScanning) scanner.stop().then(() => onScan(decodedText)).catch(() => onScan(decodedText))
         else onScan(decodedText)
@@ -89,12 +89,12 @@ function UpiScanner({ onScan, onClose }) {
       { facingMode: "environment" },
       { fps: 10, qrbox: { width: 250, height: 250 } },
       (text) => processScan(text, html5QrCode),
-      () => {}
+      () => { }
     ).catch(console.error)
 
     return () => {
       if (html5QrCode.isScanning) {
-        html5QrCode.stop().catch(() => {})
+        html5QrCode.stop().catch(() => { })
       }
       scannerRef.current = null
     }
@@ -121,10 +121,10 @@ function UpiScanner({ onScan, onClose }) {
           <div className="bp-form-title">Scan UPI QR</div>
           <button className="bp-icon-btn" onClick={onClose}><Ic.X /></button>
         </div>
-        
+
         <div id="reader" style={{ width: '100%', maxWidth: '300px', borderRadius: '12px', overflow: 'hidden' }}></div>
         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 12, marginBottom: 16 }}>Point camera at any UPI QR code.</p>
-        
+
         <div style={{ width: '100%', textAlign: 'center', borderTop: '1px solid var(--border-color)', paddingTop: 16 }}>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>Or upload an image</span>
           <input type="file" ref={fileRef} accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
@@ -141,11 +141,11 @@ function UpiScanner({ onScan, onClose }) {
 function ProductForm({ product, categories, onSave, onCancel }) {
   const isNew = !product?.id
   const [form, setForm] = useState({
-    name:     product?.name     || '',
+    name: product?.name || '',
     category: product?.category || (categories[0] || 'Coffee'),
-    price:    product?.price    || '',
-    emoji:    product?.emoji    || '🍽️',
-    badge:    product?.badge    || '',
+    price: product?.price || '',
+    emoji: product?.emoji || '🍽️',
+    badge: product?.badge || '',
   })
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -155,18 +155,18 @@ function ProductForm({ product, categories, onSave, onCancel }) {
   const [newGroup, setNewGroup] = useState(null) // null = hidden, obj = visible
   // newOption form per group: { [groupId]: { label, price } }
   const [newOpts, setNewOpts] = useState({})
-  
+
   // variantsMatrix: { 'o1|o2': price }
   const [variantsMatrix, setVariantsMatrix] = useState(product?.variantsMatrix || {})
 
   const addGroup = () => {
     if (!newGroup?.name?.trim()) return
-    const g = { 
-      id: `g-${Date.now()}`, 
-      name: newGroup.name.trim(), 
-      required: newGroup.required ?? true, 
+    const g = {
+      id: `g-${Date.now()}`,
+      name: newGroup.name.trim(),
+      required: newGroup.required ?? true,
       type: newGroup.type || 'price',
-      options: [] 
+      options: []
     }
     setVariants(vs => [...vs, g])
     setNewGroup(null)
@@ -193,12 +193,12 @@ function ProductForm({ product, categories, onSave, onCancel }) {
     if (isNaN(price) || (price <= 0 && !hasPriceVariant)) return
     onSave({
       ...(product || {}),
-      id:       product?.id || Date.now(),
-      name:     form.name.trim(),
+      id: product?.id || Date.now(),
+      name: form.name.trim(),
       category: form.category,
       price,
-      emoji:    form.emoji || '🍽️',
-      badge:    form.badge || undefined,
+      emoji: form.emoji || '🍽️',
+      badge: form.badge || undefined,
       variants: variants.length > 0 ? variants : undefined,
       variantsMatrix: Object.keys(variantsMatrix).length > 0 ? variantsMatrix : undefined,
     })
@@ -253,7 +253,7 @@ function ProductForm({ product, categories, onSave, onCancel }) {
                 <div className="bp-variant-group-name">
                   {g.name}
                   {g.required && <span className="bp-variant-req">Required</span>}
-                  <span className="bp-variant-hint" style={{marginLeft: 4}}>{g.type === 'price' ? 'Sets Item Price' : 'Adds to Price'}</span>
+                  <span className="bp-variant-hint" style={{ marginLeft: 4 }}>{g.type === 'price' ? 'Sets Item Price' : 'Adds to Price'}</span>
                 </div>
                 <button className="bp-icon-btn bp-icon-btn-danger" onClick={() => removeGroup(g.id)} title="Remove group"><Ic.Trash /></button>
               </div>
@@ -312,10 +312,10 @@ function ProductForm({ product, categories, onSave, onCancel }) {
                 onKeyDown={e => e.key === 'Enter' && addGroup()}
               />
               <div className="bp-variant-req-row" style={{ marginTop: 4 }}>
-                <select 
-                  className="bp-select" 
+                <select
+                  className="bp-select"
                   style={{ fontSize: '0.85rem', padding: '8px 12px' }}
-                  value={newGroup.type} 
+                  value={newGroup.type}
                   onChange={e => setNewGroup(g => ({ ...g, type: e.target.value }))}
                 >
                   <option value="price">This variant sets the Item Price (e.g. Size)</option>
@@ -391,10 +391,10 @@ function ProductForm({ product, categories, onSave, onCancel }) {
                                 <td key={c.id}>
                                   <div className="bp-matrix-input-wrap">
                                     <span>₹</span>
-                                    <input 
-                                      type="number" 
-                                      value={variantsMatrix[key] !== undefined ? variantsMatrix[key] : fallbackPrice} 
-                                      onChange={e => setVariantsMatrix(m => ({ ...m, [key]: parseFloat(e.target.value) || '' }))} 
+                                    <input
+                                      type="number"
+                                      value={variantsMatrix[key] !== undefined ? variantsMatrix[key] : fallbackPrice}
+                                      onChange={e => setVariantsMatrix(m => ({ ...m, [key]: parseFloat(e.target.value) || '' }))}
                                     />
                                   </div>
                                 </td>
@@ -417,7 +417,7 @@ function ProductForm({ product, categories, onSave, onCancel }) {
                           const key = combo.map(c => c.id).join('|')
                           let fallbackPrice = ''
                           if (!variantsMatrix[key]) {
-                             fallbackPrice = combo[0].price !== undefined ? combo[0].price : ''
+                            fallbackPrice = combo[0].price !== undefined ? combo[0].price : ''
                           }
                           return (
                             <tr key={key}>
@@ -425,10 +425,10 @@ function ProductForm({ product, categories, onSave, onCancel }) {
                               <td>
                                 <div className="bp-matrix-input-wrap">
                                   <span>₹</span>
-                                  <input 
-                                    type="number" 
-                                    value={variantsMatrix[key] !== undefined ? variantsMatrix[key] : fallbackPrice} 
-                                    onChange={e => setVariantsMatrix(m => ({ ...m, [key]: parseFloat(e.target.value) || '' }))} 
+                                  <input
+                                    type="number"
+                                    value={variantsMatrix[key] !== undefined ? variantsMatrix[key] : fallbackPrice}
+                                    onChange={e => setVariantsMatrix(m => ({ ...m, [key]: parseFloat(e.target.value) || '' }))}
                                   />
                                 </div>
                               </td>
@@ -658,7 +658,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
       ctx.fillText('ManSula Nexus', W / 2, fY + 24)
       ctx.font = '12px Arial, sans-serif'
       ctx.fillStyle = 'rgba(255,255,255,0.3)'
-      ctx.fillText('mansulanexus.app', W / 2, fY + 42)
+      ctx.fillText('https://mansula-nexus.netlify.app/', W / 2, fY + 42)
 
       canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Canvas failed')), 'image/png')
     } catch (err) { reject(err) }
@@ -730,8 +730,8 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
       {/* Info rows */}
       <div className="bp-info-card">
         <div className="bp-info-card-title">Contact Details</div>
-        <InfoRow icon={Ic.Phone}  label="Phone"   value={business.phone} />
-        <InfoRow icon={Ic.Mail}   label="Email"   value={business.email} />
+        <InfoRow icon={Ic.Phone} label="Phone" value={business.phone} />
+        <InfoRow icon={Ic.Mail} label="Email" value={business.email} />
         <InfoRow icon={Ic.MapPin} label="Address" value={business.address} />
       </div>
 
@@ -739,7 +739,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
         <div className="bp-info-card">
           <div className="bp-info-card-title">Tax &amp; Legal / Payments</div>
           <InfoRow icon={Ic.Receipt} label="GSTIN" value={business.gstin} />
-          
+
           {business.upiId && (
             <div className="bp-info-row" style={{ borderBottom: 'none', paddingBottom: 8 }}>
               <span className="bp-info-icon"><Ic.QrCode /></span>
@@ -749,34 +749,44 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
               </div>
             </div>
           )}
-          
+
           {business.upiId && (
             <div style={{ borderBottom: taxRateObj ? '1px solid var(--border-color)' : 'none', paddingBottom: taxRateObj ? 20 : 0, marginBottom: taxRateObj ? 8 : 0 }}>
               <div className="upi-qr-section" style={{ margin: '0 16px', border: '1px dashed var(--border-color)', background: 'var(--bg-subtle, rgba(0,0,0,0.02))' }}>
                 <div className="upi-qr-wrap">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`}
-                  alt="UPI QR Code"
-                  className="upi-qr-img"
-                  width={180} height={180}
-                />
-                <div className="upi-qr-logo">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`}
+                    alt="UPI QR Code"
+                    className="upi-qr-img"
+                    width={180} height={180}
+                  />
+                  <div className="upi-qr-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+                  <button className="bp-btn-outline" style={{ fontSize: '0.8rem', padding: '6px 16px', color: '#10b981', borderColor: 'rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.05)', borderRadius: '20px', fontWeight: 600 }} onClick={handleShareQR}>
+                    <Ic.Share /> Share
+                  </button>
+                  <button className="bp-btn-outline" style={{ fontSize: '0.8rem', padding: '6px 16px', color: '#10b981', borderColor: 'rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.05)', borderRadius: '20px', fontWeight: 600 }} onClick={handleDownloadQR}>
+                    <Ic.Download /> Download
+                  </button>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-                <button className="bp-btn-outline" style={{ fontSize: '0.8rem', padding: '6px 16px', color: '#10b981', borderColor: 'rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.05)', borderRadius: '20px', fontWeight: 600 }} onClick={handleShareQR}>
-                  <Ic.Share /> Share
-                </button>
-                <button className="bp-btn-outline" style={{ fontSize: '0.8rem', padding: '6px 16px', color: '#10b981', borderColor: 'rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.05)', borderRadius: '20px', fontWeight: 600 }} onClick={handleDownloadQR}>
-                  <Ic.Download /> Download
-                </button>
-              </div>
-            </div>
             </div>
           )}
 
-          {taxRateObj && <InfoRow icon={Ic.Tag} label="Tax Rate" value={taxRateObj.label} />}
+          {taxRateObj && (
+            <>
+              <InfoRow icon={Ic.Tag} label="Tax Rate" value={taxRateObj.label} />
+              <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#fffbfa', border: '1px solid #fee2e2', borderRadius: '12px', fontSize: '12px', color: '#6b7280', lineHeight: 1.4, display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                <div style={{ color: '#ef4444', flexShrink: 0, width: '16px', height: '16px', marginTop: '2px' }}><Ic.AlertTri /></div>
+                <div>
+                  <span style={{ color: '#ef4444', fontWeight: 600 }}>Disclaimer:</span> Tax slabs and details are selected by the user. We are not responsible for any inaccuracies or misinformation regarding applied taxes.
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -785,15 +795,15 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
 
 // ─── MAIN COMPONENT ───
 export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRates }) {
-  const [tab, setTab]           = useState('info')
+  const [tab, setTab] = useState('info')
   const [infoMode, setInfoMode] = useState('view')   // 'view' | 'edit'
   const [business, setBusiness] = useState(DEFAULT_BUSINESS)
   const [products, setProducts] = useState(DEFAULT_PRODUCTS)
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
-  const [loaded, setLoaded]     = useState(false)
-  const [saved, setSaved]       = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  const [saved, setSaved] = useState(false)
   const [editProduct, setEditProduct] = useState(null)
-  const [searchQ, setSearchQ]   = useState('')
+  const [searchQ, setSearchQ] = useState('')
   const [filterCat, setFilterCat] = useState('All')
   const [importStatus, setImportStatus] = useState(null) // null | 'ok' | 'err'
   const [showScanner, setShowScanner] = useState(false)
@@ -830,11 +840,11 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
     }
     const json = JSON.stringify(payload, null, 2)
     const blob = new Blob([json], { type: 'application/json' })
-    const url  = URL.createObjectURL(blob)
-    const a    = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
     const name = (business.name || 'mansula-nexus').replace(/\s+/g, '-').toLowerCase()
-    a.href     = url
-    a.download = `${name}-backup-${new Date().toISOString().slice(0,10)}.json`
+    a.href = url
+    a.download = `${name}-backup-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -847,8 +857,8 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
       const text = await file.text()
       const data = JSON.parse(text)
       if (!data._version) throw new Error('Invalid backup')
-      if (data.business)   { setBusiness({ ...DEFAULT_BUSINESS, ...data.business }); await dbSet(KEY_BUSINESS,   data.business) }
-      if (data.products)   { setProducts(data.products);   await dbSet(KEY_PRODUCTS,   data.products) }
+      if (data.business) { setBusiness({ ...DEFAULT_BUSINESS, ...data.business }); await dbSet(KEY_BUSINESS, data.business) }
+      if (data.products) { setProducts(data.products); await dbSet(KEY_PRODUCTS, data.products) }
       if (data.categories) { setCategories(data.categories); await dbSet(KEY_CATEGORIES, data.categories) }
       setImportStatus('ok')
       setInfoMode('view')
@@ -875,16 +885,16 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
   }
 
   const filteredProducts = products.filter(p => {
-    const matchQ   = !searchQ || p.name.toLowerCase().includes(searchQ.toLowerCase())
+    const matchQ = !searchQ || p.name.toLowerCase().includes(searchQ.toLowerCase())
     const matchCat = filterCat === 'All' || p.category === filterCat
     return matchQ && matchCat
   })
 
   const tabs = [
-    { id: 'info',       label: 'Profile',    Icon: Ic.Store },
-    { id: 'menu',       label: 'Menu',       Icon: Ic.Menu  },
-    { id: 'categories', label: 'Categories', Icon: Ic.Tag   },
-    { id: 'backup',     label: 'Backup',     Icon: Ic.Download },
+    { id: 'info', label: 'Profile', Icon: Ic.Store },
+    { id: 'menu', label: 'Menu', Icon: Ic.Menu },
+    { id: 'categories', label: 'Categories', Icon: Ic.Tag },
+    { id: 'backup', label: 'Backup', Icon: Ic.Download },
   ]
 
   if (!loaded) {
@@ -894,12 +904,12 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
   return (
     <div className="bp-root">
       {showScanner && (
-        <UpiScanner 
-          onClose={() => setShowScanner(false)} 
-          onScan={(id) => { 
+        <UpiScanner
+          onClose={() => setShowScanner(false)}
+          onScan={(id) => {
             setBusiness(b => ({ ...b, upiId: id }))
             setShowScanner(false)
-          }} 
+          }}
         />
       )}
 
@@ -992,6 +1002,12 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
                 <select className="bp-input" value={taxRateObj.value} onChange={e => onTaxRate(taxRates.find(t => t.value === parseFloat(e.target.value)))}>
                   {taxRates.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
+                <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#fffbfa', border: '1px solid #fee2e2', borderRadius: '8px', fontSize: '12px', color: '#6b7280', lineHeight: 1.4, display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                  <div style={{ color: '#ef4444', flexShrink: 0, width: '16px', height: '16px', marginTop: '2px' }}><Ic.AlertTri /></div>
+                  <div>
+                    <span style={{ color: '#ef4444', fontWeight: 600 }}>Disclaimer:</span> Tax slabs and details are selected by the user. We are not responsible for any inaccuracies or misinformation regarding applied taxes.
+                  </div>
+                </div>
               </div>
               <div className="bp-field">
                 <label className="bp-label">GSTIN</label>
@@ -1048,7 +1064,7 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
                   <div className="bp-product-name">
                     {prod.name}
                     {prod.badge && <span className={`bp-badge bp-badge-${prod.badge}`}>{prod.badge}</span>}
-                    {prod.variants?.length > 0 && <span className="bp-badge variant-badge" style={{marginLeft: 6}}>Variants</span>}
+                    {prod.variants?.length > 0 && <span className="bp-badge variant-badge" style={{ marginLeft: 6 }}>Variants</span>}
                   </div>
                   <div className="bp-product-meta">
                     {prod.category} · {prod.variants?.length > 0 ? `from ₹${prod.price}` : `₹${prod.price}`}
