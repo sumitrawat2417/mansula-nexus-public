@@ -567,7 +567,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
           
           {business.upiId && (
             <div className="upi-qr-section" style={{ margin: '12px 16px', border: '1px dashed var(--border-color)', background: 'var(--bg-subtle, rgba(0,0,0,0.02))' }}>
-              <div className="upi-qr-wrap" style={{ width: 180, height: 180 }}>
+              <div className="upi-qr-wrap">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`}
                   alt="UPI QR Code"
@@ -578,11 +578,11 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
                   <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-                <button className="bp-btn-outline" style={{ fontSize: '0.8rem', padding: '6px 12px' }} onClick={handleShareQR}>
+              <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+                <button className="bp-btn-outline" style={{ fontSize: '0.8rem', padding: '6px 16px', color: '#10b981', borderColor: 'rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.05)', borderRadius: '20px', fontWeight: 600 }} onClick={handleShareQR}>
                   <Ic.Share /> Share
                 </button>
-                <button className="bp-btn-outline" style={{ fontSize: '0.8rem', padding: '6px 12px' }} onClick={handleDownloadQR}>
+                <button className="bp-btn-outline" style={{ fontSize: '0.8rem', padding: '6px 16px', color: '#10b981', borderColor: 'rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.05)', borderRadius: '20px', fontWeight: 600 }} onClick={handleDownloadQR}>
                   <Ic.Download /> Download
                 </button>
               </div>
