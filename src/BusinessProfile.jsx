@@ -733,11 +733,21 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
         <div className="bp-info-card">
           <div className="bp-info-card-title">Tax &amp; Legal / Payments</div>
           <InfoRow icon={Ic.Receipt} label="GSTIN" value={business.gstin} />
-          <InfoRow icon={Ic.QrCode} label="UPI ID" value={business.upiId} />
           
           {business.upiId && (
-            <div className="upi-qr-section" style={{ margin: '12px 16px', border: '1px dashed var(--border-color)', background: 'var(--bg-subtle, rgba(0,0,0,0.02))' }}>
-              <div className="upi-qr-wrap">
+            <div className="bp-info-row" style={{ borderBottom: 'none', paddingBottom: 8 }}>
+              <span className="bp-info-icon"><Ic.QrCode /></span>
+              <div className="bp-info-content">
+                <div className="bp-info-label">UPI ID</div>
+                <div className="bp-info-value">{business.upiId}</div>
+              </div>
+            </div>
+          )}
+          
+          {business.upiId && (
+            <div style={{ borderBottom: taxRateObj ? '1px solid var(--border-color)' : 'none', paddingBottom: taxRateObj ? 20 : 0, marginBottom: taxRateObj ? 8 : 0 }}>
+              <div className="upi-qr-section" style={{ margin: '0 16px', border: '1px dashed var(--border-color)', background: 'var(--bg-subtle, rgba(0,0,0,0.02))' }}>
+                <div className="upi-qr-wrap">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`}
                   alt="UPI QR Code"
