@@ -489,196 +489,176 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
   // Draws a premium branded QR card on a canvas and returns a blob
   const generateQRCard = () => new Promise(async (resolve, reject) => {
     try {
-      const W = 600, H = 900
+      const W = 600, H = 960
       const canvas = document.createElement('canvas')
       canvas.width = W; canvas.height = H
       const ctx = canvas.getContext('2d')
 
-      // ── Background gradient (deep indigo → violet) ──
-      const bg = ctx.createLinearGradient(0, 0, W, H)
-      bg.addColorStop(0, '#1e1b4b')
-      bg.addColorStop(0.5, '#312e81')
-      bg.addColorStop(1, '#4c1d95')
+      // ── Background gradient ──
+      const bg = ctx.createLinearGradient(0, 0, 0, H)
+      bg.addColorStop(0, '#1a1150')
+      bg.addColorStop(0.55, '#2d2380')
+      bg.addColorStop(1, '#4a1d96')
       ctx.fillStyle = bg
       ctx.fillRect(0, 0, W, H)
 
-      // ── Decorative circles ──
-      ctx.save()
-      ctx.globalAlpha = 0.07
-      ctx.fillStyle = '#ffffff'
-      ctx.beginPath(); ctx.arc(W - 60, 60, 140, 0, Math.PI * 2); ctx.fill()
-      ctx.beginPath(); ctx.arc(60, H - 60, 120, 0, Math.PI * 2); ctx.fill()
-      ctx.globalAlpha = 0.04
-      ctx.beginPath(); ctx.arc(W / 2, H / 2, 280, 0, Math.PI * 2); ctx.fill()
-      ctx.restore()
+      // ── Decorative radial glows ──
+      const drawGlow = (x, y, r, alpha) => {
+        ctx.save(); ctx.globalAlpha = alpha
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r)
+        g.addColorStop(0, '#a78bfa'); g.addColorStop(1, 'transparent')
+        ctx.fillStyle = g
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill()
+        ctx.restore()
+      }
+      drawGlow(W - 40, 100, 220, 0.3)
+      drawGlow(40, H - 100, 180, 0.25)
+      drawGlow(W / 2, 440, 300, 0.1)
 
-      // ── Load App Logo ──
-      let loadedLogo = false
+      // ── Load Google logo ──
+      let logoLoaded = false
       const logoImg = new Image(); logoImg.crossOrigin = 'anonymous'
-      await new Promise((res) => { 
-        logoImg.onload = () => { loadedLogo = true; res() }
+      await new Promise((res) => {
+        logoImg.onload = () => { logoLoaded = true; res() }
         logoImg.onerror = res
-        logoImg.src = 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg' 
+        logoImg.src = 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg'
       })
 
-      // ── App logo ──
-      const topLogoSize = 38
-      if (loadedLogo) {
-        ctx.save()
-        ctx.beginPath()
-        ctx.arc(W / 2, 34 + topLogoSize / 2, topLogoSize / 2 + 8, 0, Math.PI * 2)
-        ctx.fillStyle = '#ffffff'
-        ctx.fill()
-        ctx.restore()
-        ctx.drawImage(logoImg, W / 2 - topLogoSize / 2, 34, topLogoSize, topLogoSize)
-      } else {
-        ctx.font = 'bold 40px serif'
-        ctx.textAlign = 'center'
-        ctx.fillStyle = '#ffffff'
-        ctx.fillText('🏪', W / 2, 72)
+      // ── TOP: Logo circle perfectly centered ──
+      const logoCX = W / 2, logoCY = 68, logoBgR = 34
+      ctx.save()
+      ctx.shadowColor = 'rgba(167,139,250,0.6)'; ctx.shadowBlur = 28
+      ctx.beginPath(); ctx.arc(logoCX, logoCY, logoBgR, 0, Math.PI * 2)
+      ctx.fillStyle = '#ffffff'; ctx.fill()
+      ctx.restore()
+      if (logoLoaded) {
+        const lsz = 40
+        ctx.drawImage(logoImg, logoCX - lsz / 2, logoCY - lsz / 2, lsz, lsz)
       }
 
-      // ── App name ──
-      ctx.font = 'bold 28px Arial, sans-serif'
+      // App name
+      ctx.textAlign = 'center'
+      ctx.font = 'bold 30px Arial, sans-serif'
       ctx.fillStyle = '#ffffff'
-      ctx.fillText('ManSula Nexus', W / 2, 110)
+      ctx.fillText('ManSula Nexus', W / 2, logoCY + logoBgR + 34)
 
-      // ── Tagline ──
-      ctx.font = '16px Arial, sans-serif'
-      ctx.fillStyle = 'rgba(255,255,255,0.6)'
-      ctx.fillText('Smart Billing & Payments', W / 2, 136)
+      // Tagline
+      ctx.font = '15px Arial, sans-serif'
+      ctx.fillStyle = 'rgba(255,255,255,0.55)'
+      ctx.fillText('Smart Billing & Payments', W / 2, logoCY + logoBgR + 58)
 
       // ── White card ──
-      const cardX = 60, cardY = 160, cardW = W - 120, cardH = 560
-      const r = 28
+      const cardX = 40, cardY = 168, cardW = W - 80, cardH = 624
+      const rr = 32
       ctx.save()
-      ctx.shadowColor = 'rgba(0,0,0,0.4)'
-      ctx.shadowBlur = 40
-      ctx.shadowOffsetY = 16
+      ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 52; ctx.shadowOffsetY = 20
       ctx.beginPath()
-      ctx.moveTo(cardX + r, cardY)
-      ctx.lineTo(cardX + cardW - r, cardY)
-      ctx.quadraticCurveTo(cardX + cardW, cardY, cardX + cardW, cardY + r)
-      ctx.lineTo(cardX + cardW, cardY + cardH - r)
-      ctx.quadraticCurveTo(cardX + cardW, cardY + cardH, cardX + cardW - r, cardY + cardH)
-      ctx.lineTo(cardX + r, cardY + cardH)
-      ctx.quadraticCurveTo(cardX, cardY + cardH, cardX, cardY + cardH - r)
-      ctx.lineTo(cardX, cardY + r)
-      ctx.quadraticCurveTo(cardX, cardY, cardX + r, cardY)
+      ctx.moveTo(cardX + rr, cardY)
+      ctx.lineTo(cardX + cardW - rr, cardY)
+      ctx.quadraticCurveTo(cardX + cardW, cardY, cardX + cardW, cardY + rr)
+      ctx.lineTo(cardX + cardW, cardY + cardH - rr)
+      ctx.quadraticCurveTo(cardX + cardW, cardY + cardH, cardX + cardW - rr, cardY + cardH)
+      ctx.lineTo(cardX + rr, cardY + cardH)
+      ctx.quadraticCurveTo(cardX, cardY + cardH, cardX, cardY + cardH - rr)
+      ctx.lineTo(cardX, cardY + rr)
+      ctx.quadraticCurveTo(cardX, cardY, cardX + rr, cardY)
       ctx.closePath()
-      ctx.fillStyle = '#ffffff'
-      ctx.fill()
+      ctx.fillStyle = '#ffffff'; ctx.fill()
       ctx.restore()
 
-      // ── "Scan & Pay" pill label ──
+      // ── SCAN & PAY pill ──
       ctx.save()
-      const pillW = 130, pillH = 32, pillX = W / 2 - pillW / 2, pillY = cardY + 24
-      ctx.beginPath()
-      ctx.roundRect(pillX, pillY, pillW, pillH, 16)
-      const pillGrad = ctx.createLinearGradient(pillX, 0, pillX + pillW, 0)
-      pillGrad.addColorStop(0, '#6366f1')
-      pillGrad.addColorStop(1, '#a855f7')
-      ctx.fillStyle = pillGrad
-      ctx.fill()
+      const pillW = 144, pillH = 34, pillY = cardY + 26
+      const pillX = W / 2 - pillW / 2
+      ctx.beginPath(); ctx.roundRect(pillX, pillY, pillW, pillH, 17)
+      const pg = ctx.createLinearGradient(pillX, 0, pillX + pillW, 0)
+      pg.addColorStop(0, '#6366f1'); pg.addColorStop(1, '#a855f7')
+      ctx.fillStyle = pg; ctx.fill()
       ctx.restore()
-      ctx.font = 'bold 14px Arial, sans-serif'
-      ctx.fillStyle = '#ffffff'
-      ctx.textAlign = 'center'
-      ctx.fillText('SCAN & PAY', W / 2, pillY + 21)
+      ctx.font = 'bold 13px Arial, sans-serif'
+      ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'
+      ctx.fillText('SCAN & PAY', W / 2, pillY + 22)
 
-      // ── Load & draw QR image ──
-      const qrSize = 260
-      const qrX = W / 2 - qrSize / 2, qrY = cardY + 76
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&qzone=2&color=312e81&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`
+      // ── QR code ──
+      const qrSize = 288
+      const qrX = W / 2 - qrSize / 2, qrY = cardY + 78
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=420x420&qzone=2&color=1e1b4b&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`
       const qrImg = new Image(); qrImg.crossOrigin = 'anonymous'
       await new Promise((res2, rej2) => { qrImg.onload = res2; qrImg.onerror = rej2; qrImg.src = qrUrl })
 
-      // QR background with subtle border
       ctx.save()
-      ctx.shadowColor = 'rgba(99,102,241,0.15)'
-      ctx.shadowBlur = 20
-      ctx.fillStyle = '#f8f8ff'
-      ctx.beginPath(); ctx.roundRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 16); ctx.fill()
+      ctx.shadowColor = 'rgba(99,102,241,0.2)'; ctx.shadowBlur = 20
+      ctx.fillStyle = '#f5f3ff'
+      ctx.beginPath(); ctx.roundRect(qrX - 12, qrY - 12, qrSize + 24, qrSize + 24, 20); ctx.fill()
       ctx.restore()
       ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize)
 
-      // ── Logo circle overlay in center of QR ──
-      const lx = W / 2, ly = qrY + qrSize / 2
+      // ── Center logo overlay in QR ──
+      const cx = W / 2, cy = qrY + qrSize / 2
       ctx.save()
-      ctx.shadowColor = 'rgba(0,0,0,0.2)'
-      ctx.shadowBlur = 8
-      ctx.beginPath(); ctx.arc(lx, ly, 26, 0, Math.PI * 2)
+      ctx.shadowColor = 'rgba(0,0,0,0.25)'; ctx.shadowBlur = 10
+      ctx.beginPath(); ctx.arc(cx, cy, 28, 0, Math.PI * 2)
       ctx.fillStyle = '#ffffff'; ctx.fill()
       ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 2.5; ctx.stroke()
       ctx.restore()
-      
-      // Draw Logo
-      const centerLogoSize = 32
-      if (loadedLogo) {
-        ctx.drawImage(logoImg, lx - centerLogoSize / 2, ly - centerLogoSize / 2, centerLogoSize, centerLogoSize)
-      } else {
-        ctx.font = '26px serif'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.fillText(business.logo || '🏪', lx, ly + 1)
-        ctx.textBaseline = 'alphabetic'
+      if (logoLoaded) {
+        const lsz = 34
+        ctx.drawImage(logoImg, cx - lsz / 2, cy - lsz / 2, lsz, lsz)
       }
 
       // ── Divider ──
-      const divY = qrY + qrSize + 30
-      ctx.strokeStyle = '#e8e8f0'; ctx.lineWidth = 1
+      const divY = qrY + qrSize + 28
+      const dg = ctx.createLinearGradient(cardX + 30, 0, cardX + cardW - 30, 0)
+      dg.addColorStop(0, 'transparent'); dg.addColorStop(0.5, '#ddd8f5'); dg.addColorStop(1, 'transparent')
+      ctx.strokeStyle = dg; ctx.lineWidth = 1
       ctx.beginPath(); ctx.moveTo(cardX + 30, divY); ctx.lineTo(cardX + cardW - 30, divY); ctx.stroke()
 
       // ── Business name ──
-      ctx.font = 'bold 26px Arial, sans-serif'
-      ctx.fillStyle = '#1e1b4b'
-      ctx.textAlign = 'center'
-      ctx.fillText(business.name || 'ManSula Nexus', W / 2, divY + 38)
+      ctx.font = 'bold 28px Arial, sans-serif'
+      ctx.fillStyle = '#1e1b4b'; ctx.textAlign = 'center'
+      ctx.fillText(business.name || 'My Business', W / 2, divY + 46)
 
       // ── UPI ID pill ──
-      const upiFontSize = 15
-      ctx.font = `${upiFontSize}px Arial, sans-serif`
-      const upiTxtW = ctx.measureText(business.upiId).width
-      const upiPillW = upiTxtW + 40, upiPillH = 30
-      const upiPillX = W / 2 - upiPillW / 2, upiPillY = divY + 52
+      const upiTxt = business.upiId || ''
+      ctx.font = '600 15px Arial, sans-serif'
+      const upiTxtW = ctx.measureText(upiTxt).width
+      const upPW = upiTxtW + 44, upPH = 32
+      const upPX = W / 2 - upPW / 2, upPY = divY + 62
       ctx.save()
-      ctx.beginPath(); ctx.roundRect(upiPillX, upiPillY, upiPillW, upiPillH, 15)
+      ctx.beginPath(); ctx.roundRect(upPX, upPY, upPW, upPH, 16)
       ctx.fillStyle = '#ede9fe'; ctx.fill()
       ctx.restore()
-      ctx.font = `600 ${upiFontSize}px Arial, sans-serif`
-      ctx.fillStyle = '#6d28d9'
-      ctx.fillText(business.upiId, W / 2, upiPillY + 20)
+      ctx.fillStyle = '#5b21b6'
+      ctx.fillText(upiTxt, W / 2, upPY + 22)
 
-      // ── "No amount pre-set" note ──
+      // ── Subtext ──
       ctx.font = '13px Arial, sans-serif'
-      ctx.fillStyle = '#9ca3af'
-      ctx.fillText('No amount pre-set · Powered by UPI', W / 2, divY + 104)
+      ctx.fillStyle = '#aaa'
+      ctx.fillText('No amount pre-set  ·  Powered by UPI', W / 2, divY + 116)
 
-      // ── UPI logo text badge ──
-      const badgeW = 80, badgeH = 28, badgeX = W / 2 - badgeW / 2, badgeY = divY + 118
+      // ── UPI badge ──
+      const bdW = 76, bdH = 28, bdX = W / 2 - bdW / 2, bdY = divY + 132
       ctx.save()
-      const badgeGrad = ctx.createLinearGradient(badgeX, 0, badgeX + badgeW, 0)
-      badgeGrad.addColorStop(0, '#f97316')
-      badgeGrad.addColorStop(0.5, '#ec4899')
-      badgeGrad.addColorStop(1, '#8b5cf6')
-      ctx.beginPath(); ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 14)
-      ctx.fillStyle = badgeGrad; ctx.fill()
+      const bgr = ctx.createLinearGradient(bdX, 0, bdX + bdW, 0)
+      bgr.addColorStop(0, '#f97316'); bgr.addColorStop(0.5, '#ec4899'); bgr.addColorStop(1, '#8b5cf6')
+      ctx.beginPath(); ctx.roundRect(bdX, bdY, bdW, bdH, 14)
+      ctx.fillStyle = bgr; ctx.fill()
       ctx.restore()
-      ctx.font = 'bold 14px Arial, sans-serif'
-      ctx.fillStyle = '#ffffff'
-      ctx.fillText('UPI', W / 2, badgeY + 19)
+      ctx.font = 'bold 13px Arial, sans-serif'
+      ctx.fillStyle = '#fff'
+      ctx.fillText('UPI', W / 2, bdY + 19)
 
       // ── Footer ──
-      const footY = H - 60
-      ctx.font = 'bold 14px Arial, sans-serif'
-      ctx.fillStyle = 'rgba(255,255,255,0.5)'
-      ctx.fillText('Generated by', W / 2, footY)
+      const fY = H - 60
+      ctx.font = '13px Arial, sans-serif'
+      ctx.fillStyle = 'rgba(255,255,255,0.4)'
+      ctx.fillText('Generated by', W / 2, fY)
       ctx.font = 'bold 18px Arial, sans-serif'
       ctx.fillStyle = 'rgba(255,255,255,0.85)'
-      ctx.fillText('ManSula Nexus', W / 2, footY + 22)
+      ctx.fillText('ManSula Nexus', W / 2, fY + 24)
       ctx.font = '12px Arial, sans-serif'
-      ctx.fillStyle = 'rgba(255,255,255,0.35)'
-      ctx.fillText('mansulanexus.app', W / 2, footY + 40)
+      ctx.fillStyle = 'rgba(255,255,255,0.3)'
+      ctx.fillText('mansulanexus.app', W / 2, fY + 42)
 
       canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Canvas failed')), 'image/png')
     } catch (err) { reject(err) }
