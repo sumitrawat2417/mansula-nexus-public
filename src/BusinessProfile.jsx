@@ -486,33 +486,203 @@ function CategoryForm({ categories, onAdd, onDelete }) {
 function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
   const hasData = business.name || business.phone || business.email
 
-  const handleDownloadQR = () => {
+  // Draws a premium branded QR card on a canvas and returns a blob
+  const generateQRCard = () => new Promise(async (resolve, reject) => {
     try {
-      const url = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`
-      fetch(url).then(res => res.blob()).then(blob => {
-        const a = document.createElement('a')
-        a.href = URL.createObjectURL(blob)
-        a.download = `${(business.name || 'Business').replace(/\s+/g, '-')}-UPI-QR.png`
-        a.click()
-      }).catch(e => alert('Failed to download QR'))
-    } catch (e) { alert('Failed to download QR') }
+      const W = 600, H = 900
+      const canvas = document.createElement('canvas')
+      canvas.width = W; canvas.height = H
+      const ctx = canvas.getContext('2d')
+
+      // ── Background gradient (deep indigo → violet) ──
+      const bg = ctx.createLinearGradient(0, 0, W, H)
+      bg.addColorStop(0, '#1e1b4b')
+      bg.addColorStop(0.5, '#312e81')
+      bg.addColorStop(1, '#4c1d95')
+      ctx.fillStyle = bg
+      ctx.fillRect(0, 0, W, H)
+
+      // ── Decorative circles ──
+      ctx.save()
+      ctx.globalAlpha = 0.07
+      ctx.fillStyle = '#ffffff'
+      ctx.beginPath(); ctx.arc(W - 60, 60, 140, 0, Math.PI * 2); ctx.fill()
+      ctx.beginPath(); ctx.arc(60, H - 60, 120, 0, Math.PI * 2); ctx.fill()
+      ctx.globalAlpha = 0.04
+      ctx.beginPath(); ctx.arc(W / 2, H / 2, 280, 0, Math.PI * 2); ctx.fill()
+      ctx.restore()
+
+      // ── App logo emoji ──
+      ctx.font = 'bold 40px serif'
+      ctx.textAlign = 'center'
+      ctx.fillStyle = '#ffffff'
+      ctx.fillText('🏪', W / 2, 72)
+
+      // ── App name ──
+      ctx.font = 'bold 28px Arial, sans-serif'
+      ctx.fillStyle = '#ffffff'
+      ctx.fillText('ManSula Nexus', W / 2, 110)
+
+      // ── Tagline ──
+      ctx.font = '16px Arial, sans-serif'
+      ctx.fillStyle = 'rgba(255,255,255,0.6)'
+      ctx.fillText('Smart Billing & Payments', W / 2, 136)
+
+      // ── White card ──
+      const cardX = 60, cardY = 160, cardW = W - 120, cardH = 560
+      const r = 28
+      ctx.save()
+      ctx.shadowColor = 'rgba(0,0,0,0.4)'
+      ctx.shadowBlur = 40
+      ctx.shadowOffsetY = 16
+      ctx.beginPath()
+      ctx.moveTo(cardX + r, cardY)
+      ctx.lineTo(cardX + cardW - r, cardY)
+      ctx.quadraticCurveTo(cardX + cardW, cardY, cardX + cardW, cardY + r)
+      ctx.lineTo(cardX + cardW, cardY + cardH - r)
+      ctx.quadraticCurveTo(cardX + cardW, cardY + cardH, cardX + cardW - r, cardY + cardH)
+      ctx.lineTo(cardX + r, cardY + cardH)
+      ctx.quadraticCurveTo(cardX, cardY + cardH, cardX, cardY + cardH - r)
+      ctx.lineTo(cardX, cardY + r)
+      ctx.quadraticCurveTo(cardX, cardY, cardX + r, cardY)
+      ctx.closePath()
+      ctx.fillStyle = '#ffffff'
+      ctx.fill()
+      ctx.restore()
+
+      // ── "Scan & Pay" pill label ──
+      ctx.save()
+      const pillW = 130, pillH = 32, pillX = W / 2 - pillW / 2, pillY = cardY + 24
+      ctx.beginPath()
+      ctx.roundRect(pillX, pillY, pillW, pillH, 16)
+      const pillGrad = ctx.createLinearGradient(pillX, 0, pillX + pillW, 0)
+      pillGrad.addColorStop(0, '#6366f1')
+      pillGrad.addColorStop(1, '#a855f7')
+      ctx.fillStyle = pillGrad
+      ctx.fill()
+      ctx.restore()
+      ctx.font = 'bold 14px Arial, sans-serif'
+      ctx.fillStyle = '#ffffff'
+      ctx.textAlign = 'center'
+      ctx.fillText('SCAN & PAY', W / 2, pillY + 21)
+
+      // ── Load & draw QR image ──
+      const qrSize = 260
+      const qrX = W / 2 - qrSize / 2, qrY = cardY + 76
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&qzone=2&color=312e81&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`
+      const qrImg = new Image(); qrImg.crossOrigin = 'anonymous'
+      await new Promise((res2, rej2) => { qrImg.onload = res2; qrImg.onerror = rej2; qrImg.src = qrUrl })
+
+      // QR background with subtle border
+      ctx.save()
+      ctx.shadowColor = 'rgba(99,102,241,0.15)'
+      ctx.shadowBlur = 20
+      ctx.fillStyle = '#f8f8ff'
+      ctx.beginPath(); ctx.roundRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 16); ctx.fill()
+      ctx.restore()
+      ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize)
+
+      // ── Logo circle overlay in center of QR ──
+      const lx = W / 2, ly = qrY + qrSize / 2
+      ctx.save()
+      ctx.shadowColor = 'rgba(0,0,0,0.2)'
+      ctx.shadowBlur = 8
+      ctx.beginPath(); ctx.arc(lx, ly, 26, 0, Math.PI * 2)
+      ctx.fillStyle = '#ffffff'; ctx.fill()
+      ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 2.5; ctx.stroke()
+      ctx.restore()
+      // Emoji logo
+      ctx.font = '26px serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(business.logo || '🏪', lx, ly + 1)
+      ctx.textBaseline = 'alphabetic'
+
+      // ── Divider ──
+      const divY = qrY + qrSize + 30
+      ctx.strokeStyle = '#e8e8f0'; ctx.lineWidth = 1
+      ctx.beginPath(); ctx.moveTo(cardX + 30, divY); ctx.lineTo(cardX + cardW - 30, divY); ctx.stroke()
+
+      // ── Business name ──
+      ctx.font = 'bold 26px Arial, sans-serif'
+      ctx.fillStyle = '#1e1b4b'
+      ctx.textAlign = 'center'
+      ctx.fillText(business.name || 'ManSula Nexus', W / 2, divY + 38)
+
+      // ── UPI ID pill ──
+      const upiFontSize = 15
+      ctx.font = `${upiFontSize}px Arial, sans-serif`
+      const upiTxtW = ctx.measureText(business.upiId).width
+      const upiPillW = upiTxtW + 40, upiPillH = 30
+      const upiPillX = W / 2 - upiPillW / 2, upiPillY = divY + 52
+      ctx.save()
+      ctx.beginPath(); ctx.roundRect(upiPillX, upiPillY, upiPillW, upiPillH, 15)
+      ctx.fillStyle = '#ede9fe'; ctx.fill()
+      ctx.restore()
+      ctx.font = `600 ${upiFontSize}px Arial, sans-serif`
+      ctx.fillStyle = '#6d28d9'
+      ctx.fillText(business.upiId, W / 2, upiPillY + 20)
+
+      // ── "No amount pre-set" note ──
+      ctx.font = '13px Arial, sans-serif'
+      ctx.fillStyle = '#9ca3af'
+      ctx.fillText('No amount pre-set · Powered by UPI', W / 2, divY + 104)
+
+      // ── UPI logo text badge ──
+      const badgeW = 80, badgeH = 28, badgeX = W / 2 - badgeW / 2, badgeY = divY + 118
+      ctx.save()
+      const badgeGrad = ctx.createLinearGradient(badgeX, 0, badgeX + badgeW, 0)
+      badgeGrad.addColorStop(0, '#f97316')
+      badgeGrad.addColorStop(0.5, '#ec4899')
+      badgeGrad.addColorStop(1, '#8b5cf6')
+      ctx.beginPath(); ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 14)
+      ctx.fillStyle = badgeGrad; ctx.fill()
+      ctx.restore()
+      ctx.font = 'bold 14px Arial, sans-serif'
+      ctx.fillStyle = '#ffffff'
+      ctx.fillText('UPI', W / 2, badgeY + 19)
+
+      // ── Footer ──
+      const footY = H - 60
+      ctx.font = 'bold 14px Arial, sans-serif'
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'
+      ctx.fillText('Generated by', W / 2, footY)
+      ctx.font = 'bold 18px Arial, sans-serif'
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'
+      ctx.fillText('ManSula Nexus', W / 2, footY + 22)
+      ctx.font = '12px Arial, sans-serif'
+      ctx.fillStyle = 'rgba(255,255,255,0.35)'
+      ctx.fillText('mansulanexus.app', W / 2, footY + 40)
+
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Canvas failed')), 'image/png')
+    } catch (err) { reject(err) }
+  })
+
+  const handleDownloadQR = async () => {
+    try {
+      const blob = await generateQRCard()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `${(business.name || 'Business').replace(/\s+/g, '-')}-UPI-QR.png`
+      a.click()
+    } catch (e) { console.error(e); alert('Failed to generate QR card') }
   }
 
   const handleShareQR = async () => {
     try {
-      const url = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`
-      const res = await fetch(url)
-      const blob = await res.blob()
-      const file = new File([blob], 'upi-qr.png', { type: 'image/png' })
+      const blob = await generateQRCard()
+      const file = new File([blob], 'upi-qr-card.png', { type: 'image/png' })
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ title: 'Pay via UPI', files: [file] })
+        await navigator.share({ title: `Pay ${business.name || 'us'} via UPI`, text: `UPI ID: ${business.upiId}`, files: [file] })
       } else {
-        handleDownloadQR()
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = `${(business.name || 'Business').replace(/\s+/g, '-')}-UPI-QR.png`
+        a.click()
       }
-    } catch (e) {
-      handleDownloadQR()
-    }
+    } catch (e) { console.error(e) }
   }
+
 
   if (!hasData) {
     return (
