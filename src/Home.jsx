@@ -233,7 +233,9 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                 disabled={perms.notifications === 'denied'}
                 style={{ background: perms.notifications === 'granted' ? '#10b981' : (perms.notifications === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.notifications === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.notifications === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
                 {perms.notifications === 'granted' ? 'Granted' : perms.notifications === 'denied' ? 'Denied' : 'Allow'}
-                    {/* Sound */}
+              </button>
+            </div>
+            {/* Sound */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
               <div>
                 <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Sound</div>
