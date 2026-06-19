@@ -401,60 +401,68 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit }) {
 
 // ── Export Modal ──
 function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll }) {
-  const cardStyle = { padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' };
-  const iconStyle = { width: 40, height: 40, flexShrink: 0 };
+  const cardStyle = { padding: '12px 14px', gap: '10px' };
+  const iconStyle = { width: 36, height: 36, flexShrink: 0 };
 
   return (
     <div className="or-modal-overlay" onClick={onClose} style={{ zIndex: 10000 }}>
-      <div className="or-modal" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: 600, padding: 0 }}>
-        <div className="or-modal-header" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>Data & Export</div>
+      <div className="or-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 450, padding: 0 }}>
+        <div className="or-modal-header" style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Data & Export</div>
           <button className="or-modal-close" onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><I.X s={20} /></button>
         </div>
         
-        <div className="or-modal-body" style={{ padding: '20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+        <div className="or-modal-body" style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           
           <div className="bp-backup-card bp-backup-export" style={cardStyle}>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div className="bp-backup-card-icon" style={{ ...iconStyle, background: 'rgba(100,116,139,0.12)', color: '#64748b' }}><I.Receipt s={20} /></div>
-              <div className="bp-backup-card-title" style={{ fontSize: '0.95rem', fontWeight: 600, margin: 0 }}>Export CSV</div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div className="bp-backup-card-icon" style={{ ...iconStyle, background: 'rgba(100,116,139,0.12)', color: '#64748b' }}><I.Receipt s={18} /></div>
+              <div className="bp-backup-card-info">
+                <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Export CSV</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Download a spreadsheet of your orders for the currently selected date range.</div>
+              </div>
             </div>
-            <div className="bp-backup-card-desc" style={{ fontSize: '0.8rem', lineHeight: 1.4, flex: 1 }}>Download a spreadsheet of your orders for the currently selected date range.</div>
-            <button className="bp-btn-primary" style={{ background: '#64748b', color: '#fff', border: 'none', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem', marginTop: 'auto' }} onClick={onExportCSV}>
-              <I.Export s={16} /> Download CSV
+            <button className="bp-btn-primary" style={{ background: '#64748b', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onExportCSV}>
+              <I.Export s={14} /> Download CSV
             </button>
           </div>
 
           <div className="bp-backup-card bp-backup-export" style={cardStyle}>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div className="bp-backup-card-icon" style={iconStyle}><I.Download s={20} /></div>
-              <div className="bp-backup-card-title" style={{ fontSize: '0.95rem', fontWeight: 600, margin: 0 }}>Save Backup</div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div className="bp-backup-card-icon" style={iconStyle}><I.Download s={18} /></div>
+              <div className="bp-backup-card-info">
+                <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Save Backup to Device</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.json</code> file containing all your order records. Keep it safe to restore later.</div>
+              </div>
             </div>
-            <div className="bp-backup-card-desc" style={{ fontSize: '0.8rem', lineHeight: 1.4, flex: 1 }}>Downloads a <code>.json</code> file containing all your order records. Keep it safe to restore later.</div>
-            <button className="bp-btn-primary" style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem', marginTop: 'auto' }} onClick={onBackup}>
-              <I.Download s={16} /> Download Backup
+            <button className="bp-btn-primary" style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
+              <I.Download s={14} /> Download Backup
             </button>
           </div>
 
           <div className="bp-backup-card bp-backup-import" style={cardStyle}>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div className="bp-backup-card-icon" style={iconStyle}><I.Upload s={20} /></div>
-              <div className="bp-backup-card-title" style={{ fontSize: '0.95rem', fontWeight: 600, margin: 0 }}>Restore Backup</div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div className="bp-backup-card-icon" style={iconStyle}><I.Upload s={18} /></div>
+              <div className="bp-backup-card-info">
+                <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Restore from Backup</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.json</code> backup file to restore your historical order records.</div>
+              </div>
             </div>
-            <div className="bp-backup-card-desc" style={{ fontSize: '0.8rem', lineHeight: 1.4, flex: 1 }}>Upload a previously downloaded <code>.json</code> backup file to restore your historical order records.</div>
-            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem', marginTop: 'auto' }} onClick={() => onRestoreRef.current?.click()}>
-              <I.Upload s={16} /> Restore Backup
+            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
+              <I.Upload s={14} /> Restore Backup
             </button>
           </div>
 
           <div className="bp-backup-card" style={{ ...cardStyle, borderColor: 'rgba(239,68,68,0.3)' }}>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div className="bp-backup-card-icon" style={{ ...iconStyle, background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}><I.Trash s={20} /></div>
-              <div className="bp-backup-card-title" style={{ fontSize: '0.95rem', color: '#ef4444', fontWeight: 600, margin: 0 }}>Wipe Order Data</div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div className="bp-backup-card-icon" style={{ ...iconStyle, background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}><I.Trash s={18} /></div>
+              <div className="bp-backup-card-info">
+                <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', color: '#ef4444', marginBottom: 2 }}>Wipe Order Data</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Permanently delete all order records and reset the order counter to #1. This cannot be undone.</div>
+              </div>
             </div>
-            <div className="bp-backup-card-desc" style={{ fontSize: '0.8rem', lineHeight: 1.4, flex: 1 }}>Permanently delete all order records and reset the order counter to #1. This cannot be undone.</div>
-            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem', marginTop: 'auto' }} onClick={onClearAll}>
-              <I.Trash s={16} /> Reset Order Records
+            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onClearAll}>
+              <I.Trash s={14} /> Reset Order Records
             </button>
           </div>
 
@@ -638,7 +646,10 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
       <div className="or-storage-bar">
         <I.DB s={13} />
         <span>Storage:</span>
-        <span className="or-storage-val">{fmtBytes(storageInfo.usage)}</span>
+        <span className="or-storage-val">
+          {fmtBytes(storageInfo.usage)}
+          {storageInfo.quota > 0 && ` (${((storageInfo.usage / storageInfo.quota) * 100).toFixed(2)}%)`}
+        </span>
         {storageInfo.quota > 0 && (
           <>
             <div className="or-storage-track">
