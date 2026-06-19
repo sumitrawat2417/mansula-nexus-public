@@ -231,71 +231,73 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               <div className="hn-srow-desc">Manage system access for POS features</div>
             </div>
             
-            {/* Camera */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Camera</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For barcode scanning</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              {/* Camera */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px', borderRadius: '10px', gap: '10px' }}>
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>Camera</div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)' }}>For barcode scanning</div>
+                </div>
+                <button 
+                  onClick={() => requestPerm('camera')}
+                  disabled={perms.camera === 'denied'}
+                  style={{ background: perms.camera === 'granted' ? '#10b981' : (perms.camera === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.camera === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.camera === 'denied' ? 'not-allowed' : 'pointer', width: '100%' }}>
+                  {perms.camera === 'granted' ? 'Granted' : perms.camera === 'denied' ? 'Denied' : 'Allow'}
+                </button>
               </div>
-              <button 
-                onClick={() => requestPerm('camera')}
-                disabled={perms.camera === 'denied'}
-                style={{ background: perms.camera === 'granted' ? '#10b981' : (perms.camera === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.camera === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.camera === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
-                {perms.camera === 'granted' ? 'Granted' : perms.camera === 'denied' ? 'Denied' : 'Allow'}
-              </button>
-            </div>
 
-            {/* Notifications */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Notifications</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For order alerts & updates</div>
+              {/* Notifications */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px', borderRadius: '10px', gap: '10px' }}>
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>Notifications</div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)' }}>For order alerts</div>
+                </div>
+                <button 
+                  onClick={() => requestPerm('notifications')}
+                  disabled={perms.notifications === 'denied'}
+                  style={{ background: perms.notifications === 'granted' ? '#10b981' : (perms.notifications === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.notifications === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.notifications === 'denied' ? 'not-allowed' : 'pointer', width: '100%' }}>
+                  {perms.notifications === 'granted' ? 'Granted' : perms.notifications === 'denied' ? 'Denied' : 'Allow'}
+                </button>
               </div>
-              <button 
-                onClick={() => requestPerm('notifications')}
-                disabled={perms.notifications === 'denied'}
-                style={{ background: perms.notifications === 'granted' ? '#10b981' : (perms.notifications === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.notifications === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.notifications === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
-                {perms.notifications === 'granted' ? 'Granted' : perms.notifications === 'denied' ? 'Denied' : 'Allow'}
-              </button>
-            </div>
 
-            {/* Sound */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Sound</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For order chimes & alerts</div>
+              {/* Sound */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px', borderRadius: '10px', gap: '10px' }}>
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>Sound</div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)' }}>For order chimes</div>
+                </div>
+                <button 
+                  onClick={() => requestPerm('sound')}
+                  style={{ background: perms.sound === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', width: '100%' }}>
+                  {perms.sound === 'granted' ? 'Granted' : 'Allow'}
+                </button>
               </div>
-              <button 
-                onClick={() => requestPerm('sound')}
-                style={{ background: perms.sound === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
-                {perms.sound === 'granted' ? 'Granted' : 'Allow'}
-              </button>
-            </div>
 
-            {/* Automatic downloads */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Automatic Downloads</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For saving backups & receipts</div>
+              {/* Automatic downloads */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px', borderRadius: '10px', gap: '10px' }}>
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>Downloads</div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)' }}>For saving backups</div>
+                </div>
+                <button 
+                  onClick={() => requestPerm('downloads')}
+                  style={{ background: perms.downloads === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', width: '100%' }}>
+                  {perms.downloads === 'granted' ? 'Granted' : 'Allow'}
+                </button>
               </div>
-              <button 
-                onClick={() => requestPerm('downloads')}
-                style={{ background: perms.downloads === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
-                {perms.downloads === 'granted' ? 'Granted' : 'Allow'}
-              </button>
-            </div>
 
-            {/* Pop-ups and redirects */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Pop-ups & Redirects</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For printing & external links</div>
+              {/* Pop-ups and redirects */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px', borderRadius: '10px', gap: '10px' }}>
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>Pop-ups</div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)' }}>For printing receipts</div>
+                </div>
+                <button 
+                  onClick={() => requestPerm('popups')}
+                  style={{ background: perms.popups === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', width: '100%' }}>
+                  {perms.popups === 'granted' ? 'Granted' : 'Allow'}
+                </button>
               </div>
-              <button 
-                onClick={() => requestPerm('popups')}
-                style={{ background: perms.popups === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
-                {perms.popups === 'granted' ? 'Granted' : 'Allow'}
-              </button>
             </div>
           </div>
 
