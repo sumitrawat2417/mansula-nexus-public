@@ -218,10 +218,10 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               }}
             >
               <option value="en">English</option>
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="hi">हिन्दी</option>
-              <option value="ar">العربية</option>
+              <option value="es" disabled>Español (Coming Soon)</option>
+              <option value="fr" disabled>Français (Coming Soon)</option>
+              <option value="hi" disabled>हिन्दी (Coming Soon)</option>
+              <option value="ar" disabled>العربية (Coming Soon)</option>
             </select>
           </div>
 
