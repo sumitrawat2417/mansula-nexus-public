@@ -489,10 +489,12 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
   // Draws a premium branded QR card on a canvas and returns a blob
   const generateQRCard = () => new Promise(async (resolve, reject) => {
     try {
+      const scale = 2
       const W = 600, H = 960
       const canvas = document.createElement('canvas')
-      canvas.width = W; canvas.height = H
+      canvas.width = W * scale; canvas.height = H * scale
       const ctx = canvas.getContext('2d')
+      ctx.scale(scale, scale)
 
       // ── Background gradient ──
       const bg = ctx.createLinearGradient(0, 0, 0, H)
@@ -582,7 +584,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
       // ── QR code ──
       const qrSize = 288
       const qrX = W / 2 - qrSize / 2, qrY = cardY + 78
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=420x420&qzone=2&color=1e1b4b&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&qzone=2&color=1e1b4b&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`
       const qrImg = new Image(); qrImg.crossOrigin = 'anonymous'
       await new Promise((res2, rej2) => { qrImg.onload = res2; qrImg.onerror = rej2; qrImg.src = qrUrl })
 
