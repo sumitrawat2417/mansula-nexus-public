@@ -75,6 +75,13 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
       setPerms(prev => ({ ...prev, [name]: p.state }))
     } catch (e) {
       console.error(e)
+      if (e.name === 'NotFoundError') {
+        alert(`No ${name} device was found on this system. Please connect one to grant permissions.`)
+      } else if (e.name === 'NotAllowedError') {
+        alert(`Permission to access the ${name} was denied by the browser settings.`)
+      } else {
+        alert(`Failed to request ${name} permission: ` + e.message)
+      }
     }
   }
 
