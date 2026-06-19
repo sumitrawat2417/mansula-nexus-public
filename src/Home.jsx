@@ -43,7 +43,14 @@ const TOOLS = [
 // ── Home Settings Modal ──
 function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, onClose }) {
   const [resetStep, setResetStep] = useState(0) // 0=idle 1=confirm 2=done
-  const [perms, setPerms] = useState({ camera: 'prompt', microphone: 'prompt', notifications: 'prompt' })
+  const [perms, setPerms] = useState({ 
+    camera: 'prompt', 
+    notifications: 'prompt',
+    sound: localStorage.getItem('perm_sound') || 'prompt',
+    files: localStorage.getItem('perm_files') || 'prompt',
+    downloads: localStorage.getItem('perm_downloads') || 'prompt',
+    popups: localStorage.getItem('perm_popups') || 'prompt'
+  })
 
   useEffect(() => {
     const check = async (name) => {
@@ -77,12 +84,19 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         osc.connect(gainNode);
         osc.start();
         osc.stop(ctx.currentTime + 0.1);
+        localStorage.setItem('perm_sound', 'granted');
+        setPerms(prev => ({ ...prev, sound: 'granted' }));
         alert("Sound enabled successfully! Your browser has registered this interaction to allow future audio.");
       } else if (name === 'files') {
         if (navigator.storage && navigator.storage.persist) {
           const granted = await navigator.storage.persist();
-          if (granted) alert("Persistent storage access has been granted by the browser!");
-          else alert("Persistent storage was denied. Please manage this via the browser's site settings.");
+          if (granted) {
+            localStorage.setItem('perm_files', 'granted');
+            setPerms(prev => ({ ...prev, files: 'granted' }));
+            alert("Persistent storage access has been granted by the browser!");
+          } else {
+            alert("Persistent storage was denied. Please manage this via the browser's site settings.");
+          }
         } else {
           alert("File permissions are handled automatically when you select a file.");
         }
@@ -96,9 +110,13 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         a2.download = 'dummy2.txt';
         a1.click();
         setTimeout(() => a2.click(), 100);
+        localStorage.setItem('perm_downloads', 'granted');
+        setPerms(prev => ({ ...prev, downloads: 'granted' }));
         alert("We requested multiple dummy downloads. If your browser blocks the second one, please click the download block icon in your address bar and choose 'Always allow'.");
       } else if (name === 'popups') {
         // Trigger async popup to prompt the popup blocker
+        localStorage.setItem('perm_popups', 'granted');
+        setPerms(prev => ({ ...prev, popups: 'granted' }));
         setTimeout(() => {
           const w = window.open('about:blank', '_blank', 'width=100,height=100');
           if (!w || w.closed || typeof w.closed === 'undefined') {
@@ -215,10 +233,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                 disabled={perms.notifications === 'denied'}
                 style={{ background: perms.notifications === 'granted' ? '#10b981' : (perms.notifications === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.notifications === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.notifications === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
                 {perms.notifications === 'granted' ? 'Granted' : perms.notifications === 'denied' ? 'Denied' : 'Allow'}
-              </button>
-            </div>
-
-            {/* Sound */}
+                    {/* Sound */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
               <div>
                 <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Sound</div>
@@ -226,8 +241,8 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               </div>
               <button 
                 onClick={() => requestPerm('sound')}
-                style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
-                Allow
+                style={{ background: perms.sound === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
+                {perms.sound === 'granted' ? 'Granted' : 'Allow'}
               </button>
             </div>
 
@@ -239,8 +254,8 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               </div>
               <button 
                 onClick={() => requestPerm('files')}
-                style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
-                Allow
+                style={{ background: perms.files === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
+                {perms.files === 'granted' ? 'Granted' : 'Allow'}
               </button>
             </div>
 
@@ -252,8 +267,8 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               </div>
               <button 
                 onClick={() => requestPerm('downloads')}
-                style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
-                Allow
+                style={{ background: perms.downloads === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
+                {perms.downloads === 'granted' ? 'Granted' : 'Allow'}
               </button>
             </div>
 
@@ -265,25 +280,10 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               </div>
               <button 
                 onClick={() => requestPerm('popups')}
-                style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
-                Allow
+                style={{ background: perms.popups === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
+                {perms.popups === 'granted' ? 'Granted' : 'Allow'}
               </button>
             </div>
-
-            {/* Notifications */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Notifications</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For order alerts & updates</div>
-              </div>
-              <button 
-                onClick={() => requestPerm('notifications')}
-                disabled={perms.notifications === 'denied'}
-                style={{ background: perms.notifications === 'granted' ? '#10b981' : (perms.notifications === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.notifications === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.notifications === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
-                {perms.notifications === 'granted' ? 'Granted' : perms.notifications === 'denied' ? 'Denied' : 'Allow'}
-              </button>
-            </div>
-
           </div>
 
           {/* Reset */}
