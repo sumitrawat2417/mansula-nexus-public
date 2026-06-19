@@ -512,11 +512,20 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
       ctx.beginPath(); ctx.arc(W / 2, H / 2, 280, 0, Math.PI * 2); ctx.fill()
       ctx.restore()
 
-      // ── App logo emoji ──
-      ctx.font = 'bold 40px serif'
-      ctx.textAlign = 'center'
-      ctx.fillStyle = '#ffffff'
-      ctx.fillText('🏪', W / 2, 72)
+      // ── Load App Logo ──
+      const logoImg = new Image(); logoImg.crossOrigin = 'anonymous'
+      await new Promise((res) => { logoImg.onload = res; logoImg.onerror = res; logoImg.src = '/favicon.svg' })
+
+      // ── App logo ──
+      const topLogoSize = 48
+      if (logoImg.width) {
+        ctx.drawImage(logoImg, W / 2 - topLogoSize / 2, 34, topLogoSize, topLogoSize)
+      } else {
+        ctx.font = 'bold 40px serif'
+        ctx.textAlign = 'center'
+        ctx.fillStyle = '#ffffff'
+        ctx.fillText('🏪', W / 2, 72)
+      }
 
       // ── App name ──
       ctx.font = 'bold 28px Arial, sans-serif'
@@ -591,12 +600,18 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
       ctx.fillStyle = '#ffffff'; ctx.fill()
       ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 2.5; ctx.stroke()
       ctx.restore()
-      // Emoji logo
-      ctx.font = '26px serif'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(business.logo || '🏪', lx, ly + 1)
-      ctx.textBaseline = 'alphabetic'
+      
+      // Draw Logo
+      const centerLogoSize = 34
+      if (logoImg.width) {
+        ctx.drawImage(logoImg, lx - centerLogoSize / 2, ly - centerLogoSize / 2, centerLogoSize, centerLogoSize)
+      } else {
+        ctx.font = '26px serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText(business.logo || '🏪', lx, ly + 1)
+        ctx.textBaseline = 'alphabetic'
+      }
 
       // ── Divider ──
       const divY = qrY + qrSize + 30
