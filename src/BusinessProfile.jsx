@@ -782,7 +782,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
               <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#fffbfa', border: '1px solid #fee2e2', borderRadius: '12px', fontSize: '12px', color: '#6b7280', lineHeight: 1.4, display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
                 <div style={{ color: '#ef4444', flexShrink: 0, width: '16px', height: '16px', marginTop: '2px' }}><Ic.AlertTri /></div>
                 <div>
-                  <span style={{ color: '#ef4444', fontWeight: 600 }}>Disclaimer:</span> Tax slabs and details are selected by the user. ManSula Nexus assumes no liability for inaccuracies or misinformation regarding applied taxes.
+                  <span style={{ color: '#ef4444', fontWeight: 600 }}>Disclaimer:</span> Tax rates and business information are configured entirely by the user. ManSula Nexus is not responsible for any inaccuracies, data entry errors, or misinformation regarding user-entered details or tax compliance.
                 </div>
               </div>
             </>

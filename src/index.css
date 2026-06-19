@@ -3708,6 +3708,7 @@ select {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 .bp-search-wrap {
@@ -3745,6 +3746,7 @@ select {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 2px;
+  flex-shrink: 0;
 }
 .bp-cat-chip {
   padding: 5px 13px;
@@ -3758,6 +3760,7 @@ select {
   white-space: nowrap;
   transition: all 0.18s;
   font-family: "Outfit", sans-serif;
+  flex-shrink: 0;
 }
 .bp-cat-chip.active { background: var(--brand-primary); border-color: var(--brand-primary); color: white; }
 
