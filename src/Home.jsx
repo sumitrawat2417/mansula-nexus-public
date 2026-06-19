@@ -63,16 +63,59 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
       if (name === 'camera') {
         const s = await navigator.mediaDevices.getUserMedia({ video: true })
         s.getTracks().forEach(t => t.stop())
-      } else if (name === 'microphone') {
-        const s = await navigator.mediaDevices.getUserMedia({ audio: true })
-        s.getTracks().forEach(t => t.stop())
       } else if (name === 'notifications') {
         const p = await Notification.requestPermission()
         setPerms(prev => ({ ...prev, notifications: p }))
+      } else if (name === 'sound') {
+        // Play silent sound to register interaction & allow future autoplay
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioContext();
+        const gainNode = ctx.createGain();
+        gainNode.gain.value = 0;
+        gainNode.connect(ctx.destination);
+        const osc = ctx.createOscillator();
+        osc.connect(gainNode);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.1);
+        alert("Sound enabled successfully! Your browser has registered this interaction to allow future audio.");
+      } else if (name === 'files') {
+        if (navigator.storage && navigator.storage.persist) {
+          const granted = await navigator.storage.persist();
+          if (granted) alert("Persistent storage access has been granted by the browser!");
+          else alert("Persistent storage was denied. Please manage this via the browser's site settings.");
+        } else {
+          alert("File permissions are handled automatically when you select a file.");
+        }
+      } else if (name === 'downloads') {
+        // Trigger multiple downloads to prompt the browser's Automatic Downloads block
+        const a1 = document.createElement('a');
+        a1.href = 'data:text/plain;charset=utf-8,dummy';
+        a1.download = 'dummy1.txt';
+        const a2 = document.createElement('a');
+        a2.href = 'data:text/plain;charset=utf-8,dummy';
+        a2.download = 'dummy2.txt';
+        a1.click();
+        setTimeout(() => a2.click(), 100);
+        alert("We requested multiple dummy downloads. If your browser blocks the second one, please click the download block icon in your address bar and choose 'Always allow'.");
+      } else if (name === 'popups') {
+        // Trigger async popup to prompt the popup blocker
+        setTimeout(() => {
+          const w = window.open('about:blank', '_blank', 'width=100,height=100');
+          if (!w || w.closed || typeof w.closed === 'undefined') {
+            alert("Pop-up blocked! Please check the address bar for the pop-up blocker icon (red X) and select 'Always allow pop-ups and redirects from this site'.");
+          } else {
+            w.close();
+            alert("Pop-ups are already allowed by your browser!");
+          }
+        }, 1000);
+        alert("Attempting to open a popup. Please wait 1 second...");
       }
+
       // Re-check
-      const p = await navigator.permissions.query({ name })
-      setPerms(prev => ({ ...prev, [name]: p.state }))
+      if (['camera', 'notifications'].includes(name)) {
+        const p = await navigator.permissions.query({ name })
+        setPerms(prev => ({ ...prev, [name]: p.state }))
+      }
     } catch (e) {
       console.error(e)
       if (e.name === 'NotFoundError') {
@@ -161,17 +204,69 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               </button>
             </div>
 
-            {/* Microphone */}
+            {/* Notifications */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
               <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Microphone</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For voice commands</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Notifications</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For order alerts & updates</div>
               </div>
               <button 
-                onClick={() => requestPerm('microphone')}
-                disabled={perms.microphone === 'denied'}
-                style={{ background: perms.microphone === 'granted' ? '#10b981' : (perms.microphone === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.microphone === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.microphone === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
-                {perms.microphone === 'granted' ? 'Granted' : perms.microphone === 'denied' ? 'Denied' : 'Allow'}
+                onClick={() => requestPerm('notifications')}
+                disabled={perms.notifications === 'denied'}
+                style={{ background: perms.notifications === 'granted' ? '#10b981' : (perms.notifications === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.notifications === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.notifications === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
+                {perms.notifications === 'granted' ? 'Granted' : perms.notifications === 'denied' ? 'Denied' : 'Allow'}
+              </button>
+            </div>
+
+            {/* Sound */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
+              <div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Sound</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For order chimes & alerts</div>
+              </div>
+              <button 
+                onClick={() => requestPerm('sound')}
+                style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
+                Allow
+              </button>
+            </div>
+
+            {/* Browse files */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
+              <div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Browse Files</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For importing/exporting data</div>
+              </div>
+              <button 
+                onClick={() => requestPerm('files')}
+                style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
+                Allow
+              </button>
+            </div>
+
+            {/* Automatic downloads */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
+              <div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Automatic Downloads</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For saving backups & receipts</div>
+              </div>
+              <button 
+                onClick={() => requestPerm('downloads')}
+                style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
+                Allow
+              </button>
+            </div>
+
+            {/* Pop-ups and redirects */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
+              <div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Pop-ups & Redirects</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For printing & external links</div>
+              </div>
+              <button 
+                onClick={() => requestPerm('popups')}
+                style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
+                Allow
               </button>
             </div>
 
