@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { dbGet, dbSet } from './db.js'
 
 import { Html5Qrcode } from 'html5-qrcode'
+import { QRCodeSVG } from 'qrcode.react'
 
 // ── Keys ──
 export const KEY_BUSINESS   = 'mn-business'
@@ -534,7 +535,21 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
         <div className="bp-info-card">
           <div className="bp-info-card-title">Tax & Legal / Payments</div>
           <InfoRow icon={Ic.Receipt} label="GSTIN" value={business.gstin} />
-          <InfoRow icon={Ic.QrCode} label="UPI ID" value={business.upiId} />
+          {business.upiId && (
+            <div className="bp-info-row" style={{ alignItems: 'center' }}>
+              <div className="bp-info-icon"><Ic.QrCode /></div>
+              <div className="bp-info-content" style={{ flex: 1 }}>
+                <div className="bp-info-label">UPI ID</div>
+                <div className="bp-info-val">{business.upiId}</div>
+              </div>
+              <div style={{ background: '#fff', padding: 4, borderRadius: 6, flexShrink: 0, border: '1px solid var(--border-color)' }}>
+                <QRCodeSVG 
+                  value={`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'Mansula Nexus')}&cu=INR`} 
+                  size={54} 
+                />
+              </div>
+            </div>
+          )}
           {taxRateObj && <InfoRow icon={Ic.Tag} label="Tax Rate" value={taxRateObj.label} />}
         </div>
       )}
