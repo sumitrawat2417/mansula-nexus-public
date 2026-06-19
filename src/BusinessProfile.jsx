@@ -536,39 +536,39 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
           <div className="bp-info-card-title">Tax & Legal / Payments</div>
           <InfoRow icon={Ic.Receipt} label="GSTIN" value={business.gstin} />
           <InfoRow icon={Ic.QrCode} label="UPI ID" value={business.upiId} />
-          {taxRateObj && <InfoRow icon={Ic.Tag} label="Tax Rate" value={taxRateObj.label} />}
-        </div>
-      )}
 
-      {/* UPI QR Premium Card */}
-      {business.upiId && (
-        <div style={{
-          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-          borderRadius: 20,
-          padding: '20px 16px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 14,
-          boxShadow: '0 8px 32px rgba(99,102,241,0.35)',
-        }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: 'rgba(255,255,255,0.75)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Your UPI QR Code</div>
-          <div className="upi-qr-wrap" style={{ padding: 12 }}>
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`}
-              alt="UPI QR Code"
-              className="upi-qr-img"
-              width={220} height={220}
-            />
-            <div className="upi-qr-logo">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="UPI" width="24" height="24" />
+          {/* UPI QR inside the card */}
+          {business.upiId && (
+            <div style={{
+              margin: '4px 0 4px',
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              borderRadius: 14,
+              padding: '16px 16px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 12,
+            }}>
+              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Scan & Pay</div>
+              <div className="upi-qr-wrap" style={{ padding: 10 }}>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'ManSula Nexus')}&cu=INR`)}`}
+                  alt="UPI QR Code"
+                  className="upi-qr-img"
+                  width={200} height={200}
+                />
+                <div className="upi-qr-logo">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="UPI" width="22" height="22" />
+                </div>
+              </div>
+              <div className="upi-qr-meta">
+                <span className="upi-qr-id" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>{business.upiId}</span>
+              </div>
+              <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>Scan to pay via any UPI app</div>
             </div>
-          </div>
-          <div className="upi-qr-meta">
-            <span className="upi-qr-id" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>{business.upiId}</span>
-            {business.name && <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>{business.name}</span>}
-          </div>
-          <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>Scan to pay via any UPI app</div>
+          )}
+
+          {taxRateObj && <InfoRow icon={Ic.Tag} label="Tax Rate" value={taxRateObj.label} />}
         </div>
       )}
     </div>
