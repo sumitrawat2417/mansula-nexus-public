@@ -767,6 +767,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
                 </button>
               </div>
             </div>
+            </div>
           )}
 
           {taxRateObj && <InfoRow icon={Ic.Tag} label="Tax Rate" value={taxRateObj.label} />}
