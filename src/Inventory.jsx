@@ -237,9 +237,10 @@ function AddEditItemModal({ item, menuProducts, onSave, onClose }) {
           </div>
           <div className="inv-form-group">
             <label className="inv-form-label">Unit</label>
-            <select className="inv-form-input" value={form.unit} onChange={e => setF('unit', e.target.value)}>
-              {UNITS.map(u => <option key={u}>{u}</option>)}
-            </select>
+            <input className="inv-form-input" list="inv-unit-list" value={form.unit} onChange={e => setF('unit', e.target.value)} placeholder="e.g. pcs" />
+            <datalist id="inv-unit-list">
+              {UNITS.map(u => <option key={u} value={u} />)}
+            </datalist>
           </div>
         </div>
 
@@ -993,17 +994,18 @@ function SupplierFormModal({ supplier, onSave, onClose }) {
   )
 }
 
-function SupplierDetailsModal({ supplier, purchaseLogs, onClose, onShowPriceGraph }) {
+function SupplierDetailsModal({ supplier, purchaseLogs, allProducts, onClose, onShowPriceGraph }) {
   const myLogs = purchaseLogs.filter(l => l.supplierId === supplier.id)
 
   const itemStats = {}
   myLogs.forEach(log => {
     (log.items || []).forEach(item => {
       if (!itemStats[item.productId]) {
+        const currentProduct = allProducts?.find(p => p.id === item.productId)
         itemStats[item.productId] = {
           id: item.productId,
-          name: item.productName,
-          unit: item.unit,
+          name: currentProduct ? currentProduct.name : item.productName,
+          unit: currentProduct && currentProduct.unit ? currentProduct.unit : item.unit,
           totalQty: 0,
           totalSpent: 0,
           purchaseDates: [],
@@ -1053,7 +1055,7 @@ function SupplierDetailsModal({ supplier, purchaseLogs, onClose, onShowPriceGrap
   )
 }
 
-function SuppliersTab({ suppliers, onSuppliersChanged }) {
+function SuppliersTab({ suppliers, menuProducts, inventoryItems, onSuppliersChanged }) {
   const [showForm, setShowForm] = useState(false)
   const [editSupplier, setEditSupplier] = useState(null)
   const [detailsSupplier, setDetailsSupplier] = useState(null)
@@ -1161,6 +1163,7 @@ function SuppliersTab({ suppliers, onSuppliersChanged }) {
         <SupplierDetailsModal
           supplier={detailsSupplier}
           purchaseLogs={purchaseLogs}
+          allProducts={[...(menuProducts || []), ...(inventoryItems || [])]}
           onClose={() => setDetailsSupplier(null)}
           onShowPriceGraph={(item, data) => setPriceGraphItem({ item, data })}
         />
@@ -1250,7 +1253,7 @@ export default function Inventory({ onClose }) {
           onPurchaseSaved={() => { loadInventory(); loadSuppliers(); }}
         />
       )}
-      {tab === 2 && <SuppliersTab suppliers={suppliers} onSuppliersChanged={loadSuppliers} />}
+      {tab === 2 && <SuppliersTab suppliers={suppliers} menuProducts={menuProducts} inventoryItems={inventoryItems} onSuppliersChanged={loadSuppliers} />}
     </div>
   )
 }
