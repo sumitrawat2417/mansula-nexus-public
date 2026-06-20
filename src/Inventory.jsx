@@ -539,12 +539,19 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, onSave, onClose
                       <label className="inv-form-label">Product</label>
                       <select className="inv-form-input" value={line.productId} onChange={e => handleProductSelect(line.id, e.target.value)}>
                         <option value="">— Select or type below —</option>
-                        <optgroup label="Menu Items">
-                          {menuProducts.map(p => <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>)}
-                        </optgroup>
-                        <optgroup label="Inventory Only">
-                          {inventoryItems.filter(i => !menuProducts.find(p => p.id === i.id)).map(i => <option key={i.id} value={i.id}>{i.emoji} {i.name}</option>)}
-                        </optgroup>
+                        {menuProducts.length > 0 && (
+                          <optgroup label="Menu Items">
+                            {menuProducts.map(p => <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>)}
+                          </optgroup>
+                        )}
+                        {inventoryItems.filter(i => !menuProducts.find(p => p.id === i.id)).length > 0 && (
+                          <optgroup label="Inventory Only">
+                            {inventoryItems.filter(i => !menuProducts.find(p => p.id === i.id)).map(i => <option key={i.id} value={i.id}>{i.emoji} {i.name}</option>)}
+                          </optgroup>
+                        )}
+                        {menuProducts.length === 0 && inventoryItems.length === 0 && (
+                          <option value="" disabled>No products available to select</option>
+                        )}
                       </select>
                     </div>
                     <div className="inv-form-group">

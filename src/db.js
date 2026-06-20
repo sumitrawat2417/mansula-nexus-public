@@ -5,7 +5,7 @@
 // - 'purchases' store: supplier purchase logs, indexed by purchasedAt
 
 const DB_NAME = 'mansula-nexus'
-const DB_VERSION = 3
+const DB_VERSION = 4
 
 let _db = null
 
