@@ -589,7 +589,7 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
   const handleProductNameChange = (lineId, val) => {
     const p = allProducts.find(x => x.name === val)
     if (p) {
-      setLines(prev => prev.map(l => l.id === lineId ? { ...l, productId: p.id, productName: p.name, emoji: p.emoji || '📦', unit: p.unit || 'pcs', category: p.category || '', costPerUnit: p.costPrice || 0 } : l))
+      setLines(prev => prev.map(l => l.id === lineId ? { ...l, productId: p.id, productName: p.name, emoji: p.emoji || '📦', unit: p.unit || 'pcs', category: p.category || '', costPerUnit: p.costPrice || 0, lineTotal: (l.qty || 1) * (p.costPrice || 0) } : l))
     } else {
       setLines(prev => prev.map(l => l.id === lineId ? { ...l, productId: '', productName: val } : l))
     }
