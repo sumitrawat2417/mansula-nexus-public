@@ -484,20 +484,20 @@ function LiveStockTab({ menuProducts }) {
       {/* KPI Strip */}
       <div className="inv-kpi-strip">
         <div className="inv-kpi-card">
-          <div className="inv-kpi-val">{items.length}</div>
           <div className="inv-kpi-label">Total Items</div>
+          <div className="inv-kpi-val">{items.length}</div>
         </div>
         <div className="inv-kpi-card">
-          <div className="inv-kpi-val">{fmtCur(totalValue)}</div>
           <div className="inv-kpi-label">Stock Value</div>
+          <div className="inv-kpi-val">{fmtCur(totalValue)}</div>
         </div>
         <div className="inv-kpi-card inv-kpi-card-warn">
-          <div className="inv-kpi-val">{lowCount}</div>
           <div className="inv-kpi-label">Low Stock</div>
+          <div className="inv-kpi-val">{lowCount}</div>
         </div>
         <div className="inv-kpi-card inv-kpi-card-danger">
-          <div className="inv-kpi-val">{outCount}</div>
           <div className="inv-kpi-label">Out of Stock</div>
+          <div className="inv-kpi-val">{outCount}</div>
         </div>
       </div>
 
@@ -878,20 +878,20 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
       )}
       <div className="inv-kpi-strip">
         <div className="inv-kpi-card">
-          <div className="inv-kpi-val">{logs.length}</div>
           <div className="inv-kpi-label">Total Logs</div>
+          <div className="inv-kpi-val">{logs.length}</div>
         </div>
         <div className="inv-kpi-card">
-          <div className="inv-kpi-val">{fmtCur(thisMonthSpend)}</div>
           <div className="inv-kpi-label">This Month</div>
+          <div className="inv-kpi-val">{fmtCur(thisMonthSpend)}</div>
         </div>
         <div className="inv-kpi-card">
-          <div className="inv-kpi-val">{thisMonthLogs.length}</div>
           <div className="inv-kpi-label">Purchases (Month)</div>
+          <div className="inv-kpi-val">{thisMonthLogs.length}</div>
         </div>
         <div className="inv-kpi-card">
-          <div className="inv-kpi-val inv-kpi-val-sm">{topSupplier?.[0] || '—'}</div>
           <div className="inv-kpi-label">Top Supplier</div>
+          <div className="inv-kpi-val inv-kpi-val-sm">{topSupplier?.[0] || '—'}</div>
         </div>
       </div>
 
@@ -1083,12 +1083,12 @@ function SuppliersTab({ suppliers, onSuppliersChanged }) {
     <div className="inv-tab-content">
       <div className="inv-kpi-strip">
         <div className="inv-kpi-card">
-          <div className="inv-kpi-val">{suppliers.length}</div>
           <div className="inv-kpi-label">Total Suppliers</div>
+          <div className="inv-kpi-val">{suppliers.length}</div>
         </div>
         <div className="inv-kpi-card">
-          <div className="inv-kpi-val">{fmtCur(totalSpendAll)}</div>
           <div className="inv-kpi-label">Total Spend (All Time)</div>
+          <div className="inv-kpi-val">{fmtCur(totalSpendAll)}</div>
         </div>
       </div>
 
