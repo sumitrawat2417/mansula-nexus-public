@@ -571,7 +571,8 @@ export async function savePurchaseLog(log) {
     const now = Date.now()
     const d = new Date(log.purchasedAt || now)
     const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    const record = { ...log, purchaseId: log.purchaseId || genPurchaseId(), monthKey, purchasedAt: log.purchasedAt || now, createdAt: now }
+    const isNew = !log.purchaseId
+    const record = { ...log, purchaseId: log.purchaseId || genPurchaseId(), monthKey, purchasedAt: log.purchasedAt || now, createdAt: log.createdAt || now }
 
     await new Promise((resolve) => {
       const tx = db.transaction('purchases', 'readwrite')
@@ -580,23 +581,25 @@ export async function savePurchaseLog(log) {
       tx.onerror = () => resolve()
     })
 
-    // Auto-increment inventory
-    for (const li of (record.items || [])) {
-      if (!li.productId) continue
-      const invItem = await getInventoryItem(li.productId)
-      if (invItem) {
-        const updated = await adjustInventoryStock(li.productId, li.qty || 0)
-        if (updated && li.costPerUnit > 0) {
-          await saveInventoryItem({ ...updated, costPrice: li.costPerUnit })
+    // Auto-increment inventory (only for new purchases to avoid double-counting on edits)
+    if (isNew) {
+      for (const li of (record.items || [])) {
+        if (!li.productId) continue
+        const invItem = await getInventoryItem(li.productId)
+        if (invItem) {
+          const updated = await adjustInventoryStock(li.productId, li.qty || 0)
+          if (updated && li.costPerUnit > 0) {
+            await saveInventoryItem({ ...updated, costPrice: li.costPerUnit })
+          }
+        } else {
+          await saveInventoryItem({
+            id: li.productId, name: li.productName, category: li.category || '',
+            emoji: li.emoji || '📦', unit: li.unit || 'pcs',
+            currentQty: li.qty || 0, lowStockThreshold: 5,
+            costPrice: li.costPerUnit || 0, sellingPrice: li.sellingPrice || 0,
+            isMenuLinked: false, wastageLog: [], createdAt: now,
+          })
         }
-      } else {
-        await saveInventoryItem({
-          id: li.productId, name: li.productName, category: li.category || '',
-          emoji: li.emoji || '📦', unit: li.unit || 'pcs',
-          currentQty: li.qty || 0, lowStockThreshold: 5,
-          costPrice: li.costPerUnit || 0, sellingPrice: li.sellingPrice || 0,
-          isMenuLinked: false, wastageLog: [], createdAt: now,
-        })
       }
     }
 

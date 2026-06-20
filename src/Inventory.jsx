@@ -453,13 +453,13 @@ function LiveStockTab({ menuProducts }) {
 // TAB 2: PURCHASE LOGS
 // ══════════════════════════════════════════════════════════════════
 
-function PurchaseForm({ suppliers, menuProducts, inventoryItems, onSave, onClose }) {
-  const [selectedSupplier, setSelectedSupplier] = useState(null)
+function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSave, onClose }) {
+  const [selectedSupplier, setSelectedSupplier] = useState(logToEdit?.supplierId ? (suppliers.find(s => s.id === logToEdit.supplierId) || { id: logToEdit.supplierId, name: logToEdit.supplierName }) : null)
   const [supplierSearch, setSupplierSearch] = useState('')
-  const [lines, setLines] = useState([{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '' }])
-  const [invoiceNo, setInvoiceNo] = useState('')
-  const [notes, setNotes] = useState('')
-  const [date, setDate] = useState(new Date().toISOString().slice(0,10))
+  const [lines, setLines] = useState(logToEdit?.items?.length ? logToEdit.items : [{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '' }])
+  const [invoiceNo, setInvoiceNo] = useState(logToEdit?.invoiceNumber || '')
+  const [notes, setNotes] = useState(logToEdit?.notes || '')
+  const [date, setDate] = useState(logToEdit?.purchasedAt ? new Date(logToEdit.purchasedAt).toISOString().slice(0,10) : new Date().toISOString().slice(0,10))
   const [saving, setSaving] = useState(false)
   const [showSupplierList, setShowSupplierList] = useState(false)
 
@@ -469,10 +469,14 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, onSave, onClose
   const removeLine = (id) => setLines(p => p.filter(l => l.id !== id))
   const updateLine = (id, k, v) => setLines(p => p.map(l => l.id === id ? {...l, [k]: v} : l))
 
-  const handleProductSelect = (lineId, productId) => {
-    const p = menuProducts.find(p => p.id === productId) || inventoryItems.find(i => i.id === productId)
+  const allProducts = [...menuProducts, ...inventoryItems.filter(i => !menuProducts.find(p => p.id === i.id))]
+
+  const handleProductNameChange = (lineId, val) => {
+    const p = allProducts.find(x => x.name === val)
     if (p) {
       setLines(prev => prev.map(l => l.id === lineId ? {...l, productId: p.id, productName: p.name, emoji: p.emoji || '📦', unit: p.unit || 'pcs', category: p.category || '', costPerUnit: p.costPrice || 0} : l))
+    } else {
+      setLines(prev => prev.map(l => l.id === lineId ? {...l, productId: '', productName: val} : l))
     }
   }
 
@@ -483,6 +487,8 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, onSave, onClose
     if (validLines.length === 0) return
     setSaving(true)
     const log = {
+      purchaseId: logToEdit?.purchaseId,
+      createdAt: logToEdit?.createdAt,
       supplierId: selectedSupplier?.id || '',
       supplierName: selectedSupplier?.name || 'Unknown',
       items: validLines.map(l => ({ ...l, productId: l.productId || uid(), qty: Number(l.qty), costPerUnit: Number(l.costPerUnit), totalCost: Number(l.qty)*Number(l.costPerUnit) })),
@@ -495,7 +501,7 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, onSave, onClose
     setSaving(false)
   }
 
-  const allProducts = [...menuProducts, ...inventoryItems.filter(i => !menuProducts.find(p => p.id === i.id))]
+
 
   return (
     <Modal title="Log New Purchase" onClose={onClose} wide>
@@ -547,30 +553,12 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, onSave, onClose
               <div key={line.id} className="inv-line-item">
                 <div className="inv-line-num">{idx + 1}</div>
                 <div className="inv-line-fields">
-                  <div className="inv-form-row-2">
-                    <div className="inv-form-group inv-form-group-flex">
-                      <label className="inv-form-label">Product</label>
-                      <select className="inv-form-input" value={line.productId} onChange={e => handleProductSelect(line.id, e.target.value)}>
-                        <option value="">— Select or type below —</option>
-                        {menuProducts.length > 0 && (
-                          <optgroup label="Menu Items">
-                            {menuProducts.map(p => <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>)}
-                          </optgroup>
-                        )}
-                        {inventoryItems.filter(i => !menuProducts.find(p => p.id === i.id)).length > 0 && (
-                          <optgroup label="Inventory Only">
-                            {inventoryItems.filter(i => !menuProducts.find(p => p.id === i.id)).map(i => <option key={i.id} value={i.id}>{i.emoji} {i.name}</option>)}
-                          </optgroup>
-                        )}
-                        {menuProducts.length === 0 && inventoryItems.length === 0 && (
-                          <option value="" disabled>No products available to select</option>
-                        )}
-                      </select>
-                    </div>
-                    <div className="inv-form-group">
-                      <label className="inv-form-label">Custom Name</label>
-                      <input className="inv-form-input" placeholder="or type name" value={line.productName} onChange={e => updateLine(line.id, 'productName', e.target.value)} />
-                    </div>
+                  <div className="inv-form-group">
+                    <label className="inv-form-label">Product Name</label>
+                    <input className="inv-form-input" list={`products-datalist-${line.id}`} placeholder="Type name or select from list..." value={line.productName} onChange={e => handleProductNameChange(line.id, e.target.value)} />
+                    <datalist id={`products-datalist-${line.id}`}>
+                      {allProducts.map(p => <option key={p.id} value={p.name}>{p.emoji} {p.name}</option>)}
+                    </datalist>
                   </div>
                   <div className="inv-line-row-3">
                     <div className="inv-form-group">
@@ -638,7 +626,7 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, onSave, onClose
   )
 }
 
-function PurchaseLogItem({ log, onDelete }) {
+function PurchaseLogItem({ log, onEdit, onDelete }) {
   const [expanded, setExpanded] = useState(false)
   return (
     <div className="inv-log-card">
@@ -682,6 +670,7 @@ function PurchaseLogItem({ log, onDelete }) {
           </table>
           {log.notes && <div className="inv-log-notes">📝 {log.notes}</div>}
           <div className="inv-log-actions">
+            <button className="inv-icon-btn" onClick={() => onEdit?.(log)}><Ic.Edit /> Edit Log</button>
             <button className="inv-icon-btn inv-icon-btn-danger" onClick={() => onDelete(log.purchaseId)}><Ic.Trash /> Delete Log</button>
           </div>
         </div>
@@ -693,6 +682,7 @@ function PurchaseLogItem({ log, onDelete }) {
 function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSaved }) {
   const [logs, setLogs] = useState([])
   const [showForm, setShowForm] = useState(false)
+  const [editLog, setEditLog] = useState(null)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
@@ -708,6 +698,7 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
     await load()
     onPurchaseSaved?.()
     setShowForm(false)
+    setEditLog(null)
   }
 
   const handleDelete = async (id) => {
@@ -777,12 +768,12 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
       ) : (
         <div className="inv-logs-list">
           {filtered.map(log => (
-            <PurchaseLogItem key={log.purchaseId} log={log} onDelete={handleDelete} />
+            <PurchaseLogItem key={log.purchaseId} log={log} onEdit={setEditLog} onDelete={handleDelete} />
           ))}
         </div>
       )}
 
-      {showForm && <PurchaseForm suppliers={suppliers} menuProducts={menuProducts} inventoryItems={inventoryItems} onSave={handleSave} onClose={() => setShowForm(false)} />}
+      {(showForm || editLog) && <PurchaseForm suppliers={suppliers} menuProducts={menuProducts} inventoryItems={inventoryItems} logToEdit={editLog} onSave={handleSave} onClose={() => { setShowForm(false); setEditLog(null) }} />}
     </div>
   )
 }
