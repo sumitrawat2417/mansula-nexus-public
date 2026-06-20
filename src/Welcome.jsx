@@ -1,15 +1,52 @@
 import { useState, useEffect } from 'react'
 
+// ── Web Audio Synthesizer (Premium Chimes) ──
+const playSound = (type) => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext
+    if (!AudioContext) return
+    const ctx = new AudioContext()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+
+    if (type === 'reveal') {
+      // Soft high chime for logo reveal
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(880, ctx.currentTime) // A5
+      osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1) // A6
+      gain.gain.setValueAtTime(0, ctx.currentTime)
+      gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5)
+      osc.start(ctx.currentTime)
+      osc.stop(ctx.currentTime + 1.5)
+    } else if (type === 'burst') {
+      // Magical burst for glow
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(440, ctx.currentTime) // A4
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.5) // A5
+      gain.gain.setValueAtTime(0, ctx.currentTime)
+      gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.1)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2)
+      osc.start(ctx.currentTime)
+      osc.stop(ctx.currentTime + 2)
+    }
+  } catch (e) {
+    // Browsers will block audio if there was no user interaction yet, fail silently.
+  }
+}
+
 export default function Welcome({ onComplete }) {
   const [stage, setStage] = useState(0)
 
   useEffect(() => {
     // Stage sequence for animations
-    const t1 = setTimeout(() => setStage(1), 300)   // Fade in logo
-    const t2 = setTimeout(() => setStage(2), 1200)  // Slide up text
-    const t3 = setTimeout(() => setStage(3), 2500)  // Glow burst
-    const t4 = setTimeout(() => setStage(4), 3800)  // Exit animation
-    const t5 = setTimeout(() => onComplete(), 4400) // Unmount
+    const t1 = setTimeout(() => { setStage(1); playSound('reveal'); }, 300)   // Fade in logo
+    const t2 = setTimeout(() => { setStage(2); }, 1200)                       // Slide up text
+    const t3 = setTimeout(() => { setStage(3); playSound('burst'); }, 2500)   // Glow burst
+    const t4 = setTimeout(() => { setStage(4); }, 3800)                       // Exit animation
+    const t5 = setTimeout(() => onComplete(), 4400)                           // Unmount
 
     return () => {
       clearTimeout(t1)
@@ -37,11 +74,7 @@ export default function Welcome({ onComplete }) {
           <div className="wel-logo-ring wel-ring-outer" />
           <div className="wel-logo-ring wel-ring-inner" />
           <div className="wel-logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" style={{ width: '36px', height: '36px' }} />
           </div>
         </div>
 
@@ -53,7 +86,7 @@ export default function Welcome({ onComplete }) {
           </h1>
           
           <div className={`wel-subtitle-wrap ${stage >= 2 ? 'show' : ''}`}>
-            <p className="wel-subtitle">Enterprise POS & Billing</p>
+            <p className="wel-subtitle" style={{ fontSize: '0.85rem' }}>Empowering Commerce with Smart Technology</p>
             <div className="wel-loader-bar">
               <div className="wel-loader-fill" />
             </div>
