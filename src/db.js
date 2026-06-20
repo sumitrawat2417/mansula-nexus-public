@@ -572,7 +572,18 @@ export async function savePurchaseLog(log) {
     const d = new Date(log.purchasedAt || now)
     const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     const isNew = !log.purchaseId
-    const record = { ...log, purchaseId: log.purchaseId || genPurchaseId(), monthKey, purchasedAt: log.purchasedAt || now, createdAt: log.createdAt || now }
+    const purchaseId = log.purchaseId || genPurchaseId()
+    const record = { ...log, purchaseId, monthKey, purchasedAt: log.purchasedAt || now, createdAt: log.createdAt || now }
+
+    let existingLog = null
+    if (!isNew) {
+      existingLog = await new Promise((resolve) => {
+        const tx = db.transaction('purchases', 'readonly')
+        const req = tx.objectStore('purchases').get(purchaseId)
+        req.onsuccess = () => resolve(req.result)
+        req.onerror = () => resolve(null)
+      })
+    }
 
     await new Promise((resolve) => {
       const tx = db.transaction('purchases', 'readwrite')
@@ -581,31 +592,53 @@ export async function savePurchaseLog(log) {
       tx.onerror = () => resolve()
     })
 
-    // Auto-increment inventory (only for new purchases to avoid double-counting on edits)
-    if (isNew) {
-      for (const li of (record.items || [])) {
-        if (!li.productId || li.isExpenseOnly) continue
-        const invItem = await getInventoryItem(li.productId)
-        if (invItem) {
-          const updated = await adjustInventoryStock(li.productId, li.qty || 0)
-          if (updated && li.costPerUnit > 0) {
-            await saveInventoryItem({ ...updated, costPrice: li.costPerUnit })
-          }
-        } else {
-          await saveInventoryItem({
-            id: li.productId, name: li.productName, category: li.category || '',
-            emoji: li.emoji || '📦', unit: li.unit || 'pcs',
-            currentQty: li.qty || 0, lowStockThreshold: 5,
-            costPrice: li.costPerUnit || 0, sellingPrice: li.sellingPrice || 0,
-            isMenuLinked: false, wastageLog: [], createdAt: now,
-          })
-        }
+    // Handle Supplier Spend Difference
+    const newSupplierId = record.supplierId
+    const newAmount = record.totalAmount || 0
+
+    if (existingLog) {
+      const oldSupplierId = existingLog.supplierId
+      const oldAmount = existingLog.totalAmount || 0
+      
+      if (oldSupplierId === newSupplierId) {
+        const diff = newAmount - oldAmount
+        if (diff !== 0 && newSupplierId) await updateSupplierSpend(newSupplierId, diff)
+      } else {
+        if (oldSupplierId) await updateSupplierSpend(oldSupplierId, -oldAmount)
+        if (newSupplierId) await updateSupplierSpend(newSupplierId, newAmount)
       }
+    } else {
+      if (newSupplierId) await updateSupplierSpend(newSupplierId, newAmount)
     }
 
-    // Update supplier spend
-    if (record.supplierId) {
-      await updateSupplierSpend(record.supplierId, record.totalAmount || 0)
+    // Handle Inventory Items Difference
+    const oldItems = existingLog?.items || []
+    const newItems = record.items || []
+
+    // 1. Revert old items stock
+    for (const li of oldItems) {
+      if (!li.productId || li.isExpenseOnly) continue
+      await adjustInventoryStock(li.productId, -(li.qty || 0))
+    }
+
+    // 2. Apply new items stock
+    for (const li of newItems) {
+      if (!li.productId || li.isExpenseOnly) continue
+      const invItem = await getInventoryItem(li.productId)
+      if (invItem) {
+        const updated = await adjustInventoryStock(li.productId, li.qty || 0)
+        if (updated && li.costPerUnit > 0) {
+          await saveInventoryItem({ ...updated, costPrice: li.costPerUnit })
+        }
+      } else {
+        await saveInventoryItem({
+          id: li.productId, name: li.productName, category: li.category || '',
+          emoji: li.emoji || '📦', unit: li.unit || 'pcs',
+          currentQty: li.qty || 0, lowStockThreshold: 5,
+          costPrice: li.costPerUnit || 0, sellingPrice: li.sellingPrice || 0,
+          isMenuLinked: false, wastageLog: [], createdAt: now,
+        })
+      }
     }
 
     return record
