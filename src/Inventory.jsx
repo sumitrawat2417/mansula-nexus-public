@@ -890,7 +890,7 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
         </div>
         <div className="inv-kpi-card">
           <div className="inv-kpi-label">Top Supp.</div>
-          <div className="inv-kpi-val inv-kpi-val-sm" style={{ maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', verticalAlign: 'bottom' }}>{topSupplier?.[0] || '—'}</div>
+          <div className="inv-kpi-val inv-kpi-val-sm" style={{ display: 'block', maxWidth: '80px', margin: '0 auto', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{topSupplier?.[0] || '—'}</div>
         </div>
       </div>
 
