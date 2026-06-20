@@ -6148,7 +6148,7 @@ select {
 .inv-kpi-card-danger { border-top: 3px solid var(--brand-danger); }
 .inv-kpi-card-accent { background: var(--brand-primary); border-color: var(--brand-primary); }
 .inv-kpi-card-accent .inv-kpi-val, .inv-kpi-card-accent .inv-kpi-label { color: #fff; }
-.inv-kpi-val { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; line-height: 1; }
+.inv-kpi-val { font-size: clamp(0.85rem, 4vw, 1.05rem); font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; line-height: 1; word-break: break-word; }
 .inv-kpi-val-sm { font-size: 0.7rem; line-height: 1.2; word-break: break-word; }
 .inv-kpi-label { font-size: 0.6rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
 
