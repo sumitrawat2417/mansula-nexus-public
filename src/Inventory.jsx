@@ -862,10 +862,11 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
     return l.supplierName?.toLowerCase().includes(s) || l.purchaseId.toLowerCase().includes(s) || (l.items||[]).some(i => i.productName.toLowerCase().includes(s))
   })
 
-  const monthKey = nowMonthKey()
-  const thisMonthLogs = logs.filter(l => { const d = new Date(l.purchasedAt); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === monthKey })
-  const thisMonthSpend = thisMonthLogs.reduce((s, l) => s + (l.totalAmount || 0), 0)
-  const topSupplier = Object.entries(logs.reduce((acc, l) => { acc[l.supplierName] = (acc[l.supplierName] || 0) + l.totalAmount; return acc }, {})).sort((a,b) => b[1]-a[1])[0]
+  const filteredSpend = filtered.reduce((s, l) => s + (l.totalAmount || 0), 0)
+  const avgSpend = filtered.length ? filteredSpend / filtered.length : 0
+  const topSupplier = Object.entries(filtered.reduce((acc, l) => { acc[l.supplierName] = (acc[l.supplierName] || 0) + l.totalAmount; return acc }, {})).sort((a,b) => b[1]-a[1])[0]
+
+  const shortLabel = dateRange.label.replace('This ', '').replace('Last ', '')
 
   return (
     <div className="inv-tab-content">
@@ -878,16 +879,16 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
       )}
       <div className="inv-kpi-strip">
         <div className="inv-kpi-card">
-          <div className="inv-kpi-label">Total Logs</div>
-          <div className="inv-kpi-val">{logs.length}</div>
+          <div className="inv-kpi-label">Logs ({shortLabel})</div>
+          <div className="inv-kpi-val">{filtered.length}</div>
         </div>
         <div className="inv-kpi-card">
-          <div className="inv-kpi-label">This Month</div>
-          <div className="inv-kpi-val">{fmtCur(thisMonthSpend)}</div>
+          <div className="inv-kpi-label">Spend ({shortLabel})</div>
+          <div className="inv-kpi-val">{fmtCur(filteredSpend)}</div>
         </div>
         <div className="inv-kpi-card">
-          <div className="inv-kpi-label">Purchases (Month)</div>
-          <div className="inv-kpi-val">{thisMonthLogs.length}</div>
+          <div className="inv-kpi-label">Avg Log Value</div>
+          <div className="inv-kpi-val">{fmtCur(avgSpend)}</div>
         </div>
         <div className="inv-kpi-card">
           <div className="inv-kpi-label">Top Supplier</div>
