@@ -444,7 +444,11 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
   const [lines, setLines] = useState(logToEdit?.items?.length ? logToEdit.items : [{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '', isExpenseOnly: false }])
   const [invoiceNo, setInvoiceNo] = useState(logToEdit?.invoiceNumber || '')
   const [notes, setNotes] = useState(logToEdit?.notes || '')
-  const [date, setDate] = useState(logToEdit?.purchasedAt ? new Date(logToEdit.purchasedAt).toISOString().slice(0,10) : new Date().toISOString().slice(0,10))
+  const [date, setDate] = useState(() => {
+    const d = logToEdit?.purchasedAt ? new Date(logToEdit.purchasedAt) : new Date()
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
+    return d.toISOString().slice(0, 16)
+  })
   const [saving, setSaving] = useState(false)
 
   const addLine = () => setLines(p => [...p, { id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '', isExpenseOnly: false }])
@@ -565,8 +569,8 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
         <div className="inv-pf-section">
           <div className="inv-form-row-2">
             <div className="inv-form-group">
-              <label className="inv-form-label">Purchase Date</label>
-              <input className="inv-form-input" type="date" value={date} onChange={e => setDate(e.target.value)} />
+              <label className="inv-form-label">Purchase Date & Time</label>
+              <input className="inv-form-input" type="datetime-local" value={date} onChange={e => setDate(e.target.value)} />
             </div>
             <div className="inv-form-group">
               <label className="inv-form-label">Invoice / Bill No.</label>
@@ -620,7 +624,7 @@ function PurchaseLogItem({ log, onEdit, onDelete }) {
           <div className="inv-log-meta">
             <span className="inv-log-supplier">{log.supplierName || 'No supplier'}</span>
             <span className="inv-log-dot">·</span>
-            <span className="inv-log-date">{fmtDate(log.purchasedAt)}</span>
+            <span className="inv-log-date">{fmtDateTime(log.purchasedAt)}</span>
             {log.invoiceNumber && <><span className="inv-log-dot">·</span><span className="inv-log-inv">#{log.invoiceNumber}</span></>}
           </div>
           <div className="inv-log-items-preview">
