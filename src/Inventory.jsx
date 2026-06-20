@@ -866,8 +866,6 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
   const avgSpend = filtered.length ? filteredSpend / filtered.length : 0
   const topSupplier = Object.entries(filtered.reduce((acc, l) => { acc[l.supplierName] = (acc[l.supplierName] || 0) + l.totalAmount; return acc }, {})).sort((a,b) => b[1]-a[1])[0]
 
-  const shortLabel = dateRange.label.replace('This ', '').replace('Last ', '')
-
   return (
     <div className="inv-tab-content">
       {filterDrawerOpen && (
@@ -879,11 +877,11 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
       )}
       <div className="inv-kpi-strip">
         <div className="inv-kpi-card">
-          <div className="inv-kpi-label">Logs ({shortLabel})</div>
+          <div className="inv-kpi-label">Total Logs</div>
           <div className="inv-kpi-val">{filtered.length}</div>
         </div>
         <div className="inv-kpi-card">
-          <div className="inv-kpi-label">Spend ({shortLabel})</div>
+          <div className="inv-kpi-label">Total Spend</div>
           <div className="inv-kpi-val">{fmtCur(filteredSpend)}</div>
         </div>
         <div className="inv-kpi-card">
