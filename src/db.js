@@ -584,7 +584,7 @@ export async function savePurchaseLog(log) {
     // Auto-increment inventory (only for new purchases to avoid double-counting on edits)
     if (isNew) {
       for (const li of (record.items || [])) {
-        if (!li.productId) continue
+        if (!li.productId || li.isExpenseOnly) continue
         const invItem = await getInventoryItem(li.productId)
         if (invItem) {
           const updated = await adjustInventoryStock(li.productId, li.qty || 0)

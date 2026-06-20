@@ -439,13 +439,13 @@ function LiveStockTab({ menuProducts }) {
 
 function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSave, onClose }) {
   const [supplierName, setSupplierName] = useState(logToEdit?.supplierName || '')
-  const [lines, setLines] = useState(logToEdit?.items?.length ? logToEdit.items : [{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '' }])
+  const [lines, setLines] = useState(logToEdit?.items?.length ? logToEdit.items : [{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '', isExpenseOnly: false }])
   const [invoiceNo, setInvoiceNo] = useState(logToEdit?.invoiceNumber || '')
   const [notes, setNotes] = useState(logToEdit?.notes || '')
   const [date, setDate] = useState(logToEdit?.purchasedAt ? new Date(logToEdit.purchasedAt).toISOString().slice(0,10) : new Date().toISOString().slice(0,10))
   const [saving, setSaving] = useState(false)
 
-  const addLine = () => setLines(p => [...p, { id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '' }])
+  const addLine = () => setLines(p => [...p, { id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '', isExpenseOnly: false }])
   const removeLine = (id) => setLines(p => p.filter(l => l.id !== id))
   const updateLine = (id, k, v) => setLines(p => p.map(l => l.id === id ? {...l, [k]: v} : l))
 
@@ -513,9 +513,15 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
                     </datalist>
                   </div>
                   {!line.productId && line.productName.trim() !== '' && (
-                    <div className="inv-form-group">
-                      <label className="inv-form-label">Category (For New Item)</label>
-                      <input className="inv-form-input" list="pf-category-list" placeholder="e.g. Raw Material, Rent..." value={line.category || ''} onChange={e => updateLine(line.id, 'category', e.target.value)} />
+                    <div className="inv-form-row-2" style={{ alignItems: 'center' }}>
+                      <div className="inv-form-group">
+                        <label className="inv-form-label">Category (For New Item)</label>
+                        <input className="inv-form-input" list="pf-category-list" placeholder="e.g. Raw Material, Rent..." value={line.category || ''} onChange={e => updateLine(line.id, 'category', e.target.value)} />
+                      </div>
+                      <div className="inv-form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '20px' }}>
+                        <input type="checkbox" id={`track-stock-${line.id}`} checked={!line.isExpenseOnly} onChange={e => updateLine(line.id, 'isExpenseOnly', !e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--brand-primary)' }} />
+                        <label htmlFor={`track-stock-${line.id}`} style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)', cursor: 'pointer', userSelect: 'none' }}>Track as Stock Item</label>
+                      </div>
                     </div>
                   )}
                   <div className="inv-line-row-3">
