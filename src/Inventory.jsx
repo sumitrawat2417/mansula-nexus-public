@@ -485,7 +485,7 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, onSave, onClose
     const log = {
       supplierId: selectedSupplier?.id || '',
       supplierName: selectedSupplier?.name || 'Unknown',
-      items: validLines.map(l => ({ ...l, qty: Number(l.qty), costPerUnit: Number(l.costPerUnit), totalCost: Number(l.qty)*Number(l.costPerUnit) })),
+      items: validLines.map(l => ({ ...l, productId: l.productId || uid(), qty: Number(l.qty), costPerUnit: Number(l.costPerUnit), totalCost: Number(l.qty)*Number(l.costPerUnit) })),
       invoiceNumber: invoiceNo,
       notes,
       totalAmount: total,

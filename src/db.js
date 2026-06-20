@@ -595,7 +595,7 @@ export async function savePurchaseLog(log) {
           emoji: li.emoji || '📦', unit: li.unit || 'pcs',
           currentQty: li.qty || 0, lowStockThreshold: 5,
           costPrice: li.costPerUnit || 0, sellingPrice: li.sellingPrice || 0,
-          isMenuLinked: true, wastageLog: [], createdAt: now,
+          isMenuLinked: false, wastageLog: [], createdAt: now,
         })
       }
     }
