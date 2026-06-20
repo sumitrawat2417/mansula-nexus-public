@@ -968,7 +968,7 @@ export default function Inventory({ onClose }) {
           suppliers={suppliers}
           menuProducts={menuProducts}
           inventoryItems={inventoryItems}
-          onPurchaseSaved={() => { loadInventory() }}
+          onPurchaseSaved={() => { loadInventory(); loadSuppliers(); }}
         />
       )}
       {tab === 2 && <SuppliersTab suppliers={suppliers} onSuppliersChanged={loadSuppliers} />}
