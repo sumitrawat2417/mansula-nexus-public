@@ -779,12 +779,12 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
           <Ic.Search />
           <input className="inv-search" placeholder="Search purchases…" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
-        <button className="or-date-filter-btn" onClick={() => setFilterDrawerOpen(true)}>
-          <Ic.CalDay />
-          <span>{dateRange.label}</span>
-          <Ic.ChevDown />
-        </button>
         <div className="inv-toolbar-actions">
+          <button className="or-date-filter-btn" onClick={() => setFilterDrawerOpen(true)}>
+            <Ic.CalDay />
+            <span>{dateRange.label}</span>
+            <Ic.ChevDown />
+          </button>
           <button className="inv-action-btn inv-action-btn-secondary" onClick={exportCSV}><Ic.Download /> Export</button>
           <button className="inv-action-btn" onClick={() => setShowForm(true)}><Ic.Plus /> Log Purchase</button>
         </div>
