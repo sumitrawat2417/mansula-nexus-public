@@ -572,18 +572,16 @@ export async function savePurchaseLog(log) {
     const d = new Date(log.purchasedAt || now)
     const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     const isNew = !log.purchaseId
-    const purchaseId = log.purchaseId || genPurchaseId()
-    const record = { ...log, purchaseId, monthKey, purchasedAt: log.purchasedAt || now, createdAt: log.createdAt || now }
-
-    let existingLog = null
+    let oldLog = null
     if (!isNew) {
-      existingLog = await new Promise((resolve) => {
+      await new Promise((resolve) => {
         const tx = db.transaction('purchases', 'readonly')
-        const req = tx.objectStore('purchases').get(purchaseId)
-        req.onsuccess = () => resolve(req.result)
-        req.onerror = () => resolve(null)
+        const req = tx.objectStore('purchases').get(log.purchaseId)
+        req.onsuccess = () => resolve(oldLog = req.result)
+        req.onerror = () => resolve()
       })
     }
+    const record = { ...log, purchaseId: log.purchaseId || genPurchaseId(), monthKey, purchasedAt: log.purchasedAt || now, createdAt: log.createdAt || now }
 
     await new Promise((resolve) => {
       const tx = db.transaction('purchases', 'readwrite')
@@ -592,53 +590,34 @@ export async function savePurchaseLog(log) {
       tx.onerror = () => resolve()
     })
 
-    // Handle Supplier Spend Difference
-    const newSupplierId = record.supplierId
-    const newAmount = record.totalAmount || 0
-
-    if (existingLog) {
-      const oldSupplierId = existingLog.supplierId
-      const oldAmount = existingLog.totalAmount || 0
-      
-      if (oldSupplierId === newSupplierId) {
-        const diff = newAmount - oldAmount
-        if (diff !== 0 && newSupplierId) await updateSupplierSpend(newSupplierId, diff)
-      } else {
-        if (oldSupplierId) await updateSupplierSpend(oldSupplierId, -oldAmount)
-        if (newSupplierId) await updateSupplierSpend(newSupplierId, newAmount)
-      }
-    } else {
-      if (newSupplierId) await updateSupplierSpend(newSupplierId, newAmount)
-    }
-
-    // Handle Inventory Items Difference
-    const oldItems = existingLog?.items || []
-    const newItems = record.items || []
-
-    // 1. Revert old items stock
-    for (const li of oldItems) {
-      if (!li.productId || li.isExpenseOnly) continue
-      await adjustInventoryStock(li.productId, -(li.qty || 0))
-    }
-
-    // 2. Apply new items stock
-    for (const li of newItems) {
-      if (!li.productId || li.isExpenseOnly) continue
-      const invItem = await getInventoryItem(li.productId)
-      if (invItem) {
-        const updated = await adjustInventoryStock(li.productId, li.qty || 0)
-        if (updated && li.costPerUnit > 0) {
-          await saveInventoryItem({ ...updated, costPrice: li.costPerUnit })
+    // Auto-increment inventory (only for new purchases to avoid double-counting on edits)
+    if (isNew) {
+      for (const li of (record.items || [])) {
+        if (!li.productId || li.isExpenseOnly) continue
+        const invItem = await getInventoryItem(li.productId)
+        if (invItem) {
+          const updated = await adjustInventoryStock(li.productId, li.qty || 0)
+          if (updated && li.costPerUnit > 0) {
+            await saveInventoryItem({ ...updated, costPrice: li.costPerUnit })
+          }
+        } else {
+          await saveInventoryItem({
+            id: li.productId, name: li.productName, category: li.category || '',
+            emoji: li.emoji || '📦', unit: li.unit || 'pcs',
+            currentQty: li.qty || 0, lowStockThreshold: 5,
+            costPrice: li.costPerUnit || 0, sellingPrice: li.sellingPrice || 0,
+            isMenuLinked: false, wastageLog: [], createdAt: now,
+          })
         }
-      } else {
-        await saveInventoryItem({
-          id: li.productId, name: li.productName, category: li.category || '',
-          emoji: li.emoji || '📦', unit: li.unit || 'pcs',
-          currentQty: li.qty || 0, lowStockThreshold: 5,
-          costPrice: li.costPerUnit || 0, sellingPrice: li.sellingPrice || 0,
-          isMenuLinked: false, wastageLog: [], createdAt: now,
-        })
       }
+    }
+
+    // Sync supplier spend exactly
+    if (record.supplierId) {
+      await syncSupplierSpend(record.supplierId)
+    }
+    if (oldLog && oldLog.supplierId && oldLog.supplierId !== record.supplierId) {
+      await syncSupplierSpend(oldLog.supplierId)
     }
 
     return record
@@ -673,12 +652,25 @@ export async function getPurchasesByMonth(monthKey) {
 export async function deletePurchaseLog(purchaseId) {
   try {
     const db = await openDB()
-    return new Promise((resolve) => {
+    let log = null
+    await new Promise((resolve) => {
+      const tx = db.transaction('purchases', 'readonly')
+      const req = tx.objectStore('purchases').get(purchaseId)
+      req.onsuccess = () => resolve(log = req.result)
+      req.onerror = () => resolve()
+    })
+
+    await new Promise((resolve) => {
       const tx = db.transaction('purchases', 'readwrite')
       tx.objectStore('purchases').delete(purchaseId)
-      tx.oncomplete = () => resolve(true)
-      tx.onerror = () => resolve(false)
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => resolve()
     })
+
+    if (log && log.supplierId) {
+      await syncSupplierSpend(log.supplierId)
+    }
+    return true
   } catch { return false }
 }
 
@@ -706,12 +698,20 @@ export async function deleteSupplier(id) {
   return true
 }
 
-export async function updateSupplierSpend(supplierId, amount) {
+export async function syncSupplierSpend(supplierId) {
+  if (!supplierId) return
+  const logs = await getPurchaseLogs()
+  const supplierLogs = logs.filter(l => l.supplierId === supplierId)
+  const total = supplierLogs.reduce((sum, l) => sum + (l.totalAmount || 0), 0)
   const suppliers = await getSuppliers()
-  const s = suppliers.find(s => s.id === supplierId)
-  if (s) {
-    s.totalSpend = (s.totalSpend || 0) + amount
-    s.lastPurchaseAt = Date.now()
+  const idx = suppliers.findIndex(s => s.id === supplierId)
+  if (idx >= 0) {
+    suppliers[idx].totalSpend = total
+    if (supplierLogs.length > 0) {
+      suppliers[idx].lastPurchaseAt = Math.max(...supplierLogs.map(l => l.purchasedAt || 0))
+    } else {
+      delete suppliers[idx].lastPurchaseAt
+    }
     await dbSet('mn-suppliers', suppliers)
   }
 }
