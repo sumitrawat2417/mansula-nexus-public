@@ -439,30 +439,31 @@ function LiveStockTab({ menuProducts }) {
 
 function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSave, onClose }) {
   const [supplierName, setSupplierName] = useState(logToEdit?.supplierName || '')
-  const [lines, setLines] = useState(logToEdit?.items?.length ? logToEdit.items.map(i => ({...i, lineTotal: (i.qty * i.costPerUnit).toFixed(2)})) : [{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, lineTotal: 0, emoji: '📦', category: '', isExpenseOnly: false }])
+  const [lines, setLines] = useState(logToEdit?.items?.length ? logToEdit.items.map(i => ({...i, lineTotal: (i.qty * i.costPerUnit).toFixed(2), calcTarget: 'lineTotal'})) : [{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, lineTotal: 0, emoji: '📦', category: '', isExpenseOnly: false, calcTarget: 'lineTotal' }])
   const [invoiceNo, setInvoiceNo] = useState(logToEdit?.invoiceNumber || '')
   const [notes, setNotes] = useState(logToEdit?.notes || '')
   const [date, setDate] = useState(logToEdit?.purchasedAt ? new Date(logToEdit.purchasedAt).toISOString().slice(0,10) : new Date().toISOString().slice(0,10))
   const [saving, setSaving] = useState(false)
 
-  const addLine = () => setLines(p => [...p, { id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, lineTotal: 0, emoji: '📦', category: '', isExpenseOnly: false }])
+  const addLine = () => setLines(p => [...p, { id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, lineTotal: 0, emoji: '📦', category: '', isExpenseOnly: false, calcTarget: 'lineTotal' }])
   const removeLine = (id) => setLines(p => p.filter(l => l.id !== id))
   const updateLine = (id, k, v) => setLines(p => p.map(l => {
     if (l.id !== id) return l;
     let nl = { ...l, [k]: v };
-    if (k === 'qty' || k === 'costPerUnit') {
-      nl.lineTotal = (Number(nl.qty) * Number(nl.costPerUnit)).toFixed(2);
-    } else if (k === 'lineTotal') {
-      const tot = Number(v);
-      const q = Number(nl.qty);
-      const c = Number(nl.costPerUnit);
-      if (c === 0 || isNaN(c)) {
-        nl.costPerUnit = q > 0 ? (tot / q).toFixed(2) : 0;
-      } else if (q === 0 || q === 1 || isNaN(q)) {
-        nl.qty = c > 0 ? (tot / c).toFixed(2) : 0;
-      } else {
-        nl.costPerUnit = q > 0 ? (tot / q).toFixed(2) : 0;
-      }
+    const target = nl.calcTarget || 'lineTotal';
+    
+    const q = Number(nl.qty) || 0;
+    const c = Number(nl.costPerUnit) || 0;
+    const t = Number(nl.lineTotal) || 0;
+
+    if (k === 'calcTarget') {
+      if (v === 'lineTotal') nl.lineTotal = (q * c).toFixed(2);
+      else if (v === 'qty' && c > 0) nl.qty = (t / c).toFixed(2);
+      else if (v === 'costPerUnit' && q > 0) nl.costPerUnit = (t / q).toFixed(2);
+    } else {
+      if (target === 'lineTotal') nl.lineTotal = (q * c).toFixed(2);
+      else if (target === 'qty' && c > 0) nl.qty = (t / c).toFixed(2);
+      else if (target === 'costPerUnit' && q > 0) nl.costPerUnit = (t / q).toFixed(2);
     }
     return nl;
   }))
@@ -542,10 +543,24 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
                       </div>
                     </div>
                   )}
+                  <div className="inv-form-group" style={{ marginBottom: '-5px', marginTop: '10px' }}>
+                    <label className="inv-form-label" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                      <span>Auto-calculate:</span>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', textTransform: 'none', fontWeight: '500', color: line.calcTarget === 'qty' ? 'var(--brand-primary)' : '' }}>
+                         <input type="radio" checked={line.calcTarget === 'qty'} onChange={() => updateLine(line.id, 'calcTarget', 'qty')} /> Qty
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', textTransform: 'none', fontWeight: '500', color: line.calcTarget === 'costPerUnit' ? 'var(--brand-primary)' : '' }}>
+                         <input type="radio" checked={line.calcTarget === 'costPerUnit'} onChange={() => updateLine(line.id, 'calcTarget', 'costPerUnit')} /> Cost
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', textTransform: 'none', fontWeight: '500', color: line.calcTarget === 'lineTotal' ? 'var(--brand-primary)' : '' }}>
+                         <input type="radio" checked={line.calcTarget === 'lineTotal'} onChange={() => updateLine(line.id, 'calcTarget', 'lineTotal')} /> Total
+                      </label>
+                    </label>
+                  </div>
                   <div className="inv-line-row-3">
                     <div className="inv-form-group">
                       <label className="inv-form-label">Qty</label>
-                      <input className="inv-form-input" type="number" min="0.01" step="0.01" value={line.qty} onChange={e => updateLine(line.id, 'qty', e.target.value)} />
+                      <input className="inv-form-input" type="number" min="0.01" step="0.01" value={line.qty} onChange={e => updateLine(line.id, 'qty', e.target.value)} disabled={line.calcTarget === 'qty'} style={{ backgroundColor: line.calcTarget === 'qty' ? 'var(--bg-surface-2)' : '' }} />
                     </div>
                     <div className="inv-form-group">
                       <label className="inv-form-label">Unit</label>
@@ -555,11 +570,11 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
                     </div>
                     <div className="inv-form-group">
                       <label className="inv-form-label">Cost/Unit (₹)</label>
-                      <input className="inv-form-input" type="number" min="0" step="0.01" value={line.costPerUnit} onChange={e => updateLine(line.id, 'costPerUnit', e.target.value)} />
+                      <input className="inv-form-input" type="number" min="0" step="0.01" value={line.costPerUnit} onChange={e => updateLine(line.id, 'costPerUnit', e.target.value)} disabled={line.calcTarget === 'costPerUnit'} style={{ backgroundColor: line.calcTarget === 'costPerUnit' ? 'var(--bg-surface-2)' : '' }} />
                     </div>
                     <div className="inv-form-group">
                       <label className="inv-form-label">Line Total</label>
-                      <input className="inv-form-input" style={{ fontWeight: 'bold', color: 'var(--brand-primary)' }} type="number" min="0" step="0.01" value={line.lineTotal} onChange={e => updateLine(line.id, 'lineTotal', e.target.value)} />
+                      <input className="inv-form-input" style={{ fontWeight: 'bold', color: 'var(--brand-primary)', backgroundColor: line.calcTarget === 'lineTotal' ? 'var(--bg-surface-2)' : '' }} type="number" min="0" step="0.01" value={line.lineTotal} onChange={e => updateLine(line.id, 'lineTotal', e.target.value)} disabled={line.calcTarget === 'lineTotal'} />
                     </div>
                   </div>
                 </div>
