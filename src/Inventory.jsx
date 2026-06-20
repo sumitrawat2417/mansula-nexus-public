@@ -110,16 +110,6 @@ function StockCard({ item, onAdjust, onWastage, onEdit, onDelete }) {
           <span className="inv-price-val">{fmtCur(item.costPrice)}</span>
         </div>
         <div className="inv-price-pair">
-          <span className="inv-price-label">Selling</span>
-          <span className="inv-price-val inv-price-sell">{fmtCur(item.sellingPrice)}</span>
-        </div>
-        <div className="inv-price-pair">
-          <span className="inv-price-label">Margin</span>
-          <span className={`inv-price-val ${item.sellingPrice > item.costPrice ? 'inv-margin-pos' : 'inv-margin-neg'}`}>
-            {item.costPrice > 0 ? `${Math.round(((item.sellingPrice - item.costPrice) / item.costPrice) * 100)}%` : '—'}
-          </span>
-        </div>
-        <div className="inv-price-pair">
           <span className="inv-price-label">Stock Value</span>
           <span className="inv-price-val">{fmtCur(item.currentQty * item.costPrice)}</span>
         </div>
@@ -241,15 +231,9 @@ function AddEditItemModal({ item, menuProducts, onSave, onClose }) {
           </div>
         </div>
 
-        <div className="inv-form-row-2">
-          <div className="inv-form-group">
-            <label className="inv-form-label">Cost Price (per unit)</label>
-            <input className="inv-form-input" type="number" min="0" step="0.01" value={form.costPrice} onChange={e => setF('costPrice', e.target.value)} placeholder="₹0" />
-          </div>
-          <div className="inv-form-group">
-            <label className="inv-form-label">Selling Price</label>
-            <input className="inv-form-input" type="number" min="0" step="0.01" value={form.sellingPrice} onChange={e => setF('sellingPrice', e.target.value)} placeholder="₹0" disabled={linkMode && !!form.menuProductId} />
-          </div>
+        <div className="inv-form-group">
+          <label className="inv-form-label">Cost Price (per unit)</label>
+          <input className="inv-form-input" type="number" min="0" step="0.01" value={form.costPrice} onChange={e => setF('costPrice', e.target.value)} placeholder="₹0" />
         </div>
 
         <button className="inv-save-btn" onClick={handleSave}>
