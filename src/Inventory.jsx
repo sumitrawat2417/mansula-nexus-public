@@ -338,9 +338,10 @@ function PriceHistoryModal({ item, data, onClose }) {
   const padding = 45
   
   const prices = sorted.map(d => d.price)
-  const minP = prices.length ? Math.min(...prices) : 0
   const maxP = prices.length ? Math.max(...prices) : 0
-  const rangeP = maxP - minP || 1
+  const minP = prices.length ? Math.min(...prices) : 0 // Actual lowest price
+  const axisMinP = 0 // Axis starts at 0
+  const rangeP = maxP - axisMinP || 1
   
   const dates = sorted.map(d => d.date)
   const minD = dates.length ? Math.min(...dates) : 0
@@ -348,7 +349,7 @@ function PriceHistoryModal({ item, data, onClose }) {
   const rangeD = maxD - minD || 1
 
   const getX = (d) => padding + ((d - minD) / rangeD) * (width - padding * 2)
-  const getY = (p) => height - padding - ((p - minP) / rangeP) * (height - padding * 2)
+  const getY = (p) => height - padding - ((p - axisMinP) / rangeP) * (height - padding * 2)
 
   const points = sorted.map(d => `${getX(d.date)},${getY(d.price)}`).join(' ')
 
@@ -366,23 +367,33 @@ function PriceHistoryModal({ item, data, onClose }) {
         {sorted.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>No price data in this date range.</div>
         ) : (
-          <svg viewBox={`0 0 ${width} ${height}`} className="inv-price-svg">
-            <line x1={padding} y1={height-padding} x2={width-padding} y2={height-padding} stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
-            <line x1={padding} y1={padding} x2={width-padding} y2={padding} stroke="#e2e8f0" strokeDasharray="4 4" strokeLinecap="round" />
-            
-            <text x={padding - 10} y={height - padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(minP)}</text>
-            <text x={padding - 10} y={padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(maxP)}</text>
-            
-            <polyline points={points} fill="none" stroke="var(--brand-primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            
-            {sorted.map((d, i) => (
-              <g key={i} className="inv-graph-point">
-                <circle cx={getX(d.date)} cy={getY(d.price)} r="5" fill="#fff" stroke="var(--brand-primary)" strokeWidth="2.5" />
-                <text x={getX(d.date)} y={getY(d.price) - 12} textAnchor="middle" fontSize="11" fill="#1e293b" fontWeight="bold" opacity="0" className="inv-point-tooltip">{fmtCur(d.price)}</text>
-                <text x={getX(d.date)} y={height - padding + 18} textAnchor="middle" fontSize="10" fill="#94a3b8" opacity="0" className="inv-point-tooltip">{fmtDate(d.date)}</text>
-              </g>
-            ))}
-          </svg>
+          <div style={{ overflowX: 'auto', paddingBottom: 10 }}>
+            <svg width={Math.max(width, sorted.length * 60 + padding * 2)} height={height} className="inv-price-svg" style={{ minWidth: '100%' }}>
+              <line x1={padding} y1={height-padding} x2={Math.max(width, sorted.length * 60 + padding * 2)-padding} y2={height-padding} stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
+              <line x1={padding} y1={padding} x2={Math.max(width, sorted.length * 60 + padding * 2)-padding} y2={padding} stroke="#e2e8f0" strokeDasharray="4 4" strokeLinecap="round" />
+              
+              <text x={padding - 10} y={height - padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(axisMinP)}</text>
+              <text x={padding - 10} y={padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(maxP)}</text>
+              
+              {sorted.map((d, i) => {
+                const getDynamicX = (index) => padding + 30 + (index * 60);
+                const x = getDynamicX(i);
+                const y = getY(d.price);
+                const barWidth = 24;
+                const baseLine = height - padding;
+                const dObj = new Date(d.date);
+                const sDate = `${dObj.getDate()} ${dObj.toLocaleString('default', { month: 'short' })}`;
+
+                return (
+                  <g key={i} className="inv-graph-point">
+                    <rect x={x - barWidth/2} y={y} width={barWidth} height={Math.max(2, baseLine - y)} fill="var(--brand-primary)" rx="4" />
+                    <text x={x} y={y - 8} textAnchor="middle" fontSize="11" fill="#1e293b" fontWeight="bold" opacity="0" className="inv-point-tooltip">{fmtCur(d.price)}</text>
+                    <text x={x} y={baseLine + 18} textAnchor="middle" fontSize="10" fill="#64748b">{sDate}</text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
         )}
       </div>
       {sorted.length > 0 && (
