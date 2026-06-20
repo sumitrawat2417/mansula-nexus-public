@@ -784,6 +784,12 @@ function PurchaseLogItem({ log, onEdit, onDelete }) {
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan="4" style={{ textAlign: 'right', fontWeight: 'bold', paddingTop: '12px', borderTop: '2px solid #f1f5f9' }}>Grand Total:</td>
+                <td style={{ fontWeight: 'bold', color: 'var(--brand-primary)', paddingTop: '12px', borderTop: '2px solid #f1f5f9' }}>{fmtCur(log.totalAmount)}</td>
+              </tr>
+            </tfoot>
           </table>
           {log.notes && <div className="inv-log-notes">📝 {log.notes}</div>}
           <div className="inv-log-actions">
