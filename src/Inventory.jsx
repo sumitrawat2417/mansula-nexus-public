@@ -649,7 +649,7 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
                     <label className="inv-form-label">Product Name</label>
                     <input className="inv-form-input" list={`products-datalist-${line.id}`} placeholder="Type name or select from list..." value={line.productName} onChange={e => handleProductNameChange(line.id, e.target.value)} />
                     <datalist id={`products-datalist-${line.id}`}>
-                      {allProducts.map(p => <option key={p.id} value={p.name}>{p.emoji} {p.name}</option>)}
+                      {allProducts.map(p => <option key={p.id} value={p.name} />)}
                     </datalist>
                   </div>
                   {!line.productId && line.productName.trim() !== '' && (
