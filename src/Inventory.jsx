@@ -369,7 +369,7 @@ function PriceHistoryModal({ item, data, onClose }) {
           <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>No price data in this date range.</div>
         ) : (
           <div style={{ overflowX: 'auto', paddingBottom: 10 }}>
-            <svg width={Math.max(width, sorted.length * 60 + padding * 2)} height={height} className="inv-price-svg" style={{ minWidth: '100%' }}>
+            <svg width={Math.max(width, sorted.length * 60 + padding * 2)} height={height} className="inv-price-svg" style={{ minWidth: '100%', height: `${height}px` }}>
               <line x1={padding} y1={height - padding} x2={Math.max(width, sorted.length * 60 + padding * 2) - padding} y2={height - padding} stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
               <line x1={padding} y1={padding} x2={Math.max(width, sorted.length * 60 + padding * 2) - padding} y2={padding} stroke="#e2e8f0" strokeDasharray="4 4" strokeLinecap="round" />
 
