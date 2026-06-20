@@ -3,6 +3,7 @@ import Home from './Home.jsx'
 import POS from './POS.jsx'
 import BusinessProfile from './BusinessProfile.jsx'
 import OrderRecords from './OrderRecords.jsx'
+import Agreement from './Agreement.jsx'
 
 export const CURRENCIES = [
   { code: 'INR', symbol: '₹', rate: 1, decimals: 0 },
@@ -20,9 +21,12 @@ export const TAX_RATES = [
   { label: 'GST 28%', value: 0.28 },
 ]
 
+const AGREEMENT_KEY = 'mn-agreement-accepted'
+
 export default function App() {
   const [screen, setScreen] = useState('home')
   const [editingRecord, setEditingRecord] = useState(null)
+  const [agreed, setAgreed] = useState(() => localStorage.getItem(AGREEMENT_KEY) === 'true')
   const [theme, setTheme] = useState(() => localStorage.getItem('mn-theme') || 'light')
   const [currency, setCurrency] = useState(() => {
     try { return JSON.parse(localStorage.getItem('mn-currency')) || CURRENCIES[0] } catch { return CURRENCIES[0] }
@@ -40,6 +44,16 @@ export default function App() {
   useEffect(() => { localStorage.setItem('mn-taxrate', JSON.stringify(taxRateObj)) }, [taxRateObj])
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
+
+  const handleAcceptAgreement = () => {
+    localStorage.setItem(AGREEMENT_KEY, 'true')
+    setAgreed(true)
+  }
+
+  // ── Gate: Show agreement on first launch ──
+  if (!agreed) {
+    return <Agreement onAccept={handleAcceptAgreement} />
+  }
 
   if (screen === 'pos') {
     return (

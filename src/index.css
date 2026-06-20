@@ -5530,3 +5530,356 @@ select {
 
 /* OR Empty icon (for no orders state) */
 .or-empty-icon svg { opacity: 0.3; }
+
+/* ══════════════════════════════════════════════════════════════════
+   AGREEMENT / ONBOARDING CONSENT SCREEN
+   ══════════════════════════════════════════════════════════════════ */
+
+.agr-root {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: linear-gradient(160deg, #0f0a2e 0%, #1a1150 35%, #2d1b69 65%, #1e1145 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  animation: agrFadeIn 0.6s ease;
+  font-family: "Outfit", sans-serif;
+}
+
+@keyframes agrFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.agr-root.agr-exit {
+  animation: agrFadeOut 0.5s ease forwards;
+}
+@keyframes agrFadeOut {
+  to { opacity: 0; transform: scale(1.04); }
+}
+
+/* ── Decorative background orbs ── */
+.agr-bg-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+}
+.agr-bg-orb-1 {
+  width: 380px; height: 380px;
+  top: -120px; right: -80px;
+  background: radial-gradient(circle, rgba(99,102,241,0.35), transparent 70%);
+}
+.agr-bg-orb-2 {
+  width: 300px; height: 300px;
+  bottom: -60px; left: -60px;
+  background: radial-gradient(circle, rgba(139,92,246,0.3), transparent 70%);
+}
+.agr-bg-orb-3 {
+  width: 200px; height: 200px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(16,185,129,0.12), transparent 70%);
+}
+
+.agr-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  padding: 40px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Header ── */
+.agr-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.agr-logo-wrap {
+  margin-bottom: 6px;
+}
+
+.agr-logo-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 0 0 6px rgba(99,102,241,0.15),
+    0 0 40px rgba(99,102,241,0.3),
+    0 8px 32px rgba(0,0,0,0.4);
+  animation: agrLogoPulse 3s ease-in-out infinite;
+}
+
+@keyframes agrLogoPulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(99,102,241,0.15), 0 0 40px rgba(99,102,241,0.3), 0 8px 32px rgba(0,0,0,0.4); }
+  50%      { box-shadow: 0 0 0 10px rgba(99,102,241,0.1), 0 0 60px rgba(99,102,241,0.4), 0 8px 32px rgba(0,0,0,0.4); }
+}
+
+.agr-logo-circle svg {
+  width: 30px;
+  height: 30px;
+  color: #ffffff;
+}
+
+.agr-title {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.agr-subtitle {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.agr-version-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 100px;
+  background: rgba(99,102,241,0.12);
+  border: 1px solid rgba(99,102,241,0.2);
+  color: #a5b4fc;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* ── Clauses accordion ── */
+.agr-clauses {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.agr-clause {
+  border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.agr-clause.open {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(99,102,241,0.25);
+  box-shadow: 0 4px 24px rgba(99,102,241,0.08);
+}
+
+.agr-clause-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
+}
+
+.agr-clause-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.agr-clause-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.agr-clause-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.agr-clause-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.agr-clause-sub {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.4);
+  margin-top: 2px;
+}
+
+.agr-clause-chevron {
+  width: 20px;
+  height: 20px;
+  color: rgba(255,255,255,0.3);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+.agr-clause-chevron svg {
+  width: 100%;
+  height: 100%;
+}
+.agr-clause-chevron.rotated {
+  transform: rotate(180deg);
+  color: var(--brand-primary);
+}
+
+/* ── Clause body (accordion collapse) ── */
+.agr-clause-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.agr-clause-body.expanded {
+  max-height: 600px;
+}
+
+.agr-clause-content {
+  padding: 0 18px 18px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 14px;
+}
+
+.agr-clause-content p {
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.55);
+  margin: 0 0 12px;
+}
+.agr-clause-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Footer / consent ── */
+.agr-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding-top: 4px;
+}
+
+.agr-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.2s;
+}
+.agr-checkbox-label:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.agr-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  margin-top: 1px;
+}
+.agr-checkbox svg {
+  width: 14px;
+  height: 14px;
+  color: #fff;
+}
+.agr-checkbox.checked {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-color: #6366f1;
+  box-shadow: 0 0 12px rgba(99,102,241,0.4);
+}
+
+.agr-checkbox-label span {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.5;
+}
+.agr-checkbox-label span strong {
+  color: #a5b4fc;
+  font-weight: 600;
+}
+
+/* ── Launch button ── */
+.agr-launch-btn {
+  width: 100%;
+  padding: 16px 24px;
+  border-radius: 14px;
+  border: none;
+  font-family: "Outfit", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: not-allowed;
+  transition: all 0.3s ease;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.25);
+}
+.agr-launch-btn svg {
+  width: 20px;
+  height: 20px;
+}
+.agr-launch-btn.active {
+  cursor: pointer;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #ffffff;
+  box-shadow:
+    0 4px 20px rgba(99,102,241,0.4),
+    0 0 0 1px rgba(99,102,241,0.3);
+}
+.agr-launch-btn.active:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 28px rgba(99,102,241,0.5),
+    0 0 0 1px rgba(99,102,241,0.4);
+}
+.agr-launch-btn.active:active {
+  transform: translateY(0);
+}
+
+.agr-footer-note {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.25);
+  text-align: center;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0 10px;
+}
