@@ -5573,6 +5573,43 @@ select {
   100% { transform: perspective(600px) rotateX(60deg) translateY(60px) translateZ(-200px); }
 }
 
+/* ── Init Button ── */
+.wel-init-btn {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 36px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.5);
+  border-radius: 12px;
+  color: #a5b4fc;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+  animation: welPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.wel-init-btn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  color: #fff;
+  border-color: #818cf8;
+  transform: scale(1.05);
+  box-shadow: 0 0 50px rgba(99, 102, 241, 0.4);
+}
+.wel-init-btn svg { width: 20px; height: 20px; }
+
+@keyframes welPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 /* ── Orbs ── */
 .wel-orb {
   position: absolute;
