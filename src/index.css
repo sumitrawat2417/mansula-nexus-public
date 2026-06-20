@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 /* ══════════ LIGHT THEME ══════════ */
 :root {
@@ -6307,7 +6307,7 @@ select {
 .inv-log-table td { padding: 7px 8px; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); }
 .inv-log-table tr:last-child td { border-bottom: none; }
 .inv-log-notes { margin-top: 8px; font-size: 0.78rem; color: var(--text-muted); background: var(--bg-surface-2); padding: 7px 11px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
-.inv-log-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+.inv-log-actions { display: flex; justify-content: flex-end; margin-top: 10px; gap: 8px; }
 
 /* Purchase Form */
 .inv-purchase-form { display: flex; flex-direction: column; gap: 16px; }

@@ -670,8 +670,8 @@ function PurchaseLogItem({ log, onEdit, onDelete }) {
           </table>
           {log.notes && <div className="inv-log-notes">📝 {log.notes}</div>}
           <div className="inv-log-actions">
-            <button className="inv-icon-btn" onClick={() => onEdit?.(log)}><Ic.Edit /> Edit Log</button>
-            <button className="inv-icon-btn inv-icon-btn-danger" onClick={() => onDelete(log.purchaseId)}><Ic.Trash /> Delete Log</button>
+            <button className="inv-icon-btn" title="Edit Log" onClick={() => onEdit?.(log)}><Ic.Edit /></button>
+            <button className="inv-icon-btn inv-icon-btn-danger" title="Delete Log" onClick={() => onDelete(log.purchaseId)}><Ic.Trash /></button>
           </div>
         </div>
       )}
