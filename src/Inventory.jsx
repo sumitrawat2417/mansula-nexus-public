@@ -207,7 +207,20 @@ function AddEditItemModal({ item, menuProducts, onSave, onClose }) {
         <div className="inv-form-row-2">
           <div className="inv-form-group">
             <label className="inv-form-label">Category</label>
-            <input className="inv-form-input" value={form.category} onChange={e => setF('category', e.target.value)} placeholder="e.g. Dairy, Grains" />
+            <input className="inv-form-input" list="inv-category-list" value={form.category} onChange={e => setF('category', e.target.value)} placeholder="e.g. Dairy, Grains" />
+            <datalist id="inv-category-list">
+              <option value="Dairy & Eggs" />
+              <option value="Grains & Pasta" />
+              <option value="Vegetables & Fruits" />
+              <option value="Meat & Poultry" />
+              <option value="Spices & Condiments" />
+              <option value="Beverages" />
+              <option value="Snacks" />
+              <option value="Cleaning Supplies" />
+              <option value="Packaging" />
+              <option value="Baking" />
+              <option value="Oils & Fats" />
+            </datalist>
           </div>
           <div className="inv-form-group">
             <label className="inv-form-label">Unit</label>
