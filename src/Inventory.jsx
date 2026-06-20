@@ -512,6 +512,12 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
                       {allProducts.map(p => <option key={p.id} value={p.name}>{p.emoji} {p.name}</option>)}
                     </datalist>
                   </div>
+                  {!line.productId && line.productName.trim() !== '' && (
+                    <div className="inv-form-group">
+                      <label className="inv-form-label">Category (For New Item)</label>
+                      <input className="inv-form-input" list="pf-category-list" placeholder="e.g. Raw Material, Rent..." value={line.category || ''} onChange={e => updateLine(line.id, 'category', e.target.value)} />
+                    </div>
+                  )}
                   <div className="inv-line-row-3">
                     <div className="inv-form-group">
                       <label className="inv-form-label">Qty</label>
@@ -574,6 +580,19 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
           </button>
         </div>
       </div>
+      <datalist id="pf-category-list">
+        <option value="Raw Material" />
+        <option value="Disposables & Packaging" />
+        <option value="Transport & Logistics" />
+        <option value="Rent & Lease" />
+        <option value="Electricity & Utilities" />
+        <option value="Equipment & Maintenance" />
+        <option value="Cleaning & Hygiene" />
+        <option value="Marketing & Advertising" />
+        <option value="Office Supplies" />
+        <option value="Staff & Labor" />
+        <option value="Miscellaneous" />
+      </datalist>
     </Modal>
   )
 }
