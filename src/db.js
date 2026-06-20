@@ -3,7 +3,7 @@
 // - 'orders' store: completed order records, indexed by date
 
 const DB_NAME = 'mansula-nexus'
-const DB_VERSION = 2
+const DB_VERSION = 3
 
 let _db = null
 
@@ -22,6 +22,10 @@ function openDB() {
         const store = db.createObjectStore('orders', { keyPath: 'orderId' })
         store.createIndex('completedAt', 'completedAt', { unique: false })
         store.createIndex('monthKey', 'monthKey', { unique: false })
+      }
+      // v3: customers store
+      if (!db.objectStoreNames.contains('customers')) {
+        const store = db.createObjectStore('customers', { keyPath: 'id' })
       }
     }
     req.onsuccess = (e) => {
@@ -77,9 +81,10 @@ export async function dbClearAll() {
   try {
     const db = await openDB()
     return new Promise((resolve) => {
-      const tx = db.transaction(['kv', 'orders'], 'readwrite')
+      const tx = db.transaction(['kv', 'orders', 'customers'], 'readwrite')
       tx.objectStore('kv').clear()
       tx.objectStore('orders').clear()
+      tx.objectStore('customers').clear()
       tx.oncomplete = () => resolve()
       tx.onerror = () => resolve()
     })
@@ -111,6 +116,38 @@ export async function saveOrderRecord(order) {
       paymentDetails: order.paymentDetails || null,
       taxLabel: order.taxLabel || '',
       taxAmt: order.taxAmt || 0,
+      customerId: order.customerId || null,
+    }
+
+    // Update customer stats if customerId is present
+    if (order.customerId) {
+      const cTx = db.transaction('customers', 'readwrite')
+      const store = cTx.objectStore('customers')
+      const req = store.get(order.customerId)
+      req.onsuccess = () => {
+        if (req.result) {
+          const cust = req.result
+          cust.ordersCount = (cust.ordersCount || 0) + 1
+          cust.totalSpent = (cust.totalSpent || 0) + (record.total || 0)
+          
+          if (record.paymentMode === 'udhaar') {
+            cust.creditBalance = (cust.creditBalance || 0) + (record.total || 0)
+          }
+
+          // Store condensed summary for "lastOrders" snapshot
+          cust.lastOrders = cust.lastOrders || []
+          cust.lastOrders.unshift({
+            id: record.orderId,
+            total: record.total,
+            date: record.completedAt,
+            itemsCount: record.items.length
+          })
+          if (cust.lastOrders.length > 5) cust.lastOrders = cust.lastOrders.slice(0, 5)
+          cust.updatedAt = now
+          
+          store.put(cust)
+        }
+      }
     }
 
     return new Promise((resolve) => {
@@ -438,4 +475,42 @@ export async function injectStressTestData(numOrders = 10000) {
       tx.onerror = () => resolve(-1)
     })
   } catch { return -1 }
+}
+
+// ── Customers store ──
+
+export async function saveCustomer(customer) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('customers', 'readwrite')
+      tx.objectStore('customers').put(customer)
+      tx.oncomplete = () => resolve(customer)
+      tx.onerror = () => resolve(null)
+    })
+  } catch { return null }
+}
+
+export async function getCustomers() {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('customers', 'readonly')
+      const req = tx.objectStore('customers').getAll()
+      req.onsuccess = () => resolve(req.result || [])
+      req.onerror = () => resolve([])
+    })
+  } catch { return [] }
+}
+
+export async function getCustomer(id) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('customers', 'readonly')
+      const req = tx.objectStore('customers').get(id)
+      req.onsuccess = () => resolve(req.result || null)
+      req.onerror = () => resolve(null)
+    })
+  } catch { return null }
 }

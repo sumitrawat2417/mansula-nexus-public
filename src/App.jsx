@@ -5,6 +5,7 @@ import POS from './POS.jsx'
 import BusinessProfile from './BusinessProfile.jsx'
 import OrderRecords from './OrderRecords.jsx'
 import Agreement from './Agreement.jsx'
+import Customers from './Customers.jsx'
 
 export const CURRENCIES = [
   { code: 'INR', symbol: '₹', rate: 1, decimals: 0 },
@@ -88,6 +89,10 @@ export default function App() {
              currency={currency}
              onEdit={(record) => { setEditingRecord(record); setScreen('pos'); }}
            />
+  }
+
+  if (screen === 'customers') {
+    return <Customers onBack={() => setScreen('home')} />
   }
 
   return (

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import './App.css'
-import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth } from './db.js'
+import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth, getCustomers, saveCustomer } from './db.js'
 import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES, KEY_BUSINESS, DEFAULT_BUSINESS } from './BusinessProfile.jsx'
 
 // ─────────────── DATA (loaded from IDB, fallback to defaults) ───────────────
@@ -39,7 +39,7 @@ function makeDateSuffix(d = new Date()) {
 let _tempCounter = 1
 const makeTempOrderId = () => `T${_tempCounter++}-${makeDateSuffix()}`
 
-const makeOrder = (id) => ({ id: id || makeTempOrderId(), items: [], createdAt: new Date(), status: 'active' })
+const makeOrder = (id) => ({ id: id || makeTempOrderId(), items: [], createdAt: new Date(), status: 'active', customerId: null, customerName: null })
 const INIT_ORDER = makeOrder() // created once at module level
 
 // ─────────────── SOUND ───────────────
@@ -760,6 +760,13 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   const [activeCategory, setActiveCat] = useState('All')
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
+  
+  // Customers CRM
+  const [customersList, setCustomersList] = useState([])
+  const [showCustomerModal, setShowCustomerModal] = useState(false)
+  const [newCustName, setNewCustName] = useState('')
+  const [newCustPhone, setNewCustPhone] = useState('')
+
   const [variantProduct, setVariantProduct] = useState(null)
   const [cartOpen, setCartOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -793,16 +800,18 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   // Also load any persisted active orders and fix the INIT_ORDER id
   useEffect(() => {
     async function load() {
-      const [p, c, b, activeOrders, monthOrders] = await Promise.all([
+      const [p, c, b, activeOrders, monthOrders, cl] = await Promise.all([
         dbGet(KEY_PRODUCTS),
         dbGet(KEY_CATEGORIES),
         dbGet(KEY_BUSINESS),
         dbGet('mn-active-orders'),
         getOrdersByMonth(getMonthKey()),
+        getCustomers(),
       ])
       if (p && p.length > 0) setProducts(p)
       if (c && c.length > 0) setCategories(c)
       if (b) setBusiness({ ...DEFAULT_BUSINESS, ...b })
+      if (cl && cl.length > 0) setCustomersList(cl)
 
       // Restore persisted active orders (survive refresh)
       let loadedOrders = (activeOrders && activeOrders.length > 0)
@@ -949,6 +958,10 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
     ))
   }, [currentOrderId])
 
+  const updateOrder = useCallback((id, updates) => {
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o))
+  }, [])
+
   const createNewOrder = async () => {
     const current = orders.find(o => o.id === currentOrderId)
     if (current && current.items.length === 0) {
@@ -1089,6 +1102,10 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
     const current = orders.find(o => o.id === currentOrderId)
     if (current && current.items.length === 0) {
       showToast('Cannot complete an empty order.')
+      return
+    }
+    if (paymentMode === 'udhaar' && !current.customerId) {
+      showToast('You must assign a customer to use Udhaar / Credit payment.', 'error')
       return
     }
     handleCheckoutOrder(currentOrderId)
@@ -1244,6 +1261,18 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
               <>
                 {cartStep === 'cart' ? (
                   <>
+                    <div style={{ padding: '0 15px', marginBottom: '10px' }}>
+                      {currentOrder && currentOrder.customerId ? (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(99, 102, 241, 0.1)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--brand-primary)' }}>👤 {currentOrder.customerName}</span>
+                          <button onClick={() => updateOrder(currentOrderId, { customerId: null, customerName: null })} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><I.X s={14} /></button>
+                        </div>
+                      ) : (
+                        <button onClick={() => setShowCustomerModal(true)} style={{ width: '100%', background: 'var(--surface)', border: '1px dashed var(--border-color)', padding: '8px', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '5px' }}>
+                          <I.Plus s={14} /> Assign Customer
+                        </button>
+                      )}
+                    </div>
                     <div className="cart-items" role="list">
                       {cart.map(item => <CartItem key={item.variantKey ? `${item.id}-${item.variantKey}` : item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} currency={currency} />)}
                     </div>
@@ -1575,6 +1604,68 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
         <button id="mobile-cart-fab" className="mobile-cart-fab" onClick={() => setCartOpen(o => !o)} aria-label={`Cart`}>
           <I.Cart s={24} />
         </button>
+      )}
+
+      {/* Customer Assignment Modal */}
+      {showCustomerModal && (
+        <div className="modal-overlay" onClick={() => setShowCustomerModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h3>Assign Customer</h3>
+            
+            <div style={{ marginBottom: 15 }}>
+              <input 
+                type="text" 
+                placeholder="Search phone or name..." 
+                value={newCustPhone}
+                onChange={e => setNewCustPhone(e.target.value)}
+                autoFocus
+                style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text)' }}
+              />
+            </div>
+
+            <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: 15, border: '1px solid var(--border-color)', borderRadius: 8 }}>
+              {customersList.filter(c => c.phone.includes(newCustPhone) || c.name.toLowerCase().includes(newCustPhone.toLowerCase())).map(c => (
+                <div key={c.id} style={{ padding: 10, borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }} onClick={() => {
+                  updateOrder(currentOrderId, { customerId: c.id, customerName: c.name })
+                  setShowCustomerModal(false)
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 600, color: 'var(--text)' }}>{c.name}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{c.phone}</div>
+                  </div>
+                  <button className="secondary-btn" style={{ padding: '4px 10px' }}>Select</button>
+                </div>
+              ))}
+              {customersList.filter(c => c.phone.includes(newCustPhone) || c.name.toLowerCase().includes(newCustPhone.toLowerCase())).length === 0 && (
+                <div style={{ padding: 10, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>No matching customers</div>
+              )}
+            </div>
+
+            {/* Quick Add */}
+            <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: 15 }}>
+              <h4 style={{ fontSize: '0.9rem', marginBottom: 10, color: 'var(--text)' }}>Quick Add New</h4>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input 
+                  type="text" 
+                  placeholder="Customer Name" 
+                  value={newCustName}
+                  onChange={e => setNewCustName(e.target.value)}
+                  style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text)' }}
+                />
+                <button className="primary-btn" onClick={async () => {
+                  if (!newCustName || !newCustPhone) return;
+                  const c = { id: `CUST-${Date.now()}`, name: newCustName.trim(), phone: newCustPhone.trim(), ordersCount: 0, totalSpent: 0, creditBalance: 0, createdAt: Date.now() }
+                  await saveCustomer(c)
+                  setCustomersList([...customersList, c])
+                  updateOrder(currentOrderId, { customerId: c.id, customerName: c.name })
+                  setShowCustomerModal(false)
+                  setNewCustName('')
+                  setNewCustPhone('')
+                }}>Save & Select</button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </>
   )
