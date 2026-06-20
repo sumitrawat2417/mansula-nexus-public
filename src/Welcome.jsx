@@ -9,31 +9,55 @@ const playSound = (type) => {
     const AudioContext = window.AudioContext || window.webkitAudioContext
     if (!AudioContext) return
     const ctx = new AudioContext()
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.connect(gain)
-    gain.connect(ctx.destination)
 
     if (type === 'reveal') {
-      // Soft high chime for logo reveal
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(880, ctx.currentTime) // A5
-      osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1) // A6
+      // Energetic tech power-up sweep
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      
+      osc.type = 'square'
+      // Fast pitch sweep up
+      osc.frequency.setValueAtTime(150, ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.15)
+      
       gain.gain.setValueAtTime(0, ctx.currentTime)
-      gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5)
+      gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.05)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+      
       osc.start(ctx.currentTime)
-      osc.stop(ctx.currentTime + 1.5)
+      osc.stop(ctx.currentTime + 0.3)
+
     } else if (type === 'burst') {
-      // Magical burst for glow
-      osc.type = 'triangle'
-      osc.frequency.setValueAtTime(440, ctx.currentTime) // A4
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.5) // A5
-      gain.gain.setValueAtTime(0, ctx.currentTime)
-      gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.1)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2)
-      osc.start(ctx.currentTime)
-      osc.stop(ctx.currentTime + 2)
+      // Big energetic synth impact/chord (C Major 9)
+      const frequencies = [261.63, 329.63, 392.00, 493.88, 587.33] // C4, E4, G4, B4, D5
+      
+      frequencies.forEach(freq => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        const filter = ctx.createBiquadFilter()
+        
+        osc.type = 'sawtooth'
+        osc.frequency.setValueAtTime(freq, ctx.currentTime)
+        
+        // Classic electronic filter sweep down
+        filter.type = 'lowpass'
+        filter.frequency.setValueAtTime(5000, ctx.currentTime)
+        filter.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 1.2)
+        
+        osc.connect(filter)
+        filter.connect(gain)
+        gain.connect(ctx.destination)
+        
+        // Punchy attack, long fade out
+        gain.gain.setValueAtTime(0, ctx.currentTime)
+        gain.gain.linearRampToValueAtTime(0.03, ctx.currentTime + 0.02)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2)
+        
+        osc.start(ctx.currentTime)
+        osc.stop(ctx.currentTime + 2)
+      })
     }
   } catch (e) {
     // Browsers will block audio if there was no user interaction yet, fail silently.
