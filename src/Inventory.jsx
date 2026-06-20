@@ -12,34 +12,34 @@ import DateFilterDrawer, { computeQuick } from './DateFilterDrawer.jsx'
 const fmt = (n) => Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 const fmtCur = (n) => `₹${fmt(n)}`
 const uid = () => `inv-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
-const nowMonthKey = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` }
-const fmtDate = (ts) => ts ? new Date(ts).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—'
-const fmtDateTime = (ts) => ts ? new Date(ts).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—'
+const nowMonthKey = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` }
+const fmtDate = (ts) => ts ? new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
+const fmtDateTime = (ts) => ts ? new Date(ts).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
 
 const UNITS = ['pcs', 'kg', 'gm', 'L', 'mL', 'bottles', 'boxes', 'bags', 'dozen', 'plates', 'packets']
 const WASTAGE_REASONS = ['Spoiled', 'Spilled', 'Expired', 'Damaged Packaging', 'Quality Issue', 'Other']
 
 // ── Icon set ──
 const Ic = {
-  Close:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>,
-  Plus:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
-  Minus:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>,
-  Search:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
-  Trash:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>,
-  Edit:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
-  Warn:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-  Box:      () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
-  Receipt:  () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>,
-  Supplier: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg>,
-  CalDay:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>,
-  ChevDown: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
-  ChevRight:() => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
-  Download: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
-  Link:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
-  History:  () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>,
-  Phone:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 11.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3 .77l3-.01a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 8.45a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 15z"/></svg>,
-  Check:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
-  WhatsApp: () => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>,
+  Close: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>,
+  Plus: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>,
+  Minus: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12" /></svg>,
+  Search: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>,
+  Trash: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>,
+  Edit: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>,
+  Warn: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
+  Box: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>,
+  Receipt: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z" /><line x1="9" y1="9" x2="15" y2="9" /><line x1="9" y1="13" x2="15" y2="13" /><line x1="9" y1="17" x2="12" y2="17" /></svg>,
+  Supplier: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /><line x1="12" y1="12" x2="12" y2="17" /><line x1="9.5" y1="14.5" x2="14.5" y2="14.5" /></svg>,
+  CalDay: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /><line x1="12" y1="14" x2="12" y2="18" /><line x1="10" y1="16" x2="14" y2="16" /></svg>,
+  ChevDown: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>,
+  ChevRight: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>,
+  Download: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>,
+  Link: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>,
+  History: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-4.5" /></svg>,
+  Phone: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 11.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3 .77l3-.01a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 8.45a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 15z" /></svg>,
+  Check: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
+  WhatsApp: () => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" /></svg>,
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -332,17 +332,17 @@ function PriceHistoryModal({ item, data, onClose }) {
 
   const filteredData = data.filter(d => d.date >= dateRange.fromTs && d.date <= dateRange.toTs)
   const sorted = [...filteredData].sort((a, b) => a.date - b.date)
-  
+
   const width = 500
   const height = 220
   const padding = 45
-  
+
   const prices = sorted.map(d => d.price)
   const maxP = prices.length ? Math.max(...prices) : 0
   const minP = prices.length ? Math.min(...prices) : 0 // Actual lowest price
   const axisMinP = 0 // Axis starts at 0
   const rangeP = maxP - axisMinP || 1
-  
+
   const dates = sorted.map(d => d.date)
   const minD = dates.length ? Math.min(...dates) : 0
   const maxD = dates.length ? Math.max(...dates) : 0
@@ -369,12 +369,12 @@ function PriceHistoryModal({ item, data, onClose }) {
         ) : (
           <div style={{ overflowX: 'auto', paddingBottom: 10 }}>
             <svg width={Math.max(width, sorted.length * 60 + padding * 2)} height={height} className="inv-price-svg" style={{ minWidth: '100%' }}>
-              <line x1={padding} y1={height-padding} x2={Math.max(width, sorted.length * 60 + padding * 2)-padding} y2={height-padding} stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
-              <line x1={padding} y1={padding} x2={Math.max(width, sorted.length * 60 + padding * 2)-padding} y2={padding} stroke="#e2e8f0" strokeDasharray="4 4" strokeLinecap="round" />
-              
+              <line x1={padding} y1={height - padding} x2={Math.max(width, sorted.length * 60 + padding * 2) - padding} y2={height - padding} stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
+              <line x1={padding} y1={padding} x2={Math.max(width, sorted.length * 60 + padding * 2) - padding} y2={padding} stroke="#e2e8f0" strokeDasharray="4 4" strokeLinecap="round" />
+
               <text x={padding - 10} y={height - padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(axisMinP)}</text>
               <text x={padding - 10} y={padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(maxP)}</text>
-              
+
               {sorted.map((d, i) => {
                 const getDynamicX = (index) => padding + 30 + (index * 60);
                 const x = getDynamicX(i);
@@ -386,7 +386,7 @@ function PriceHistoryModal({ item, data, onClose }) {
 
                 return (
                   <g key={i} className="inv-graph-point">
-                    <rect x={x - barWidth/2} y={y} width={barWidth} height={Math.max(2, baseLine - y)} fill="var(--brand-primary)" rx="4" />
+                    <rect x={x - barWidth / 2} y={y} width={barWidth} height={Math.max(2, baseLine - y)} fill="var(--brand-primary)" rx="4" />
                     <text x={x} y={y - 8} textAnchor="middle" fontSize="11" fill="#1e293b" fontWeight="bold" opacity="0" className="inv-point-tooltip">{fmtCur(d.price)}</text>
                     <text x={x} y={baseLine + 18} textAnchor="middle" fontSize="10" fill="#64748b">{sDate}</text>
                   </g>
@@ -451,17 +451,17 @@ function LiveStockTab({ menuProducts }) {
   }
 
   const exportCSV = () => {
-    const rows = [['Name','Category','Unit','Qty','Low Threshold','Cost Price','Selling Price','Stock Value','Wastage Count']]
-    filtered.forEach(i => rows.push([i.name,i.category,i.unit,i.currentQty,i.lowStockThreshold,i.costPrice,i.sellingPrice,(i.currentQty*i.costPrice).toFixed(2),(i.wastageLog||[]).length]))
+    const rows = [['Name', 'Category', 'Unit', 'Qty', 'Low Threshold', 'Cost Price', 'Selling Price', 'Stock Value', 'Wastage Count']]
+    filtered.forEach(i => rows.push([i.name, i.category, i.unit, i.currentQty, i.lowStockThreshold, i.costPrice, i.sellingPrice, (i.currentQty * i.costPrice).toFixed(2), (i.wastageLog || []).length]))
     const csv = rows.map(r => r.join(',')).join('\n')
-    const blob = new Blob([csv], {type:'text/csv'})
+    const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url; a.download = `inventory-${Date.now()}.csv`; a.click()
     URL.revokeObjectURL(url)
   }
 
   const filtered = items.filter(i => {
-    const matchSearch = !search || i.name.toLowerCase().includes(search.toLowerCase()) || (i.category||'').toLowerCase().includes(search.toLowerCase())
+    const matchSearch = !search || i.name.toLowerCase().includes(search.toLowerCase()) || (i.category || '').toLowerCase().includes(search.toLowerCase())
     const matchFilter = filter === 'all' || (filter === 'low' && i.isLowStock && i.currentQty > 0) || (filter === 'out' && i.currentQty === 0) || (filter === 'linked' && i.isMenuLinked)
     return matchSearch && matchFilter
   })
@@ -477,7 +477,7 @@ function LiveStockTab({ menuProducts }) {
   const totalValue = items.reduce((s, i) => s + (i.currentQty * getAvgCost(i)), 0)
   const lowCount = items.filter(i => i.isLowStock).length
   const outCount = items.filter(i => i.currentQty === 0).length
-  const totalWastage = items.reduce((s, i) => s + (i.wastageLog||[]).reduce((a, w) => a + w.qty, 0), 0)
+  const totalWastage = items.reduce((s, i) => s + (i.wastageLog || []).reduce((a, w) => a + w.qty, 0), 0)
 
   return (
     <div className="inv-tab-content">
@@ -508,7 +508,7 @@ function LiveStockTab({ menuProducts }) {
           <input className="inv-search" placeholder="Search items…" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="inv-filter-chips">
-          {['all','low','out','linked'].map(f => (
+          {['all', 'low', 'out', 'linked'].map(f => (
             <button key={f} className={`inv-filter-chip ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>
               {f === 'all' ? 'All' : f === 'low' ? '⚠ Low' : f === 'out' ? '🚫 Out' : '🔗 Menu'}
             </button>
@@ -558,7 +558,7 @@ function LiveStockTab({ menuProducts }) {
 function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSave, onClose }) {
   const [supplierName, setSupplierName] = useState(logToEdit?.supplierName || '')
   const selectedS = suppliers.find(s => s.name.toLowerCase() === supplierName.trim().toLowerCase())
-  const [lines, setLines] = useState(logToEdit?.items?.length ? logToEdit.items.map(l => ({...l, lineTotal: l.qty * l.costPerUnit})) : [{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, lineTotal: 0, emoji: '📦', category: '', isExpenseOnly: false }])
+  const [lines, setLines] = useState(logToEdit?.items?.length ? logToEdit.items.map(l => ({ ...l, lineTotal: l.qty * l.costPerUnit })) : [{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, lineTotal: 0, emoji: '📦', category: '', isExpenseOnly: false }])
   const [invoiceNo, setInvoiceNo] = useState(logToEdit?.invoiceNumber || '')
   const [notes, setNotes] = useState(logToEdit?.notes || '')
   const [date, setDate] = useState(() => {
@@ -589,9 +589,9 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
   const handleProductNameChange = (lineId, val) => {
     const p = allProducts.find(x => x.name === val)
     if (p) {
-      setLines(prev => prev.map(l => l.id === lineId ? {...l, productId: p.id, productName: p.name, emoji: p.emoji || '📦', unit: p.unit || 'pcs', category: p.category || '', costPerUnit: p.costPrice || 0} : l))
+      setLines(prev => prev.map(l => l.id === lineId ? { ...l, productId: p.id, productName: p.name, emoji: p.emoji || '📦', unit: p.unit || 'pcs', category: p.category || '', costPerUnit: p.costPrice || 0 } : l))
     } else {
-      setLines(prev => prev.map(l => l.id === lineId ? {...l, productId: '', productName: val} : l))
+      setLines(prev => prev.map(l => l.id === lineId ? { ...l, productId: '', productName: val } : l))
     }
   }
 
@@ -757,8 +757,8 @@ function PurchaseLogItem({ log, onEdit, onDelete }) {
             {log.invoiceNumber && <><span className="inv-log-dot">·</span><span className="inv-log-inv">#{log.invoiceNumber}</span></>}
           </div>
           <div className="inv-log-items-preview">
-            {(log.items||[]).slice(0,3).map((i,idx) => <span key={idx} className="inv-log-item-tag">{i.emoji} {i.productName} ×{i.qty}</span>)}
-            {(log.items||[]).length > 3 && <span className="inv-log-item-tag">+{log.items.length - 3} more</span>}
+            {(log.items || []).slice(0, 3).map((i, idx) => <span key={idx} className="inv-log-item-tag">{i.emoji} {i.productName} ×{i.qty}</span>)}
+            {(log.items || []).length > 3 && <span className="inv-log-item-tag">+{log.items.length - 3} more</span>}
           </div>
         </div>
         <div className="inv-log-right">
@@ -774,7 +774,7 @@ function PurchaseLogItem({ log, onEdit, onDelete }) {
               <tr><th>Item</th><th>Qty</th><th>Unit</th><th>Cost/Unit</th><th>Total</th></tr>
             </thead>
             <tbody>
-              {(log.items||[]).map((item, i) => (
+              {(log.items || []).map((item, i) => (
                 <tr key={i}>
                   <td>{item.emoji} {item.productName}</td>
                   <td>{item.qty}</td>
@@ -846,10 +846,10 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
   }
 
   const exportCSV = () => {
-    const rows = [['Purchase ID','Supplier','Date','Invoice','Items','Total Amount']]
-    logs.forEach(l => rows.push([l.purchaseId,l.supplierName,fmtDate(l.purchasedAt),l.invoiceNumber||'',(l.items||[]).length,l.totalAmount]))
+    const rows = [['Purchase ID', 'Supplier', 'Date', 'Invoice', 'Items', 'Total Amount']]
+    logs.forEach(l => rows.push([l.purchaseId, l.supplierName, fmtDate(l.purchasedAt), l.invoiceNumber || '', (l.items || []).length, l.totalAmount]))
     const csv = rows.map(r => r.join(',')).join('\n')
-    const blob = new Blob([csv], {type:'text/csv'})
+    const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url; a.download = `purchases-${Date.now()}.csv`; a.click()
     URL.revokeObjectURL(url)
@@ -859,12 +859,12 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
     if (l.purchasedAt < dateRange.fromTs || l.purchasedAt > dateRange.toTs) return false
     if (!search) return true
     const s = search.toLowerCase()
-    return l.supplierName?.toLowerCase().includes(s) || l.purchaseId.toLowerCase().includes(s) || (l.items||[]).some(i => i.productName.toLowerCase().includes(s))
+    return l.supplierName?.toLowerCase().includes(s) || l.purchaseId.toLowerCase().includes(s) || (l.items || []).some(i => i.productName.toLowerCase().includes(s))
   })
 
   const filteredSpend = filtered.reduce((s, l) => s + (l.totalAmount || 0), 0)
   const avgSpend = filtered.length ? filteredSpend / filtered.length : 0
-  const topSupplier = Object.entries(filtered.reduce((acc, l) => { acc[l.supplierName] = (acc[l.supplierName] || 0) + l.totalAmount; return acc }, {})).sort((a,b) => b[1]-a[1])[0]
+  const topSupplier = Object.entries(filtered.reduce((acc, l) => { acc[l.supplierName] = (acc[l.supplierName] || 0) + l.totalAmount; return acc }, {})).sort((a, b) => b[1] - a[1])[0]
 
   return (
     <div className="inv-tab-content">
@@ -877,20 +877,20 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
       )}
       <div className="inv-kpi-strip">
         <div className="inv-kpi-card">
-          <div className="inv-kpi-label">Total Logs</div>
+          <div className="inv-kpi-label">Logs</div>
           <div className="inv-kpi-val">{filtered.length}</div>
         </div>
         <div className="inv-kpi-card">
-          <div className="inv-kpi-label">Total Spend</div>
+          <div className="inv-kpi-label">Spend</div>
           <div className="inv-kpi-val">{fmtCur(filteredSpend)}</div>
         </div>
         <div className="inv-kpi-card">
-          <div className="inv-kpi-label">Avg Log Value</div>
+          <div className="inv-kpi-label">Avg Value</div>
           <div className="inv-kpi-val">{fmtCur(avgSpend)}</div>
         </div>
         <div className="inv-kpi-card">
-          <div className="inv-kpi-label">Top Supplier</div>
-          <div className="inv-kpi-val inv-kpi-val-sm">{topSupplier?.[0] || '—'}</div>
+          <div className="inv-kpi-label">Top Supp.</div>
+          <div className="inv-kpi-val inv-kpi-val-sm" style={{ maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', verticalAlign: 'bottom' }}>{topSupplier?.[0] || '—'}</div>
         </div>
       </div>
 
@@ -974,7 +974,7 @@ function SupplierFormModal({ supplier, onSave, onClose }) {
         </div>
         <div className="inv-form-group">
           <label className="inv-form-label">GST Number</label>
-          <input className="inv-form-input" value={form.gstNo} onChange={e => setF('gstNo', e.target.value)} placeholder="GSTIN" style={{textTransform:'uppercase'}} />
+          <input className="inv-form-input" value={form.gstNo} onChange={e => setF('gstNo', e.target.value)} placeholder="GSTIN" style={{ textTransform: 'uppercase' }} />
         </div>
         <div className="inv-form-group">
           <label className="inv-form-label">Address</label>
@@ -992,7 +992,7 @@ function SupplierFormModal({ supplier, onSave, onClose }) {
 
 function SupplierDetailsModal({ supplier, purchaseLogs, onClose, onShowPriceGraph }) {
   const myLogs = purchaseLogs.filter(l => l.supplierId === supplier.id)
-  
+
   const itemStats = {}
   myLogs.forEach(log => {
     (log.items || []).forEach(item => {
@@ -1013,7 +1013,7 @@ function SupplierDetailsModal({ supplier, purchaseLogs, onClose, onShowPriceGrap
     })
   })
 
-  const itemsList = Object.values(itemStats).sort((a,b) => b.totalSpent - a.totalSpent)
+  const itemsList = Object.values(itemStats).sort((a, b) => b.totalSpent - a.totalSpent)
 
   return (
     <Modal title={`${supplier.name} - Purchases`} onClose={onClose}>
@@ -1035,11 +1035,11 @@ function SupplierDetailsModal({ supplier, purchaseLogs, onClose, onShowPriceGrap
                 <div>
                   <div style={{ fontWeight: '600', color: '#1e293b' }}>{it.name}</div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', cursor: 'pointer', marginTop: 4, display: 'inline-flex', alignItems: 'center' }} onClick={() => onShowPriceGraph({ id: it.id, name: it.name }, it.purchaseDates)}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, marginRight: 4 }}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, marginRight: 4 }}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>
                     <span style={{ textDecoration: 'underline', textDecorationStyle: 'dotted' }}>View Price History</span>
                   </div>
                 </div>
-                <div style={{ textAlign: 'right', fontWeight: '500', color: '#475569' }}>{it.totalQty} <span style={{fontSize:'0.8rem', color:'#94a3b8'}}>{it.unit}</span></div>
+                <div style={{ textAlign: 'right', fontWeight: '500', color: '#475569' }}>{it.totalQty} <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{it.unit}</span></div>
                 <div style={{ textAlign: 'right', fontWeight: '700', color: '#1e293b' }}>{fmtCur(it.totalSpent)}</div>
               </div>
             ))}
@@ -1075,7 +1075,7 @@ function SuppliersTab({ suppliers, onSuppliersChanged }) {
     onSuppliersChanged()
   }
 
-  const filtered = suppliers.filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.tags||[]).some(t => t.toLowerCase().includes(search.toLowerCase())))
+  const filtered = suppliers.filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.tags || []).some(t => t.toLowerCase().includes(search.toLowerCase())))
   const totalSpendAll = suppliers.reduce((s, sup) => s + (sup.totalSpend || 0), 0)
 
   return (
@@ -1131,7 +1131,7 @@ function SuppliersTab({ suppliers, onSuppliersChanged }) {
                 </div>
               </div>
               {s.address && <div className="inv-supplier-card-address">📍 {s.address}</div>}
-              {(s.tags||[]).length > 0 && (
+              {(s.tags || []).length > 0 && (
                 <div className="inv-supplier-card-tags">
                   {s.tags.map((t, i) => <span key={i} className="inv-tag">{t}</span>)}
                 </div>
@@ -1155,18 +1155,18 @@ function SuppliersTab({ suppliers, onSuppliersChanged }) {
         <SupplierFormModal supplier={editSupplier} onSave={handleSave} onClose={() => { setShowForm(false); setEditSupplier(null) }} />
       )}
       {detailsSupplier && (
-        <SupplierDetailsModal 
-          supplier={detailsSupplier} 
-          purchaseLogs={purchaseLogs} 
-          onClose={() => setDetailsSupplier(null)} 
+        <SupplierDetailsModal
+          supplier={detailsSupplier}
+          purchaseLogs={purchaseLogs}
+          onClose={() => setDetailsSupplier(null)}
           onShowPriceGraph={(item, data) => setPriceGraphItem({ item, data })}
         />
       )}
       {priceGraphItem && (
-        <PriceHistoryModal 
-          item={priceGraphItem.item} 
-          data={priceGraphItem.data} 
-          onClose={() => setPriceGraphItem(null)} 
+        <PriceHistoryModal
+          item={priceGraphItem.item}
+          data={priceGraphItem.data}
+          onClose={() => setPriceGraphItem(null)}
         />
       )}
     </div>
@@ -1217,7 +1217,7 @@ export default function Inventory({ onClose }) {
       {/* Header matches BusinessProfile / OrderRecords style */}
       <header className="inv-header">
         <button className="inv-back-btn" onClick={onClose}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
         </button>
         <div className="inv-header-icon">
           <Ic.Box />
