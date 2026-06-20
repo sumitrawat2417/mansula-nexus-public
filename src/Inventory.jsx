@@ -374,6 +374,9 @@ function PriceHistoryModal({ item, data, onClose }) {
 
               <text x={padding - 10} y={height - padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(axisMinP)}</text>
               <text x={padding - 10} y={padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(maxP)}</text>
+              
+              <text x={padding / 2 - 5} y={height / 2} transform={`rotate(-90 ${padding / 2 - 5} ${height / 2})`} textAnchor="middle" fontSize="11" fill="#94a3b8" fontWeight="bold" letterSpacing="0.05em">PRICE</text>
+              <text x={Math.max(width, sorted.length * 60 + padding * 2) / 2} y={height - 5} textAnchor="middle" fontSize="11" fill="#94a3b8" fontWeight="bold" letterSpacing="0.05em">DATE</text>
 
               {sorted.map((d, i) => {
                 const getDynamicX = (index) => padding + 30 + (index * 60);
