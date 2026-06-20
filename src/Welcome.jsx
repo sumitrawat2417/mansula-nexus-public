@@ -1,38 +1,88 @@
 import { useState, useEffect } from 'react'
 
-// ── Audio Boot Up Sound ──
-// High quality, energetic MP3 to ensure cross-browser compatibility
-const bootSound = new Audio('https://www.myinstants.com/media/sounds/ps1-startup.mp3')
-bootSound.volume = 0.6
+// ── Web Audio Synthesizer (Premium Chimes) ──
+const playSound = (type) => {
+  try {
+    // Suppress console warning if user hasn't interacted yet
+    if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
+    
+    const AudioContext = window.AudioContext || window.webkitAudioContext
+    if (!AudioContext) return
+    const ctx = new AudioContext()
+
+    if (type === 'reveal') {
+      // Energetic tech power-up sweep
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      
+      osc.type = 'square'
+      // Fast pitch sweep up
+      osc.frequency.setValueAtTime(150, ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.15)
+      
+      gain.gain.setValueAtTime(0, ctx.currentTime)
+      gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.05)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+      
+      osc.start(ctx.currentTime)
+      osc.stop(ctx.currentTime + 0.3)
+
+    } else if (type === 'burst') {
+      // Big energetic synth impact/chord (C Major 9)
+      const frequencies = [261.63, 329.63, 392.00, 493.88, 587.33] // C4, E4, G4, B4, D5
+      
+      frequencies.forEach(freq => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        const filter = ctx.createBiquadFilter()
+        
+        osc.type = 'sawtooth'
+        osc.frequency.setValueAtTime(freq, ctx.currentTime)
+        
+        // Classic electronic filter sweep down
+        filter.type = 'lowpass'
+        filter.frequency.setValueAtTime(5000, ctx.currentTime)
+        filter.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 1.2)
+        
+        osc.connect(filter)
+        filter.connect(gain)
+        gain.connect(ctx.destination)
+        
+        // Punchy attack, long fade out
+        gain.gain.setValueAtTime(0, ctx.currentTime)
+        gain.gain.linearRampToValueAtTime(0.03, ctx.currentTime + 0.02)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2)
+        
+        osc.start(ctx.currentTime)
+        osc.stop(ctx.currentTime + 2)
+      })
+    }
+  } catch (e) {
+    // Browsers will block audio if there was no user interaction yet, fail silently.
+  }
+}
 
 export default function Welcome({ onComplete }) {
-  const [stage, setStage] = useState(-1) // -1 means waiting for user click
+  const [stage, setStage] = useState(0)
 
-  const handleStart = () => {
-    setStage(0)
-    
-    // Guaranteed to play because it's directly inside a click handler
-    bootSound.play().catch(e => console.warn('Audio play failed:', e))
-
+  useEffect(() => {
     // Stage sequence for animations
-    const t1 = setTimeout(() => { setStage(1) }, 300)   // Fade in logo
-    const t2 = setTimeout(() => { setStage(2) }, 1200)  // Slide up text
-    const t3 = setTimeout(() => { setStage(3) }, 2500)  // Glow burst
-    const t4 = setTimeout(() => { setStage(4) }, 4800)  // Exit animation (extended for sound)
-    const t5 = setTimeout(() => onComplete(), 5400)     // Unmount
-  }
+    const t1 = setTimeout(() => { setStage(1); playSound('reveal'); }, 300)   // Fade in logo
+    const t2 = setTimeout(() => { setStage(2); }, 1200)                       // Slide up text
+    const t3 = setTimeout(() => { setStage(3); playSound('burst'); }, 2500)   // Glow burst
+    const t4 = setTimeout(() => { setStage(4); }, 3800)                       // Exit animation
+    const t5 = setTimeout(() => onComplete(), 4400)                           // Unmount
 
-  if (stage === -1) {
-    return (
-      <div className="wel-root">
-        <div className="wel-grid" />
-        <button className="wel-init-btn" onClick={handleStart}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          INITIALIZE SYSTEM
-        </button>
-      </div>
-    )
-  }
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(t3)
+      clearTimeout(t4)
+      clearTimeout(t5)
+    }
+  }, [onComplete])
 
   return (
     <div className={`wel-root ${stage === 4 ? 'exit' : ''}`}>
@@ -65,7 +115,7 @@ export default function Welcome({ onComplete }) {
           <div className={`wel-subtitle-wrap ${stage >= 2 ? 'show' : ''}`}>
             <p className="wel-subtitle" style={{ fontSize: '0.85rem' }}>Empowering Commerce with Smart Technology</p>
             <div className="wel-loader-bar">
-              <div className="wel-loader-fill" style={{ animationDuration: '4.5s' }} />
+              <div className="wel-loader-fill" />
             </div>
           </div>
         </div>

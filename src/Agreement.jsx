@@ -66,6 +66,36 @@ The only external network requests made by the application are: (a) fetching QR 
   },
 ]
 
+// ── Success Sound (Synthesized) ──
+const playSuccessSound = () => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext
+    if (!AudioContext) return
+    const ctx = new AudioContext()
+    
+    const playNote = (freq, startTime, duration) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.type = 'sine'
+      osc.frequency.value = freq
+      
+      gain.gain.setValueAtTime(0, startTime)
+      gain.gain.linearRampToValueAtTime(0.15, startTime + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration)
+      
+      osc.start(startTime)
+      osc.stop(startTime + duration)
+    }
+
+    playNote(880, ctx.currentTime, 0.15)          // A5
+    playNote(1108.73, ctx.currentTime + 0.1, 0.4) // C#6
+  } catch (e) {
+    // Ignore audio failures silently
+  }
+}
+
 export default function Agreement({ onAccept }) {
   const [expanded, setExpanded] = useState(null)
   const [agreed, setAgreed] = useState(false)
@@ -76,6 +106,7 @@ export default function Agreement({ onAccept }) {
   const handleLaunch = () => {
     if (!agreed) return
     setLaunching(true)
+    playSuccessSound()
     setTimeout(() => onAccept(), 600)
   }
 
