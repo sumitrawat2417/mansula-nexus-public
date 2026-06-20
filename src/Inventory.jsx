@@ -111,7 +111,7 @@ function StockCard({ item, purchaseLogs, onAdjust, onWastage, onEdit, onDelete, 
         <div className="inv-price-pair">
           <span className="inv-price-label">Cost</span>
           {(() => {
-            const myLogs = (purchaseLogs || []).flatMap(l => (l.items || []).filter(i => i.productId === item.id).map(i => ({ date: l.purchasedAt, price: i.costPerUnit }))).filter(x => x.price > 0)
+            const myLogs = (purchaseLogs || []).flatMap(l => (l.items || []).filter(i => i.productId === item.id).map(i => ({ date: l.purchasedAt, price: i.costPerUnit, qty: i.qty }))).filter(x => x.price > 0)
             if (myLogs.length > 0) {
               const prices = myLogs.map(x => x.price)
               const minP = Math.min(...prices)
@@ -125,7 +125,16 @@ function StockCard({ item, purchaseLogs, onAdjust, onWastage, onEdit, onDelete, 
         </div>
         <div className="inv-price-pair">
           <span className="inv-price-label">Stock Value</span>
-          <span className="inv-price-val">{fmtCur(item.currentQty * item.costPrice)}</span>
+          {(() => {
+            const myLogs = (purchaseLogs || []).flatMap(l => (l.items || []).filter(i => i.productId === item.id)).filter(x => x.costPerUnit > 0 && x.qty > 0)
+            let avgCost = item.costPrice || 0
+            if (myLogs.length > 0) {
+              const totalCost = myLogs.reduce((s, x) => s + (x.qty * x.costPerUnit), 0)
+              const totalQty = myLogs.reduce((s, x) => s + x.qty, 0)
+              avgCost = totalCost / totalQty
+            }
+            return <span className="inv-price-val">{fmtCur(item.currentQty * avgCost)}</span>
+          })()}
         </div>
       </div>
 
@@ -427,7 +436,15 @@ function LiveStockTab({ menuProducts }) {
     return matchSearch && matchFilter
   })
 
-  const totalValue = items.reduce((s, i) => s + (i.currentQty * i.costPrice), 0)
+  const getAvgCost = (item) => {
+    const myLogs = (purchaseLogs || []).flatMap(l => (l.items || []).filter(li => li.productId === item.id)).filter(x => x.costPerUnit > 0 && x.qty > 0)
+    if (myLogs.length === 0) return item.costPrice || 0
+    const totalCost = myLogs.reduce((s, x) => s + (x.qty * x.costPerUnit), 0)
+    const totalQty = myLogs.reduce((s, x) => s + x.qty, 0)
+    return totalCost / totalQty
+  }
+
+  const totalValue = items.reduce((s, i) => s + (i.currentQty * getAvgCost(i)), 0)
   const lowCount = items.filter(i => i.isLowStock).length
   const outCount = items.filter(i => i.currentQty === 0).length
   const totalWastage = items.reduce((s, i) => s + (i.wastageLog||[]).reduce((a, w) => a + w.qty, 0), 0)
