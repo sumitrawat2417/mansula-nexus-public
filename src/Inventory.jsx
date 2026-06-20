@@ -66,7 +66,7 @@ function Modal({ title, onClose, children, wide }) {
 // TAB 1: LIVE STOCK
 // ══════════════════════════════════════════════════════════════════
 
-function StockCard({ item, onAdjust, onWastage, onEdit, onDelete }) {
+function StockCard({ item, purchaseLogs, onAdjust, onWastage, onEdit, onDelete, onShowPriceGraph }) {
   const isOut = item.currentQty === 0
   const isLow = !isOut && item.isLowStock
 
@@ -110,7 +110,18 @@ function StockCard({ item, onAdjust, onWastage, onEdit, onDelete }) {
       <div className="inv-stock-prices">
         <div className="inv-price-pair">
           <span className="inv-price-label">Cost</span>
-          <span className="inv-price-val">{fmtCur(item.costPrice)}</span>
+          {(() => {
+            const myLogs = (purchaseLogs || []).flatMap(l => (l.items || []).filter(i => i.productId === item.id).map(i => ({ date: l.purchasedAt, price: i.costPerUnit }))).filter(x => x.price > 0)
+            if (myLogs.length > 0) {
+              const prices = myLogs.map(x => x.price)
+              const minP = Math.min(...prices)
+              const maxP = Math.max(...prices)
+              if (minP !== maxP) {
+                return <span className="inv-price-val inv-price-interactive" onClick={() => onShowPriceGraph(item, myLogs)}>{fmtCur(minP)} - {fmtCur(maxP)}</span>
+              }
+            }
+            return <span className="inv-price-val">{fmtCur(item.costPrice)}</span>
+          })()}
         </div>
         <div className="inv-price-pair">
           <span className="inv-price-label">Stock Value</span>
@@ -306,6 +317,56 @@ function WastageModal({ item, onSave, onClose }) {
   )
 }
 
+function PriceHistoryModal({ item, data, onClose }) {
+  const sorted = [...data].sort((a, b) => a.date - b.date)
+  const width = 500
+  const height = 220
+  const padding = 45
+  
+  const prices = sorted.map(d => d.price)
+  const minP = Math.min(...prices)
+  const maxP = Math.max(...prices)
+  const rangeP = maxP - minP || 1
+  
+  const dates = sorted.map(d => d.date)
+  const minD = Math.min(...dates)
+  const maxD = Math.max(...dates)
+  const rangeD = maxD - minD || 1
+
+  const getX = (d) => padding + ((d - minD) / rangeD) * (width - padding * 2)
+  const getY = (p) => height - padding - ((p - minP) / rangeP) * (height - padding * 2)
+
+  const points = sorted.map(d => `${getX(d.date)},${getY(d.price)}`).join(' ')
+
+  return (
+    <Modal title={`Price History: ${item.name}`} onClose={onClose}>
+      <div className="inv-price-graph-wrap">
+        <svg viewBox={`0 0 ${width} ${height}`} className="inv-price-svg">
+          <line x1={padding} y1={height-padding} x2={width-padding} y2={height-padding} stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
+          <line x1={padding} y1={padding} x2={width-padding} y2={padding} stroke="#e2e8f0" strokeDasharray="4 4" strokeLinecap="round" />
+          
+          <text x={padding - 10} y={height - padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(minP)}</text>
+          <text x={padding - 10} y={padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(maxP)}</text>
+          
+          <polyline points={points} fill="none" stroke="var(--brand-primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          
+          {sorted.map((d, i) => (
+            <g key={i} className="inv-graph-point">
+              <circle cx={getX(d.date)} cy={getY(d.price)} r="5" fill="#fff" stroke="var(--brand-primary)" strokeWidth="2.5" />
+              <text x={getX(d.date)} y={getY(d.price) - 12} textAnchor="middle" fontSize="11" fill="#1e293b" fontWeight="bold" opacity="0" className="inv-point-tooltip">{fmtCur(d.price)}</text>
+              <text x={getX(d.date)} y={height - padding + 18} textAnchor="middle" fontSize="10" fill="#94a3b8" opacity="0" className="inv-point-tooltip">{fmtDate(d.date)}</text>
+            </g>
+          ))}
+        </svg>
+      </div>
+      <div className="inv-price-graph-meta">
+        <div><span className="inv-price-graph-badge">Lowest</span> <strong>{fmtCur(minP)}</strong></div>
+        <div><span className="inv-price-graph-badge">Highest</span> <strong>{fmtCur(maxP)}</strong></div>
+      </div>
+    </Modal>
+  )
+}
+
 function LiveStockTab({ menuProducts }) {
   const [items, setItems] = useState([])
   const [search, setSearch] = useState('')
@@ -314,10 +375,14 @@ function LiveStockTab({ menuProducts }) {
   const [editItem, setEditItem] = useState(null)
   const [wastageItem, setWastageItem] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [purchaseLogs, setPurchaseLogs] = useState([])
+  const [priceGraphItem, setPriceGraphItem] = useState(null)
 
   const load = useCallback(async () => {
     const data = await getInventoryItems()
+    const logs = await getPurchaseLogs()
     setItems(data)
+    setPurchaseLogs(logs)
     setLoading(false)
   }, [])
   useEffect(() => { load() }, [load])
@@ -421,7 +486,7 @@ function LiveStockTab({ menuProducts }) {
       ) : (
         <div className="inv-stock-grid">
           {filtered.map(item => (
-            <StockCard key={item.id} item={item} onAdjust={handleAdjust} onWastage={setWastageItem} onEdit={setEditItem} onDelete={handleDelete} />
+            <StockCard key={item.id} item={item} purchaseLogs={purchaseLogs} onAdjust={handleAdjust} onWastage={setWastageItem} onEdit={setEditItem} onDelete={handleDelete} onShowPriceGraph={(it, data) => setPriceGraphItem({ item: it, data })} />
           ))}
         </div>
       )}
@@ -431,6 +496,9 @@ function LiveStockTab({ menuProducts }) {
       )}
       {wastageItem && (
         <WastageModal item={wastageItem} onSave={handleWastage} onClose={() => setWastageItem(null)} />
+      )}
+      {priceGraphItem && (
+        <PriceHistoryModal item={priceGraphItem.item} data={priceGraphItem.data} onClose={() => setPriceGraphItem(null)} />
       )}
     </div>
   )
@@ -779,12 +847,12 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
           <Ic.Search />
           <input className="inv-search" placeholder="Search purchases…" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
+        <button className="or-date-filter-btn" onClick={() => setFilterDrawerOpen(true)}>
+          <Ic.CalDay />
+          <span>{dateRange.label}</span>
+          <Ic.ChevDown />
+        </button>
         <div className="inv-toolbar-actions">
-          <button className="or-date-filter-btn" onClick={() => setFilterDrawerOpen(true)}>
-            <Ic.CalDay />
-            <span>{dateRange.label}</span>
-            <Ic.ChevDown />
-          </button>
           <button className="inv-action-btn inv-action-btn-secondary" onClick={exportCSV}><Ic.Download /> Export</button>
           <button className="inv-action-btn" onClick={() => setShowForm(true)}><Ic.Plus /> Log Purchase</button>
         </div>

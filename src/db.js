@@ -610,6 +610,44 @@ export async function savePurchaseLog(log) {
           })
         }
       }
+    } else if (oldLog) {
+      const itemsMap = new Map()
+      for (const o of (oldLog.items || [])) {
+        if (!o.productId || o.isExpenseOnly) continue
+        itemsMap.set(o.productId, { id: o.productId, oldQty: o.qty || 0, newQty: 0, costPerUnit: o.costPerUnit || 0, name: o.productName, category: o.category, emoji: o.emoji, unit: o.unit })
+      }
+      for (const n of (record.items || [])) {
+        if (!n.productId || n.isExpenseOnly) continue
+        if (itemsMap.has(n.productId)) {
+          const existing = itemsMap.get(n.productId)
+          existing.newQty = n.qty || 0
+          existing.costPerUnit = n.costPerUnit || 0
+        } else {
+          itemsMap.set(n.productId, { id: n.productId, oldQty: 0, newQty: n.qty || 0, costPerUnit: n.costPerUnit || 0, name: n.productName, category: n.category, emoji: n.emoji, unit: n.unit })
+        }
+      }
+
+      for (const [pId, d] of itemsMap.entries()) {
+        const delta = d.newQty - d.oldQty
+        const invItem = await getInventoryItem(pId)
+        if (invItem) {
+          if (delta !== 0 || invItem.costPrice !== d.costPerUnit) {
+            let updated = invItem
+            if (delta !== 0) updated = await adjustInventoryStock(pId, delta) || updated
+            if (updated && d.newQty > 0 && d.costPerUnit > 0) {
+              await saveInventoryItem({ ...updated, costPrice: d.costPerUnit })
+            }
+          }
+        } else if (d.newQty > 0) {
+          await saveInventoryItem({
+            id: pId, name: d.name, category: d.category || '',
+            emoji: d.emoji || '📦', unit: d.unit || 'pcs',
+            currentQty: d.newQty, lowStockThreshold: 5,
+            costPrice: d.costPerUnit || 0, sellingPrice: 0,
+            isMenuLinked: false, wastageLog: [], createdAt: now,
+          })
+        }
+      }
     }
 
     // Sync supplier spend exactly
@@ -667,8 +705,14 @@ export async function deletePurchaseLog(purchaseId) {
       tx.onerror = () => resolve()
     })
 
-    if (log && log.supplierId) {
-      await syncSupplierSpend(log.supplierId)
+    if (log) {
+      for (const li of (log.items || [])) {
+        if (!li.productId || li.isExpenseOnly) continue
+        await adjustInventoryStock(li.productId, -(li.qty || 0))
+      }
+      if (log.supplierId) {
+        await syncSupplierSpend(log.supplierId)
+      }
     }
     return true
   } catch { return false }

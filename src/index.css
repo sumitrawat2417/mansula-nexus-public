@@ -6211,7 +6211,18 @@ select {
 .inv-price-pair:last-child { border-right: none; }
 .inv-price-label { font-size: 0.58rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 .inv-price-val { font-size: 0.78rem; font-weight: 700; color: var(--text-primary); }
+.inv-price-interactive { cursor: pointer; color: var(--brand-primary); text-decoration: underline; text-decoration-style: dotted; transition: color 0.2s; }
+.inv-price-interactive:hover { color: var(--brand-primary-light); }
 .inv-price-sell { color: #059669; }
+
+/* Price Graph */
+.inv-price-graph-wrap { background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 15px 10px 10px; margin-bottom: 20px; }
+.inv-price-svg { width: 100%; height: auto; display: block; overflow: visible; }
+.inv-graph-point { cursor: crosshair; transition: all 0.2s; }
+.inv-graph-point:hover circle { r: 6; fill: var(--brand-primary); stroke: #fff; stroke-width: 3; }
+.inv-graph-point:hover .inv-point-tooltip { opacity: 1; }
+.inv-price-graph-meta { display: flex; gap: 20px; justify-content: center; }
+.inv-price-graph-badge { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; margin-right: 6px; }
 .inv-margin-pos { color: #059669; }
 .inv-margin-neg { color: var(--brand-danger); }
 
