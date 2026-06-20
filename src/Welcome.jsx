@@ -1,66 +1,15 @@
 import { useState, useEffect } from 'react'
 
-// ── Web Audio Synthesizer (Premium Chimes) ──
-const playSound = (type) => {
+// ── Audio Boot Up Sound ──
+const bootSound = new Audio('https://upload.wikimedia.org/wikipedia/commons/e/e1/KDE_Startup_1.ogg')
+bootSound.volume = 0.5
+
+const playBootSound = () => {
   try {
-    // Suppress console warning if user hasn't interacted yet
     if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
-    
-    const AudioContext = window.AudioContext || window.webkitAudioContext
-    if (!AudioContext) return
-    const ctx = new AudioContext()
-
-    if (type === 'reveal') {
-      // Energetic tech power-up sweep
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      
-      osc.type = 'square'
-      // Fast pitch sweep up
-      osc.frequency.setValueAtTime(150, ctx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.15)
-      
-      gain.gain.setValueAtTime(0, ctx.currentTime)
-      gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.05)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
-      
-      osc.start(ctx.currentTime)
-      osc.stop(ctx.currentTime + 0.3)
-
-    } else if (type === 'burst') {
-      // Big energetic synth impact/chord (C Major 9)
-      const frequencies = [261.63, 329.63, 392.00, 493.88, 587.33] // C4, E4, G4, B4, D5
-      
-      frequencies.forEach(freq => {
-        const osc = ctx.createOscillator()
-        const gain = ctx.createGain()
-        const filter = ctx.createBiquadFilter()
-        
-        osc.type = 'sawtooth'
-        osc.frequency.setValueAtTime(freq, ctx.currentTime)
-        
-        // Classic electronic filter sweep down
-        filter.type = 'lowpass'
-        filter.frequency.setValueAtTime(5000, ctx.currentTime)
-        filter.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 1.2)
-        
-        osc.connect(filter)
-        filter.connect(gain)
-        gain.connect(ctx.destination)
-        
-        // Punchy attack, long fade out
-        gain.gain.setValueAtTime(0, ctx.currentTime)
-        gain.gain.linearRampToValueAtTime(0.03, ctx.currentTime + 0.02)
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2)
-        
-        osc.start(ctx.currentTime)
-        osc.stop(ctx.currentTime + 2)
-      })
-    }
+    bootSound.play().catch(() => {})
   } catch (e) {
-    // Browsers will block audio if there was no user interaction yet, fail silently.
+    // Fail silently if blocked
   }
 }
 
@@ -69,11 +18,11 @@ export default function Welcome({ onComplete }) {
 
   useEffect(() => {
     // Stage sequence for animations
-    const t1 = setTimeout(() => { setStage(1); playSound('reveal'); }, 300)   // Fade in logo
-    const t2 = setTimeout(() => { setStage(2); }, 1200)                       // Slide up text
-    const t3 = setTimeout(() => { setStage(3); playSound('burst'); }, 2500)   // Glow burst
-    const t4 = setTimeout(() => { setStage(4); }, 3800)                       // Exit animation
-    const t5 = setTimeout(() => onComplete(), 4400)                           // Unmount
+    const t1 = setTimeout(() => { setStage(1); playBootSound(); }, 300)   // Fade in logo & play sound
+    const t2 = setTimeout(() => { setStage(2); }, 1200)                   // Slide up text
+    const t3 = setTimeout(() => { setStage(3); }, 2500)                   // Glow burst
+    const t4 = setTimeout(() => { setStage(4); }, 3800)                   // Exit animation
+    const t5 = setTimeout(() => onComplete(), 4400)                       // Unmount
 
     return () => {
       clearTimeout(t1)
