@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import './App.css'
-import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth, getCustomers, saveCustomer } from './db.js'
+import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth } from './db.js'
 import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES, KEY_BUSINESS, DEFAULT_BUSINESS } from './BusinessProfile.jsx'
 
 // ─────────────── DATA (loaded from IDB, fallback to defaults) ───────────────
@@ -39,7 +39,7 @@ function makeDateSuffix(d = new Date()) {
 let _tempCounter = 1
 const makeTempOrderId = () => `T${_tempCounter++}-${makeDateSuffix()}`
 
-const makeOrder = (id) => ({ id: id || makeTempOrderId(), items: [], createdAt: new Date(), status: 'active', customerId: null, customerName: null })
+const makeOrder = (id) => ({ id: id || makeTempOrderId(), items: [], createdAt: new Date(), status: 'active' })
 const INIT_ORDER = makeOrder() // created once at module level
 
 // ─────────────── SOUND ───────────────
@@ -164,7 +164,7 @@ const I = {
   Clock: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
   Settings: ({ s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>,
   GridAuto: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /></svg>,
-  Home: ({ s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  Home: ({ s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>,
   Logo: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>,
 }
 
@@ -180,7 +180,7 @@ const ordTotal = (order, taxRate) => {
 function SuccessModal({ order, onClose, currency, taxRateObj }) {
   const [expanded, setExpanded] = useState(false)
   if (!order) return null
-  
+
   // Use stored values if available, otherwise fallback to basic calculation
   const sub = order.subtotal !== undefined ? order.subtotal : order.items.reduce((s, i) => s + i.price * i.qty, 0)
   const tax = order.taxAmt !== undefined ? order.taxAmt : sub * taxRateObj.value
@@ -309,8 +309,8 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
                 </div>
               ))}
               {!showAllItems && hasMore && (
-                <button 
-                  className="expand-items-btn" 
+                <button
+                  className="expand-items-btn"
                   onClick={() => setShowAllItems(true)}
                   style={{ width: '100%', marginTop: 8 }}
                 >
@@ -553,7 +553,7 @@ function VariantModal({ product, currency, onConfirm, onClose }) {
 
   let base = product.price
   const priceGroups = (product.variants || []).filter(g => g.type === 'price')
-  
+
   if (priceGroups.length > 0) {
     const matrixKey = priceGroups.map(g => selections[g.id] || '').join('|')
     if (product.variantsMatrix && product.variantsMatrix[matrixKey] !== undefined) {
@@ -614,7 +614,7 @@ function VariantModal({ product, currency, onConfirm, onClose }) {
                 {g.options.map(o => {
                   let val = o.price !== undefined ? o.price : (o.priceAdj || 0)
                   let showPrice = false
-                  
+
                   if (g.type === 'price') {
                     if (priceGroups.length === 1) {
                       // If there's only 1 price group, we can show its explicit price
@@ -760,13 +760,6 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   const [activeCategory, setActiveCat] = useState('All')
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
-  
-  // Customers CRM
-  const [customersList, setCustomersList] = useState([])
-  const [showCustomerModal, setShowCustomerModal] = useState(false)
-  const [newCustName, setNewCustName] = useState('')
-  const [newCustPhone, setNewCustPhone] = useState('')
-
   const [variantProduct, setVariantProduct] = useState(null)
   const [cartOpen, setCartOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -793,25 +786,23 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
 
   const currentOrder = orders.find(o => o.id === currentOrderId)
   const cart = currentOrder?.items ?? []
-  
+
   const hasLoaded = useRef(false)
 
   // Load products/categories/business from IDB on mount
   // Also load any persisted active orders and fix the INIT_ORDER id
   useEffect(() => {
     async function load() {
-      const [p, c, b, activeOrders, monthOrders, cl] = await Promise.all([
+      const [p, c, b, activeOrders, monthOrders] = await Promise.all([
         dbGet(KEY_PRODUCTS),
         dbGet(KEY_CATEGORIES),
         dbGet(KEY_BUSINESS),
         dbGet('mn-active-orders'),
         getOrdersByMonth(getMonthKey()),
-        getCustomers(),
       ])
       if (p && p.length > 0) setProducts(p)
       if (c && c.length > 0) setCategories(c)
       if (b) setBusiness({ ...DEFAULT_BUSINESS, ...b })
-      if (cl && cl.length > 0) setCustomersList(cl)
 
       // Restore persisted active orders (survive refresh)
       let loadedOrders = (activeOrders && activeOrders.length > 0)
@@ -858,10 +849,10 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
           loadedOrders.push(orderToEdit)
         }
         newCurrentId = editingRecord.orderId
-        
+
         // Remove from todayCompleted so it's not duplicated
         todayCompleted = todayCompleted.filter(o => o.id !== editingRecord.orderId)
-        
+
         setDiscountType(editingRecord.discountAmt > 0 ? 'flat' : 'none')
         setDiscountVal(editingRecord.discountAmt || 0)
         setDeliveryCharge(editingRecord.deliveryCharge || 0)
@@ -877,7 +868,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
       hasLoaded.current = true
     }
     load()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 
@@ -892,7 +883,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
     }
   }, [cartOpen])
 
-  const toggleTheme = () => {}
+  const toggleTheme = () => { }
 
   const [toast, setToast] = useState(null)
   const toastTimeout = useRef(null)
@@ -957,10 +948,6 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
         : o
     ))
   }, [currentOrderId])
-
-  const updateOrder = useCallback((id, updates) => {
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o))
-  }, [])
 
   const createNewOrder = async () => {
     const current = orders.find(o => o.id === currentOrderId)
@@ -1104,10 +1091,6 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
       showToast('Cannot complete an empty order.')
       return
     }
-    if (paymentMode === 'udhaar' && !current.customerId) {
-      showToast('You must assign a customer to use Udhaar / Credit payment.', 'error')
-      return
-    }
     handleCheckoutOrder(currentOrderId)
   }
 
@@ -1224,7 +1207,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
           {/* ── CART ── */}
           <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true" />
           <aside className={`cart-panel ${cartOpen ? 'open' : ''}`} aria-label="Current order">
-            <div 
+            <div
               onTouchStart={e => { window._cartTouchY = e.touches[0].clientY }}
               onTouchEnd={e => {
                 if (window._cartTouchY == null) return;
@@ -1261,18 +1244,6 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
               <>
                 {cartStep === 'cart' ? (
                   <>
-                    <div style={{ padding: '0 15px', marginBottom: '10px' }}>
-                      {currentOrder && currentOrder.customerId ? (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(99, 102, 241, 0.1)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
-                          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--brand-primary)' }}>👤 {currentOrder.customerName}</span>
-                          <button onClick={() => updateOrder(currentOrderId, { customerId: null, customerName: null })} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><I.X s={14} /></button>
-                        </div>
-                      ) : (
-                        <button onClick={() => setShowCustomerModal(true)} style={{ width: '100%', background: 'var(--surface)', border: '1px dashed var(--border-color)', padding: '8px', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '5px' }}>
-                          <I.Plus s={14} /> Assign Customer
-                        </button>
-                      )}
-                    </div>
                     <div className="cart-items" role="list">
                       {cart.map(item => <CartItem key={item.variantKey ? `${item.id}-${item.variantKey}` : item.id} item={item} onIncrease={increaseQty} onDecrease={decreaseQty} currency={currency} />)}
                     </div>
@@ -1433,14 +1404,14 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                           </div>
 
                           <div style={{ padding: '0 4px', marginBottom: 6 }}>
-                            <input 
-                              type="range" 
-                              min="0" 
-                              max={total} 
-                              step="10" 
-                              value={splitCash || 0} 
-                              onChange={e => setSplitCash(Number(e.target.value))} 
-                              style={{ width: '100%', accentColor: 'var(--brand-primary)', cursor: 'pointer', height: 12 }} 
+                            <input
+                              type="range"
+                              min="0"
+                              max={total}
+                              step="10"
+                              value={splitCash || 0}
+                              onChange={e => setSplitCash(Number(e.target.value))}
+                              style={{ width: '100%', accentColor: 'var(--brand-primary)', cursor: 'pointer', height: 12 }}
                             />
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: 0, fontWeight: 600 }}>
                               <span>{fmt(0, currency)}</span>
@@ -1456,7 +1427,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                             ))}
                             <button className="cash-calc-btn clear" onClick={() => setSplitCash(0)} style={{ flex: '0 1 auto', padding: '3px 4px', fontSize: '0.75rem', borderRadius: 4 }}>Clear</button>
                           </div>
-                          
+
                           {splitCash < total ? (
                             <div className="upi-qr-section" style={{ marginTop: 2, padding: '4px 0 0' }}>
                               <div className="upi-qr-label" style={{ color: 'var(--brand-accent)', fontSize: '0.75rem', marginBottom: 4 }}>Remaining via UPI: {fmt(total - splitCash, currency)}</div>
@@ -1522,7 +1493,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                         const allModes = [
                           { id: 'cash', label: 'Cash', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><circle cx="12" cy="12" r="3" /><path d="M5 8v.01M19 8v.01M5 16v.01M19 16v.01" /></svg> },
                           { id: 'upi', label: 'UPI', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" /><line x1="12" y1="18" x2="12.01" y2="18" /></svg> },
-                          { id: 'split', label: 'Split', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> },
+                          { id: 'split', label: 'Split', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
                           { id: 'udhaar', label: 'Udhaar', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
                           { id: 'card', label: 'Card', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /><path d="M5 15h2M10 15h4" /></svg> },
                           { id: 'other', label: 'Other', svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg> },
@@ -1604,68 +1575,6 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
         <button id="mobile-cart-fab" className="mobile-cart-fab" onClick={() => setCartOpen(o => !o)} aria-label={`Cart`}>
           <I.Cart s={24} />
         </button>
-      )}
-
-      {/* Customer Assignment Modal */}
-      {showCustomerModal && (
-        <div className="modal-overlay" onClick={() => setShowCustomerModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3>Assign Customer</h3>
-            
-            <div style={{ marginBottom: 15 }}>
-              <input 
-                type="text" 
-                placeholder="Search phone or name..." 
-                value={newCustPhone}
-                onChange={e => setNewCustPhone(e.target.value)}
-                autoFocus
-                style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text)' }}
-              />
-            </div>
-
-            <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: 15, border: '1px solid var(--border-color)', borderRadius: 8 }}>
-              {customersList.filter(c => c.phone.includes(newCustPhone) || c.name.toLowerCase().includes(newCustPhone.toLowerCase())).map(c => (
-                <div key={c.id} style={{ padding: 10, borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }} onClick={() => {
-                  updateOrder(currentOrderId, { customerId: c.id, customerName: c.name })
-                  setShowCustomerModal(false)
-                }}>
-                  <div>
-                    <div style={{ fontWeight: 600, color: 'var(--text)' }}>{c.name}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{c.phone}</div>
-                  </div>
-                  <button className="secondary-btn" style={{ padding: '4px 10px' }}>Select</button>
-                </div>
-              ))}
-              {customersList.filter(c => c.phone.includes(newCustPhone) || c.name.toLowerCase().includes(newCustPhone.toLowerCase())).length === 0 && (
-                <div style={{ padding: 10, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>No matching customers</div>
-              )}
-            </div>
-
-            {/* Quick Add */}
-            <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: 15 }}>
-              <h4 style={{ fontSize: '0.9rem', marginBottom: 10, color: 'var(--text)' }}>Quick Add New</h4>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <input 
-                  type="text" 
-                  placeholder="Customer Name" 
-                  value={newCustName}
-                  onChange={e => setNewCustName(e.target.value)}
-                  style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--bg-body)', color: 'var(--text)' }}
-                />
-                <button className="primary-btn" onClick={async () => {
-                  if (!newCustName || !newCustPhone) return;
-                  const c = { id: `CUST-${Date.now()}`, name: newCustName.trim(), phone: newCustPhone.trim(), ordersCount: 0, totalSpent: 0, creditBalance: 0, createdAt: Date.now() }
-                  await saveCustomer(c)
-                  setCustomersList([...customersList, c])
-                  updateOrder(currentOrderId, { customerId: c.id, customerName: c.name })
-                  setShowCustomerModal(false)
-                  setNewCustName('')
-                  setNewCustPhone('')
-                }}>Save & Select</button>
-              </div>
-            </div>
-          </div>
-        </div>
       )}
     </>
   )

@@ -35,9 +35,9 @@ const TOOLS = [
   { id: 'records',   name: 'Order Records',    desc: 'View, edit & export all orders', Icon: Icon.OrderRec,  color: '#10b981', bg: 'linear-gradient(135deg,#10b981,#059669)', active: true },
   { id: 'analytics', name: 'Analytics',        desc: 'Sales trends & insights',        Icon: Icon.Analytics,  color: '#0ea5e9', bg: 'linear-gradient(135deg,#0ea5e9,#2dd4bf)', active: false },
   { id: 'reports',   name: 'Reports',           desc: 'Daily, weekly & monthly',        Icon: Icon.Reports,    color: '#f59e0b', bg: 'linear-gradient(135deg,#f59e0b,#ef4444)', active: false },
-  { id: 'inventory', name: 'Inventory',         desc: 'Stock & supplier mgmt',          Icon: Icon.Inventory,  color: '#ec4899', bg: 'linear-gradient(135deg,#ec4899,#f43f5e)', active: false },
+  { id: 'inventory', name: 'Inventory',         desc: 'Stock, purchases & suppliers',   Icon: Icon.Inventory,  color: '#ec4899', bg: 'linear-gradient(135deg,#ec4899,#f43f5e)', active: true },
   { id: 'staff',     name: 'Staff',             desc: 'Team roles & shifts',            Icon: Icon.Staff,      color: '#06b6d4', bg: 'linear-gradient(135deg,#06b6d4,#0284c7)', active: false },
-  { id: 'customers', name: 'Customers',         desc: 'Udhaar ledger & CRM',            Icon: Icon.Customers,  color: '#64748b', bg: 'linear-gradient(135deg,#64748b,#475569)', active: true },
+  { id: 'customers', name: 'Customers',         desc: 'Udhaar ledger & CRM',            Icon: Icon.Customers,  color: '#64748b', bg: 'linear-gradient(135deg,#64748b,#475569)', active: false },
 ]
 
 // ── Home Settings Modal ──

@@ -1,6 +1,8 @@
-// ── Mansula Nexus — IndexedDB persistence layer v2 ──
-// - 'kv' store: generic key-value (settings, products, etc.)
+// ── Mansula Nexus — IndexedDB persistence layer v3 ──
+// - 'kv' store: generic key-value (settings, products, suppliers, etc.)
 // - 'orders' store: completed order records, indexed by date
+// - 'inventory' store: live stock items, indexed by productId
+// - 'purchases' store: supplier purchase logs, indexed by purchasedAt
 
 const DB_NAME = 'mansula-nexus'
 const DB_VERSION = 3
@@ -23,9 +25,18 @@ function openDB() {
         store.createIndex('completedAt', 'completedAt', { unique: false })
         store.createIndex('monthKey', 'monthKey', { unique: false })
       }
-      // v3: customers store
-      if (!db.objectStoreNames.contains('customers')) {
-        const store = db.createObjectStore('customers', { keyPath: 'id' })
+      // v3: inventory store — keyed by id (matches menu item id or standalone)
+      if (!db.objectStoreNames.contains('inventory')) {
+        const invStore = db.createObjectStore('inventory', { keyPath: 'id' })
+        invStore.createIndex('category', 'category', { unique: false })
+        invStore.createIndex('lowStock', 'isLowStock', { unique: false })
+      }
+      // v3: purchases store — keyed by purchaseId
+      if (!db.objectStoreNames.contains('purchases')) {
+        const purStore = db.createObjectStore('purchases', { keyPath: 'purchaseId' })
+        purStore.createIndex('purchasedAt', 'purchasedAt', { unique: false })
+        purStore.createIndex('supplierId', 'supplierId', { unique: false })
+        purStore.createIndex('monthKey', 'monthKey', { unique: false })
       }
     }
     req.onsuccess = (e) => {
@@ -81,10 +92,9 @@ export async function dbClearAll() {
   try {
     const db = await openDB()
     return new Promise((resolve) => {
-      const tx = db.transaction(['kv', 'orders', 'customers'], 'readwrite')
+      const tx = db.transaction(['kv', 'orders'], 'readwrite')
       tx.objectStore('kv').clear()
       tx.objectStore('orders').clear()
-      tx.objectStore('customers').clear()
       tx.oncomplete = () => resolve()
       tx.onerror = () => resolve()
     })
@@ -116,38 +126,6 @@ export async function saveOrderRecord(order) {
       paymentDetails: order.paymentDetails || null,
       taxLabel: order.taxLabel || '',
       taxAmt: order.taxAmt || 0,
-      customerId: order.customerId || null,
-    }
-
-    // Update customer stats if customerId is present
-    if (order.customerId) {
-      const cTx = db.transaction('customers', 'readwrite')
-      const store = cTx.objectStore('customers')
-      const req = store.get(order.customerId)
-      req.onsuccess = () => {
-        if (req.result) {
-          const cust = req.result
-          cust.ordersCount = (cust.ordersCount || 0) + 1
-          cust.totalSpent = (cust.totalSpent || 0) + (record.total || 0)
-          
-          if (record.paymentMode === 'udhaar') {
-            cust.creditBalance = (cust.creditBalance || 0) + (record.total || 0)
-          }
-
-          // Store condensed summary for "lastOrders" snapshot
-          cust.lastOrders = cust.lastOrders || []
-          cust.lastOrders.unshift({
-            id: record.orderId,
-            total: record.total,
-            date: record.completedAt,
-            itemsCount: record.items.length
-          })
-          if (cust.lastOrders.length > 5) cust.lastOrders = cust.lastOrders.slice(0, 5)
-          cust.updatedAt = now
-          
-          store.put(cust)
-        }
-      }
     }
 
     return new Promise((resolve) => {
@@ -477,40 +455,227 @@ export async function injectStressTestData(numOrders = 10000) {
   } catch { return -1 }
 }
 
-// ── Customers store ──
+// ════════════════════════════════════════════════════════════════════
+// INVENTORY STORE — v3
+// ════════════════════════════════════════════════════════════════════
 
-export async function saveCustomer(customer) {
+export async function getInventoryItems() {
   try {
     const db = await openDB()
     return new Promise((resolve) => {
-      const tx = db.transaction('customers', 'readwrite')
-      tx.objectStore('customers').put(customer)
-      tx.oncomplete = () => resolve(customer)
-      tx.onerror = () => resolve(null)
-    })
-  } catch { return null }
-}
-
-export async function getCustomers() {
-  try {
-    const db = await openDB()
-    return new Promise((resolve) => {
-      const tx = db.transaction('customers', 'readonly')
-      const req = tx.objectStore('customers').getAll()
+      const tx = db.transaction('inventory', 'readonly')
+      const req = tx.objectStore('inventory').getAll()
       req.onsuccess = () => resolve(req.result || [])
       req.onerror = () => resolve([])
     })
   } catch { return [] }
 }
 
-export async function getCustomer(id) {
+export async function getInventoryItem(id) {
   try {
     const db = await openDB()
     return new Promise((resolve) => {
-      const tx = db.transaction('customers', 'readonly')
-      const req = tx.objectStore('customers').get(id)
+      const tx = db.transaction('inventory', 'readonly')
+      const req = tx.objectStore('inventory').get(id)
       req.onsuccess = () => resolve(req.result || null)
       req.onerror = () => resolve(null)
     })
   } catch { return null }
+}
+
+export async function saveInventoryItem(item) {
+  try {
+    const db = await openDB()
+    const record = {
+      ...item,
+      isLowStock: (item.currentQty ?? 0) <= (item.lowStockThreshold ?? 5),
+      updatedAt: Date.now(),
+      createdAt: item.createdAt || Date.now(),
+    }
+    return new Promise((resolve) => {
+      const tx = db.transaction('inventory', 'readwrite')
+      tx.objectStore('inventory').put(record)
+      tx.oncomplete = () => resolve(record)
+      tx.onerror = () => resolve(null)
+    })
+  } catch { return null }
+}
+
+export async function deleteInventoryItem(id) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('inventory', 'readwrite')
+      tx.objectStore('inventory').delete(id)
+      tx.oncomplete = () => resolve(true)
+      tx.onerror = () => resolve(false)
+    })
+  } catch { return false }
+}
+
+export async function adjustInventoryStock(id, delta) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('inventory', 'readwrite')
+      const store = tx.objectStore('inventory')
+      const getReq = store.get(id)
+      getReq.onsuccess = () => {
+        const item = getReq.result
+        if (!item) { resolve(false); return }
+        const newQty = Math.max(0, (item.currentQty || 0) + delta)
+        const updated = { ...item, currentQty: newQty, isLowStock: newQty <= (item.lowStockThreshold || 5), updatedAt: Date.now() }
+        store.put(updated)
+        tx.oncomplete = () => resolve(updated)
+      }
+      tx.onerror = () => resolve(false)
+    })
+  } catch { return false }
+}
+
+export async function logWastage(itemId, entry) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('inventory', 'readwrite')
+      const store = tx.objectStore('inventory')
+      const getReq = store.get(itemId)
+      getReq.onsuccess = () => {
+        const item = getReq.result
+        if (!item) { resolve(false); return }
+        const wastageLog = item.wastageLog || []
+        wastageLog.unshift({ ...entry, loggedAt: Date.now() })
+        const newQty = Math.max(0, (item.currentQty || 0) - (entry.qty || 0))
+        const updated = { ...item, currentQty: newQty, isLowStock: newQty <= (item.lowStockThreshold || 5), wastageLog, updatedAt: Date.now() }
+        store.put(updated)
+        tx.oncomplete = () => resolve(updated)
+      }
+      tx.onerror = () => resolve(false)
+    })
+  } catch { return false }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// PURCHASES STORE — v3
+// ════════════════════════════════════════════════════════════════════
+
+function genPurchaseId() {
+  const d = new Date()
+  const ym = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}`
+  return `PUR-${ym}-${Date.now().toString(36).toUpperCase()}`
+}
+
+export async function savePurchaseLog(log) {
+  try {
+    const db = await openDB()
+    const now = Date.now()
+    const d = new Date(log.purchasedAt || now)
+    const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const record = { ...log, purchaseId: log.purchaseId || genPurchaseId(), monthKey, purchasedAt: log.purchasedAt || now, createdAt: now }
+
+    await new Promise((resolve) => {
+      const tx = db.transaction('purchases', 'readwrite')
+      tx.objectStore('purchases').put(record)
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => resolve()
+    })
+
+    // Auto-increment inventory
+    for (const li of (record.items || [])) {
+      if (!li.productId) continue
+      const invItem = await getInventoryItem(li.productId)
+      if (invItem) {
+        const updated = await adjustInventoryStock(li.productId, li.qty || 0)
+        if (updated && li.costPerUnit > 0) {
+          await saveInventoryItem({ ...updated, costPrice: li.costPerUnit })
+        }
+      } else {
+        await saveInventoryItem({
+          id: li.productId, name: li.productName, category: li.category || '',
+          emoji: li.emoji || '📦', unit: li.unit || 'pcs',
+          currentQty: li.qty || 0, lowStockThreshold: 5,
+          costPrice: li.costPerUnit || 0, sellingPrice: li.sellingPrice || 0,
+          isMenuLinked: true, wastageLog: [], createdAt: now,
+        })
+      }
+    }
+
+    // Update supplier spend
+    if (record.supplierId) {
+      await updateSupplierSpend(record.supplierId, record.totalAmount || 0)
+    }
+
+    return record
+  } catch (e) { console.error('savePurchaseLog:', e); return null }
+}
+
+export async function getPurchaseLogs() {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('purchases', 'readonly')
+      const req = tx.objectStore('purchases').getAll()
+      req.onsuccess = () => resolve((req.result || []).sort((a, b) => b.purchasedAt - a.purchasedAt))
+      req.onerror = () => resolve([])
+    })
+  } catch { return [] }
+}
+
+export async function getPurchasesByMonth(monthKey) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('purchases', 'readonly')
+      const index = tx.objectStore('purchases').index('monthKey')
+      const req = index.getAll(IDBKeyRange.only(monthKey))
+      req.onsuccess = () => resolve(req.result || [])
+      req.onerror = () => resolve([])
+    })
+  } catch { return [] }
+}
+
+export async function deletePurchaseLog(purchaseId) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('purchases', 'readwrite')
+      tx.objectStore('purchases').delete(purchaseId)
+      tx.oncomplete = () => resolve(true)
+      tx.onerror = () => resolve(false)
+    })
+  } catch { return false }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SUPPLIERS — KV store 'mn-suppliers'
+// ════════════════════════════════════════════════════════════════════
+
+export async function getSuppliers() {
+  return (await dbGet('mn-suppliers')) || []
+}
+
+export async function saveSupplier(supplier) {
+  const suppliers = await getSuppliers()
+  const idx = suppliers.findIndex(s => s.id === supplier.id)
+  const record = { ...supplier, updatedAt: Date.now(), createdAt: supplier.createdAt || Date.now() }
+  if (idx >= 0) suppliers[idx] = record
+  else suppliers.push(record)
+  await dbSet('mn-suppliers', suppliers)
+  return record
+}
+
+export async function deleteSupplier(id) {
+  const suppliers = await getSuppliers()
+  await dbSet('mn-suppliers', suppliers.filter(s => s.id !== id))
+  return true
+}
+
+export async function updateSupplierSpend(supplierId, amount) {
+  const suppliers = await getSuppliers()
+  const s = suppliers.find(s => s.id === supplierId)
+  if (s) {
+    s.totalSpend = (s.totalSpend || 0) + amount
+    s.lastPurchaseAt = Date.now()
+    await dbSet('mn-suppliers', suppliers)
+  }
 }

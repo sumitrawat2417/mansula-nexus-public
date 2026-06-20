@@ -5,7 +5,7 @@ import POS from './POS.jsx'
 import BusinessProfile from './BusinessProfile.jsx'
 import OrderRecords from './OrderRecords.jsx'
 import Agreement from './Agreement.jsx'
-import Customers from './Customers.jsx'
+import Inventory from './Inventory.jsx'
 
 export const CURRENCIES = [
   { code: 'INR', symbol: '₹', rate: 1, decimals: 0 },
@@ -91,8 +91,8 @@ export default function App() {
            />
   }
 
-  if (screen === 'customers') {
-    return <Customers onBack={() => setScreen('home')} />
+  if (screen === 'inventory') {
+    return <Inventory onClose={() => setScreen('home')} />
   }
 
   return (
