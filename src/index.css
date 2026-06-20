@@ -6501,3 +6501,8 @@ select {
   transition: all 0.2s;
 }
 .secondary-btn:hover { background: var(--bg-surface-2); }
+
+/* Hotfix Box Sizing for CRM */
+.crm-search, .primary-btn, .secondary-btn, .customers-container {
+  box-sizing: border-box;
+}
