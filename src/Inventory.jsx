@@ -454,8 +454,15 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
       nl.lineTotal = (Number(nl.qty) * Number(nl.costPerUnit)).toFixed(2);
     } else if (k === 'lineTotal') {
       const tot = Number(v);
-      if (Number(nl.qty) > 0) nl.costPerUnit = (tot / Number(nl.qty)).toFixed(2);
-      else if (Number(nl.costPerUnit) > 0) nl.qty = (tot / Number(nl.costPerUnit)).toFixed(2);
+      const q = Number(nl.qty);
+      const c = Number(nl.costPerUnit);
+      if (c === 0 || isNaN(c)) {
+        nl.costPerUnit = q > 0 ? (tot / q).toFixed(2) : 0;
+      } else if (q === 0 || q === 1 || isNaN(q)) {
+        nl.qty = c > 0 ? (tot / c).toFixed(2) : 0;
+      } else {
+        nl.costPerUnit = q > 0 ? (tot / q).toFixed(2) : 0;
+      }
     }
     return nl;
   }))
