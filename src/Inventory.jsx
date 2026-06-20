@@ -985,10 +985,77 @@ function SupplierFormModal({ supplier, onSave, onClose }) {
   )
 }
 
+function SupplierDetailsModal({ supplier, purchaseLogs, onClose, onShowPriceGraph }) {
+  const myLogs = purchaseLogs.filter(l => l.supplierId === supplier.id)
+  
+  const itemStats = {}
+  myLogs.forEach(log => {
+    (log.items || []).forEach(item => {
+      if (!itemStats[item.productId]) {
+        itemStats[item.productId] = {
+          id: item.productId,
+          name: item.productName,
+          unit: item.unit,
+          totalQty: 0,
+          totalSpent: 0,
+          purchaseDates: [],
+        }
+      }
+      const stat = itemStats[item.productId]
+      stat.totalQty += item.qty
+      stat.totalSpent += (item.qty * item.costPerUnit)
+      stat.purchaseDates.push({ date: log.purchasedAt, price: item.costPerUnit, qty: item.qty })
+    })
+  })
+
+  const itemsList = Object.values(itemStats).sort((a,b) => b.totalSpent - a.totalSpent)
+
+  return (
+    <Modal title={`${supplier.name} - Purchases`} onClose={onClose}>
+      <div className="inv-supplier-details">
+        {itemsList.length === 0 ? (
+          <div className="inv-empty" style={{ padding: '30px 0' }}>
+            <div className="inv-empty-icon">📦</div>
+            <div className="inv-empty-title">No purchases yet</div>
+          </div>
+        ) : (
+          <div className="inv-item-list">
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontWeight: 'bold', borderBottom: '1px solid #e2e8f0', paddingBottom: 8, marginBottom: 8, color: '#64748b', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+              <div>Item</div>
+              <div style={{ textAlign: 'right' }}>Total Qty</div>
+              <div style={{ textAlign: 'right' }}>Total Spent</div>
+            </div>
+            {itemsList.map(it => (
+              <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', padding: '12px 0', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontWeight: '600', color: '#1e293b' }}>{it.name}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', cursor: 'pointer', marginTop: 4, display: 'inline-flex', alignItems: 'center' }} onClick={() => onShowPriceGraph({ id: it.id, name: it.name }, it.purchaseDates)}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, marginRight: 4 }}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                    <span style={{ textDecoration: 'underline', textDecorationStyle: 'dotted' }}>View Price History</span>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', fontWeight: '500', color: '#475569' }}>{it.totalQty} <span style={{fontSize:'0.8rem', color:'#94a3b8'}}>{it.unit}</span></div>
+                <div style={{ textAlign: 'right', fontWeight: '700', color: '#1e293b' }}>{fmtCur(it.totalSpent)}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Modal>
+  )
+}
+
 function SuppliersTab({ suppliers, onSuppliersChanged }) {
   const [showForm, setShowForm] = useState(false)
   const [editSupplier, setEditSupplier] = useState(null)
+  const [detailsSupplier, setDetailsSupplier] = useState(null)
+  const [purchaseLogs, setPurchaseLogs] = useState([])
+  const [priceGraphItem, setPriceGraphItem] = useState(null)
   const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    getPurchaseLogs().then(setPurchaseLogs)
+  }, [])
 
   const handleSave = async (s) => {
     await saveSupplier(s)
@@ -1039,7 +1106,7 @@ function SuppliersTab({ suppliers, onSuppliersChanged }) {
       ) : (
         <div className="inv-supplier-grid">
           {filtered.map(s => (
-            <div key={s.id} className="inv-supplier-card">
+            <div key={s.id} className="inv-supplier-card" onClick={() => setDetailsSupplier(s)} style={{ cursor: 'pointer' }}>
               <div className="inv-supplier-card-header">
                 <div className="inv-supplier-avatar-lg">{s.name[0]}</div>
                 <div className="inv-supplier-card-info">
@@ -1048,7 +1115,7 @@ function SuppliersTab({ suppliers, onSuppliersChanged }) {
                   {s.email && <div className="inv-supplier-card-meta">✉ {s.email}</div>}
                   {s.gstNo && <div className="inv-supplier-card-meta">GST: {s.gstNo}</div>}
                 </div>
-                <div className="inv-supplier-card-actions">
+                <div className="inv-supplier-card-actions" onClick={e => e.stopPropagation()}>
                   {s.phone && (
                     <a href={`https://wa.me/${s.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="inv-icon-btn" style={{ color: '#25D366', borderColor: 'rgba(37,211,102,0.3)', background: 'rgba(37,211,102,0.1)', display: 'flex' }} title="WhatsApp">
                       <Ic.WhatsApp />
@@ -1081,6 +1148,21 @@ function SuppliersTab({ suppliers, onSuppliersChanged }) {
 
       {(showForm || editSupplier) && (
         <SupplierFormModal supplier={editSupplier} onSave={handleSave} onClose={() => { setShowForm(false); setEditSupplier(null) }} />
+      )}
+      {detailsSupplier && (
+        <SupplierDetailsModal 
+          supplier={detailsSupplier} 
+          purchaseLogs={purchaseLogs} 
+          onClose={() => setDetailsSupplier(null)} 
+          onShowPriceGraph={(item, data) => setPriceGraphItem({ item, data })}
+        />
+      )}
+      {priceGraphItem && (
+        <PriceHistoryModal 
+          item={priceGraphItem.item} 
+          data={priceGraphItem.data} 
+          onClose={() => setPriceGraphItem(null)} 
+        />
       )}
     </div>
   )
