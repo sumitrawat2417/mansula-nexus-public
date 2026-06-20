@@ -47,6 +47,7 @@ function Modal({ title, onClose, children, wide }) {
   return (
     <div className="inv-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className={`inv-modal ${wide ? 'inv-modal-wide' : ''}`}>
+        <div className="inv-modal-handle" />
         <div className="inv-modal-header">
           <h3 className="inv-modal-title">{title}</h3>
           <button className="inv-modal-close" onClick={onClose}><Ic.Close /></button>
@@ -56,6 +57,7 @@ function Modal({ title, onClose, children, wide }) {
     </div>
   )
 }
+
 
 // ══════════════════════════════════════════════════════════════════
 // TAB 1: LIVE STOCK
@@ -953,21 +955,24 @@ export default function Inventory({ onClose }) {
   }, [loadSuppliers, loadMenu, loadInventory])
 
   const TABS = [
-    { label: '📦 Live Stock', icon: Ic.Box },
-    { label: '🧾 Purchase Logs', icon: Ic.Receipt },
-    { label: '🏢 Suppliers', icon: Ic.Supplier },
+    { label: 'Live Stock', icon: Ic.Box },
+    { label: 'Purchase Logs', icon: Ic.Receipt },
+    { label: 'Suppliers', icon: Ic.Supplier },
   ]
 
   return (
     <div className="inv-root">
-      {/* Header */}
+      {/* Header matches BusinessProfile / OrderRecords style */}
       <header className="inv-header">
         <button className="inv-back-btn" onClick={onClose}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
+        <div className="inv-header-icon">
+          <Ic.Box />
+        </div>
         <div className="inv-header-info">
           <h1 className="inv-header-title">Inventory</h1>
-          <div className="inv-header-sub">Stock · Purchases · Suppliers</div>
+          <div className="inv-header-sub">ManSula Nexus</div>
         </div>
       </header>
 
@@ -975,13 +980,13 @@ export default function Inventory({ onClose }) {
       <div className="inv-tab-bar">
         {TABS.map((t, i) => (
           <button key={i} className={`inv-tab-btn ${tab === i ? 'active' : ''}`} onClick={() => setTab(i)}>
-            {t.label}
+            <t.icon /> {t.label}
           </button>
         ))}
       </div>
 
       {/* Content */}
-      {tab === 0 && <LiveStockTab menuProducts={menuProducts} ref={stockRef} />}
+      {tab === 0 && <LiveStockTab menuProducts={menuProducts} />}
       {tab === 1 && (
         <PurchaseLogsTab
           suppliers={suppliers}
