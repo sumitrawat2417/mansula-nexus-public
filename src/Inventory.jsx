@@ -327,19 +327,24 @@ function WastageModal({ item, onSave, onClose }) {
 }
 
 function PriceHistoryModal({ item, data, onClose }) {
-  const sorted = [...data].sort((a, b) => a.date - b.date)
+  const [dateRange, setDateRange] = useState(() => computeQuick('alltime'))
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
+
+  const filteredData = data.filter(d => d.date >= dateRange.fromTs && d.date <= dateRange.toTs)
+  const sorted = [...filteredData].sort((a, b) => a.date - b.date)
+  
   const width = 500
   const height = 220
   const padding = 45
   
   const prices = sorted.map(d => d.price)
-  const minP = Math.min(...prices)
-  const maxP = Math.max(...prices)
+  const minP = prices.length ? Math.min(...prices) : 0
+  const maxP = prices.length ? Math.max(...prices) : 0
   const rangeP = maxP - minP || 1
   
   const dates = sorted.map(d => d.date)
-  const minD = Math.min(...dates)
-  const maxD = Math.max(...dates)
+  const minD = dates.length ? Math.min(...dates) : 0
+  const maxD = dates.length ? Math.max(...dates) : 0
   const rangeD = maxD - minD || 1
 
   const getX = (d) => padding + ((d - minD) / rangeD) * (width - padding * 2)
@@ -349,29 +354,43 @@ function PriceHistoryModal({ item, data, onClose }) {
 
   return (
     <Modal title={`Price History: ${item.name}`} onClose={onClose}>
+      {filterDrawerOpen && (
+        <DateFilterDrawer current={dateRange} onApply={setDateRange} onClose={() => setFilterDrawerOpen(false)} />
+      )}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+        <button className="or-date-filter-btn" onClick={() => setFilterDrawerOpen(true)}>
+          <Ic.CalDay /> {dateRange.label}
+        </button>
+      </div>
       <div className="inv-price-graph-wrap">
-        <svg viewBox={`0 0 ${width} ${height}`} className="inv-price-svg">
-          <line x1={padding} y1={height-padding} x2={width-padding} y2={height-padding} stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
-          <line x1={padding} y1={padding} x2={width-padding} y2={padding} stroke="#e2e8f0" strokeDasharray="4 4" strokeLinecap="round" />
-          
-          <text x={padding - 10} y={height - padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(minP)}</text>
-          <text x={padding - 10} y={padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(maxP)}</text>
-          
-          <polyline points={points} fill="none" stroke="var(--brand-primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          
-          {sorted.map((d, i) => (
-            <g key={i} className="inv-graph-point">
-              <circle cx={getX(d.date)} cy={getY(d.price)} r="5" fill="#fff" stroke="var(--brand-primary)" strokeWidth="2.5" />
-              <text x={getX(d.date)} y={getY(d.price) - 12} textAnchor="middle" fontSize="11" fill="#1e293b" fontWeight="bold" opacity="0" className="inv-point-tooltip">{fmtCur(d.price)}</text>
-              <text x={getX(d.date)} y={height - padding + 18} textAnchor="middle" fontSize="10" fill="#94a3b8" opacity="0" className="inv-point-tooltip">{fmtDate(d.date)}</text>
-            </g>
-          ))}
-        </svg>
+        {sorted.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>No price data in this date range.</div>
+        ) : (
+          <svg viewBox={`0 0 ${width} ${height}`} className="inv-price-svg">
+            <line x1={padding} y1={height-padding} x2={width-padding} y2={height-padding} stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
+            <line x1={padding} y1={padding} x2={width-padding} y2={padding} stroke="#e2e8f0" strokeDasharray="4 4" strokeLinecap="round" />
+            
+            <text x={padding - 10} y={height - padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(minP)}</text>
+            <text x={padding - 10} y={padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(maxP)}</text>
+            
+            <polyline points={points} fill="none" stroke="var(--brand-primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            
+            {sorted.map((d, i) => (
+              <g key={i} className="inv-graph-point">
+                <circle cx={getX(d.date)} cy={getY(d.price)} r="5" fill="#fff" stroke="var(--brand-primary)" strokeWidth="2.5" />
+                <text x={getX(d.date)} y={getY(d.price) - 12} textAnchor="middle" fontSize="11" fill="#1e293b" fontWeight="bold" opacity="0" className="inv-point-tooltip">{fmtCur(d.price)}</text>
+                <text x={getX(d.date)} y={height - padding + 18} textAnchor="middle" fontSize="10" fill="#94a3b8" opacity="0" className="inv-point-tooltip">{fmtDate(d.date)}</text>
+              </g>
+            ))}
+          </svg>
+        )}
       </div>
-      <div className="inv-price-graph-meta">
-        <div><span className="inv-price-graph-badge">Lowest</span> <strong>{fmtCur(minP)}</strong></div>
-        <div><span className="inv-price-graph-badge">Highest</span> <strong>{fmtCur(maxP)}</strong></div>
-      </div>
+      {sorted.length > 0 && (
+        <div className="inv-price-graph-meta">
+          <div><span className="inv-price-graph-badge">Lowest</span> <strong>{fmtCur(minP)}</strong></div>
+          <div><span className="inv-price-graph-badge">Highest</span> <strong>{fmtCur(maxP)}</strong></div>
+        </div>
+      )}
     </Modal>
   )
 }
