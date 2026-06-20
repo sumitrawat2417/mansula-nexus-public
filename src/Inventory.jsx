@@ -443,7 +443,7 @@ function LiveStockTab({ menuProducts }) {
 function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSave, onClose }) {
   const [supplierName, setSupplierName] = useState(logToEdit?.supplierName || '')
   const selectedS = suppliers.find(s => s.name.toLowerCase() === supplierName.trim().toLowerCase())
-  const [lines, setLines] = useState(logToEdit?.items?.length ? logToEdit.items : [{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '', isExpenseOnly: false }])
+  const [lines, setLines] = useState(logToEdit?.items?.length ? logToEdit.items.map(l => ({...l, lineTotal: l.qty * l.costPerUnit})) : [{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, lineTotal: 0, emoji: '📦', category: '', isExpenseOnly: false }])
   const [invoiceNo, setInvoiceNo] = useState(logToEdit?.invoiceNumber || '')
   const [notes, setNotes] = useState(logToEdit?.notes || '')
   const [date, setDate] = useState(() => {
@@ -453,9 +453,21 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
   })
   const [saving, setSaving] = useState(false)
 
-  const addLine = () => setLines(p => [...p, { id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '', isExpenseOnly: false }])
+  const addLine = () => setLines(p => [...p, { id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, lineTotal: 0, emoji: '📦', category: '', isExpenseOnly: false }])
   const removeLine = (id) => setLines(p => p.filter(l => l.id !== id))
-  const updateLine = (id, k, v) => setLines(p => p.map(l => l.id === id ? {...l, [k]: v} : l))
+  const updateLine = (id, k, v) => setLines(p => p.map(l => {
+    if (l.id !== id) return l
+    let next = { ...l, [k]: v }
+    if (k === 'qty') {
+      next.lineTotal = Number(next.qty || 0) * Number(next.costPerUnit || 0)
+    } else if (k === 'costPerUnit') {
+      next.lineTotal = Number(next.qty || 0) * Number(next.costPerUnit || 0)
+    } else if (k === 'lineTotal') {
+      const q = Number(next.qty) || 1
+      next.costPerUnit = Number(next.lineTotal || 0) / q
+    }
+    return next
+  }))
 
   const allProducts = [...menuProducts, ...inventoryItems.filter(i => !menuProducts.find(p => p.id === i.id))]
 
@@ -468,7 +480,7 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
     }
   }
 
-  const total = lines.reduce((s, l) => s + (Number(l.qty) * Number(l.costPerUnit)), 0)
+  const total = lines.reduce((s, l) => s + Number(l.lineTotal || 0), 0)
 
   const handleSave = async () => {
     const validLines = lines.filter(l => l.productName.trim() && Number(l.qty) > 0)
@@ -479,7 +491,7 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
       createdAt: logToEdit?.createdAt,
       supplierId: logToEdit?.supplierId || '',
       supplierName: supplierName.trim() || 'Unknown',
-      items: validLines.map(l => ({ ...l, productId: l.productId || uid(), qty: Number(l.qty), costPerUnit: Number(l.costPerUnit), totalCost: Number(l.qty)*Number(l.costPerUnit) })),
+      items: validLines.map(l => ({ ...l, productId: l.productId || uid(), qty: Number(l.qty), costPerUnit: Number(l.costPerUnit), totalCost: Number(l.lineTotal || 0) })),
       invoiceNumber: invoiceNo,
       notes,
       totalAmount: total,
@@ -554,7 +566,7 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
                     </div>
                     <div className="inv-form-group">
                       <label className="inv-form-label">Line Total</label>
-                      <div className="inv-line-total">{fmtCur(line.qty * line.costPerUnit)}</div>
+                      <input className="inv-form-input" type="number" min="0" step="0.01" value={line.lineTotal} onChange={e => updateLine(line.id, 'lineTotal', e.target.value)} />
                     </div>
                   </div>
                 </div>
