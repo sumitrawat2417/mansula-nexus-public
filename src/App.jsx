@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Welcome from './Welcome.jsx'
 import Home from './Home.jsx'
 import POS from './POS.jsx'
 import BusinessProfile from './BusinessProfile.jsx'
@@ -24,6 +25,7 @@ export const TAX_RATES = [
 const AGREEMENT_KEY = 'mn-agreement-accepted'
 
 export default function App() {
+  const [showWelcome, setShowWelcome] = useState(() => !sessionStorage.getItem('mn-welcome-shown'))
   const [screen, setScreen] = useState('home')
   const [editingRecord, setEditingRecord] = useState(null)
   const [agreed, setAgreed] = useState(() => localStorage.getItem(AGREEMENT_KEY) === 'true')
@@ -50,7 +52,17 @@ export default function App() {
     setAgreed(true)
   }
 
-  // ── Gate: Show agreement on first launch ──
+  const handleWelcomeComplete = () => {
+    sessionStorage.setItem('mn-welcome-shown', 'true')
+    setShowWelcome(false)
+  }
+
+  // ── Gate 1: Cinematic Splash Screen ──
+  if (showWelcome) {
+    return <Welcome onComplete={handleWelcomeComplete} />
+  }
+
+  // ── Gate 2: Show agreement on first launch ──
   if (!agreed) {
     return <Agreement onAccept={handleAcceptAgreement} />
   }

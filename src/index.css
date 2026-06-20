@@ -5532,6 +5532,230 @@ select {
 .or-empty-icon svg { opacity: 0.3; }
 
 /* ══════════════════════════════════════════════════════════════════
+   WELCOME / SPLASH SCREEN
+   ══════════════════════════════════════════════════════════════════ */
+
+.wel-root {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: #09090b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Outfit", sans-serif;
+  overflow: hidden;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.wel-root.exit {
+  opacity: 0;
+  transform: scale(1.05);
+  pointer-events: none;
+}
+
+/* ── Grid ── */
+.wel-grid {
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background-size: 60px 60px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  transform: perspective(600px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+  animation: welGridMove 15s linear infinite;
+  mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 60%);
+  -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 60%);
+}
+@keyframes welGridMove {
+  0% { transform: perspective(600px) rotateX(60deg) translateY(0) translateZ(-200px); }
+  100% { transform: perspective(600px) rotateX(60deg) translateY(60px) translateZ(-200px); }
+}
+
+/* ── Orbs ── */
+.wel-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0;
+  transition: all 2s cubic-bezier(0.22, 1, 0.36, 1);
+  mix-blend-mode: screen;
+}
+.wel-orb-1 {
+  width: 400px; height: 400px;
+  top: -100px; left: -100px;
+  background: #4f46e5;
+  transform: scale(0.5) translate(-100px, -100px);
+}
+.wel-orb-1.active { opacity: 0.4; transform: scale(1) translate(0, 0); }
+
+.wel-orb-2 {
+  width: 500px; height: 500px;
+  bottom: -150px; right: -150px;
+  background: #9333ea;
+  transform: scale(0.5) translate(100px, 100px);
+}
+.wel-orb-2.active { opacity: 0.3; transform: scale(1) translate(0, 0); }
+
+.wel-orb-3 {
+  width: 300px; height: 300px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: #14b8a6;
+}
+.wel-orb-3.burst { opacity: 0.5; transform: translate(-50%, -50%) scale(3); filter: blur(120px); }
+
+/* ── Content ── */
+.wel-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+/* ── Logo Animation ── */
+.wel-logo-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(30px) scale(0.8);
+  transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.wel-logo-wrap.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.wel-logo-wrap.glow .wel-logo {
+  box-shadow: 0 0 50px 10px rgba(99,102,241,0.6);
+  border-color: rgba(165,180,252,0.8);
+}
+
+.wel-logo {
+  position: relative;
+  z-index: 2;
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: all 1s ease;
+}
+.wel-logo svg { width: 36px; height: 36px; }
+
+.wel-logo-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(99,102,241,0.4);
+}
+.wel-ring-outer {
+  width: 140px; height: 140px;
+  animation: welSpin 8s linear infinite;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+}
+.wel-ring-inner {
+  width: 110px; height: 110px;
+  animation: welSpinRev 6s linear infinite;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  opacity: 0.6;
+}
+@keyframes welSpin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes welSpinRev { 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
+
+/* ── Typography ── */
+.wel-text-wrap {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wel-title {
+  margin: 0;
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  display: flex;
+  gap: 10px;
+  overflow: hidden;
+}
+.wel-word {
+  color: #fff;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s ease;
+}
+.wel-word.wel-highlight {
+  background: linear-gradient(to right, #818cf8, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition-delay: 0.1s;
+}
+.wel-title.show .wel-word {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.wel-subtitle-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
+}
+.wel-subtitle-wrap.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.wel-subtitle {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── Loader Bar ── */
+.wel-loader-bar {
+  width: 180px;
+  height: 2px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.wel-loader-fill {
+  height: 100%;
+  background: #818cf8;
+  width: 0%;
+  animation: welLoad 3.5s cubic-bezier(0.8, 0, 0.2, 1) forwards;
+}
+@keyframes welLoad {
+  0% { width: 0%; }
+  40% { width: 60%; }
+  100% { width: 100%; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
    AGREEMENT / ONBOARDING CONSENT SCREEN
    ══════════════════════════════════════════════════════════════════ */
 
