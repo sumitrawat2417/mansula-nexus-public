@@ -25,7 +25,7 @@ export const TAX_RATES = [
 const AGREEMENT_KEY = 'mn-agreement-accepted'
 
 export default function App() {
-  const [showWelcome, setShowWelcome] = useState(() => !sessionStorage.getItem('mn-welcome-shown'))
+  const [showWelcome, setShowWelcome] = useState(true)
   const [screen, setScreen] = useState('home')
   const [editingRecord, setEditingRecord] = useState(null)
   const [agreed, setAgreed] = useState(() => localStorage.getItem(AGREEMENT_KEY) === 'true')
@@ -53,7 +53,6 @@ export default function App() {
   }
 
   const handleWelcomeComplete = () => {
-    sessionStorage.setItem('mn-welcome-shown', 'true')
     setShowWelcome(false)
   }
 
