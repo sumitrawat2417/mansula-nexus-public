@@ -438,16 +438,12 @@ function LiveStockTab({ menuProducts }) {
 // ══════════════════════════════════════════════════════════════════
 
 function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSave, onClose }) {
-  const [selectedSupplier, setSelectedSupplier] = useState(logToEdit?.supplierId ? (suppliers.find(s => s.id === logToEdit.supplierId) || { id: logToEdit.supplierId, name: logToEdit.supplierName }) : null)
-  const [supplierSearch, setSupplierSearch] = useState('')
+  const [supplierName, setSupplierName] = useState(logToEdit?.supplierName || '')
   const [lines, setLines] = useState(logToEdit?.items?.length ? logToEdit.items : [{ id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '' }])
   const [invoiceNo, setInvoiceNo] = useState(logToEdit?.invoiceNumber || '')
   const [notes, setNotes] = useState(logToEdit?.notes || '')
   const [date, setDate] = useState(logToEdit?.purchasedAt ? new Date(logToEdit.purchasedAt).toISOString().slice(0,10) : new Date().toISOString().slice(0,10))
   const [saving, setSaving] = useState(false)
-  const [showSupplierList, setShowSupplierList] = useState(false)
-
-  const filteredSuppliers = suppliers.filter(s => s.name.toLowerCase().includes(supplierSearch.toLowerCase()))
 
   const addLine = () => setLines(p => [...p, { id: uid(), productId: '', productName: '', qty: 1, unit: 'pcs', costPerUnit: 0, emoji: '📦', category: '' }])
   const removeLine = (id) => setLines(p => p.filter(l => l.id !== id))
@@ -473,8 +469,8 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
     const log = {
       purchaseId: logToEdit?.purchaseId,
       createdAt: logToEdit?.createdAt,
-      supplierId: selectedSupplier?.id || '',
-      supplierName: selectedSupplier?.name || 'Unknown',
+      supplierId: logToEdit?.supplierId || '',
+      supplierName: supplierName.trim() || 'Unknown',
       items: validLines.map(l => ({ ...l, productId: l.productId || uid(), qty: Number(l.qty), costPerUnit: Number(l.costPerUnit), totalCost: Number(l.qty)*Number(l.costPerUnit) })),
       invoiceNumber: invoiceNo,
       notes,
@@ -492,41 +488,13 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
       <div className="inv-purchase-form">
         {/* Supplier */}
         <div className="inv-pf-section">
-          <div className="inv-section-label">Supplier</div>
-          <div className="inv-supplier-selector" onClick={() => setShowSupplierList(p => !p)}>
-            {selectedSupplier ? (
-              <div className="inv-selected-supplier">
-                <span className="inv-supplier-avatar">{selectedSupplier.name[0]}</span>
-                <div>
-                  <div className="inv-supplier-name">{selectedSupplier.name}</div>
-                  <div className="inv-supplier-phone">{selectedSupplier.phone}</div>
-                </div>
-                <button className="inv-clear-btn" onClick={e => { e.stopPropagation(); setSelectedSupplier(null) }}><Ic.Close /></button>
-              </div>
-            ) : (
-              <div className="inv-supplier-placeholder">
-                <Ic.Supplier /> Select Supplier (optional)
-              </div>
-            )}
-            <Ic.ChevDown />
+          <div className="inv-section-label">Supplier Name</div>
+          <div className="inv-form-group">
+            <input className="inv-form-input" list="pf-supplier-list" placeholder="Select or type new supplier..." value={supplierName} onChange={e => setSupplierName(e.target.value)} />
+            <datalist id="pf-supplier-list">
+              {suppliers.map(s => <option key={s.id} value={s.name} />)}
+            </datalist>
           </div>
-          {showSupplierList && (
-            <div className="inv-supplier-dropdown">
-              <input className="inv-form-input" placeholder="Search suppliers…" value={supplierSearch} onChange={e => setSupplierSearch(e.target.value)} autoFocus onClick={e => e.stopPropagation()} />
-              <div className="inv-supplier-list">
-                {filteredSuppliers.length === 0 ? <div className="inv-supplier-empty">No suppliers found</div> : filteredSuppliers.map(s => (
-                  <div key={s.id} className="inv-supplier-option" onClick={() => { setSelectedSupplier(s); setShowSupplierList(false); setSupplierSearch('') }}>
-                    <span className="inv-supplier-avatar">{s.name[0]}</span>
-                    <div>
-                      <div className="inv-supplier-name">{s.name}</div>
-                      <div className="inv-supplier-phone">{s.phone}</div>
-                    </div>
-                    {selectedSupplier?.id === s.id && <span className="inv-check-mark"><Ic.Check /></span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Line Items */}
@@ -678,6 +646,19 @@ function PurchaseLogsTab({ suppliers, menuProducts, inventoryItems, onPurchaseSa
   useEffect(() => { load() }, [load])
 
   const handleSave = async (log) => {
+    let sId = log.supplierId
+    if (log.supplierName && log.supplierName !== 'Unknown') {
+      const existing = suppliers.find(s => s.name.toLowerCase() === log.supplierName.toLowerCase())
+      if (existing) {
+        sId = existing.id
+        log.supplierName = existing.name
+      } else if (!sId || log.supplierName !== editLog?.supplierName) {
+        const newS = await saveSupplier({ id: uid(), name: log.supplierName, phone: '', email: '', address: '', gstNo: '', tags: [], totalSpend: 0 })
+        sId = newS.id
+      }
+    }
+    log.supplierId = sId
+
     await savePurchaseLog(log)
     await load()
     onPurchaseSaved?.()
