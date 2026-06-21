@@ -1294,7 +1294,7 @@ export default function Inventory({ onClose }) {
   const handleClearAll = async () => {
     const ok = await showConfirm(
       'This will permanently delete ALL live stock, purchase logs, and suppliers. This action cannot be undone.',
-      { title: 'Wipe Inventory Data?', type: 'danger', confirmText: 'Yes, Wipe Everything', cancelText: 'Cancel' }
+      { title: 'Wipe Inventory Data?', type: 'danger', confirmText: 'Yes, Wipe Everything', cancelText: 'Cancel', confirmWord: 'WIPE' }
     )
     if (!ok) return
     const success = await clearAllInventoryData()

@@ -352,7 +352,7 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
   const handleClearAll = async () => {
     const ok = await showConfirm(
       'This will permanently delete all order records and reset the order counter to #1. This action cannot be undone.',
-      { title: 'Wipe Order Records?', type: 'danger', confirmText: 'Yes, Wipe Everything', cancelText: 'Cancel' }
+      { title: 'Wipe Order Records?', type: 'danger', confirmText: 'Yes, Wipe Everything', cancelText: 'Cancel', confirmWord: 'WIPE' }
     )
     if (!ok) return
     

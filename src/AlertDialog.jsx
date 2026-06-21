@@ -40,27 +40,41 @@ const COLORS = {
 function AlertDialogModal({ dialog, onResolve }) {
   const confirmBtnRef = useRef(null)
   const cancelBtnRef = useRef(null)
-  const { type = 'info', title, message, confirmText = 'OK', cancelText = 'Cancel', isConfirm } = dialog
+  const typeInputRef = useRef(null)
+  const {
+    type = 'info',
+    title,
+    message,
+    confirmText = 'OK',
+    cancelText = 'Cancel',
+    isConfirm,
+    confirmWord, // e.g. 'WIPE' — when set, enables "type to confirm" mode
+  } = dialog
   const c = COLORS[type] || COLORS.info
 
+  const [typed, setTyped] = useState('')
+  const isTypeMode = isConfirm && !!confirmWord
+  const isConfirmEnabled = isTypeMode ? typed === confirmWord : true
+
   useEffect(() => {
-    // Focus confirm button after animation
     const t = setTimeout(() => {
-      if (isConfirm && cancelBtnRef.current) cancelBtnRef.current.focus()
+      if (isTypeMode && typeInputRef.current) typeInputRef.current.focus()
+      else if (isConfirm && cancelBtnRef.current) cancelBtnRef.current.focus()
       else if (confirmBtnRef.current) confirmBtnRef.current.focus()
-    }, 50)
+    }, 80)
     return () => clearTimeout(t)
-  }, [isConfirm])
+  }, [isConfirm, isTypeMode])
 
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e) => {
-      if (e.key === 'Escape') { if (isConfirm) onResolve(false) }
-      if (e.key === 'Enter') { if (!isConfirm) onResolve(true) }
+      if (e.key === 'Escape' && isConfirm) onResolve(false)
+      if (e.key === 'Enter' && !isConfirm) onResolve(true)
+      if (e.key === 'Enter' && isTypeMode && isConfirmEnabled) onResolve(true)
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [isConfirm, onResolve])
+  }, [isConfirm, isTypeMode, isConfirmEnabled, onResolve])
 
   return (
     <div className="ald-overlay" onClick={isConfirm ? undefined : () => onResolve(true)}>
@@ -76,6 +90,25 @@ function AlertDialogModal({ dialog, onResolve }) {
           <div className="ald-message">{message}</div>
         </div>
 
+        {/* Type-to-confirm input */}
+        {isTypeMode && (
+          <div className="ald-type-confirm-wrap">
+            <div className="ald-type-confirm-label">
+              Type <span className="ald-type-confirm-word">{confirmWord}</span> to confirm
+            </div>
+            <input
+              ref={typeInputRef}
+              className={`ald-type-confirm-input ${typed.length > 0 && typed !== confirmWord ? 'ald-type-confirm-input--error' : ''} ${typed === confirmWord ? 'ald-type-confirm-input--valid' : ''}`}
+              type="text"
+              value={typed}
+              onChange={e => setTyped(e.target.value)}
+              placeholder={confirmWord}
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </div>
+        )}
+
         {/* Actions */}
         <div className={`ald-actions ${isConfirm ? 'ald-actions-row' : 'ald-actions-center'}`}>
           {isConfirm && (
@@ -89,11 +122,18 @@ function AlertDialogModal({ dialog, onResolve }) {
           )}
           <button
             ref={confirmBtnRef}
-            className="ald-btn ald-btn-confirm"
-            style={{ background: c.confirm }}
-            onMouseOver={e => e.currentTarget.style.background = c.confirmHover}
-            onMouseOut={e => e.currentTarget.style.background = c.confirm}
-            onClick={() => onResolve(true)}
+            className={`ald-btn ald-btn-confirm ${isTypeMode && !isConfirmEnabled ? 'ald-btn-confirm--disabled' : ''}`}
+            style={{
+              background: isTypeMode && !isConfirmEnabled ? 'var(--border-color)' : c.confirm,
+              color: isTypeMode && !isConfirmEnabled ? 'var(--text-muted)' : '#fff',
+              cursor: isTypeMode && !isConfirmEnabled ? 'not-allowed' : 'pointer',
+              boxShadow: isTypeMode && !isConfirmEnabled ? 'none' : undefined,
+              transform: 'none',
+            }}
+            disabled={isTypeMode && !isConfirmEnabled}
+            onMouseOver={e => { if (isConfirmEnabled) e.currentTarget.style.background = c.confirmHover }}
+            onMouseOut={e => { if (isConfirmEnabled) e.currentTarget.style.background = c.confirm }}
+            onClick={() => { if (isConfirmEnabled) onResolve(true) }}
           >
             {confirmText}
           </button>
@@ -104,29 +144,11 @@ function AlertDialogModal({ dialog, onResolve }) {
 }
 
 export function AlertProvider({ children }) {
+  // Separate resolve logic to avoid state update issues
+  const resolveMap = useRef({})
   const [dialogs, setDialogs] = useState([])
 
   const show = useCallback((dialog) => {
-    return new Promise((resolve) => {
-      const id = Date.now() + Math.random()
-      setDialogs(prev => [...prev, { ...dialog, id, resolve }])
-    })
-  }, [])
-
-  const handleResolve = useCallback((id, value) => {
-    setDialogs(prev => prev.filter(d => d.id !== id))
-    // Find the dialog and call its resolve
-    setDialogs(prev => {
-      const dialog = prev.find(d => d.id === id)
-      if (dialog) dialog.resolve(value)
-      return prev.filter(d => d.id !== id)
-    })
-  }, [])
-
-  // Separate resolve logic to avoid state update issues
-  const resolveMap = useRef({})
-  
-  const show2 = useCallback((dialog) => {
     return new Promise((resolve) => {
       const id = Date.now() + Math.random()
       resolveMap.current[id] = resolve
@@ -134,7 +156,7 @@ export function AlertProvider({ children }) {
     })
   }, [])
 
-  const handleResolve2 = useCallback((id, value) => {
+  const handleResolve = useCallback((id, value) => {
     const resolver = resolveMap.current[id]
     if (resolver) {
       delete resolveMap.current[id]
@@ -144,12 +166,12 @@ export function AlertProvider({ children }) {
   }, [])
 
   const alert = useCallback((message, { title, type = 'info', confirmText = 'Got it' } = {}) => {
-    return show2({ message, title, type, confirmText, isConfirm: false })
-  }, [show2])
+    return show({ message, title, type, confirmText, isConfirm: false })
+  }, [show])
 
-  const confirm = useCallback((message, { title, type = 'danger', confirmText = 'Confirm', cancelText = 'Cancel' } = {}) => {
-    return show2({ message, title, type, confirmText, cancelText, isConfirm: true })
-  }, [show2])
+  const confirm = useCallback((message, { title, type = 'danger', confirmText = 'Confirm', cancelText = 'Cancel', confirmWord } = {}) => {
+    return show({ message, title, type, confirmText, cancelText, isConfirm: true, confirmWord })
+  }, [show])
 
   return (
     <AlertContext.Provider value={{ alert, confirm }}>
@@ -158,7 +180,7 @@ export function AlertProvider({ children }) {
         <AlertDialogModal
           key={dialog.id}
           dialog={dialog}
-          onResolve={(value) => handleResolve2(dialog.id, value)}
+          onResolve={(value) => handleResolve(dialog.id, value)}
         />
       ))}
     </AlertContext.Provider>

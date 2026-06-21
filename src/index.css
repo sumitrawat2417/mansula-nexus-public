@@ -6516,14 +6516,84 @@ select {
 .ald-btn-confirm {
   color: #fff;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  transition: all 0.18s ease;
 }
 
-.ald-btn-confirm:hover {
+.ald-btn-confirm:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
-.ald-btn-confirm:active {
+.ald-btn-confirm:active:not(:disabled) {
   transform: translateY(0);
+}
+
+/* ── Type-to-confirm ── */
+.ald-type-confirm-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ald-type-confirm-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-align: center;
+  font-family: "Outfit", sans-serif;
+}
+
+.ald-type-confirm-word {
+  font-family: ui-monospace, "Fira Code", "Cascadia Code", monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  padding: 1px 6px;
+  border-radius: 5px;
+  letter-spacing: 0.06em;
+}
+
+.ald-type-confirm-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: ui-monospace, "Fira Code", "Cascadia Code", monospace;
+  letter-spacing: 0.1em;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  box-sizing: border-box;
+}
+
+.ald-type-confirm-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  opacity: 0.5;
+}
+
+.ald-type-confirm-input:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.ald-type-confirm-input--error {
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444;
+}
+
+.ald-type-confirm-input--valid {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+  color: #10b981;
 }
 
