@@ -65,7 +65,7 @@ function Modal({ title, onClose, children, wide }) {
 }
 
 // ── Export Modal ──
-function ExportModal({ onClose, onBackup, onRestoreRef, onClearAll }) {
+function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll }) {
   const cardStyle = { padding: '12px 14px', gap: '10px' };
   const iconStyle = { width: 36, height: 36, flexShrink: 0 };
 
@@ -78,6 +78,19 @@ function ExportModal({ onClose, onBackup, onRestoreRef, onClearAll }) {
         </div>
         
         <div className="inv-modal-body" style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+          <div className="bp-backup-card bp-backup-export" style={cardStyle}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div className="bp-backup-card-icon" style={{ ...iconStyle, background: 'rgba(100,116,139,0.12)', color: '#64748b' }}><span style={{ width: 18, height: 18, display: 'flex' }}><Ic.Receipt /></span></div>
+              <div className="bp-backup-card-info">
+                <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Export CSV</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Download a spreadsheet of your current live stock inventory.</div>
+              </div>
+            </div>
+            <button className="bp-btn-primary" style={{ background: '#64748b', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onExportCSV}>
+              <span style={{ width: 14, height: 14, display: 'flex' }}><Ic.Export /></span> Download CSV
+            </button>
+          </div>
           
           <div className="bp-backup-card bp-backup-export" style={cardStyle}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
@@ -1289,6 +1302,30 @@ export default function Inventory({ onClose }) {
     }
   }
 
+  const handleExportCSV = () => {
+    if (inventoryItems.length === 0) {
+      alert('No inventory items to export.');
+      return;
+    }
+    const headers = ['Item Name', 'Category', 'Quantity', 'Unit', 'Avg Price'];
+    const rows = inventoryItems.map(item => [
+      `"${(item.name || '').replace(/"/g, '""')}"`,
+      `"${(item.category || '').replace(/"/g, '""')}"`,
+      item.qty || 0,
+      `"${(item.unit || '').replace(/"/g, '""')}"`,
+      item.avgPrice || 0
+    ]);
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mansula-inventory-stock-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setExportModalOpen(false);
+  }
+
   const loadSuppliers = useCallback(async () => {
     const data = await getSuppliers()
     setSuppliers(data)
@@ -1356,6 +1393,7 @@ export default function Inventory({ onClose }) {
       {exportModalOpen && (
         <ExportModal
           onClose={() => setExportModalOpen(false)}
+          onExportCSV={handleExportCSV}
           onBackup={handleBackup}
           onRestoreRef={restoreFileRef}
           onClearAll={handleClearAll}
