@@ -6600,7 +6600,7 @@ select {
 /* ── Offline Banner ── */
 .mn-offline-banner {
   position: fixed;
-  top: 20px;
+  top: 16px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.95);
@@ -6609,16 +6609,16 @@ select {
   border: 1px solid rgba(245, 158, 11, 0.3);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(245, 158, 11, 0.1);
   padding: 8px 12px 8px 16px;
-  border-radius: 100px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   gap: 12px;
   z-index: 99999;
   animation: slideDownOffline 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   color: var(--text-primary);
-  width: auto;
-  max-width: 90vw;
-  white-space: nowrap;
+  width: 92%;
+  max-width: 450px;
+  cursor: pointer;
 }
 
 [data-theme="dark"] .mn-offline-banner {
@@ -6642,6 +6642,7 @@ select {
 .mn-offline-text {
   font-size: 0.8rem;
   line-height: 1.2;
+  flex: 1;
 }
 
 .mn-offline-text strong {
