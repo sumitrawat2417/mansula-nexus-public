@@ -5,6 +5,7 @@ import {
   exportOrdersBackup, restoreOrdersBackup, clearAllOrderRecords
 } from './db.js'
 import DateFilterDrawer, { computeNavRange, computeQuick } from './DateFilterDrawer.jsx'
+import { useAlert } from './AlertDialog.jsx'
 
 // ── SVG Icon Library ──
 const I = {
@@ -246,6 +247,7 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
   const searchTimer = useRef(null)
   const sentinelRef = useRef(null)
   const fileInputRef = useRef(null)
+  const { alert: showAlert, confirm: showConfirm } = useAlert()
 
   const loadPage = useCallback(async () => {
     setLoading(true)
@@ -325,7 +327,7 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
 
   const handleBackup = async () => {
     const blob = await exportOrdersBackup()
-    if (!blob) return alert('Backup failed')
+    if (!blob) return showAlert('Backup failed. Please try again.', { title: 'Backup Failed', type: 'danger', confirmText: 'OK' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -339,24 +341,28 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
     if (!file) return
     const count = await restoreOrdersBackup(file)
     e.target.value = null // reset
-    if (count < 0) alert('Restore failed. Invalid format or error.')
+    if (count < 0) showAlert('Restore failed. Invalid format or error.', { title: 'Restore Failed', type: 'danger', confirmText: 'OK' })
     else {
-      alert(`Successfully restored ${count} orders!`)
+      await showAlert(`Successfully restored ${count} orders!`, { title: 'Restore Complete', type: 'success', confirmText: 'Great!' })
       setExportModalOpen(false)
       loadPage(); loadStats()
     }
   }
 
   const handleClearAll = async () => {
-    if (!window.confirm("Are you sure you want to permanently delete all order records? This will also reset the order counter to #1. This action cannot be undone.")) return
+    const ok = await showConfirm(
+      'This will permanently delete all order records and reset the order counter to #1. This action cannot be undone.',
+      { title: 'Wipe Order Records?', type: 'danger', confirmText: 'Yes, Wipe Everything', cancelText: 'Cancel' }
+    )
+    if (!ok) return
     
     const success = await clearAllOrderRecords()
     if (success) {
-      alert('All order records have been wiped.')
+      await showAlert('All order records have been wiped.', { title: 'Done', type: 'info', confirmText: 'OK' })
       setExportModalOpen(false)
       loadPage(); loadStats()
     } else {
-      alert('Failed to clear order records.')
+      showAlert('Failed to clear order records. Please try again.', { title: 'Error', type: 'danger', confirmText: 'OK' })
     }
   }
 

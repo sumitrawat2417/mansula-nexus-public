@@ -6,6 +6,7 @@ import BusinessProfile from './BusinessProfile.jsx'
 import OrderRecords from './OrderRecords.jsx'
 import Agreement from './Agreement.jsx'
 import Inventory from './Inventory.jsx'
+import { AlertProvider } from './AlertDialog.jsx'
 
 export const CURRENCIES = [
   { code: 'INR', symbol: '₹', rate: 1, decimals: 0 },
@@ -59,50 +60,58 @@ export default function App() {
 
   // ── Gate 1: Cinematic Splash Screen ──
   if (showWelcome) {
-    return <Welcome onComplete={handleWelcomeComplete} />
+    return <AlertProvider><Welcome onComplete={handleWelcomeComplete} /></AlertProvider>
   }
 
   // ── Gate 2: Show agreement on first launch ──
   if (!agreed) {
-    return <Agreement onAccept={handleAcceptAgreement} />
+    return <AlertProvider><Agreement onAccept={handleAcceptAgreement} /></AlertProvider>
   }
 
   if (screen === 'pos') {
     return (
-      <POS
-        onExit={() => { setScreen('home'); setEditingRecord(null); }}
-        currency={currency}
-        taxRateObj={taxRateObj}
-        editingRecord={editingRecord}
-        onClearEditing={() => setEditingRecord(null)}
-      />
+      <AlertProvider>
+        <POS
+          onExit={() => { setScreen('home'); setEditingRecord(null); }}
+          currency={currency}
+          taxRateObj={taxRateObj}
+          editingRecord={editingRecord}
+          onClearEditing={() => setEditingRecord(null)}
+        />
+      </AlertProvider>
     )
   }
 
   if (screen === 'business') {
-    return <BusinessProfile onClose={() => setScreen('home')} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} taxRates={TAX_RATES} />
+    return <AlertProvider><BusinessProfile onClose={() => setScreen('home')} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} taxRates={TAX_RATES} /></AlertProvider>
   }
 
   if (screen === 'records') {
-    return <OrderRecords
-             onClose={() => setScreen('home')}
-             currency={currency}
-             onEdit={(record) => { setEditingRecord(record); setScreen('pos'); }}
-           />
+    return (
+      <AlertProvider>
+        <OrderRecords
+          onClose={() => setScreen('home')}
+          currency={currency}
+          onEdit={(record) => { setEditingRecord(record); setScreen('pos'); }}
+        />
+      </AlertProvider>
+    )
   }
 
   if (screen === 'inventory') {
-    return <Inventory onClose={() => setScreen('home')} />
+    return <AlertProvider><Inventory onClose={() => setScreen('home')} /></AlertProvider>
   }
 
   return (
-    <Home
-      onLaunch={setScreen}
-      theme={theme}
-      onToggleTheme={toggleTheme}
-      currency={currency}
-      onCurrency={setCurrency}
-      currencies={CURRENCIES}
-    />
+    <AlertProvider>
+      <Home
+        onLaunch={setScreen}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        currency={currency}
+        onCurrency={setCurrency}
+        currencies={CURRENCIES}
+      />
+    </AlertProvider>
   )
 }

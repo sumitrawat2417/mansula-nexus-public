@@ -7,6 +7,7 @@ import {
   dbGet, exportInventoryBackup, restoreInventoryBackup, clearAllInventoryData
 } from './db.js'
 import DateFilterDrawer, { computeQuick } from './DateFilterDrawer.jsx'
+import { useAlert } from './AlertDialog.jsx'
 
 // ── Helpers ──
 const fmt = (n) => Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
@@ -1260,6 +1261,7 @@ export default function Inventory({ onClose }) {
   const stockRef = useRef(null)
   const [exportModalOpen, setExportModalOpen] = useState(false)
   const restoreFileRef = useRef(null)
+  const { alert: showAlert, confirm: showConfirm } = useAlert()
 
   const handleBackup = async () => {
     const blob = await exportInventoryBackup()
@@ -1278,33 +1280,37 @@ export default function Inventory({ onClose }) {
     if (!file) return
     const success = await restoreInventoryBackup(file)
     if (success) {
-      alert('Inventory data restored successfully!')
+      await showAlert('Inventory data restored successfully!', { title: 'Restore Complete', type: 'success', confirmText: 'Great!' })
       loadSuppliers()
       loadMenu()
       loadInventory()
       setExportModalOpen(false)
     } else {
-      alert('Failed to restore. Invalid or corrupted backup file.')
+      showAlert('Failed to restore. Invalid or corrupted backup file.', { title: 'Restore Failed', type: 'danger', confirmText: 'OK' })
     }
     e.target.value = ''
   }
 
   const handleClearAll = async () => {
-    if (!window.confirm('WARNING: This will permanently delete ALL live stock, purchase logs, and suppliers. This cannot be undone. Are you sure you want to proceed?')) return
+    const ok = await showConfirm(
+      'This will permanently delete ALL live stock, purchase logs, and suppliers. This action cannot be undone.',
+      { title: 'Wipe Inventory Data?', type: 'danger', confirmText: 'Yes, Wipe Everything', cancelText: 'Cancel' }
+    )
+    if (!ok) return
     const success = await clearAllInventoryData()
     if (success) {
-      alert('All inventory data wiped.')
+      await showAlert('All inventory data has been wiped.', { title: 'Done', type: 'info', confirmText: 'OK' })
       loadSuppliers()
       loadInventory()
       setExportModalOpen(false)
     } else {
-      alert('Failed to wipe data.')
+      showAlert('Failed to wipe data. Please try again.', { title: 'Error', type: 'danger', confirmText: 'OK' })
     }
   }
 
   const handleExportCSV = () => {
     if (inventoryItems.length === 0) {
-      alert('No inventory items to export.');
+      showAlert('No inventory items to export yet.', { title: 'Nothing to Export', type: 'warning', confirmText: 'OK' });
       return;
     }
     const headers = ['Item Name', 'Category', 'Quantity', 'Unit', 'Avg Price'];
