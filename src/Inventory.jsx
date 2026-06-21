@@ -1220,7 +1220,7 @@ export default function Inventory({ onClose }) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
         </button>
         <div className="inv-header-title">
-          <h1 className="inv-header-main"><Ic.Box style={{ width: 19, height: 19, color: 'var(--brand-primary)', verticalAlign: 'text-bottom' }} /> Inventory</h1>
+          <h1 className="inv-header-main"><Ic.Box /> Inventory</h1>
           <div className="inv-header-sub">ManSula Nexus</div>
         </div>
       </header>
