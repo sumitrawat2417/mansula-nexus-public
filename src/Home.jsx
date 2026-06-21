@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { dbClearAll, dbGet, injectStressTestData } from './db.js'
+import { useAlert } from './AlertDialog.jsx'
 
 // ── Greeting ──
 function getGreeting() {
@@ -42,7 +43,8 @@ const TOOLS = [
 
 // ── Home Settings Modal ──
 function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, onClose }) {
-  const [resetStep, setResetStep] = useState(0) // 0=idle 1=confirm 2=done
+  const [resetStep, setResetStep] = useState(0) // 0=idle 2=done
+  const { alert: showAlert, confirm: showConfirm } = useAlert()
   const [lang, setLang] = useState(localStorage.getItem('pos_lang') || 'en')
   const [showPerms, setShowPerms] = useState(false)
   const [perms, setPerms] = useState({ 
@@ -88,19 +90,19 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         osc.stop(ctx.currentTime + 0.1);
         localStorage.setItem('perm_sound', 'granted');
         setPerms(prev => ({ ...prev, sound: 'granted' }));
-        alert("Sound enabled successfully! Your browser has registered this interaction to allow future audio.");
+        showAlert("Sound enabled successfully! Your browser has registered this interaction to allow future audio.", { type: 'success' });
       } else if (name === 'files') {
         if (navigator.storage && navigator.storage.persist) {
           const granted = await navigator.storage.persist();
           if (granted) {
             localStorage.setItem('perm_files', 'granted');
             setPerms(prev => ({ ...prev, files: 'granted' }));
-            alert("Persistent storage access has been granted by the browser!");
+            showAlert("Persistent storage access has been granted by the browser!", { type: 'success' });
           } else {
-            alert("Persistent storage was denied. Please manage this via the browser's site settings.");
+            showAlert("Persistent storage was denied. Please manage this via the browser's site settings.", { type: 'danger' });
           }
         } else {
-          alert("File permissions are handled automatically when you select a file.");
+          showAlert("File permissions are handled automatically when you select a file.", { type: 'info' });
         }
       } else if (name === 'downloads') {
         // Trigger multiple downloads to prompt the browser's Automatic Downloads block
@@ -114,7 +116,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         setTimeout(() => a2.click(), 100);
         localStorage.setItem('perm_downloads', 'granted');
         setPerms(prev => ({ ...prev, downloads: 'granted' }));
-        alert("We requested multiple dummy downloads. If your browser blocks the second one, please click the download block icon in your address bar and choose 'Always allow'.");
+        showAlert("We requested multiple dummy downloads. If your browser blocks the second one, please click the download block icon in your address bar and choose 'Always allow'.", { type: 'info' });
       } else if (name === 'popups') {
         // Trigger async popup to prompt the popup blocker
         localStorage.setItem('perm_popups', 'granted');
@@ -122,13 +124,13 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         setTimeout(() => {
           const w = window.open('about:blank', '_blank', 'width=100,height=100');
           if (!w || w.closed || typeof w.closed === 'undefined') {
-            alert("Pop-up blocked! Please check the address bar for the pop-up blocker icon (red X) and select 'Always allow pop-ups and redirects from this site'.");
+            showAlert("Pop-up blocked! Please check the address bar for the pop-up blocker icon (red X) and select 'Always allow pop-ups and redirects from this site'.", { type: 'warning' });
           } else {
             w.close();
-            alert("Pop-ups are already allowed by your browser!");
+            showAlert("Pop-ups are already allowed by your browser!", { type: 'success' });
           }
         }, 1000);
-        alert("Attempting to open a popup. Please wait 1 second...");
+        showAlert("Attempting to open a popup. Please wait 1 second...", { type: 'info' });
       }
 
       // Re-check
@@ -139,21 +141,27 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
     } catch (e) {
       console.error(e)
       if (e.name === 'NotFoundError') {
-        alert(`No ${name} device was found on this system. Please connect one to grant permissions.`)
+        showAlert(`No ${name} device was found on this system. Please connect one to grant permissions.`, { type: 'danger' })
       } else if (e.name === 'NotAllowedError') {
-        alert(`Permission to access the ${name} was denied by the browser settings.`)
+        showAlert(`Permission to access the ${name} was denied by the browser settings.`, { type: 'danger' })
       } else {
-        alert(`Failed to request ${name} permission: ` + e.message)
+        showAlert(`Failed to request ${name} permission: ` + e.message, { type: 'danger' })
       }
     }
   }
 
   const handleReset = async () => {
-    if (resetStep === 0) { setResetStep(1); return }
+    if (resetStep === 2) return
+    const ok = await showConfirm(
+      'This will permanently clear all your business data, products, and settings. This cannot be undone.',
+      { title: 'Reset App Data?', type: 'danger', confirmText: 'Yes, Reset Everything', cancelText: 'Cancel', confirmWord: 'RESET' }
+    )
+    if (!ok) return
+
     // Confirmed — clear IDB + localStorage
+    setResetStep(2)
     await dbClearAll()
     localStorage.clear()
-    setResetStep(2)
     setTimeout(() => window.location.reload(), 1200)
   }
 
@@ -320,21 +328,13 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               <div className="hn-srow-desc">Clears all settings, products & saved data</div>
             </div>
             <button
-              className={`hn-reset-btn ${resetStep === 1 ? 'confirm' : ''} ${resetStep === 2 ? 'done' : ''}`}
+              className={`hn-reset-btn ${resetStep === 2 ? 'done' : ''}`}
               onClick={handleReset}
+              disabled={resetStep === 2}
             >
-              {resetStep === 0 && <><Icon.Reset /> Reset</>}
-              {resetStep === 1 && <><Icon.Warn /> Confirm?</>}
-              {resetStep === 2 && '↺ Reloading…'}
+              {resetStep !== 2 ? <><Icon.Reset /> Reset</> : '↺ Reloading…'}
             </button>
           </div>
-
-          {resetStep === 1 && (
-            <div className="hn-reset-warning">
-              ⚠️ This will permanently clear all your business data, products, and settings. This cannot be undone.
-              <button className="hn-reset-cancel" onClick={() => setResetStep(0)}>Cancel</button>
-            </div>
-          )}
 
           {/* About */}
           <div className="hn-settings-about">
@@ -356,6 +356,7 @@ export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurre
   const [time, setTime] = useState(new Date())
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [businessName, setBusinessName] = useState('')
+  const { alert: showAlert, confirm: showConfirm } = useAlert()
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 60000)
@@ -372,12 +373,16 @@ export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurre
   const [stressing, setStressing] = useState(false)
 
   const handleStressTest = async () => {
-    if (confirm('This will inject 10,000 fake orders into your database to stress test the UI. Proceed?')) {
+    const ok = await showConfirm(
+      'This will inject 10,000 fake orders into your database to stress test the UI. Proceed?',
+      { title: 'Inject Stress Data?', type: 'warning', confirmText: 'Yes, Inject', cancelText: 'Cancel' }
+    )
+    if (ok) {
       setStressing(true)
       const num = await injectStressTestData(10000)
       setStressing(false)
-      if (num > 0) alert(`Successfully injected ${num} orders! Open Order Records to see the load.`)
-      else alert('Stress test failed.')
+      if (num > 0) showAlert(`Successfully injected ${num} orders! Open Order Records to see the load.`, { type: 'success' })
+      else showAlert('Stress test failed.', { type: 'danger' })
     }
   }
 
