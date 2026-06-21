@@ -92,9 +92,11 @@ export async function dbClearAll() {
   try {
     const db = await openDB()
     return new Promise((resolve) => {
-      const tx = db.transaction(['kv', 'orders'], 'readwrite')
+      const tx = db.transaction(['kv', 'orders', 'inventory', 'purchases'], 'readwrite')
       tx.objectStore('kv').clear()
       tx.objectStore('orders').clear()
+      tx.objectStore('inventory').clear()
+      tx.objectStore('purchases').clear()
       tx.oncomplete = () => resolve()
       tx.onerror = () => resolve()
     })
