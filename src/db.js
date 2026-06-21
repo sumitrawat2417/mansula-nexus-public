@@ -5,7 +5,7 @@
 // - 'purchases' store: supplier purchase logs, indexed by purchasedAt
 
 const DB_NAME = 'mansula-nexus'
-const DB_VERSION = 4
+const DB_VERSION = 5
 
 let _db = null
 
@@ -37,6 +37,18 @@ function openDB() {
         purStore.createIndex('purchasedAt', 'purchasedAt', { unique: false })
         purStore.createIndex('supplierId', 'supplierId', { unique: false })
         purStore.createIndex('monthKey', 'monthKey', { unique: false })
+      }
+      // v5: customers store — keyed by customerId
+      if (!db.objectStoreNames.contains('customers')) {
+        const custStore = db.createObjectStore('customers', { keyPath: 'customerId' })
+        custStore.createIndex('phone', 'phone', { unique: false })
+        custStore.createIndex('createdAt', 'createdAt', { unique: false })
+      }
+      // v5: udhaar store — keyed by udhaarId
+      if (!db.objectStoreNames.contains('udhaar')) {
+        const udhStore = db.createObjectStore('udhaar', { keyPath: 'udhaarId' })
+        udhStore.createIndex('customerId', 'customerId', { unique: false })
+        udhStore.createIndex('createdAt', 'createdAt', { unique: false })
       }
     }
     req.onsuccess = (e) => {
@@ -92,11 +104,13 @@ export async function dbClearAll() {
   try {
     const db = await openDB()
     return new Promise((resolve) => {
-      const tx = db.transaction(['kv', 'orders', 'inventory', 'purchases'], 'readwrite')
+      const tx = db.transaction(['kv', 'orders', 'inventory', 'purchases', 'customers', 'udhaar'], 'readwrite')
       tx.objectStore('kv').clear()
       tx.objectStore('orders').clear()
       tx.objectStore('inventory').clear()
       tx.objectStore('purchases').clear()
+      tx.objectStore('customers').clear()
+      tx.objectStore('udhaar').clear()
       tx.oncomplete = () => resolve()
       tx.onerror = () => resolve()
     })
@@ -852,6 +866,152 @@ export async function clearAllInventoryData() {
     
     await dbSet('mn-suppliers', [])
     
+    return true
+  } catch { return false }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CUSTOMERS STORE
+// ══════════════════════════════════════════════════════════════════
+
+const custUid = () => `cust-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+const udhUid  = () => `udh-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+
+export async function saveCustomer(customer) {
+  try {
+    const db = await openDB()
+    const record = {
+      customerId: customer.customerId || custUid(),
+      name: customer.name || '',
+      phone: customer.phone || '',
+      email: customer.email || '',
+      address: customer.address || '',
+      birthday: customer.birthday || null,
+      tags: customer.tags || [],
+      notes: customer.notes || [],
+      totalSpent: customer.totalSpent || 0,
+      visitCount: customer.visitCount || 0,
+      lastVisitAt: customer.lastVisitAt || null,
+      udhaarBalance: customer.udhaarBalance || 0,
+      createdAt: customer.createdAt || Date.now(),
+      updatedAt: Date.now(),
+    }
+    return new Promise((resolve) => {
+      const tx = db.transaction('customers', 'readwrite')
+      tx.objectStore('customers').put(record)
+      tx.oncomplete = () => resolve(record)
+      tx.onerror = () => resolve(null)
+    })
+  } catch { return null }
+}
+
+export async function getCustomers() {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('customers', 'readonly')
+      const req = tx.objectStore('customers').getAll()
+      req.onsuccess = () => resolve(req.result || [])
+      req.onerror = () => resolve([])
+    })
+  } catch { return [] }
+}
+
+export async function getCustomerById(customerId) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('customers', 'readonly')
+      const req = tx.objectStore('customers').get(customerId)
+      req.onsuccess = () => resolve(req.result || null)
+      req.onerror = () => resolve(null)
+    })
+  } catch { return null }
+}
+
+export async function deleteCustomer(customerId) {
+  try {
+    const db = await openDB()
+    // also delete all udhaar entries for this customer
+    const udhaarEntries = await getUdhaarByCustomer(customerId)
+    await Promise.all(udhaarEntries.map(u => deleteUdhaarEntry(u.udhaarId)))
+    return new Promise((resolve) => {
+      const tx = db.transaction('customers', 'readwrite')
+      tx.objectStore('customers').delete(customerId)
+      tx.oncomplete = () => resolve(true)
+      tx.onerror = () => resolve(false)
+    })
+  } catch { return false }
+}
+
+// ── Udhaar (Credit Ledger) ──
+
+export async function saveUdhaarEntry(entry) {
+  try {
+    const db = await openDB()
+    const record = {
+      udhaarId:   entry.udhaarId || udhUid(),
+      customerId: entry.customerId,
+      amount:     entry.amount || 0,
+      reason:     entry.reason || '',
+      createdAt:  entry.createdAt || Date.now(),
+      paidAt:     entry.paidAt || null,
+      paidAmt:    entry.paidAmt || 0,
+    }
+    return new Promise((resolve) => {
+      const tx = db.transaction('udhaar', 'readwrite')
+      tx.objectStore('udhaar').put(record)
+      tx.oncomplete = () => resolve(record)
+      tx.onerror = () => resolve(null)
+    })
+  } catch { return null }
+}
+
+export async function getUdhaarByCustomer(customerId) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('udhaar', 'readonly')
+      const index = tx.objectStore('udhaar').index('customerId')
+      const req = index.getAll(IDBKeyRange.only(customerId))
+      req.onsuccess = () => resolve(req.result || [])
+      req.onerror = () => resolve([])
+    })
+  } catch { return [] }
+}
+
+export async function deleteUdhaarEntry(udhaarId) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('udhaar', 'readwrite')
+      tx.objectStore('udhaar').delete(udhaarId)
+      tx.oncomplete = () => resolve(true)
+      tx.onerror = () => resolve(false)
+    })
+  } catch { return false }
+}
+
+export async function recalcUdhaarBalance(customerId) {
+  try {
+    const entries = await getUdhaarByCustomer(customerId)
+    const balance = entries.reduce((sum, e) => sum + (e.amount - (e.paidAmt || 0)), 0)
+    const cust = await getCustomerById(customerId)
+    if (cust) await saveCustomer({ ...cust, udhaarBalance: Math.max(0, balance) })
+    return Math.max(0, balance)
+  } catch { return 0 }
+}
+
+export async function clearAllCustomerData() {
+  try {
+    const db = await openDB()
+    await new Promise((resolve) => {
+      const tx = db.transaction(['customers', 'udhaar'], 'readwrite')
+      tx.objectStore('customers').clear()
+      tx.objectStore('udhaar').clear()
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => resolve()
+    })
     return true
   } catch { return false }
 }
