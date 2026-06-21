@@ -39,10 +39,17 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem('mn-taxrate')) || TAX_RATES[0] } catch { return TAX_RATES[0] }
   })
   const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [dismissOffline, setDismissOffline] = useState(false)
 
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
+    const handleOnline = () => {
+      setIsOnline(true)
+      setDismissOffline(false)
+    }
+    const handleOffline = () => {
+      setIsOnline(false)
+      setDismissOffline(false)
+    }
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
     return () => {
@@ -124,12 +131,15 @@ export default function App() {
         onCurrency={setCurrency}
         currencies={CURRENCIES}
       />
-      {!isOnline && (
+      {!isOnline && !dismissOffline && (
         <div className="mn-offline-banner">
           <div className="mn-offline-icon">⚡</div>
           <div className="mn-offline-text">
-            <strong>Working Offline</strong> — Don't worry, your data is securely saved on this device.
+            <strong>Working Offline</strong> — Your data is securely saved.
           </div>
+          <button className="mn-offline-close" onClick={() => setDismissOffline(true)} aria-label="Close">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
         </div>
       )}
     </AlertProvider>
