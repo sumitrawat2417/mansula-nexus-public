@@ -759,3 +759,97 @@ export async function syncSupplierSpend(supplierId) {
     await dbSet('mn-suppliers', suppliers)
   }
 }
+// ════════════════════════════════════════════════════════════════════
+// INVENTORY BACKUP & RESTORE
+// ════════════════════════════════════════════════════════════════════
+
+export async function exportInventoryBackup() {
+  try {
+    const db = await openDB()
+    const inventory = await new Promise((resolve) => {
+      const tx = db.transaction('inventory', 'readonly')
+      const req = tx.objectStore('inventory').getAll()
+      req.onsuccess = () => resolve(req.result || [])
+      req.onerror = () => resolve([])
+    })
+    
+    const purchases = await new Promise((resolve) => {
+      const tx = db.transaction('purchases', 'readonly')
+      const req = tx.objectStore('purchases').getAll()
+      req.onsuccess = () => resolve(req.result || [])
+      req.onerror = () => resolve([])
+    })
+    
+    const suppliers = await getSuppliers()
+    
+    const backupData = { inventory, purchases, suppliers }
+    const jsonStr = JSON.stringify(backupData)
+    return new Blob([jsonStr], { type: 'application/json' })
+  } catch (err) {
+    console.error('Inventory Backup failed:', err)
+    return null
+  }
+}
+
+export async function restoreInventoryBackup(file) {
+  try {
+    const jsonStr = await file.text()
+    const data = JSON.parse(jsonStr)
+    
+    if (!data.inventory && !data.purchases && !data.suppliers) throw new Error('Invalid backup format')
+    
+    const db = await openDB()
+    
+    if (data.inventory) {
+      await new Promise((resolve) => {
+        const tx = db.transaction('inventory', 'readwrite')
+        const store = tx.objectStore('inventory')
+        data.inventory.forEach(item => store.put(item))
+        tx.oncomplete = () => resolve()
+        tx.onerror = () => resolve()
+      })
+    }
+    
+    if (data.purchases) {
+      await new Promise((resolve) => {
+        const tx = db.transaction('purchases', 'readwrite')
+        const store = tx.objectStore('purchases')
+        data.purchases.forEach(log => store.put(log))
+        tx.oncomplete = () => resolve()
+        tx.onerror = () => resolve()
+      })
+    }
+    
+    if (data.suppliers) {
+      await dbSet('mn-suppliers', data.suppliers)
+    }
+    
+    return true
+  } catch (err) {
+    console.error('Inventory Restore failed:', err)
+    return false
+  }
+}
+
+export async function clearAllInventoryData() {
+  try {
+    const db = await openDB()
+    await new Promise((resolve) => {
+      const tx = db.transaction('inventory', 'readwrite')
+      tx.objectStore('inventory').clear()
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => resolve()
+    })
+    
+    await new Promise((resolve) => {
+      const tx = db.transaction('purchases', 'readwrite')
+      tx.objectStore('purchases').clear()
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => resolve()
+    })
+    
+    await dbSet('mn-suppliers', [])
+    
+    return true
+  } catch { return false }
+}

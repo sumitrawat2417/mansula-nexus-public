@@ -4,7 +4,7 @@ import {
   adjustInventoryStock, logWastage,
   getPurchaseLogs, savePurchaseLog, deletePurchaseLog,
   getSuppliers, saveSupplier, deleteSupplier,
-  dbGet,
+  dbGet, exportInventoryBackup, restoreInventoryBackup, clearAllInventoryData
 } from './db.js'
 import DateFilterDrawer, { computeQuick } from './DateFilterDrawer.jsx'
 
@@ -41,6 +41,8 @@ const Ic = {
   Check: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
   WhatsApp: () => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" /></svg>,
   DB: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
+  Export: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+  Upload: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -62,6 +64,65 @@ function Modal({ title, onClose, children, wide }) {
   )
 }
 
+// ── Export Modal ──
+function ExportModal({ onClose, onBackup, onRestoreRef, onClearAll }) {
+  const cardStyle = { padding: '12px 14px', gap: '10px' };
+  const iconStyle = { width: 36, height: 36, flexShrink: 0 };
+
+  return (
+    <div className="inv-modal-overlay" onClick={onClose} style={{ zIndex: 10000 }}>
+      <div className="inv-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 450, padding: 0 }}>
+        <div className="inv-modal-header" style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Data & Export</div>
+          <button className="inv-modal-close" onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><Ic.Close /></button>
+        </div>
+        
+        <div className="inv-modal-body" style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          
+          <div className="bp-backup-card bp-backup-export" style={cardStyle}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div className="bp-backup-card-icon" style={iconStyle}><Ic.Download /></div>
+              <div className="bp-backup-card-info">
+                <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Save Backup to Device</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.json</code> file containing all your inventory stock, suppliers, and purchase logs.</div>
+              </div>
+            </div>
+            <button className="bp-btn-primary" style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
+              <Ic.Download /> Download Backup
+            </button>
+          </div>
+
+          <div className="bp-backup-card bp-backup-import" style={cardStyle}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div className="bp-backup-card-icon" style={iconStyle}><Ic.Upload /></div>
+              <div className="bp-backup-card-info">
+                <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Restore from Backup</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.json</code> backup file to restore your inventory data.</div>
+              </div>
+            </div>
+            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
+              <Ic.Upload /> Restore Backup
+            </button>
+          </div>
+
+          <div className="bp-backup-card" style={{ ...cardStyle, borderColor: 'rgba(239,68,68,0.3)' }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div className="bp-backup-card-icon" style={{ ...iconStyle, background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}><Ic.Trash /></div>
+              <div className="bp-backup-card-info">
+                <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', color: '#ef4444', marginBottom: 2 }}>Wipe Inventory Data</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Permanently delete all live stock, purchase logs, and suppliers. This cannot be undone.</div>
+              </div>
+            </div>
+            <button className="bp-btn-danger" style={{ background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onClearAll}>
+              <Ic.Trash /> Reset Inventory
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ══════════════════════════════════════════════════════════════════
 // TAB 1: LIVE STOCK
@@ -1184,6 +1245,49 @@ export default function Inventory({ onClose }) {
   const [menuProducts, setMenuProducts] = useState([])
   const [inventoryItems, setInventoryItems] = useState([])
   const stockRef = useRef(null)
+  const [exportModalOpen, setExportModalOpen] = useState(false)
+  const restoreFileRef = useRef(null)
+
+  const handleBackup = async () => {
+    const blob = await exportInventoryBackup()
+    if (blob) {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `mansula-inventory-backup-${new Date().toISOString().slice(0, 10)}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+  }
+
+  const handleRestore = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const success = await restoreInventoryBackup(file)
+    if (success) {
+      alert('Inventory data restored successfully!')
+      loadSuppliers()
+      loadMenu()
+      loadInventory()
+      setExportModalOpen(false)
+    } else {
+      alert('Failed to restore. Invalid or corrupted backup file.')
+    }
+    e.target.value = ''
+  }
+
+  const handleClearAll = async () => {
+    if (!window.confirm('WARNING: This will permanently delete ALL live stock, purchase logs, and suppliers. This cannot be undone. Are you sure you want to proceed?')) return
+    const success = await clearAllInventoryData()
+    if (success) {
+      alert('All inventory data wiped.')
+      loadSuppliers()
+      loadInventory()
+      setExportModalOpen(false)
+    } else {
+      alert('Failed to wipe data.')
+    }
+  }
 
   const loadSuppliers = useCallback(async () => {
     const data = await getSuppliers()
@@ -1221,7 +1325,7 @@ export default function Inventory({ onClose }) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
         </button>
         <div className="inv-header-title"><Ic.Box /> Inventory</div>
-        <button className="inv-export-btn" onClick={() => alert('Data export modal coming soon!')} title="Data & Export"><Ic.DB /> Data</button>
+        <button className="inv-export-btn" onClick={() => setExportModalOpen(true)} title="Data & Export"><Ic.DB /> Data</button>
       </header>
 
       {/* Tab bar */}
@@ -1244,6 +1348,19 @@ export default function Inventory({ onClose }) {
         />
       )}
       {tab === 2 && <SuppliersTab suppliers={suppliers} onSuppliersChanged={loadSuppliers} />}
+
+      {/* Hidden file input for restore */}
+      <input type="file" accept=".json" style={{ display: 'none' }} ref={restoreFileRef} onChange={handleRestore} />
+
+      {/* Export Modal */}
+      {exportModalOpen && (
+        <ExportModal
+          onClose={() => setExportModalOpen(false)}
+          onBackup={handleBackup}
+          onRestoreRef={restoreFileRef}
+          onClearAll={handleClearAll}
+        />
+      )}
     </div>
   )
 }
