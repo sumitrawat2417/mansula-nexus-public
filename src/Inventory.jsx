@@ -81,40 +81,40 @@ function ExportModal({ onClose, onBackup, onRestoreRef, onClearAll }) {
           
           <div className="bp-backup-card bp-backup-export" style={cardStyle}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-              <div className="bp-backup-card-icon" style={iconStyle}><Ic.Download /></div>
+              <div className="bp-backup-card-icon" style={iconStyle}><span style={{ width: 18, height: 18, display: 'flex' }}><Ic.Download /></span></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Save Backup to Device</div>
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.json</code> file containing all your inventory stock, suppliers, and purchase logs.</div>
               </div>
             </div>
             <button className="bp-btn-primary" style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
-              <Ic.Download /> Download Backup
+              <span style={{ width: 14, height: 14, display: 'flex' }}><Ic.Download /></span> Download Backup
             </button>
           </div>
 
           <div className="bp-backup-card bp-backup-import" style={cardStyle}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-              <div className="bp-backup-card-icon" style={iconStyle}><Ic.Upload /></div>
+              <div className="bp-backup-card-icon" style={iconStyle}><span style={{ width: 18, height: 18, display: 'flex' }}><Ic.Upload /></span></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Restore from Backup</div>
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.json</code> backup file to restore your inventory data.</div>
               </div>
             </div>
             <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
-              <Ic.Upload /> Restore Backup
+              <span style={{ width: 14, height: 14, display: 'flex' }}><Ic.Upload /></span> Restore Backup
             </button>
           </div>
 
           <div className="bp-backup-card" style={{ ...cardStyle, borderColor: 'rgba(239,68,68,0.3)' }}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-              <div className="bp-backup-card-icon" style={{ ...iconStyle, background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}><Ic.Trash /></div>
+              <div className="bp-backup-card-icon" style={{ ...iconStyle, background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}><span style={{ width: 18, height: 18, display: 'flex' }}><Ic.Trash /></span></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', color: '#ef4444', marginBottom: 2 }}>Wipe Inventory Data</div>
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Permanently delete all live stock, purchase logs, and suppliers. This cannot be undone.</div>
               </div>
             </div>
             <button className="bp-btn-danger" style={{ background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onClearAll}>
-              <Ic.Trash /> Reset Inventory
+              <span style={{ width: 14, height: 14, display: 'flex' }}><Ic.Trash /></span> Reset Inventory
             </button>
           </div>
 
