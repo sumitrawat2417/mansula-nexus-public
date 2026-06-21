@@ -6600,7 +6600,7 @@ select {
 /* ── Offline Banner ── */
 .mn-offline-banner {
   position: fixed;
-  top: 16px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.95);
@@ -6614,7 +6614,7 @@ select {
   align-items: center;
   gap: 12px;
   z-index: 99999;
-  animation: slideDownOffline 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUpOffline 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   color: var(--text-primary);
   width: 92%;
   max-width: 450px;
@@ -6669,8 +6669,8 @@ select {
   color: var(--text-primary);
 }
 
-@keyframes slideDownOffline {
-  0% { transform: translate(-50%, -150%); opacity: 0; }
+@keyframes slideUpOffline {
+  0% { transform: translate(-50%, 150%); opacity: 0; }
   100% { transform: translate(-50%, 0); opacity: 1; }
 }
 
