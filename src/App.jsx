@@ -38,6 +38,18 @@ export default function App() {
   const [taxRateObj, setTaxRateObj] = useState(() => {
     try { return JSON.parse(localStorage.getItem('mn-taxrate')) || TAX_RATES[0] } catch { return TAX_RATES[0] }
   })
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -112,6 +124,14 @@ export default function App() {
         onCurrency={setCurrency}
         currencies={CURRENCIES}
       />
+      {!isOnline && (
+        <div className="mn-offline-banner">
+          <div className="mn-offline-icon">⚡</div>
+          <div className="mn-offline-text">
+            <strong>Working Offline</strong> — Don't worry, your data is securely saved on this device.
+          </div>
+        </div>
+      )}
     </AlertProvider>
   )
 }
