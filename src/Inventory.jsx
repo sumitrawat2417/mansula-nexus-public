@@ -237,10 +237,9 @@ function AddEditItemModal({ item, menuProducts, onSave, onClose }) {
           </div>
           <div className="inv-form-group">
             <label className="inv-form-label">Unit</label>
-            <input className="inv-form-input" list="inv-unit-list" value={form.unit} onChange={e => setF('unit', e.target.value)} placeholder="e.g. pcs" />
-            <datalist id="inv-unit-list">
-              {UNITS.map(u => <option key={u} value={u} />)}
-            </datalist>
+            <select className="inv-form-input" value={form.unit} onChange={e => setF('unit', e.target.value)}>
+              {UNITS.map(u => <option key={u}>{u}</option>)}
+            </select>
           </div>
         </div>
 
@@ -369,15 +368,12 @@ function PriceHistoryModal({ item, data, onClose }) {
           <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>No price data in this date range.</div>
         ) : (
           <div style={{ overflowX: 'auto', paddingBottom: 10 }}>
-            <svg width={Math.max(width, sorted.length * 60 + padding * 2)} height={height} className="inv-price-svg" style={{ minWidth: '100%', height: `${height}px` }}>
+            <svg width={Math.max(width, sorted.length * 60 + padding * 2)} height={height} className="inv-price-svg" style={{ minWidth: '100%' }}>
               <line x1={padding} y1={height - padding} x2={Math.max(width, sorted.length * 60 + padding * 2) - padding} y2={height - padding} stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
               <line x1={padding} y1={padding} x2={Math.max(width, sorted.length * 60 + padding * 2) - padding} y2={padding} stroke="#e2e8f0" strokeDasharray="4 4" strokeLinecap="round" />
 
               <text x={padding - 10} y={height - padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(axisMinP)}</text>
               <text x={padding - 10} y={padding + 4} textAnchor="end" fontSize="12" fill="#64748b" fontWeight="600">{fmtCur(maxP)}</text>
-              
-              <text x={padding / 2 - 5} y={height / 2} transform={`rotate(-90 ${padding / 2 - 5} ${height / 2})`} textAnchor="middle" fontSize="11" fill="#94a3b8" fontWeight="bold" letterSpacing="0.05em">PRICE</text>
-              <text x={Math.max(width, sorted.length * 60 + padding * 2) / 2} y={height - 5} textAnchor="middle" fontSize="11" fill="#94a3b8" fontWeight="bold" letterSpacing="0.05em">DATE</text>
 
               {sorted.map((d, i) => {
                 const getDynamicX = (index) => padding + 30 + (index * 60);
@@ -593,7 +589,7 @@ function PurchaseForm({ suppliers, menuProducts, inventoryItems, logToEdit, onSa
   const handleProductNameChange = (lineId, val) => {
     const p = allProducts.find(x => x.name === val)
     if (p) {
-      setLines(prev => prev.map(l => l.id === lineId ? { ...l, productId: p.id, productName: p.name, emoji: p.emoji || '📦', unit: p.unit || 'pcs', category: p.category || '', costPerUnit: p.costPrice || 0, lineTotal: (l.qty || 1) * (p.costPrice || 0) } : l))
+      setLines(prev => prev.map(l => l.id === lineId ? { ...l, productId: p.id, productName: p.name, emoji: p.emoji || '📦', unit: p.unit || 'pcs', category: p.category || '', costPerUnit: p.costPrice || 0 } : l))
     } else {
       setLines(prev => prev.map(l => l.id === lineId ? { ...l, productId: '', productName: val } : l))
     }
@@ -994,18 +990,17 @@ function SupplierFormModal({ supplier, onSave, onClose }) {
   )
 }
 
-function SupplierDetailsModal({ supplier, purchaseLogs, allProducts, onClose, onShowPriceGraph }) {
+function SupplierDetailsModal({ supplier, purchaseLogs, onClose, onShowPriceGraph }) {
   const myLogs = purchaseLogs.filter(l => l.supplierId === supplier.id)
 
   const itemStats = {}
   myLogs.forEach(log => {
     (log.items || []).forEach(item => {
       if (!itemStats[item.productId]) {
-        const currentProduct = allProducts?.find(p => p.id === item.productId)
         itemStats[item.productId] = {
           id: item.productId,
-          name: currentProduct ? currentProduct.name : item.productName,
-          unit: currentProduct && currentProduct.unit ? currentProduct.unit : item.unit,
+          name: item.productName,
+          unit: item.unit,
           totalQty: 0,
           totalSpent: 0,
           purchaseDates: [],
@@ -1055,7 +1050,7 @@ function SupplierDetailsModal({ supplier, purchaseLogs, allProducts, onClose, on
   )
 }
 
-function SuppliersTab({ suppliers, menuProducts, inventoryItems, onSuppliersChanged }) {
+function SuppliersTab({ suppliers, onSuppliersChanged }) {
   const [showForm, setShowForm] = useState(false)
   const [editSupplier, setEditSupplier] = useState(null)
   const [detailsSupplier, setDetailsSupplier] = useState(null)
@@ -1163,7 +1158,6 @@ function SuppliersTab({ suppliers, menuProducts, inventoryItems, onSuppliersChan
         <SupplierDetailsModal
           supplier={detailsSupplier}
           purchaseLogs={purchaseLogs}
-          allProducts={[...(menuProducts || []), ...(inventoryItems || [])]}
           onClose={() => setDetailsSupplier(null)}
           onShowPriceGraph={(item, data) => setPriceGraphItem({ item, data })}
         />
@@ -1225,11 +1219,8 @@ export default function Inventory({ onClose }) {
         <button className="inv-back-btn" onClick={onClose}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
         </button>
-        <div className="inv-header-icon">
-          <Ic.Box />
-        </div>
-        <div className="inv-header-info">
-          <h1 className="inv-header-title">Inventory</h1>
+        <div className="inv-header-title">
+          <h1 className="inv-header-main"><Ic.Box style={{ width: 19, height: 19, color: 'var(--brand-primary)', verticalAlign: 'text-bottom' }} /> Inventory</h1>
           <div className="inv-header-sub">ManSula Nexus</div>
         </div>
       </header>
@@ -1253,7 +1244,7 @@ export default function Inventory({ onClose }) {
           onPurchaseSaved={() => { loadInventory(); loadSuppliers(); }}
         />
       )}
-      {tab === 2 && <SuppliersTab suppliers={suppliers} menuProducts={menuProducts} inventoryItems={inventoryItems} onSuppliersChanged={loadSuppliers} />}
+      {tab === 2 && <SuppliersTab suppliers={suppliers} onSuppliersChanged={loadSuppliers} />}
     </div>
   )
 }
