@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useBackButton } from './useBackButton.js'
 import {
   getOrdersByDateRange, getStatsForDateRange,
   deleteOrderRecord, updateOrderRecord, getStorageEstimate, getAllOrderRecords, dbGet,
-  exportOrdersBackup, restoreOrdersBackup, clearAllOrderRecords
+  exportOrdersBackup, restoreOrdersBackup, clearAllOrderRecords, getUdhaarByOrderId, getCustomerById, getOrderRecordById
 } from './db.js'
 import DateFilterDrawer, { computeNavRange, computeQuick } from './DateFilterDrawer.jsx'
 import { useAlert } from './AlertDialog.jsx'
@@ -55,15 +56,34 @@ const PAYMENT_COLOR = { cash: '#10b981', upi: '#6366f1', card: '#0ea5e9', udhaar
 const PAGE_SIZE = 50
 
 // ── Order Detail Modal ──
-function OrderDetailModal({ record, currency, onClose, onDelete, onEdit }) {
-  const [confirmDelete, setConfirmDelete] = useState(false)
+function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavigate }) {
+  useBackButton(onClose)
+  const { confirm: showConfirm } = useAlert()
   const [showAllItems, setShowAllItems] = useState(false)
+  const [udhaarInfo, setUdhaarInfo] = useState(null)
+  const [customerInfo, setCustomerInfo] = useState(null)
+
+  useEffect(() => {
+    if (record.paymentMode === 'udhaar') {
+      getUdhaarByOrderId(record.orderId).then(info => {
+        setUdhaarInfo(info)
+        if (info && info.customerId) {
+          getCustomerById(info.customerId).then(setCustomerInfo)
+        }
+      })
+    }
+  }, [record.paymentMode, record.orderId])
+
   const sym = currency?.symbol || '₹'
   const items = record.items || []
   const subtotal = record.subtotal !== undefined ? record.subtotal : items.reduce((s, i) => s + i.price * i.qty, 0)
 
   const handleDelete = async () => {
-    if (!confirmDelete) { setConfirmDelete(true); return }
+    const ok = await showConfirm(
+      'Are you sure you want to permanently delete this order?',
+      { title: 'Delete Order', type: 'danger', confirmText: 'Yes, Delete', confirmWord: 'DELETE' }
+    )
+    if (!ok) return
     await onDelete(record.orderId)
     onClose()
   }
@@ -125,24 +145,40 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit }) {
           </div>
 
           <div className="or-detail-section-label" style={{ marginTop: 16 }}>Payment</div>
-          <div className="or-payment-badge" style={{ '--chip-color': PAYMENT_COLOR[record.paymentMode] || '#64748b' }}>
-            <I.Cash s={13} /> {PAYMENT_LABEL[record.paymentMode] || record.paymentMode}
+          <div 
+            className="or-payment-badge" 
+            style={{ 
+              '--chip-color': PAYMENT_COLOR[record.paymentMode] || '#64748b',
+              cursor: record.paymentMode === 'udhaar' ? 'pointer' : 'default'
+            }}
+            onClick={() => {
+              if (record.paymentMode === 'udhaar' && udhaarInfo) {
+                localStorage.setItem('mn-open-udhaar', udhaarInfo.udhaarId);
+                if (customerInfo) {
+                  localStorage.setItem('mn-open-customer', customerInfo.customerId || customerInfo.id);
+                }
+                onNavigate('customers');
+              }
+            }}
+          >
+            <I.Cash s={13} /> {PAYMENT_LABEL[record.paymentMode] || record.paymentMode} {customerInfo ? `• ${customerInfo.name}` : ''}
+            {record.paymentMode === 'udhaar' && udhaarInfo && (udhaarInfo.amount - (udhaarInfo.paidAmt || 0)) <= 0 && (
+              <span style={{ fontSize: '0.72rem', marginLeft: 8, opacity: 0.9, background: 'rgba(255,255,255,0.2)', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                ✓ CLEARED
+              </span>
+            )}
             {record.paymentMode === 'split' && record.paymentDetails && (
               <span style={{ fontSize: '0.72rem', marginLeft: 8, opacity: 0.8 }}>
                 Cash {fmtCur(record.paymentDetails.cash, sym)} · UPI {fmtCur(record.paymentDetails.upi, sym)}
               </span>
             )}
           </div>
-
-          <div className="or-detail-section-label" style={{ marginTop: 16 }}>Note</div>
-          <div className="or-note-display">{record.note || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No note</span>}</div>
         </div>
 
         <div className="or-modal-footer">
-          <button className={`or-btn-danger ${confirmDelete ? 'confirm' : ''}`} onClick={handleDelete}>
-            {confirmDelete ? <><I.Warn s={14} /> Confirm Delete?</> : <><I.Trash s={14} /> Delete</>}
+          <button className="or-btn-danger" onClick={handleDelete}>
+            <I.Trash s={14} /> Delete
           </button>
-          {confirmDelete && <button className="or-btn-ghost" onClick={() => setConfirmDelete(false)}>Cancel</button>}
         </div>
       </div>
     </div>
@@ -151,6 +187,7 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit }) {
 
 // ── Export Modal ──
 function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll }) {
+  useBackButton(onClose)
   const cardStyle = { padding: '12px 14px', gap: '10px' };
   const iconStyle = { width: 36, height: 36, flexShrink: 0 };
 
@@ -223,7 +260,8 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll 
 }
 
 // ── Main OrderRecords ──
-export default function OrderRecords({ onClose, currency, onEdit }) {
+export default function OrderRecords({ onClose, currency, onEdit, onNavigate }) {
+  useBackButton(onClose)
   const [records, setRecords]           = useState([])
   const [loading, setLoading]           = useState(true)
   const [loadingMore, setLoadingMore]   = useState(false)
@@ -248,6 +286,16 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
   const sentinelRef = useRef(null)
   const fileInputRef = useRef(null)
   const { alert: showAlert, confirm: showConfirm } = useAlert()
+
+  useEffect(() => {
+    const openOrderId = localStorage.getItem('mn-open-order')
+    if (openOrderId) {
+      getOrderRecordById(openOrderId).then(order => {
+        if (order) setViewRecord(order)
+        localStorage.removeItem('mn-open-order')
+      })
+    }
+  }, [])
 
   const loadPage = useCallback(async () => {
     setLoading(true)
@@ -370,7 +418,7 @@ export default function OrderRecords({ onClose, currency, onEdit }) {
     <div className="or-root">
       {viewRecord && (
         <OrderDetailModal record={viewRecord} currency={currency}
-          onClose={() => setViewRecord(null)} onDelete={handleDelete} onEdit={onEdit} />
+          onClose={() => setViewRecord(null)} onDelete={handleDelete} onEdit={onEdit} onNavigate={onNavigate} />
       )}
       {filterDrawerOpen && (
         <DateFilterDrawer

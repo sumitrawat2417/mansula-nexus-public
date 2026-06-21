@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useBackButton } from './useBackButton.js'
 import { dbGet, dbSet } from './db.js'
 
 import { Html5Qrcode } from 'html5-qrcode'
@@ -61,6 +62,7 @@ const BADGE_OPTIONS = [{ value: '', label: 'None' }, { value: 'popular', label: 
 
 // ─── UPI SCANNER ───
 function UpiScanner({ onScan, onClose }) {
+  useBackButton(onClose)
   const scannerRef = useRef(null)
   const fileRef = useRef(null)
 
@@ -797,6 +799,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
 
 // ─── MAIN COMPONENT ───
 export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRates }) {
+  useBackButton(onClose)
   const [tab, setTab] = useState('info')
   const [infoMode, setInfoMode] = useState('view')   // 'view' | 'edit'
   const [business, setBusiness] = useState(DEFAULT_BUSINESS)

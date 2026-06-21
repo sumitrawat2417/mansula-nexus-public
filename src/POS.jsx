@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import './App.css'
-import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth } from './db.js'
+import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth, getCustomers, saveCustomer, saveUdhaarEntry, recalcUdhaarBalance } from './db.js'
 import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES, KEY_BUSINESS, DEFAULT_BUSINESS } from './BusinessProfile.jsx'
+import { useBackButton } from './useBackButton.js'
 
 // ─────────────── DATA (loaded from IDB, fallback to defaults) ───────────────
 
@@ -178,6 +179,7 @@ const ordTotal = (order, taxRate) => {
 
 // ─────────────── SUCCESS MODAL ───────────────
 function SuccessModal({ order, onClose, currency, taxRateObj }) {
+  useBackButton(onClose)
   const [expanded, setExpanded] = useState(false)
   if (!order) return null
 
@@ -264,6 +266,7 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
 
 // ─────────────── ORDER CONSOLE ───────────────
 function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onClose, currency, taxRateObj, watchdogMins, onWatchdogMins }) {
+  useBackButton(onClose)
   const [expandedId, setExpandedId] = useState(null)
   const [showAllItems, setShowAllItems] = useState(false)
   const [isCustomTimer, setIsCustomTimer] = useState(![0, 2, 5, 10, 15, 30].includes(watchdogMins))
@@ -478,6 +481,7 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
 
 // ─────────────── SETTINGS DRAWER ───────────────
 function SettingsDrawer({ cols, onCols, onExit, onClose }) {
+  useBackButton(onClose)
   const gridOptions = [
     { key: 'auto', label: 'Auto', icon: <I.GridAuto s={18} /> },
     { key: '2', label: '2 cols', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="8" height="18" rx="1" /><rect x="13" y="3" width="8" height="18" rx="1" /></svg> },
@@ -544,8 +548,9 @@ function SettingsDrawer({ cols, onCols, onExit, onClose }) {
   )
 }
 
-// ─────────────── PRODUCT CARD ───────────────// ─────────────── VARIANT MODAL ───────────────
+// ─────────────── VARIANT MODAL ───────────────
 function VariantModal({ product, currency, onConfirm, onClose }) {
+  useBackButton(onClose)
   // selections[groupId] = optionId
   const [selections, setSelections] = useState({})
 
@@ -750,6 +755,7 @@ function CartItem({ item, onIncrease, onDecrease, currency }) {
 
 // ─────────────── MAIN POS ───────────────
 export default function POS({ onExit, currency, taxRateObj, editingRecord, onClearEditing }) {
+  useBackButton(onExit)
   const [cols, setCols] = useState(() => localStorage.getItem('mn-cols') || 'auto')
   const [products, setProducts] = useState(DEFAULT_PRODUCTS)
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
@@ -771,7 +777,15 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   const [discountVal, setDiscountVal] = useState(0)
   const [deliveryCharge, setDeliveryCharge] = useState(0)
   const [paymentMode, setPaymentMode] = useState('cash')  // 'cash' | 'upi' | 'udhaar' | 'card' | 'other'
+  const [udhaarName, setUdhaarName] = useState('')
+  const [udhaarPhone, setUdhaarPhone] = useState('')
+  const [customersList, setCustomersList] = useState([])
+  const [udhaarFocus, setUdhaarFocus] = useState(false)
   const [cartStep, setCartStep] = useState('cart')   // 'cart' | 'payment'
+
+  useEffect(() => {
+    getCustomers().then(c => setCustomersList(c || []))
+  }, [])
   const [summaryExpanded, setSummaryExpanded] = useState(false)
   const [cashNotes, setCashNotes] = useState({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })
   const [splitCash, setSplitCash] = useState(0)
@@ -1029,6 +1043,10 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
       showToast('Cannot complete an empty order.', 'error')
       return
     }
+    if (paymentMode === 'udhaar' && !udhaarPhone.trim()) {
+      showToast('Please enter customer phone number for Udhaar', 'error')
+      return
+    }
 
     // eslint-disable-next-line react-hooks/purity
     const completedAt = order.originalCompletedAt || Date.now()
@@ -1048,6 +1066,45 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
 
     // Save to permanent order records
     await saveOrderRecord(enrichedOrder)
+
+    if (paymentMode === 'udhaar') {
+      const allCustomers = await getCustomers() || []
+      let customer = udhaarPhone.trim() ? allCustomers.find(c => c.phone === udhaarPhone.trim()) : null
+      if (!customer && udhaarName.trim()) {
+        customer = allCustomers.find(c => c.name.toLowerCase() === udhaarName.trim().toLowerCase())
+      }
+      
+      if (!customer) {
+        customer = {
+          customerId: 'cust-' + Date.now(),
+          name: udhaarName.trim() || 'Customer ' + udhaarPhone.trim().slice(-4),
+          phone: udhaarPhone.trim(),
+          udhaarBalance: 0,
+          createdAt: new Date().toISOString()
+        }
+        await saveCustomer(customer)
+      } else if (udhaarPhone.trim() && !customer.phone) {
+        customer.phone = udhaarPhone.trim()
+        await saveCustomer(customer)
+      }
+      
+      const itemsStr = enrichedOrder.items.map(i => `${i.qty}x ${i.name} @ ${i.price}`).join(', ')
+      const newEntry = {
+        udhaarId: 'udh-' + Date.now(),
+        customerId: customer.customerId,
+        amount: enrichedOrder.total,
+        date: new Date().toISOString(),
+        items: itemsStr,
+        isCleared: false,
+        clearedAt: null,
+        clearedAmount: 0,
+        createdAt: new Date().toISOString(),
+        orderId: enrichedOrder.id,
+        paymentHistory: []
+      }
+      await saveUdhaarEntry(newEntry)
+      await recalcUdhaarBalance(customer.customerId)
+    }
 
     playSound('checkout')
     setSuccessOrder(enrichedOrder)
@@ -1076,7 +1133,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
       setCartOpen(false)
       setCartStep('cart')
       setSummaryExpanded(false)
-      setDiscountType('none'); setDiscountVal(0); setDeliveryCharge(0); setPaymentMode('cash'); setCashNotes({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 })
+      setDiscountType('none'); setDiscountVal(0); setDeliveryCharge(0); setPaymentMode('cash'); setCashNotes({ 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0 }); setUdhaarName(''); setUdhaarPhone('')
     }
 
     setOrders(newOrders)
@@ -1104,6 +1161,26 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   const getQty = (id) => cart.filter(i => i.id === id).reduce((s, i) => s + i.qty, 0)
   const closeSearch = () => { setSearch(''); setSearchOpen(false) }
   const activeOrders = orders.filter(o => o.status === 'active')
+
+  const filteredCusts = useMemo(() => {
+    if (!udhaarFocus) return []
+    const n = udhaarName.trim().toLowerCase()
+    const p = udhaarPhone.trim()
+    if (!n && !p) return customersList.slice(0, 5)
+    
+    return customersList.filter(c => {
+      const matchName = n ? (c.name || '').toLowerCase().includes(n) : true;
+      const matchPhone = p ? (c.phone || '').includes(p) : true;
+      return matchName && matchPhone;
+    }).slice(0, 5)
+  }, [udhaarName, udhaarPhone, customersList, udhaarFocus])
+
+  const handlePhoneChange = (e) => {
+    let val = e.target.value.replace(/\D/g, '')
+    if (val.startsWith('91') && val.length > 10) val = val.substring(2)
+    val = val.replace(/^0+/, '')
+    setUdhaarPhone(val.slice(0, 10))
+  }
 
   return (
     <>
@@ -1380,6 +1457,59 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                             )}
                             {totalCashReceived > 0 && totalCashReceived < total && (
                               <div className="cash-short">Short by: <span className="val">{fmt(total - totalCashReceived, currency)}</span></div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {paymentMode === 'udhaar' && (
+                        <div className="cash-calc-section" style={{ padding: '16px' }}>
+                          <div className="cash-calc-label" style={{ fontSize: '0.85rem', marginBottom: 12 }}>Customer Details for Udhaar</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface-1)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
+                              <span style={{ padding: '12px 0 12px 16px', color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500 }}>+91</span>
+                              <input 
+                                type="tel"
+                                placeholder="Phone Number *" 
+                                value={udhaarPhone} 
+                                onChange={handlePhoneChange} 
+                                onFocus={() => setUdhaarFocus(true)}
+                                onBlur={() => setTimeout(() => setUdhaarFocus(false), 200)}
+                                style={{ padding: '12px 16px 12px 8px', background: 'transparent', border: 'none', fontSize: '1rem', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
+                              />
+                            </div>
+                            <input 
+                              type="text" 
+                              placeholder="Customer Name (Optional)" 
+                              value={udhaarName} 
+                              onChange={e => setUdhaarName(e.target.value)} 
+                              onFocus={() => setUdhaarFocus(true)}
+                              onBlur={() => setTimeout(() => setUdhaarFocus(false), 200)}
+                              className="search-input" 
+                              style={{ padding: '12px 16px', background: 'var(--bg-surface-1)', border: '1px solid var(--border-color)', borderRadius: '12px', fontSize: '1rem', width: '100%', color: 'var(--text-primary)' }}
+                            />
+                            {udhaarFocus && filteredCusts.length > 0 && (
+                              <div className="autocomplete-dropdown" style={{
+                                position: 'absolute', top: '100%', left: 0, right: 0, 
+                                background: 'var(--bg-surface)', border: '1px solid var(--border-color)', 
+                                borderRadius: '12px', marginTop: '4px', zIndex: 100, 
+                                boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden'
+                              }}>
+                                {filteredCusts.map(c => (
+                                  <div 
+                                    key={c.customerId} 
+                                    style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)' }}
+                                    onClick={() => {
+                                      setUdhaarName(c.name);
+                                      setUdhaarPhone(c.phone || '');
+                                      setUdhaarFocus(false);
+                                    }}
+                                  >
+                                    <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{c.name}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{c.phone || 'No phone'}</div>
+                                  </div>
+                                ))}
+                              </div>
                             )}
                           </div>
                         </div>

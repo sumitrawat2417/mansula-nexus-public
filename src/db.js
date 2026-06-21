@@ -905,6 +905,20 @@ export async function saveCustomer(customer) {
   } catch { return null }
 }
 
+export async function getOrderRecordById(orderId) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('orders', 'readonly')
+      const req = tx.objectStore('orders').get(orderId)
+      req.onsuccess = () => resolve(req.result || null)
+    })
+  } catch (err) {
+    console.error('Fetch order by id failed:', err)
+    return null
+  }
+}
+
 export async function getCustomers() {
   try {
     const db = await openDB()
@@ -950,13 +964,14 @@ export async function saveUdhaarEntry(entry) {
   try {
     const db = await openDB()
     const record = {
-      udhaarId:   entry.udhaarId || udhUid(),
+      ...entry,
+      udhaarId:   entry.udhaarId || entry.id || udhUid(),
       customerId: entry.customerId,
       amount:     entry.amount || 0,
-      reason:     entry.reason || '',
+      reason:     entry.reason || entry.items || '',
       createdAt:  entry.createdAt || Date.now(),
-      paidAt:     entry.paidAt || null,
-      paidAmt:    entry.paidAmt || 0,
+      paidAt:     entry.paidAt || entry.clearedAt || null,
+      paidAmt:    entry.paidAmt || entry.clearedAmount || 0,
     }
     return new Promise((resolve) => {
       const tx = db.transaction('udhaar', 'readwrite')
@@ -992,12 +1007,29 @@ export async function deleteUdhaarEntry(udhaarId) {
   } catch { return false }
 }
 
+export async function getUdhaarByOrderId(orderId) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('udhaar', 'readonly')
+      const store = tx.objectStore('udhaar')
+      const req = store.getAll()
+      req.onsuccess = () => {
+        const matches = (req.result || []).filter(e => e.orderId === orderId)
+        resolve(matches[0] || null)
+      }
+      req.onerror = () => resolve(null)
+    })
+  } catch { return null }
+}
+
 export async function recalcUdhaarBalance(customerId) {
   try {
     const entries = await getUdhaarByCustomer(customerId)
     const balance = entries.reduce((sum, e) => sum + (e.amount - (e.paidAmt || 0)), 0)
+    const totalSpent = entries.reduce((sum, e) => sum + (e.amount || 0), 0)
     const cust = await getCustomerById(customerId)
-    if (cust) await saveCustomer({ ...cust, udhaarBalance: Math.max(0, balance) })
+    if (cust) await saveCustomer({ ...cust, udhaarBalance: Math.max(0, balance), totalSpent })
     return Math.max(0, balance)
   } catch { return 0 }
 }
@@ -1014,4 +1046,60 @@ export async function clearAllCustomerData() {
     })
     return true
   } catch { return false }
+}
+
+export async function exportCustomersBackup() {
+  try {
+    const db = await openDB()
+    const data = await new Promise((resolve) => {
+      const tx = db.transaction(['customers', 'udhaar'], 'readonly')
+      const customersReq = tx.objectStore('customers').getAll()
+      const udhaarReq = tx.objectStore('udhaar').getAll()
+      
+      tx.oncomplete = () => {
+        resolve({
+          customers: customersReq.result || [],
+          udhaar: udhaarReq.result || []
+        })
+      }
+      tx.onerror = () => resolve(null)
+    })
+    if (!data) return null
+    const jsonStr = JSON.stringify(data)
+    return new Blob([jsonStr], { type: 'application/json' })
+  } catch (err) {
+    console.error('Backup failed:', err)
+    return null
+  }
+}
+
+export async function restoreCustomersBackup(file) {
+  try {
+    const jsonStr = await file.text()
+    const data = JSON.parse(jsonStr)
+    
+    // Support either old array format (just customers) or new object format (customers + udhaar)
+    const customers = Array.isArray(data) ? data : (data.customers || [])
+    const udhaar = Array.isArray(data) ? [] : (data.udhaar || [])
+    
+    if (!Array.isArray(customers) || !Array.isArray(udhaar)) {
+      throw new Error('Invalid backup format')
+    }
+    
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction(['customers', 'udhaar'], 'readwrite')
+      const custStore = tx.objectStore('customers')
+      const udhStore = tx.objectStore('udhaar')
+      
+      customers.forEach(r => custStore.put(r))
+      udhaar.forEach(r => udhStore.put(r))
+      
+      tx.oncomplete = () => resolve(true)
+      tx.onerror = () => resolve(false)
+    })
+  } catch (err) {
+    console.error('Restore failed:', err)
+    return false
+  }
 }

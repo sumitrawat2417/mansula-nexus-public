@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useBackButton } from './useBackButton.js'
 import { dbClearAll, dbGet, injectStressTestData } from './db.js'
 import { useAlert } from './AlertDialog.jsx'
 
@@ -43,6 +44,7 @@ const TOOLS = [
 
 // ── Home Settings Modal ──
 function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, onClose }) {
+  useBackButton(onClose)
   const [resetStep, setResetStep] = useState(0) // 0=idle 2=done
   const { alert: showAlert, confirm: showConfirm } = useAlert()
   const [lang, setLang] = useState(localStorage.getItem('pos_lang') || 'en')

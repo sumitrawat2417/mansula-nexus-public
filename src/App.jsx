@@ -141,6 +141,7 @@ export default function App() {
           onClose={() => setScreen('home')}
           currency={currency}
           onEdit={(record) => { setEditingRecord(record); setScreen('pos'); }}
+          onNavigate={setScreen}
         />
       )
     }
@@ -150,7 +151,7 @@ export default function App() {
     }
 
     if (screen === 'customers') {
-      return <Customers onClose={() => setScreen('home')} />
+      return <Customers onClose={() => setScreen('home')} onNavigate={setScreen} />
     }
 
     return (

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useBackButton } from './useBackButton.js'
 import {
   getInventoryItems, saveInventoryItem, deleteInventoryItem,
   adjustInventoryStock, logWastage,
@@ -51,6 +52,7 @@ const Ic = {
 // ══════════════════════════════════════════════════════════════════
 
 function Modal({ title, onClose, children, wide }) {
+  useBackButton(onClose)
   return (
     <div className="inv-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className={`inv-modal ${wide ? 'inv-modal-wide' : ''}`}>
@@ -1254,6 +1256,7 @@ function SuppliersTab({ suppliers, onSuppliersChanged }) {
 // ══════════════════════════════════════════════════════════════════
 
 export default function Inventory({ onClose }) {
+  useBackButton(onClose)
   const [tab, setTab] = useState(0) // 0=stock, 1=purchases, 2=suppliers
   const [suppliers, setSuppliers] = useState([])
   const [menuProducts, setMenuProducts] = useState([])
