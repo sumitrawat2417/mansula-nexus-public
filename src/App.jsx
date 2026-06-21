@@ -57,7 +57,11 @@ export default function App() {
   const [screen, setScreen] = useState('home')
   const [editingRecord, setEditingRecord] = useState(null)
   const [agreed, setAgreed] = useState(() => localStorage.getItem(AGREEMENT_KEY) === 'true')
-  const [theme, setTheme] = useState(() => localStorage.getItem('mn-theme') || 'light')
+  const [theme, setTheme] = useState(() => {
+    const stored = localStorage.getItem('mn-theme')
+    if (stored) return stored
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  })
   const [currency, setCurrency] = useState(() => {
     try { return JSON.parse(localStorage.getItem('mn-currency')) || CURRENCIES[0] } catch { return CURRENCIES[0] }
   })
