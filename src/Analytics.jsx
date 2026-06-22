@@ -27,6 +27,7 @@ const Ic = {
   Warning:   ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
   Zap:       ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
   ChevD:     ({ s=13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
+  ChevR:     ({ s=18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -1114,25 +1115,29 @@ export default function Analytics({ onClose, currency }) {
 
       {/* Date Filter Bar */}
       {tab !== 'ai' && (
-        <div style={{ padding: '10px 14px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)' }}>
-          <button onClick={() => setFilterDrawerOpen(true)} style={{ width: '100%', justifyContent: 'space-between', display: 'flex', alignItems: 'center', padding: '8px 14px', background: 'var(--bg-surface-2)', border: '1.5px solid var(--border-color)', borderRadius: 'var(--radius-full)', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Ic.Calend s={14} />
-              <span>{dateRange.label}</span>
-            </div>
-            <Ic.ChevD s={14} />
+        <div style={{ padding: '12px 14px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Date Filter:</span>
+          <button className="or-date-filter-btn" onClick={() => setFilterDrawerOpen(true)}>
+            <Ic.Calend s={13} />
+            <span>{dateRange.label}</span>
+            <Ic.ChevD s={12} />
           </button>
         </div>
       )}
 
       {/* Tab Bar */}
-      <div className="an-tab-bar">
-        {TABS.map(t => (
-          <button key={t.id} className={`an-tab-btn ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
-            {t.icon}
-            <span>{t.label}</span>
-          </button>
-        ))}
+      <div className="an-tab-container">
+        <div className="an-tab-bar">
+          {TABS.map(t => (
+            <button key={t.id} className={`an-tab-btn ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
+              {t.icon}
+              <span>{t.label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="an-tab-scroll-hint">
+          <Ic.ChevR s={14} />
+        </div>
       </div>
 
       {/* Tab Content */}

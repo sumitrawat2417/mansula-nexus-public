@@ -11189,14 +11189,35 @@ select {
 .an-date-sep { font-size: 0.78rem; color: var(--text-muted); flex-shrink: 0; }
 
 /* ── Tab Bar ── */
+.an-tab-container {
+  position: relative;
+  background: var(--bg-surface);
+  border-bottom: 1.5px solid var(--border-color);
+  flex-shrink: 0;
+}
 .an-tab-bar {
   display: flex;
   overflow-x: auto;
   scrollbar-width: none;
-  background: var(--bg-surface);
-  border-bottom: 1.5px solid var(--border-color);
-  flex-shrink: 0;
   gap: 0;
+  padding-right: 40px;
+}
+.an-tab-scroll-hint {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 45px;
+  background: linear-gradient(to right, transparent, var(--bg-surface) 60%);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  pointer-events: none;
+  color: var(--brand-primary);
+  animation: pulseHint 2s infinite;
+}
+@keyframes pulseHint {
+  0%, 100% { transform: translateX(0); opacity: 0.6; }
+  50% { transform: translateX(4px); opacity: 1; }
 }
 .an-tab-bar::-webkit-scrollbar { display: none; }
 .an-tab-btn {
