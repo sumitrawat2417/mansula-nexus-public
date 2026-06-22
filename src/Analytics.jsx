@@ -1087,7 +1087,7 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
       <ChartCard title="Expenses by Category" subtitle="Where is the money going?">
         {catData.length > 0 ? (
           <div className="an-pay-methods">
-            <PieChart data={catData}/>
+            <DonutChart segments={catData} centerLabel={fmtCurrency(stats.totalExpenses)} centerSub="expenses"/>
             <div className="an-pay-legend">
               {catData.map(d => (
                 <div key={d.label} className="an-pay-legend-item">
