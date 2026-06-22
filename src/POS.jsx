@@ -1112,7 +1112,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
       return
     }
 
-    const completedAtTimestamp = orderDate ? new Date(orderDate).getTime() : Date.now();
+    const completedAtTimestamp = editingRecord ? editingRecord.completedAt : Date.now();
 
     if (paymentMode === 'udhaar') {
       const allCustomers = await getCustomers() || []
