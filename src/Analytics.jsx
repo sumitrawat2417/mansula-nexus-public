@@ -67,7 +67,7 @@ function ClickableAmount({ value, prefix = '', suffix = '', as: Component = 'spa
             setTimeout(() => window.addEventListener('click', hide, { once: true }), 10)
           }
         }}
-        style={{ cursor: 'pointer', borderBottom: Component !== 'tspan' ? '1px dashed currentColor' : 'none', textDecoration: Component === 'tspan' ? 'underline' : 'none', textDecorationStyle: 'dashed' }}
+        style={{ cursor: 'pointer' }}
       >
         {`${prefix}${fmtKStr(value)}${suffix}`}
       </Component>
@@ -78,8 +78,8 @@ function ClickableAmount({ value, prefix = '', suffix = '', as: Component = 'spa
             top: targetRef.current.getBoundingClientRect().top - 34,
             left: targetRef.current.getBoundingClientRect().left + (targetRef.current.getBoundingClientRect().width / 2),
             transform: 'translateX(-50%)',
-            background: 'var(--text-main)',
-            color: 'var(--bg-surface)',
+            background: '#1e293b',
+            color: '#ffffff',
             padding: '4px 10px',
             borderRadius: '6px',
             fontSize: '13px',
