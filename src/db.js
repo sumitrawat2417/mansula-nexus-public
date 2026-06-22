@@ -1103,3 +1103,24 @@ export async function restoreCustomersBackup(file) {
     return false
   }
 }
+
+// ── Analytics data fetch — returns all orders in a date range for client-side aggregation ──
+export async function getAnalyticsData(fromTs, toTs) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('orders', 'readonly')
+      const index = tx.objectStore('orders').index('completedAt')
+      const range = IDBKeyRange.bound(fromTs, toTs)
+      const results = []
+      const req = index.openCursor(range)
+      req.onsuccess = (e) => {
+        const cursor = e.target.result
+        if (!cursor) { resolve(results); return }
+        results.push(cursor.value)
+        cursor.continue()
+      }
+      req.onerror = () => resolve([])
+    })
+  } catch { return [] }
+}

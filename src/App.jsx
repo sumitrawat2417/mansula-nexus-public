@@ -7,6 +7,7 @@ import OrderRecords from './OrderRecords.jsx'
 import Agreement from './Agreement.jsx'
 import Inventory from './Inventory.jsx'
 import Customers from './Customers.jsx'
+import Analytics from './Analytics.jsx'
 import { AlertProvider, useAlert } from './AlertDialog.jsx'
 
 function OfflineBanner({ onDismiss }) {
@@ -152,6 +153,10 @@ export default function App() {
 
     if (screen === 'customers') {
       return <Customers onClose={() => setScreen('home')} onNavigate={setScreen} />
+    }
+
+    if (screen === 'analytics') {
+      return <Analytics onClose={() => setScreen('home')} currency={currency} />
     }
 
     return (
