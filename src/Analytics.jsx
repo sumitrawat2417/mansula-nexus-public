@@ -44,8 +44,22 @@ const BRAND_AMBER  = '#f59e0b'
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const fmt    = (n) => Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })
 const fmtCur = (n, sym = '₹') => `${sym}${fmt(n)}`
-const fmtK   = (n) => n >= 100000 ? `${(n/100000).toFixed(1)}L` : n >= 1000 ? `${(n/1000).toFixed(1)}K` : fmt(n)
-const fmtCurK = (n, sym = '₹') => `${sym}${fmtK(n)}`
+const fmtKStr = (n) => n >= 100000 ? `${(n/100000).toFixed(1)}L` : n >= 1000 ? `${(n/1000).toFixed(1)}K` : fmt(n)
+const fmtCurKStr = (n, sym = '₹') => `${sym}${fmtKStr(n)}`
+
+function ClickableAmount({ value, prefix = '', suffix = '', as: Component = 'span' }) {
+  const [exact, setExact] = React.useState(false)
+  if (typeof value !== 'number' || value < 1000) return <Component>{prefix}{fmt(value)}{suffix}</Component>
+  return (
+    <Component 
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExact(p => !p) }}
+      style={{ cursor: 'pointer', borderBottom: Component !== 'tspan' ? '1px dashed currentColor' : 'none', textDecoration: Component === 'tspan' ? 'underline' : 'none', textDecorationStyle: 'dashed' }}
+      title="Tap to view exact amount"
+    >
+      {exact ? `${prefix}${fmt(value)}${suffix}` : `${prefix}${fmtKStr(value)}${suffix}`}
+    </Component>
+  )
+}
 const toDateStr = (d) => d.toISOString().slice(0, 10)
 
 function getGranularity(from, to) {
@@ -282,7 +296,7 @@ function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = '
 
   useEffect(() => { setKey(k => k + 1) }, [data])
 
-  const fmtV = formatValue || ((v) => fmtK(v))
+  const fmtV = formatValue || ((v) => <ClickableAmount value={v} />)
   const fmtL = formatLabel || ((l) => l)
 
   if (!data || data.length === 0) return (
@@ -419,7 +433,7 @@ function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = '
 
 // ─── BarChart (vertical) ──────────────────────────────────────────────────────
 function BarChart({ data, color = BRAND, formatValue, barLabel, maxBars = 24, forceLabels, amPmRegions = false }) {
-  const fmtV = formatValue || ((v) => fmtK(v))
+  const fmtV = formatValue || ((v) => <ClickableAmount value={v} />)
   const visible = data ? data.slice(0, maxBars) : []
   if (!visible || visible.length === 0) return <div className="an-chart-empty"><span>No data</span></div>
 
@@ -662,7 +676,7 @@ function InsightRow({ icon, label, value, sub, color }) {
 // ─── TAB: Overview ────────────────────────────────────────────────────────────
 function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity, dateRange }) {
   const sym = currency?.symbol || '₹'
-  const fmtCurrency = (v) => `${sym}${fmtK(v)}`
+  const fmtCurrency = (v) => <ClickableAmount value={v} prefix={sym} />
 
   // Build revenue time series
   const timeSeries = useMemo(() => {
@@ -707,19 +721,19 @@ function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity
       <div className="an-kpi-grid">
         <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Net Profit" rawValue={stats.netProfit}
           prevValue={prevStats?.netProfit} color={stats.netProfit >= 0 ? '#10b981' : '#ef4444'}
-          formatFn={(v) => v < 0 ? `-${sym}${fmtK(Math.abs(v))}` : `${sym}${fmtK(v)}`} hideTrend={dateRange?.label === 'Today'} />
+          formatFn={(v) => v < 0 ? <ClickableAmount value={Math.abs(v)} prefix={`-${sym}`} /> : <ClickableAmount value={v} prefix={sym} />} hideTrend={dateRange?.label === 'Today'} />
         <KPICard icon={<Ic.Wallet/>} label="Expenses" rawValue={stats.totalExpenses}
           prevValue={prevStats?.totalExpenses} color="#ef4444"
-          formatFn={(v) => `${sym}${fmtK(v)}`} hideTrend={dateRange?.label === 'Today'} />
+          formatFn={(v) => <ClickableAmount value={v} prefix={sym} />} hideTrend={dateRange?.label === 'Today'} />
         <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Revenue" rawValue={stats.totalRevenue}
           prevValue={prevStats?.totalRevenue} sparkData={sparkRevenue} color={BRAND}
-          formatFn={(v) => `${sym}${fmtK(v)}`} hideTrend={dateRange?.label === 'Today'} />
+          formatFn={(v) => <ClickableAmount value={v} prefix={sym} />} hideTrend={dateRange?.label === 'Today'} />
         <KPICard icon={<Ic.Orders/>} label="Orders" rawValue={stats.orderCount}
           prevValue={prevStats?.orderCount} color={BRAND_GREEN}
           formatFn={(v) => fmt(v)} hideTrend={dateRange?.label === 'Today'} />
         <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Avg Order" rawValue={stats.avgOrder}
           prevValue={prevStats?.avgOrder} color={BRAND_AMBER}
-          formatFn={(v) => `${sym}${fmtK(v)}`} hideTrend={dateRange?.label === 'Today'} />
+          formatFn={(v) => <ClickableAmount value={v} prefix={sym} />} hideTrend={dateRange?.label === 'Today'} />
         <KPICard icon={stats.topPayMethod?.toLowerCase() === 'cash' ? <Ic.Cash/> : <Ic.Pay/>} label="Top Payment" rawValue={0}
           color="#8b5cf6" formatFn={() => PAYMENT_LABEL[stats.topPayMethod] || stats.topPayMethod} />
       </div>
@@ -760,7 +774,7 @@ function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity
 // ─── TAB: Revenue ─────────────────────────────────────────────────────────────
 function RevenueTab({ orders, stats, prevStats, from, to, currency, granularity }) {
   const sym = currency?.symbol || '₹'
-  const fmtCurrency = (v) => `${sym}${fmtK(v)}`
+  const fmtCurrency = (v) => <ClickableAmount value={v} prefix={sym} />
 
   const timeSeries = useMemo(() => {
     if (granularity === 'hour') return buildHourlySeries(orders, from, to)
@@ -914,7 +928,7 @@ function OrdersTab({ orders, stats, prevStats, from, to, currency, granularity }
             <InsightRow icon={<Ic.Clock/>} label="Peak Hour" value={HOUR_LABELS[peakH]} sub={`${stats.ordersByHour[peakH]} orders`} color={BRAND}/>
           )}
           {stats.ordersByHour[slowH] > 0 && (
-            <InsightRow icon={<Ic.Target/>} label="Avg Order Value" value={`${sym}${fmtK(stats.avgOrder)}`} sub="per transaction" color={BRAND_GREEN}/>
+            <InsightRow icon={<Ic.Target/>} label="Avg Order Value" value={<ClickableAmount value={stats.avgOrder} prefix={sym} />} sub="per transaction" color={BRAND_GREEN}/>
           )}
         </div>
       )}
@@ -945,7 +959,7 @@ function ProductsTab({ stats, currency }) {
         <HorizontalBarChart
           data={data}
           color={view === 'revenue' ? BRAND : BRAND_GREEN}
-          formatValue={view === 'revenue' ? (v) => `${sym}${fmtK(v)}` : (v) => `×${fmt(v)}`}
+          formatValue={view === 'revenue' ? (v) => <ClickableAmount value={v} prefix={sym} /> : (v) => `×${fmt(v)}`}
         />
       </ChartCard>
 
@@ -958,7 +972,7 @@ function ProductsTab({ stats, currency }) {
               <div className="an-podium-emoji">{item.emoji || '—'}</div>
               <div className="an-podium-name">{item.name}</div>
               <div className="an-podium-val">
-                {view === 'revenue' ? `${sym}${fmtK(item.value)}` : `×${fmt(item.value)}`}
+                {view === 'revenue' ? <ClickableAmount value={item.value} prefix={sym} /> : `×${fmt(item.value)}`}
               </div>
             </div>
           ))}
@@ -1020,14 +1034,14 @@ function CustomersTab({ currency }) {
       <div className="an-kpi-grid">
         <KPICard icon={<Ic.Users/>} label="Total Customers" rawValue={custStats.total} color={BRAND} formatFn={fmt}/>
         <KPICard icon={<Ic.Pay/>}  label="Udhaar Customers" rawValue={custStats.withUdhaar} color={BRAND_AMBER} formatFn={fmt}/>
-        <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Total Spend" rawValue={custStats.totalSpent} color={BRAND_GREEN} formatFn={(v) => `${sym}${fmtK(v)}`}/>
-        <KPICard icon={<Ic.Warning/>} label="Pending Udhaar" rawValue={custStats.outstandingUdhaar} color="#ef4444" formatFn={(v) => `${sym}${fmtK(v)}`}/>
+        <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Total Spend" rawValue={custStats.totalSpent} color={BRAND_GREEN} formatFn={(v) => <ClickableAmount value={v} prefix={sym} />}/>
+        <KPICard icon={<Ic.Warning/>} label="Pending Udhaar" rawValue={custStats.outstandingUdhaar} color="#ef4444" formatFn={(v) => <ClickableAmount value={v} prefix={sym} />}/>
       </div>
 
       {/* Udhaar Donut */}
       {custStats.udhaarSegments.length > 0 && (
         <ChartCard title="Udhaar Overview" subtitle="Outstanding vs cleared">
-          <DonutChart segments={custStats.udhaarSegments} centerLabel={`${sym}${fmtK(custStats.outstandingUdhaar)}`} centerSub="outstanding"/>
+          <DonutChart segments={custStats.udhaarSegments} centerLabel={<ClickableAmount value={custStats.outstandingUdhaar} prefix={sym} as="tspan" />} centerSub="outstanding"/>
         </ChartCard>
       )}
 
@@ -1041,9 +1055,9 @@ function CustomersTab({ currency }) {
                 <div className="an-cust-avatar">{c.name?.[0]?.toUpperCase() || '?'}</div>
                 <div className="an-cust-info">
                   <div className="an-cust-name">{c.name}</div>
-                  {c.udhaar > 0 && <div className="an-cust-udhaar">Udhaar: {sym}{fmtK(c.udhaar)}</div>}
+                  {c.udhaar > 0 && <div className="an-cust-udhaar">Udhaar: <ClickableAmount value={c.udhaar} prefix={sym} /></div>}
                 </div>
-                <div className="an-cust-spent">{sym}{fmtK(c.spent)}</div>
+                <div className="an-cust-spent"><ClickableAmount value={c.spent} prefix={sym} /></div>
               </div>
             ))}
           </div>
@@ -1063,7 +1077,7 @@ function CustomersTab({ currency }) {
 // ─── TAB: Expenses ────────────────────────────────────────────────────────────
 function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granularity, dateRange }) {
   const sym = currency?.symbol || '₹'
-  const fmtCurrency = (v) => `${sym}${fmtK(v)}`
+  const fmtCurrency = (v) => <ClickableAmount value={v} prefix={sym} />
   const [view, setView] = useState('cost')
 
   const expensesChange = pctChange(stats.totalExpenses, prevStats?.totalExpenses)
