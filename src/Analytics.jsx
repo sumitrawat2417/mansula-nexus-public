@@ -346,7 +346,7 @@ function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = '
 }
 
 // ─── BarChart (vertical) ──────────────────────────────────────────────────────
-function BarChart({ data, color = BRAND, formatValue, barLabel, maxBars = 24 }) {
+function BarChart({ data, color = BRAND, formatValue, barLabel, maxBars = 24, forceLabels }) {
   const fmtV = formatValue || ((v) => fmtK(v))
   const visible = data ? data.slice(0, maxBars) : []
   if (!visible || visible.length === 0) return <div className="an-chart-empty"><span>No data</span></div>
@@ -358,7 +358,7 @@ function BarChart({ data, color = BRAND, formatValue, barLabel, maxBars = 24 }) 
   const barW = (cW / visible.length) * 0.7
   const gap   = (cW / visible.length) * 0.3
 
-  const showLabels = visible.length <= 12
+  const showLabels = forceLabels || visible.length <= 12
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
@@ -793,7 +793,7 @@ function OrdersTab({ orders, stats, prevStats, from, to, currency, granularity }
 
   // Hour bars (grouped: show every 2 hours or full)
   const hourData = useMemo(() =>
-    HOUR_LABELS.map((label, i) => ({ label, value: stats.ordersByHour[i] }))
+    Array.from({ length: 24 }).map((_, i) => ({ label: i.toString(), value: stats.ordersByHour[i] }))
   , [stats.ordersByHour])
 
   // Peak analysis
@@ -815,7 +815,7 @@ function OrdersTab({ orders, stats, prevStats, from, to, currency, granularity }
 
       {/* Hour of Day */}
       <ChartCard title="Orders by Hour of Day" subtitle="When do orders come in?">
-        <BarChart data={hourData} color="#8b5cf6" formatValue={(v) => Math.round(v).toString()} maxBars={24}/>
+        <BarChart data={hourData} color="#8b5cf6" formatValue={(v) => Math.round(v).toString()} maxBars={24} forceLabels={true}/>
       </ChartCard>
 
       {/* Peak insights */}
