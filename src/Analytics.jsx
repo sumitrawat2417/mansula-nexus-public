@@ -48,6 +48,14 @@ const fmtK   = (n) => n >= 100000 ? `${(n/100000).toFixed(1)}L` : n >= 1000 ? `$
 const fmtCurK = (n, sym = '₹') => `${sym}${fmtK(n)}`
 const toDateStr = (d) => d.toISOString().slice(0, 10)
 
+function getGranularity(from, to) {
+  const days = (to - from) / 86400000
+  if (days <= 1.5) return 'hour'
+  if (days <= 31)  return 'day'
+  if (days <= 93)  return 'week'
+  return 'month'
+}
+
 function computeAnalytics(orders, purchases = []) {
   const empty = {
     totalRevenue: 0, orderCount: 0, avgOrder: 0, topPayMethod: '-',
