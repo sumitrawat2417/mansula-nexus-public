@@ -45,7 +45,7 @@ const BRAND_AMBER  = '#f59e0b'
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const fmt    = (n) => Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })
 const fmtCur = (n, sym = '₹') => `${sym}${fmt(n)}`
-const fmtKStr = (n) => n >= 100000 ? `${parseFloat((n/100000).toFixed(2))}L` : n >= 1000 ? `${parseFloat((n/1000).toFixed(2))}K` : fmt(n)
+const fmtKStr = (n) => n >= 100000 ? `${(n/100000).toFixed(2)}L` : n >= 1000 ? `${(n/1000).toFixed(2)}K` : fmt(n)
 const fmtCurKStr = (n, sym = '₹') => `${sym}${fmtKStr(n)}`
 
 function ClickableAmount({ value, prefix = '', suffix = '', as: Component = 'span' }) {
