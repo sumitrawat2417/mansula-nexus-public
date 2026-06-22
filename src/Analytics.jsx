@@ -616,6 +616,9 @@ function InsightRow({ icon, label, value, sub, color }) {
 }
 
 // ─── TAB: Overview ────────────────────────────────────────────────────────────
+/**
+ * Renders the top-level overview metrics, KPI cards, and dynamic charts for quick business insights.
+ */
 function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity, dateRange }) {
   const sym = currency?.symbol || '₹'
   const fmtCurrency = (v) => `${sym}${fmtK(v)}`
