@@ -1072,6 +1072,27 @@ export default function Analytics({ onClose, currency }) {
   const [prevOrders, setPrevOrders] = useState([])
   const [loading, setLoading]       = useState(true)
 
+  const tabBarRef = useRef(null)
+  const [showScrollHint, setShowScrollHint] = useState(true)
+
+  const handleTabScroll = useCallback(() => {
+    if (!tabBarRef.current) return
+    const { scrollLeft, scrollWidth, clientWidth } = tabBarRef.current
+    setShowScrollHint(scrollLeft + clientWidth < scrollWidth - 5)
+  }, [])
+
+  useEffect(() => {
+    handleTabScroll()
+    window.addEventListener('resize', handleTabScroll)
+    return () => window.removeEventListener('resize', handleTabScroll)
+  }, [handleTabScroll, tab])
+
+  const scrollTabsRight = () => {
+    if (tabBarRef.current) {
+      tabBarRef.current.scrollBy({ left: 150, behavior: 'smooth' })
+    }
+  }
+
   const from = dateRange.fromTs
   const to   = dateRange.toTs
   const granularity = useMemo(() => getGranularity(from, to), [from, to])
@@ -1125,7 +1146,7 @@ export default function Analytics({ onClose, currency }) {
 
       {/* Tab Bar */}
       <div className="an-tab-container">
-        <div className="an-tab-bar">
+        <div className="an-tab-bar" ref={tabBarRef} onScroll={handleTabScroll}>
           {TABS.map(t => (
             <button key={t.id} className={`an-tab-btn ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
               {t.icon}
@@ -1133,9 +1154,13 @@ export default function Analytics({ onClose, currency }) {
             </button>
           ))}
         </div>
-        <div className="an-tab-scroll-hint">
-          <Ic.ChevR s={14} />
-        </div>
+        {showScrollHint && (
+          <div className="an-tab-scroll-hint">
+            <button onClick={scrollTabsRight} style={{ background: 'none', border: 'none', cursor: 'pointer', pointerEvents: 'auto', display: 'flex', color: 'inherit', padding: '4px' }}>
+              <Ic.ChevR s={14} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Tab Content */}
