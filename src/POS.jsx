@@ -783,8 +783,6 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   const [customerPhone, setCustomerPhone] = useState('')
   const [customersList, setCustomersList] = useState([])
   const [customerFocus, setCustomerFocus] = useState(false)
-  const [orderDate, setOrderDate] = useState(null)
-  const [showDatePicker, setShowDatePicker] = useState(false)
   const [cartStep, setCartStep] = useState('cart')   // 'cart' | 'payment'
 
   useEffect(() => {
@@ -871,7 +869,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
         // Remove from todayCompleted so it's not duplicated
         todayCompleted = todayCompleted.filter(o => o.id !== editingRecord.orderId)
 
-        if (editingRecord.completedAt) setOrderDate(new Date(editingRecord.completedAt).toISOString().slice(0,16))
+        // removed orderDate setting
         if (editingRecord.customerDetails) {
           setCustomerName(editingRecord.customerDetails.name || '')
           setCustomerPhone(editingRecord.customerDetails.phone || '')
@@ -1345,32 +1343,9 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
               <div className="drawer-handle" onClick={() => setCartOpen(false)} style={{ display: window.innerWidth <= 768 ? 'block' : 'none', cursor: 'pointer', marginBottom: '8px' }} />
               {cartStep === 'cart' && (
                 <div className="cart-header">
-                  <div className="cart-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <I.Cart s={17} /> {formatOrderId(currentOrderId)}
-                      {totalItems > 0 && <span className="cart-count-badge">{totalItems}</span>}
-                    </div>
-                    {editingRecord && (
-                      <div style={{ position: 'relative' }}>
-                        <button 
-                          onClick={() => setShowDatePicker(!showDatePicker)}
-                          style={{ background: 'var(--bg-surface-1)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-muted)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
-                        >
-                          <I.Calendar s={12}/>
-                          {orderDate ? new Date(orderDate).toLocaleString('en-IN', {day:'2-digit', month:'short', hour:'numeric', minute:'2-digit'}) : 'Edit Date'}
-                        </button>
-                        {showDatePicker && (
-                          <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 4, background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: 8, zIndex: 100, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-                            <input 
-                              type="datetime-local" 
-                              value={orderDate || new Date(editingRecord.completedAt || Date.now()).toISOString().slice(0,16)} 
-                              onChange={(e) => { setOrderDate(e.target.value); setShowDatePicker(false); }}
-                              style={{ background: 'var(--bg-surface-1)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '6px 10px', borderRadius: '4px' }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
+                  <div className="cart-title">
+                    <I.Cart s={17} /> {formatOrderId(currentOrderId)}
+                    {totalItems > 0 && <span className="cart-count-badge">{totalItems}</span>}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {cart.length > 0 && <button id="clear-cart-btn" className="cart-clear-btn" onClick={clearCart}>Clear</button>}
@@ -1534,7 +1509,8 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                         </div>
                       )}
 
-                      <div className="cash-calc-section" style={{ padding: '16px', background: 'linear-gradient(145deg, rgba(99,102,241,0.05) 0%, rgba(139,92,246,0.05) 100%)', border: '1px solid rgba(99,102,241,0.1)' }}>
+                      {paymentMode === 'udhaar' && (
+                        <div className="cash-calc-section" style={{ padding: '16px', background: 'linear-gradient(145deg, rgba(99,102,241,0.05) 0%, rgba(139,92,246,0.05) 100%)', border: '1px solid rgba(99,102,241,0.1)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                           <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', borderRadius: '8px', padding: '6px' }}>
                             <I.Users s={16}/>
@@ -1596,7 +1572,8 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                             </div>
                           )}
                         </div>
-                      </div>
+                        </div>
+                      )}
 
                       {/* Split Pay — shown when Split selected */}
                       {paymentMode === 'split' && (

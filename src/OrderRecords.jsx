@@ -56,12 +56,16 @@ const PAYMENT_COLOR = { cash: '#10b981', upi: '#6366f1', card: '#0ea5e9', udhaar
 const PAGE_SIZE = 50
 
 // ── Order Detail Modal ──
-function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavigate }) {
+function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavigate, onUpdateRecord }) {
   useBackButton(onClose)
   const { confirm: showConfirm } = useAlert()
   const [showAllItems, setShowAllItems] = useState(false)
   const [udhaarInfo, setUdhaarInfo] = useState(null)
   const [customerInfo, setCustomerInfo] = useState(null)
+  
+  const [editDateMode, setEditDateMode] = useState(false)
+  const [tempDate, setTempDate] = useState(() => record.completedAt ? new Date(record.completedAt).toISOString().slice(0,16) : '')
+  const [isSavingDate, setIsSavingDate] = useState(false)
 
   useEffect(() => {
     if (record.paymentMode === 'udhaar') {
@@ -88,6 +92,16 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
     onClose()
   }
 
+  const handleSaveDate = async () => {
+    setIsSavingDate(true)
+    const newTs = new Date(tempDate).getTime()
+    const updated = { ...record, completedAt: newTs }
+    await updateOrderRecord(updated)
+    setIsSavingDate(false)
+    setEditDateMode(false)
+    if (onUpdateRecord) onUpdateRecord(updated)
+  }
+
   const PREVIEW_COUNT = 3
   const visibleItems = showAllItems ? items : items.slice(0, PREVIEW_COUNT)
   const hasMore = items.length > PREVIEW_COUNT
@@ -100,11 +114,29 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
             <span className="or-modal-icon"><I.Receipt s={20} /></span>
             <div>
               <div className="or-modal-order-id">#{record.orderId}</div>
-              <div className="or-modal-date">{fmtDate(record.completedAt)} · {fmtTime(record.completedAt)}</div>
+              {editDateMode ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                  <input 
+                    type="datetime-local" 
+                    value={tempDate} 
+                    onChange={e => setTempDate(e.target.value)}
+                    style={{ padding: '2px 4px', fontSize: '0.8rem', borderRadius: 4, border: '1px solid var(--border-color)', background: 'var(--bg-surface)' }}
+                  />
+                  <button onClick={handleSaveDate} disabled={isSavingDate} style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', borderRadius: 4, padding: '2px 8px', fontSize: '0.75rem', cursor: 'pointer' }}>{isSavingDate ? 'Saving...' : 'Save'}</button>
+                  <button onClick={() => setEditDateMode(false)} style={{ background: 'transparent', color: 'var(--text-muted)', border: 'none', cursor: 'pointer', fontSize: '0.75rem' }}>Cancel</button>
+                </div>
+              ) : (
+                <div className="or-modal-date" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {fmtDate(record.completedAt)} · {fmtTime(record.completedAt)}
+                  <button onClick={() => setEditDateMode(true)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', padding: 2 }} title="Edit Date"><I.Edit s={12} /></button>
+                </div>
+              )}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button className="or-icon-btn" onClick={() => onEdit(record)} title="Edit"><I.Edit s={15} /></button>
+            <button onClick={() => onEdit(record)} title="Edit Items" style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-surface-1)', border: '1px solid var(--border-color)', borderRadius: 6, padding: '4px 8px', color: 'var(--text-primary)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
+              <I.Edit s={12} /> Edit Items
+            </button>
             <button className="or-icon-btn" onClick={onClose} title="Close"><I.X s={17} /></button>
           </div>
         </div>
@@ -418,7 +450,7 @@ export default function OrderRecords({ onClose, currency, onEdit, onNavigate }) 
     <div className="or-root">
       {viewRecord && (
         <OrderDetailModal record={viewRecord} currency={currency}
-          onClose={() => setViewRecord(null)} onDelete={handleDelete} onEdit={onEdit} onNavigate={onNavigate} />
+          onClose={() => setViewRecord(null)} onDelete={handleDelete} onEdit={onEdit} onNavigate={onNavigate} onUpdateRecord={updated => { setViewRecord(updated); loadPage(); loadStats(); }} />
       )}
       {filterDrawerOpen && (
         <DateFilterDrawer
