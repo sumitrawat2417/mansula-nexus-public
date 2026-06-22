@@ -61,7 +61,7 @@ function computeAnalytics(orders, purchases = []) {
     totalRevenue: 0, orderCount: 0, avgOrder: 0, topPayMethod: '-',
     revenueByDay: {}, ordersByHour: new Array(24).fill(0), ordersByDOW: new Array(7).fill(0),
     paymentCounts: {}, paymentRevenue: {}, topItemsByRevenue: [], topItemsByQty: [],
-    totalExpenses: 0, netProfit: 0, expensesByCategory: {}, topExpenseCategory: '-', expensesByDay: {}, topExpenseItems: []
+    totalExpenses: 0, netProfit: 0, expensesByCategory: {}, topExpenseCategory: '-', expensesByDay: {}, topExpenseItems: [], topExpenseItemsByQty: []
   }
   if ((!orders || orders.length === 0) && (!purchases || purchases.length === 0)) return empty
 
@@ -126,6 +126,11 @@ function computeAnalytics(orders, purchases = []) {
     .slice(0, 10)
     .map(d => ({ ...d, value: d.cost }))
 
+  const topExpenseItemsByQty = Object.values(expensesByItem)
+    .sort((a,b) => b.qty - a.qty)
+    .slice(0, 10)
+    .map(d => ({ ...d, value: d.qty }))
+
   const topPay = Object.entries(paymentCounts).sort((a,b) => b[1]-a[1])[0]
   const items  = Object.entries(itemMap).map(([name, data]) => ({ name, ...data }))
 
@@ -135,7 +140,7 @@ function computeAnalytics(orders, purchases = []) {
     revenueByDay, ordersByHour, ordersByDOW, paymentCounts, paymentRevenue,
     topItemsByRevenue: [...items].sort((a,b) => b.revenue-a.revenue).slice(0,10),
     topItemsByQty:     [...items].sort((a,b) => b.qty-a.qty).slice(0,10),
-    totalExpenses, netProfit, expensesByCategory, topExpenseCategory, expensesByDay, topExpenseItems
+    totalExpenses, netProfit, expensesByCategory, topExpenseCategory, expensesByDay, topExpenseItems, topExpenseItemsByQty
   }
 }
 
@@ -484,7 +489,6 @@ function HorizontalBarChart({ data, color = BRAND, formatValue }) {
             <div className="an-hbar-label" title={d.name}>
               {d.emoji ? <span style={{ marginRight: 4 }}>{d.emoji}</span> : null}
               <span className="an-hbar-name">{d.name}</span>
-              {d.subtitle && <span className="an-hbar-sub" style={{ fontSize: '0.85em', color: 'var(--text-muted)', marginLeft: 8 }}>{d.subtitle}</span>}
             </div>
             <div className="an-hbar-track">
               <div
@@ -1060,6 +1064,7 @@ function CustomersTab({ currency }) {
 function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granularity, dateRange }) {
   const sym = currency?.symbol || '₹'
   const fmtCurrency = (v) => `${sym}${fmtK(v)}`
+  const [view, setView] = useState('cost')
 
   const expensesChange = pctChange(stats.totalExpenses, prevStats?.totalExpenses)
 
@@ -1078,12 +1083,7 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
       }))
   }, [stats.expensesByCategory])
 
-  const expenseChartData = useMemo(() => {
-    return (stats.topExpenseItems || []).map(d => ({
-      ...d,
-      subtitle: `(${fmt(d.qty)} ${d.unit})`
-    }))
-  }, [stats.topExpenseItems])
+  const data = view === 'cost' ? stats.topExpenseItems : stats.topExpenseItemsByQty
 
   return (
     <div className="an-tab-content">
@@ -1120,9 +1120,18 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
         )}
       </ChartCard>
 
-      <ChartCard title="Top Expense Items" subtitle="Highest cost raw materials & items">
-        {expenseChartData?.length > 0 ? (
-          <HorizontalBarChart data={expenseChartData} formatValue={fmtCurrency} color="#ef4444"/>
+      <div className="an-seg-ctrl">
+        <button className={`an-seg-btn ${view === 'cost' ? 'active' : ''}`} onClick={() => setView('cost')}>By Cost</button>
+        <button className={`an-seg-btn ${view === 'qty' ? 'active' : ''}`} onClick={() => setView('qty')}>By Quantity</button>
+      </div>
+
+      <ChartCard title={view === 'cost' ? "Top Expense Items by Cost" : "Top Expense Items by Quantity"} subtitle="Highest consumption raw materials & items">
+        {data?.length > 0 ? (
+          <HorizontalBarChart 
+            data={data} 
+            formatValue={view === 'cost' ? fmtCurrency : (v) => fmt(v)} 
+            color={view === 'cost' ? "#ef4444" : "#10b981"}
+          />
         ) : (
           <div className="an-chart-empty"><span>No items logged</span></div>
         )}
