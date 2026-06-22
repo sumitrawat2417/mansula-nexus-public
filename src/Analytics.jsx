@@ -105,11 +105,13 @@ function computeAnalytics(orders, purchases = []) {
     if (p.items) {
       for (const item of p.items) {
         const cat = item.category || 'Uncategorized'
-        const cost = (item.qty || 0) * (item.costPerUnit || 0)
+        const cost = Number(item.lineTotal) || (Number(item.qty) * Number(item.costPerUnit)) || 0
         expensesByCategory[cat] = (expensesByCategory[cat] || 0) + cost
         
-        const name = item.name || 'Unknown Item'
-        expensesByItem[name] = (expensesByItem[name] || 0) + cost
+        const name = item.productName || item.name || 'Unknown Item'
+        if (!expensesByItem[name]) expensesByItem[name] = { name, cost: 0, qty: 0, unit: item.unit || 'pcs', emoji: item.emoji || '' }
+        expensesByItem[name].cost += cost
+        expensesByItem[name].qty += Number(item.qty) || 0
       }
     }
   }
@@ -119,10 +121,10 @@ function computeAnalytics(orders, purchases = []) {
   const sortedExpenseCats = Object.entries(expensesByCategory).sort((a,b) => b[1] - a[1])
   const topExpenseCategory = sortedExpenseCats.length > 0 ? sortedExpenseCats[0][0] : '-'
 
-  const topExpenseItems = Object.entries(expensesByItem)
-    .sort((a,b) => b[1] - a[1])
+  const topExpenseItems = Object.values(expensesByItem)
+    .sort((a,b) => b.cost - a.cost)
     .slice(0, 10)
-    .map(([name, revenue]) => ({ name, revenue }))
+    .map(d => ({ ...d, value: d.cost }))
 
   const topPay = Object.entries(paymentCounts).sort((a,b) => b[1]-a[1])[0]
   const items  = Object.entries(itemMap).map(([name, data]) => ({ name, ...data }))
@@ -482,6 +484,7 @@ function HorizontalBarChart({ data, color = BRAND, formatValue }) {
             <div className="an-hbar-label" title={d.name}>
               {d.emoji ? <span style={{ marginRight: 4 }}>{d.emoji}</span> : null}
               <span className="an-hbar-name">{d.name}</span>
+              {d.subtitle && <span className="an-hbar-sub" style={{ fontSize: '0.85em', color: 'var(--text-muted)', marginLeft: 8 }}>{d.subtitle}</span>}
             </div>
             <div className="an-hbar-track">
               <div
@@ -1075,6 +1078,13 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
       }))
   }, [stats.expensesByCategory])
 
+  const expenseChartData = useMemo(() => {
+    return (stats.topExpenseItems || []).map(d => ({
+      ...d,
+      subtitle: `(${fmt(d.qty)} ${d.unit})`
+    }))
+  }, [stats.topExpenseItems])
+
   return (
     <div className="an-tab-content">
       <div className="an-compare-row" style={{ display: 'flex', gap: '16px' }}>
@@ -1111,8 +1121,8 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
       </ChartCard>
 
       <ChartCard title="Top Expense Items" subtitle="Highest cost raw materials & items">
-        {stats.topExpenseItems?.length > 0 ? (
-          <HorizontalBarChart data={stats.topExpenseItems} formatValue={fmtCurrency} color="#ef4444"/>
+        {expenseChartData?.length > 0 ? (
+          <HorizontalBarChart data={expenseChartData} formatValue={fmtCurrency} color="#ef4444"/>
         ) : (
           <div className="an-chart-empty"><span>No items logged</span></div>
         )}
