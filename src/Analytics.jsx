@@ -1096,15 +1096,12 @@ export default function Analytics({ onClose, currency }) {
   return (
     <div className="an-root">
       {/* Header */}
-      <header className="an-header">
-        <button className="an-back-btn" onClick={onClose} aria-label="Back">
-          <Ic.Back/>
-        </button>
-        <div className="an-header-center">
+      <header className="or-header">
+        <button className="or-back-btn" onClick={onClose} aria-label="Back"><Ic.Back s={20} /></button>
+        <div className="or-header-title">
           <div className="an-header-icon"><Ic.Wave s={18}/></div>
-          <h1 className="an-header-title">Analytics</h1>
+          Analytics
         </div>
-        <div style={{ width: 36 }} /> {/* Spacer for centering */}
       </header>
 
       {filterDrawerOpen && (
