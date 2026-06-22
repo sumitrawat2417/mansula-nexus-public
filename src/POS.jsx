@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import './App.css'
-import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth, getCustomers, saveCustomer, saveUdhaarEntry, recalcUdhaarBalance, getUdhaarByOrderId, getCustomerById } from './db.js'
+import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth, getCustomers, saveCustomer, saveUdhaarEntry, recalcUdhaarBalance, getUdhaarByOrderId, getCustomerById, deleteUdhaarEntry } from './db.js'
 import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES, KEY_BUSINESS, DEFAULT_BUSINESS } from './BusinessProfile.jsx'
 import { useBackButton } from './useBackButton.js'
 
@@ -1125,29 +1125,19 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
 
     const completedAtTimestamp = editingRecord ? editingRecord.completedAt : Date.now();
 
+    let existingUdhaar = null
+    if (editingRecord && editingRecord.paymentMode === 'udhaar') {
+      existingUdhaar = await getUdhaarByOrderId(editingRecord.orderId)
+    }
+
     if (paymentMode === 'udhaar') {
-      const allCustomers = await getCustomers() || []
-      let customer = customerPhone.trim() ? allCustomers.find(c => c.phone === customerPhone.trim()) : null
-      if (!customer && customerName.trim()) {
-        customer = allCustomers.find(c => c.name.toLowerCase() === customerName.trim().toLowerCase())
-      }
-      
-      if (!customer) {
-        customer = {
-          customerId: 'cust-' + Date.now(),
-          name: customerName.trim() || 'Customer ' + customerPhone.trim().slice(-4),
-          phone: customerPhone.trim(),
-          udhaarBalance: 0,
-          createdAt: new Date().toISOString()
-        }
-        await saveCustomer(customer)
-      } else if (customerPhone.trim() && !customer.phone) {
-        customer.phone = customerPhone.trim()
-        await saveCustomer(customer)
-      }
-      
       const itemsStr = enrichedOrder.items.map(i => `${i.qty}x ${i.name} @ ${i.price}`).join(', ')
-      const newEntry = {
+      const udhaarEntry = existingUdhaar ? {
+        ...existingUdhaar,
+        customerId: customerIdToLink,
+        amount: enrichedOrder.total,
+        items: itemsStr
+      } : {
         udhaarId: 'udh-' + Date.now(),
         customerId: customerIdToLink,
         amount: enrichedOrder.total,
@@ -1160,8 +1150,19 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
         orderId: enrichedOrder.id,
         paymentHistory: []
       }
-      await saveUdhaarEntry(newEntry)
-      await recalcUdhaarBalance(customer.customerId)
+      await saveUdhaarEntry(udhaarEntry)
+      await recalcUdhaarBalance(customerIdToLink)
+      
+      if (existingUdhaar && existingUdhaar.customerId && existingUdhaar.customerId !== customerIdToLink) {
+        await recalcUdhaarBalance(existingUdhaar.customerId)
+      }
+    } else {
+      if (existingUdhaar) {
+        await deleteUdhaarEntry(existingUdhaar.udhaarId)
+        if (existingUdhaar.customerId) {
+          await recalcUdhaarBalance(existingUdhaar.customerId)
+        }
+      }
     }
 
     playSound('checkout')
