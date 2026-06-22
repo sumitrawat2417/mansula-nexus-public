@@ -800,6 +800,9 @@ function RevenueTab({ orders, stats, prevStats, from, to, currency, granularity 
 }
 
 // ─── TAB: Orders ──────────────────────────────────────────────────────────────
+/**
+ * Renders analytics related to order volume, timing patterns, and peak business hours.
+ */
 function OrdersTab({ orders, stats, prevStats, from, to, currency, granularity }) {
   const sym = currency?.symbol || '₹'
 
