@@ -14,6 +14,7 @@ const Ic = {
   Orders:    ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
   Avg:       ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
   Pay:       ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
+  Cash:      ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2" ry="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>,
   Package:   ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
   Users:     ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
   Brain:     ({ s=32 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>,
@@ -493,7 +494,7 @@ function DonutChart({ segments, centerLabel, centerSub }) {
 }
 
 // ─── KPICard ──────────────────────────────────────────────────────────────────
-function KPICard({ icon, label, value, unit = '', rawValue, prevValue, sparkData, color = BRAND, formatFn }) {
+function KPICard({ icon, label, value, unit = '', rawValue, prevValue, sparkData, color = BRAND, formatFn, hideTrend }) {
   const display = useCountUp(Math.round(rawValue || 0))
   const fmtFn = formatFn || ((v) => `${unit}${fmt(v)}`)
   const change = prevValue != null ? pctChange(rawValue, prevValue) : null
@@ -503,7 +504,7 @@ function KPICard({ icon, label, value, unit = '', rawValue, prevValue, sparkData
     <div className="an-kpi-card">
       <div className="an-kpi-top">
         <div className="an-kpi-icon" style={{ color, background: `${color}18` }}>{icon}</div>
-        {change !== null && (
+        {!hideTrend && change !== null && (
           <div className={`an-kpi-badge ${isUp ? 'up' : 'down'}`}>
             {isUp ? <Ic.TrendUp/> : <Ic.TrendDown/>}
             {Math.abs(change).toFixed(1)}%
@@ -577,7 +578,7 @@ function InsightRow({ icon, label, value, sub, color }) {
 }
 
 // ─── TAB: Overview ────────────────────────────────────────────────────────────
-function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity }) {
+function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity, dateRange }) {
   const sym = currency?.symbol || '₹'
   const fmtCurrency = (v) => `${sym}${fmtK(v)}`
 
@@ -622,16 +623,16 @@ function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity
     <div className="an-tab-content">
       {/* KPI Grid */}
       <div className="an-kpi-grid">
-        <KPICard icon={<Ic.Revenue/>} label="Revenue" rawValue={stats.totalRevenue}
+        <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Revenue" rawValue={stats.totalRevenue}
           prevValue={prevStats?.totalRevenue} sparkData={sparkRevenue} color={BRAND}
-          formatFn={(v) => `${sym}${fmtK(v)}`} />
+          formatFn={(v) => `${sym}${fmtK(v)}`} hideTrend={dateRange?.label === 'Today'} />
         <KPICard icon={<Ic.Orders/>} label="Orders" rawValue={stats.orderCount}
           prevValue={prevStats?.orderCount} color={BRAND_GREEN}
-          formatFn={(v) => fmt(v)} />
-        <KPICard icon={<Ic.Avg/>} label="Avg Order" rawValue={stats.avgOrder}
+          formatFn={(v) => fmt(v)} hideTrend={dateRange?.label === 'Today'} />
+        <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Avg Order" rawValue={stats.avgOrder}
           prevValue={prevStats?.avgOrder} color={BRAND_AMBER}
-          formatFn={(v) => `${sym}${fmtK(v)}`} />
-        <KPICard icon={<Ic.Pay/>} label="Top Payment" rawValue={0}
+          formatFn={(v) => `${sym}${fmtK(v)}`} hideTrend={dateRange?.label === 'Today'} />
+        <KPICard icon={stats.topPayMethod?.toLowerCase() === 'cash' ? <Ic.Cash/> : <Ic.Pay/>} label="Top Payment" rawValue={0}
           color="#8b5cf6" formatFn={() => PAYMENT_LABEL[stats.topPayMethod] || stats.topPayMethod} />
       </div>
 
@@ -931,7 +932,7 @@ function CustomersTab({ currency }) {
       <div className="an-kpi-grid">
         <KPICard icon={<Ic.Users/>} label="Total Customers" rawValue={custStats.total} color={BRAND} formatFn={fmt}/>
         <KPICard icon={<Ic.Pay/>}  label="Udhaar Customers" rawValue={custStats.withUdhaar} color={BRAND_AMBER} formatFn={fmt}/>
-        <KPICard icon={<Ic.Revenue/>} label="Total Spend" rawValue={custStats.totalSpent} color={BRAND_GREEN} formatFn={(v) => `${sym}${fmtK(v)}`}/>
+        <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Total Spend" rawValue={custStats.totalSpent} color={BRAND_GREEN} formatFn={(v) => `${sym}${fmtK(v)}`}/>
         <KPICard icon={<Ic.Warning/>} label="Pending Udhaar" rawValue={custStats.outstandingUdhaar} color="#ef4444" formatFn={(v) => `${sym}${fmtK(v)}`}/>
       </div>
 
@@ -1092,7 +1093,7 @@ export default function Analytics({ onClose, currency }) {
   const stats     = useMemo(() => computeAnalytics(orders), [orders])
   const prevStats = useMemo(() => computeAnalytics(prevOrders), [prevOrders])
 
-  const tabProps = { orders, stats, prevStats, from, to, currency, granularity }
+  const tabProps = { orders, stats, prevStats, from, to, currency, granularity, dateRange }
 
   return (
     <div className="an-root">
