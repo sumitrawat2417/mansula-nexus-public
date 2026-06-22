@@ -1345,9 +1345,32 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
               <div className="drawer-handle" onClick={() => setCartOpen(false)} style={{ display: window.innerWidth <= 768 ? 'block' : 'none', cursor: 'pointer', marginBottom: '8px' }} />
               {cartStep === 'cart' && (
                 <div className="cart-header">
-                  <div className="cart-title">
-                    <I.Cart s={17} /> {formatOrderId(currentOrderId)}
-                    {totalItems > 0 && <span className="cart-count-badge">{totalItems}</span>}
+                  <div className="cart-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <I.Cart s={17} /> {formatOrderId(currentOrderId)}
+                      {totalItems > 0 && <span className="cart-count-badge">{totalItems}</span>}
+                    </div>
+                    {editingRecord && (
+                      <div style={{ position: 'relative' }}>
+                        <button 
+                          onClick={() => setShowDatePicker(!showDatePicker)}
+                          style={{ background: 'var(--bg-surface-1)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-muted)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
+                        >
+                          <I.Calendar s={12}/>
+                          {orderDate ? new Date(orderDate).toLocaleString('en-IN', {day:'2-digit', month:'short', hour:'numeric', minute:'2-digit'}) : 'Edit Date'}
+                        </button>
+                        {showDatePicker && (
+                          <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 4, background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: 8, zIndex: 100, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+                            <input 
+                              type="datetime-local" 
+                              value={orderDate || new Date(editingRecord.completedAt || Date.now()).toISOString().slice(0,16)} 
+                              onChange={(e) => { setOrderDate(e.target.value); setShowDatePicker(false); }}
+                              style={{ background: 'var(--bg-surface-1)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '6px 10px', borderRadius: '4px' }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {cart.length > 0 && <button id="clear-cart-btn" className="cart-clear-btn" onClick={clearCart}>Clear</button>}
@@ -1511,58 +1534,69 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                         </div>
                       )}
 
-                      {paymentMode === 'udhaar' && (
-                        <div className="cash-calc-section" style={{ padding: '16px' }}>
-                          <div className="cash-calc-label" style={{ fontSize: '0.85rem', marginBottom: 12 }}>Customer Details for Udhaar</div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface-1)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
-                              <span style={{ padding: '12px 0 12px 16px', color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500 }}>+91</span>
-                              <input 
-                                type="tel"
-                                placeholder="Phone Number *" 
-                                value={customerPhone} 
-                                onChange={handlePhoneChange} 
-                                onFocus={() => setCustomerFocus(true)}
-                                onBlur={() => setTimeout(() => setCustomerFocus(false), 200)}
-                                style={{ padding: '12px 16px 12px 8px', background: 'transparent', border: 'none', fontSize: '1rem', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
-                              />
-                            </div>
-                            <input 
-                              type="text" 
-                              placeholder="Customer Name (Optional)" 
-                              value={customerName} 
-                              onChange={e => setCustomerName(e.target.value)} 
-                              onFocus={() => setCustomerFocus(true)}
-                              onBlur={() => setTimeout(() => setCustomerFocus(false), 200)}
-                              className="search-input" 
-                              style={{ padding: '12px 16px', background: 'var(--bg-surface-1)', border: '1px solid var(--border-color)', borderRadius: '12px', fontSize: '1rem', width: '100%', color: 'var(--text-primary)' }}
-                            />
-                            {customerFocus && filteredCusts.length > 0 && (
-                              <div className="autocomplete-dropdown" style={{
-                                position: 'absolute', top: '100%', left: 0, right: 0, 
-                                background: 'var(--bg-surface)', border: '1px solid var(--border-color)', 
-                                borderRadius: '12px', marginTop: '4px', zIndex: 100, 
-                                boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden'
-                              }}>
-                                {filteredCusts.map(c => (
-                                  <div 
-                                    key={c.customerId} 
-                                    style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)' }}
-                                    onClick={() => {
-                                      setCustomerName(c.name);
-                                      setCustomerPhone(c.phone || '');
-                                      setCustomerFocus(false);
-                                    }}
-                                  >
-                                    <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{c.name}</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{c.phone || 'No phone'}</div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                      <div className="cash-calc-section" style={{ padding: '16px', background: 'linear-gradient(145deg, rgba(99,102,241,0.05) 0%, rgba(139,92,246,0.05) 100%)', border: '1px solid rgba(99,102,241,0.1)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                          <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', borderRadius: '8px', padding: '6px' }}>
+                            <I.Users s={16}/>
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Customer Details</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Link customer for Udhaar or loyalty</div>
                           </div>
                         </div>
-                      )}
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden', transition: 'border-color 0.2s', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}>
+                            <span style={{ padding: '12px 0 12px 16px', color: '#6366f1', fontSize: '0.95rem', fontWeight: 600 }}>+91</span>
+                            <input 
+                              type="tel"
+                              placeholder="Phone Number (Required for Udhaar)" 
+                              value={customerPhone} 
+                              onChange={handlePhoneChange} 
+                              onFocus={() => setCustomerFocus(true)}
+                              onBlur={() => setTimeout(() => setCustomerFocus(false), 200)}
+                              style={{ padding: '12px 16px 12px 8px', background: 'transparent', border: 'none', fontSize: '0.95rem', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
+                            />
+                            {customerPhone.length >= 10 && <div style={{ paddingRight: 16, color: '#10b981' }}><I.Check s={16}/></div>}
+                          </div>
+                          
+                          <input 
+                            type="text" 
+                            placeholder="Customer Name" 
+                            value={customerName} 
+                            onChange={e => setCustomerName(e.target.value)} 
+                            onFocus={() => setCustomerFocus(true)}
+                            onBlur={() => setTimeout(() => setCustomerFocus(false), 200)}
+                            style={{ padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}
+                          />
+                          
+                          {customerFocus && filteredCusts.length > 0 && (
+                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', marginTop: 8, zIndex: 100, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
+                              <div style={{ padding: '8px 12px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', background: 'var(--bg-surface-1)' }}>SUGGESTED CUSTOMERS</div>
+                              {filteredCusts.map(c => (
+                                <div 
+                                  key={c.customerId} 
+                                  style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: 12 }}
+                                  onMouseDown={(e) => {
+                                    e.preventDefault() // prevent blur
+                                    setCustomerName(c.name || '')
+                                    setCustomerPhone(c.phone || '')
+                                    setCustomerFocus(false)
+                                  }}
+                                >
+                                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6, #6366f1)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 600 }}>
+                                    {(c.name || 'C')[0].toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{c.name || 'Unknown'}</div>
+                                    {c.phone && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>+91 {c.phone}</div>}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
                       {/* Split Pay — shown when Split selected */}
                       {paymentMode === 'split' && (
