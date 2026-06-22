@@ -7,51 +7,51 @@ import DateFilterDrawer, { computeQuick } from './DateFilterDrawer.jsx'
 
 // ─── Icon Set ────────────────────────────────────────────────────────────────
 const Ic = {
-  Back:      ({ s=20 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
-  Wave:      ({ s=20 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
-  TrendUp:   ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
-  TrendDown: ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>,
-  Revenue:   ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
-  Orders:    ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
-  Avg:       ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
-  Wallet:    ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/></svg>,
-  Lock:      ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
-  Pay:       ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
-  Cash:      ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2" ry="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>,
-  Package:   ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
-  Users:     ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-  Brain:     ({ s=32 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>,
-  Bell:      ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
-  Sparkles:  ({ s=20 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>,
-  Clock:     ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-  Target:    ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
-  Calend:    ({ s=15 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-  Trophy:    ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>,
-  Warning:   ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-  Zap:       ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
-  ChevD:     ({ s=13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
-  ChevR:     ({ s=18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
+  Back: ({ s = 20 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>,
+  Wave: ({ s = 20 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>,
+  TrendUp: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>,
+  TrendDown: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6" /><polyline points="17 18 23 18 23 12" /></svg>,
+  Revenue: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>,
+  Orders: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>,
+  Avg: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>,
+  Wallet: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" /><path d="M4 6v12c0 1.1.9 2 2 2h14v-4" /><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" /></svg>,
+  Lock: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>,
+  Pay: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>,
+  Cash: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2" ry="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></svg>,
+  Package: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>,
+  Users: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
+  Brain: ({ s = 32 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" /><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" /><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4" /><path d="M17.599 6.5a3 3 0 0 0 .399-1.375" /><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5" /><path d="M3.477 10.896a4 4 0 0 1 .585-.396" /><path d="M19.938 10.5a4 4 0 0 1 .585.396" /><path d="M6 18a4 4 0 0 1-1.967-.516" /><path d="M19.967 17.484A4 4 0 0 1 18 18" /></svg>,
+  Bell: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>,
+  Sparkles: ({ s = 20 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" /></svg>,
+  Clock: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
+  Target: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>,
+  Calend: ({ s = 15 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>,
+  Trophy: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>,
+  Warning: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
+  Zap: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
+  ChevD: ({ s = 13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>,
+  ChevR: ({ s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>,
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const PAYMENT_COLOR = { cash: '#10b981', upi: '#6366f1', card: '#0ea5e9', udhaar: '#f59e0b', split: '#8b5cf6', other: '#64748b' }
 const PAYMENT_LABEL = { cash: 'Cash', upi: 'UPI', card: 'Card', udhaar: 'Udhaar', split: 'Split', other: 'Other' }
-const DOW_LABELS   = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const HOUR_LABELS  = Array.from({ length: 24 }, (_, h) => h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h-12}pm`)
-const BRAND        = '#6366f1'
-const BRAND_GREEN  = '#10b981'
-const BRAND_AMBER  = '#f59e0b'
+const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const HOUR_LABELS = Array.from({ length: 24 }, (_, h) => h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h - 12}pm`)
+const BRAND = '#6366f1'
+const BRAND_GREEN = '#10b981'
+const BRAND_AMBER = '#f59e0b'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-const fmt    = (n) => Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })
+const fmt = (n) => Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })
 const fmtCur = (n, sym = '₹') => `${sym}${fmt(n)}`
-const fmtKStr = (n) => n >= 100000 ? `${(n/100000).toFixed(2)}L` : n >= 1000 ? `${(n/1000).toFixed(2)}K` : fmt(n)
+const fmtKStr = (n) => n >= 100000 ? `${(n / 100000).toFixed(2)}L` : n >= 1000 ? `${(n / 1000).toFixed(2)}K` : fmt(n)
 const fmtCurKStr = (n, sym = '₹') => `${sym}${fmtKStr(n)}`
 
 function ClickableAmount({ value, prefix = '', suffix = '', as: Component = 'span' }) {
   const [show, setShow] = React.useState(false)
   const targetRef = React.useRef(null)
-  
+
   React.useEffect(() => {
     if (!show) return
     const hide = () => setShow(false)
@@ -64,14 +64,14 @@ function ClickableAmount({ value, prefix = '', suffix = '', as: Component = 'spa
       window.removeEventListener('close-tooltips', hide)
     }
   }, [show])
-  
+
   if (typeof value !== 'number' || value < 1000) return <Component>{prefix}{fmt(value)}{suffix}</Component>
-  
+
   return (
     <>
-      <Component 
+      <Component
         ref={targetRef}
-        onClick={(e) => { 
+        onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
           if (!show) window.dispatchEvent(new CustomEvent('close-tooltips'))
@@ -82,7 +82,7 @@ function ClickableAmount({ value, prefix = '', suffix = '', as: Component = 'spa
         {`${prefix}${fmtKStr(value)}${suffix}`}
       </Component>
       {show && targetRef.current && createPortal(
-        <div 
+        <div
           style={{
             position: 'fixed',
             top: targetRef.current.getBoundingClientRect().top - 34,
@@ -112,8 +112,8 @@ const toDateStr = (d) => d.toISOString().slice(0, 10)
 function getGranularity(from, to) {
   const days = (to - from) / 86400000
   if (days <= 1.5) return 'hour'
-  if (days <= 31)  return 'day'
-  if (days <= 93)  return 'week'
+  if (days <= 31) return 'day'
+  if (days <= 93) return 'week'
   return 'month'
 }
 
@@ -132,7 +132,7 @@ function computeAnalytics(orders, purchases = []) {
 
   for (const order of orders) {
     const d = new Date(order.completedAt)
-    const dayKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+    const dayKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     const total = order.total || 0
 
     revenueByDay[dayKey] = (revenueByDay[dayKey] || 0) + total
@@ -146,7 +146,7 @@ function computeAnalytics(orders, purchases = []) {
 
     for (const item of (order.items || [])) {
       if (!itemMap[item.name]) itemMap[item.name] = { qty: 0, revenue: 0, emoji: item.emoji || '📦' }
-      itemMap[item.name].qty     += item.qty || 1
+      itemMap[item.name].qty += item.qty || 1
       itemMap[item.name].revenue += (item.price || 0) * (item.qty || 1)
     }
   }
@@ -158,9 +158,9 @@ function computeAnalytics(orders, purchases = []) {
   for (const p of purchases) {
     const total = p.totalAmount || 0
     totalExpenses += total
-    
+
     const d = new Date(p.purchasedAt)
-    const dayKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+    const dayKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     expensesByDay[dayKey] = (expensesByDay[dayKey] || 0) + total
 
     if (p.items) {
@@ -168,7 +168,7 @@ function computeAnalytics(orders, purchases = []) {
         const cat = item.category || 'Uncategorized'
         const cost = Number(item.lineTotal) || (Number(item.qty) * Number(item.costPerUnit)) || 0
         expensesByCategory[cat] = (expensesByCategory[cat] || 0) + cost
-        
+
         const name = item.productName || item.name || 'Unknown Item'
         if (!expensesByItem[name]) expensesByItem[name] = { name, cost: 0, qty: 0, unit: item.unit || 'pcs', emoji: item.emoji || '' }
         expensesByItem[name].cost += cost
@@ -178,29 +178,29 @@ function computeAnalytics(orders, purchases = []) {
   }
 
   const netProfit = totalRevenue - totalExpenses
-  
-  const sortedExpenseCats = Object.entries(expensesByCategory).sort((a,b) => b[1] - a[1])
+
+  const sortedExpenseCats = Object.entries(expensesByCategory).sort((a, b) => b[1] - a[1])
   const topExpenseCategory = sortedExpenseCats.length > 0 ? sortedExpenseCats[0][0] : '-'
 
   const topExpenseItems = Object.values(expensesByItem)
-    .sort((a,b) => b.cost - a.cost)
+    .sort((a, b) => b.cost - a.cost)
     .slice(0, 10)
     .map(d => ({ ...d, value: d.cost }))
 
   const topExpenseItemsByQty = Object.values(expensesByItem)
-    .sort((a,b) => b.qty - a.qty)
+    .sort((a, b) => b.qty - a.qty)
     .slice(0, 10)
     .map(d => ({ ...d, value: d.qty }))
 
-  const topPay = Object.entries(paymentCounts).sort((a,b) => b[1]-a[1])[0]
-  const items  = Object.entries(itemMap).map(([name, data]) => ({ name, ...data }))
+  const topPay = Object.entries(paymentCounts).sort((a, b) => b[1] - a[1])[0]
+  const items = Object.entries(itemMap).map(([name, data]) => ({ name, ...data }))
 
   return {
     totalRevenue, orderCount: orders.length, avgOrder: orders.length > 0 ? totalRevenue / orders.length : 0,
     topPayMethod: topPay?.[0] || '-',
     revenueByDay, ordersByHour, ordersByDOW, paymentCounts, paymentRevenue,
-    topItemsByRevenue: [...items].sort((a,b) => b.revenue-a.revenue).slice(0,10),
-    topItemsByQty:     [...items].sort((a,b) => b.qty-a.qty).slice(0,10),
+    topItemsByRevenue: [...items].sort((a, b) => b.revenue - a.revenue).slice(0, 10),
+    topItemsByQty: [...items].sort((a, b) => b.qty - a.qty).slice(0, 10),
     totalExpenses, netProfit, expensesByCategory, topExpenseCategory, expensesByDay, topExpenseItems, topExpenseItemsByQty
   }
 }
@@ -217,7 +217,7 @@ function buildTimeSeries(revenueByDay, from, to, granularity) {
     return []
   }
   if (granularity === 'day') {
-    const cur = new Date(from); cur.setHours(0,0,0,0)
+    const cur = new Date(from); cur.setHours(0, 0, 0, 0)
     const end = new Date(to)
     while (cur <= end) {
       const key = toDateStr(cur)
@@ -228,7 +228,7 @@ function buildTimeSeries(revenueByDay, from, to, granularity) {
     return series
   }
   if (granularity === 'week') {
-    const cur = new Date(from); cur.setHours(0,0,0,0)
+    const cur = new Date(from); cur.setHours(0, 0, 0, 0)
     // Align to Monday
     cur.setDate(cur.getDate() - ((cur.getDay() + 6) % 7))
     const end = new Date(to)
@@ -247,7 +247,7 @@ function buildTimeSeries(revenueByDay, from, to, granularity) {
     return series
   }
   if (granularity === 'month') {
-    const cur = new Date(from); cur.setDate(1); cur.setHours(0,0,0,0)
+    const cur = new Date(from); cur.setDate(1); cur.setHours(0, 0, 0, 0)
     const end = new Date(to)
     while (cur <= end) {
       const year = cur.getFullYear(), month = cur.getMonth()
@@ -316,21 +316,21 @@ function SparkLine({ data, color = BRAND, height = 36, width = 80 }) {
   const pts = data.map((v, i) => ({ x: toX(i), y: toY(v) }))
   let line = `M ${pts[0].x} ${pts[0].y}`
   for (let i = 1; i < pts.length; i++) {
-    const cpx = (pts[i-1].x + pts[i].x) / 2
-    line += ` C ${cpx} ${pts[i-1].y} ${cpx} ${pts[i].y} ${pts[i].x} ${pts[i].y}`
+    const cpx = (pts[i - 1].x + pts[i].x) / 2
+    line += ` C ${cpx} ${pts[i - 1].y} ${cpx} ${pts[i].y} ${pts[i].x} ${pts[i].y}`
   }
-  const area = `${line} L ${pts[pts.length-1].x} ${H} L ${pts[0].x} ${H} Z`
-  const gId = `sp${Math.random().toString(36).slice(2,7)}`
+  const area = `${line} L ${pts[pts.length - 1].x} ${H} L ${pts[0].x} ${H} Z`
+  const gId = `sp${Math.random().toString(36).slice(2, 7)}`
   return (
     <svg width={width} height={height} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
       <defs>
         <linearGradient id={gId} x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.3"/>
-          <stop offset="100%" stopColor={color} stopOpacity="0"/>
+          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={area} fill={`url(#${gId})`}/>
-      <path d={line} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round"/>
+      <path d={area} fill={`url(#${gId})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
     </svg>
   )
 }
@@ -364,15 +364,15 @@ function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = '
   const pts = data.map((d, i) => ({ x: toX(i), y: toY(d.value), ...d }))
   let linePath = `M ${pts[0].x} ${pts[0].y}`
   for (let i = 1; i < pts.length; i++) {
-    const cpx = (pts[i-1].x + pts[i].x) / 2
-    linePath += ` C ${cpx} ${pts[i-1].y} ${cpx} ${pts[i].y} ${pts[i].x} ${pts[i].y}`
+    const cpx = (pts[i - 1].x + pts[i].x) / 2
+    linePath += ` C ${cpx} ${pts[i - 1].y} ${cpx} ${pts[i].y} ${pts[i].x} ${pts[i].y}`
   }
-  const areaPath = `${linePath} L ${pts[pts.length-1].x} ${pT + cH} L ${pts[0].x} ${pT + cH} Z`
+  const areaPath = `${linePath} L ${pts[pts.length - 1].x} ${pT + cH} L ${pts[0].x} ${pT + cH} Z`
 
   const gridLevels = [0.25, 0.5, 0.75, 1.0]
   const step = Math.max(1, Math.floor(data.length / 6))
 
-  const gId = `ac${Math.random().toString(36).slice(2,7)}`
+  const gId = `ac${Math.random().toString(36).slice(2, 7)}`
 
   const handlePointer = (e) => {
     const rect = svgRef.current?.getBoundingClientRect()
@@ -393,8 +393,8 @@ function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = '
         style={{ display: 'block', width: '100%', height: 'auto' }}>
         <defs>
           <linearGradient id={gId} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity="0.25"/>
-            <stop offset="100%" stopColor={color} stopOpacity="0"/>
+            <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+            <stop offset="100%" stopColor={color} stopOpacity="0" />
           </linearGradient>
         </defs>
 
@@ -412,13 +412,13 @@ function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = '
             <g className="an-chart-regions">
               {amW > 0 && (
                 <>
-                  <rect x={amStart} y={pT} width={amW} height={cH} fill="#64748b" opacity="0.08" rx="4"/>
+                  <rect x={amStart} y={pT} width={amW} height={cH} fill="#64748b" opacity="0.08" rx="4" />
                   <text x={amStart + amW / 2} y={12} fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold" letterSpacing="1">AM</text>
                 </>
               )}
               {pmW > 0 && (
                 <>
-                  <rect x={pmStart} y={pT} width={pmW} height={cH} fill="#eab308" opacity="0.12" rx="4"/>
+                  <rect x={pmStart} y={pT} width={pmW} height={cH} fill="#eab308" opacity="0.12" rx="4" />
                   <text x={pmStart + pmW / 2} y={12} fontSize="9" fill="#eab308" textAnchor="middle" fontWeight="bold" letterSpacing="1">PM</text>
                 </>
               )}
@@ -431,7 +431,7 @@ function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = '
           const gY = pT + (1 - t) * cH
           return (
             <g key={t}>
-              <line x1={pL} y1={gY} x2={W - pR} y2={gY} stroke="var(--border-color)" strokeWidth="1" strokeDasharray="4,4"/>
+              <line x1={pL} y1={gY} x2={W - pR} y2={gY} stroke="var(--border-color)" strokeWidth="1" strokeDasharray="4,4" />
               <text x={pL - 4} y={gY + 3.5} fontSize="8.5" fill="var(--text-muted)" textAnchor="end" fontFamily="Outfit, sans-serif">
                 {fmtV(minV + t * range)}
               </text>
@@ -440,13 +440,13 @@ function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = '
         })}
 
         {/* Base line */}
-        <line x1={pL} y1={pT + cH} x2={W - pR} y2={pT + cH} stroke="var(--border-color)" strokeWidth="1"/>
+        <line x1={pL} y1={pT + cH} x2={W - pR} y2={pT + cH} stroke="var(--border-color)" strokeWidth="1" />
 
         {/* Area fill */}
-        <path key={`a-${key}`} d={areaPath} fill={`url(#${gId})`} className="an-area-anim"/>
+        <path key={`a-${key}`} d={areaPath} fill={`url(#${gId})`} className="an-area-anim" />
 
         {/* Line */}
-        <path key={`l-${key}`} d={linePath} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" className="an-line-anim"/>
+        <path key={`l-${key}`} d={linePath} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" className="an-line-anim" />
 
         {/* X-axis labels */}
         {data.map((d, i) => {
@@ -461,8 +461,8 @@ function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = '
         {/* Tooltip crosshair */}
         {tooltip && (
           <>
-            <line x1={tooltip.pt.x} y1={pT} x2={tooltip.pt.x} y2={pT + cH} stroke={color} strokeWidth="1.5" strokeDasharray="4,3" opacity="0.5"/>
-            <circle cx={tooltip.pt.x} cy={tooltip.pt.y} r="5" fill={color} stroke="var(--bg-surface)" strokeWidth="2.5"/>
+            <line x1={tooltip.pt.x} y1={pT} x2={tooltip.pt.x} y2={pT + cH} stroke={color} strokeWidth="1.5" strokeDasharray="4,3" opacity="0.5" />
+            <circle cx={tooltip.pt.x} cy={tooltip.pt.y} r="5" fill={color} stroke="var(--bg-surface)" strokeWidth="2.5" />
           </>
         )}
       </svg>
@@ -489,7 +489,7 @@ function BarChart({ data, color = BRAND, formatValue, barLabel, maxBars = 24, fo
   const cW = W - pL - pR, cH = H - pT - pB
   const maxV = Math.max(...visible.map(d => d.value), 1)
   const barW = (cW / visible.length) * 0.7
-  const gap   = (cW / visible.length) * 0.3
+  const gap = (cW / visible.length) * 0.3
 
   const showLabels = forceLabels || visible.length <= 12
   const regionW = 12 * (barW + gap)
@@ -498,10 +498,10 @@ function BarChart({ data, color = BRAND, formatValue, barLabel, maxBars = 24, fo
     <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
       {amPmRegions && visible.length === 24 && (
         <g className="an-chart-regions">
-          <rect x={pL} y={pT} width={regionW} height={cH} fill="#64748b" opacity="0.08" rx="4"/>
+          <rect x={pL} y={pT} width={regionW} height={cH} fill="#64748b" opacity="0.08" rx="4" />
           <text x={pL + regionW / 2} y={12} fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold" letterSpacing="1">AM</text>
-          
-          <rect x={pL + regionW} y={pT} width={regionW} height={cH} fill="#eab308" opacity="0.12" rx="4"/>
+
+          <rect x={pL + regionW} y={pT} width={regionW} height={cH} fill="#eab308" opacity="0.12" rx="4" />
           <text x={pL + regionW + regionW / 2} y={12} fontSize="9" fill="#eab308" textAnchor="middle" fontWeight="bold" letterSpacing="1">PM</text>
         </g>
       )}
@@ -587,15 +587,15 @@ function DonutChart({ segments, centerLabel, centerSub }) {
       // Full circle
       return (
         <>
-          <circle cx={CX} cy={CY} r={R} fill={color} opacity="0.9"/>
-          <circle cx={CX} cy={CY} r={INNER_R} fill="var(--bg-surface)"/>
+          <circle cx={CX} cy={CY} r={R} fill={color} opacity="0.9" />
+          <circle cx={CX} cy={CY} r={INNER_R} fill="var(--bg-surface)" />
         </>
       )
     }
     const s = getPoint(startA, R), e = getPoint(endA, R)
     const si = getPoint(endA, INNER_R), ei = getPoint(startA, INNER_R)
     const large = endA - startA > 180 ? 1 : 0
-    return <path d={`M ${s.x} ${s.y} A ${R} ${R} 0 ${large} 1 ${e.x} ${e.y} L ${si.x} ${si.y} A ${INNER_R} ${INNER_R} 0 ${large} 0 ${ei.x} ${ei.y} Z`} fill={color} opacity="0.92"/>
+    return <path d={`M ${s.x} ${s.y} A ${R} ${R} 0 ${large} 1 ${e.x} ${e.y} L ${si.x} ${si.y} A ${INNER_R} ${INNER_R} 0 ${large} 0 ${ei.x} ${ei.y} Z`} fill={color} opacity="0.92" />
   }
 
   let startAngle = -90
@@ -626,7 +626,7 @@ function DonutChart({ segments, centerLabel, centerSub }) {
       <div className="an-donut-legend">
         {arcs.map((seg, i) => (
           <div key={i} className="an-donut-leg-item">
-            <div className="an-donut-leg-dot" style={{ background: seg.color }}/>
+            <div className="an-donut-leg-dot" style={{ background: seg.color }} />
             <span className="an-donut-leg-label">{seg.label}</span>
             <span className="an-donut-leg-pct">{Math.round((seg.value / total) * 100)}%</span>
           </div>
@@ -649,7 +649,7 @@ function KPICard({ icon, label, value, unit = '', rawValue, prevValue, sparkData
         <div className="an-kpi-icon" style={{ color, background: `${color}18` }}>{icon}</div>
         {!hideTrend && change !== null && (
           <div className={`an-kpi-badge ${isUp ? 'up' : 'down'}`}>
-            {isUp ? <Ic.TrendUp/> : <Ic.TrendDown/>}
+            {isUp ? <Ic.TrendUp /> : <Ic.TrendDown />}
             {Math.abs(change).toFixed(1)}%
           </div>
         )}
@@ -658,7 +658,7 @@ function KPICard({ icon, label, value, unit = '', rawValue, prevValue, sparkData
       <div className="an-kpi-label">{label}</div>
       {sparkData && sparkData.length > 1 && (
         <div className="an-kpi-spark">
-          <SparkLine data={sparkData} color={color} width={90} height={32}/>
+          <SparkLine data={sparkData} color={color} width={90} height={32} />
         </div>
       )}
     </div>
@@ -667,22 +667,22 @@ function KPICard({ icon, label, value, unit = '', rawValue, prevValue, sparkData
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ h = 20, w = '100%', radius = 8, style }) {
-  return <div className="an-skeleton" style={{ height: h, width: w, borderRadius: radius, ...style }}/>
+  return <div className="an-skeleton" style={{ height: h, width: w, borderRadius: radius, ...style }} />
 }
 
 function SkeletonTab() {
   return (
     <div className="an-tab-content" style={{ gap: 16 }}>
       <div className="an-kpi-grid">
-        {[0,1,2,3].map(i => <div key={i} className="an-kpi-card"><Skeleton h={90}/></div>)}
+        {[0, 1, 2, 3].map(i => <div key={i} className="an-kpi-card"><Skeleton h={90} /></div>)}
       </div>
       <div className="an-chart-card">
-        <Skeleton h={16} w="40%" style={{ marginBottom: 12 }}/>
-        <Skeleton h={160}/>
+        <Skeleton h={16} w="40%" style={{ marginBottom: 12 }} />
+        <Skeleton h={160} />
       </div>
       <div className="an-chart-card">
-        <Skeleton h={16} w="40%" style={{ marginBottom: 12 }}/>
-        <Skeleton h={120}/>
+        <Skeleton h={16} w="40%" style={{ marginBottom: 12 }} />
+        <Skeleton h={120} />
       </div>
     </div>
   )
@@ -769,19 +769,19 @@ function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity
         <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Net Profit" rawValue={stats.netProfit}
           prevValue={prevStats?.netProfit} color={stats.netProfit >= 0 ? '#10b981' : '#ef4444'}
           formatFn={(v) => v < 0 ? <ClickableAmount value={Math.abs(v)} prefix={`-${sym}`} /> : <ClickableAmount value={v} prefix={sym} />} hideTrend={dateRange?.label === 'Today'} />
-        <KPICard icon={<Ic.Wallet/>} label="Expenses" rawValue={stats.totalExpenses}
+        <KPICard icon={<Ic.Wallet />} label="Expenses" rawValue={stats.totalExpenses}
           prevValue={prevStats?.totalExpenses} color="#ef4444"
           formatFn={(v) => <ClickableAmount value={v} prefix={sym} />} hideTrend={dateRange?.label === 'Today'} />
         <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Revenue" rawValue={stats.totalRevenue}
           prevValue={prevStats?.totalRevenue} sparkData={sparkRevenue} color={BRAND}
           formatFn={(v) => <ClickableAmount value={v} prefix={sym} />} hideTrend={dateRange?.label === 'Today'} />
-        <KPICard icon={<Ic.Orders/>} label="Orders" rawValue={stats.orderCount}
+        <KPICard icon={<Ic.Orders />} label="Orders" rawValue={stats.orderCount}
           prevValue={prevStats?.orderCount} color={BRAND_GREEN}
           formatFn={(v) => fmt(v)} hideTrend={dateRange?.label === 'Today'} />
         <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Avg Order" rawValue={stats.avgOrder}
           prevValue={prevStats?.avgOrder} color={BRAND_AMBER}
           formatFn={(v) => <ClickableAmount value={v} prefix={sym} />} hideTrend={dateRange?.label === 'Today'} />
-        <KPICard icon={stats.topPayMethod?.toLowerCase() === 'cash' ? <Ic.Cash/> : <Ic.Pay/>} label="Top Payment" rawValue={0}
+        <KPICard icon={stats.topPayMethod?.toLowerCase() === 'cash' ? <Ic.Cash /> : <Ic.Pay />} label="Top Payment" rawValue={0}
           color="#8b5cf6" formatFn={() => PAYMENT_LABEL[stats.topPayMethod] || stats.topPayMethod} />
       </div>
 
@@ -790,27 +790,27 @@ function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity
         title={granularity === 'hour' ? 'Revenue by Hour' : granularity === 'week' ? 'Weekly Revenue' : granularity === 'month' ? 'Monthly Revenue' : 'Daily Revenue'}
         subtitle={`${orders.length} orders in period`}
       >
-        <AreaChart data={timeSeries} color={BRAND} formatValue={fmtCurrency} emptyMsg="No orders in this period" amPmRegions={granularity === 'hour'}/>
+        <AreaChart data={timeSeries} color={BRAND} formatValue={fmtCurrency} emptyMsg="No orders in this period" amPmRegions={granularity === 'hour'} />
       </ChartCard>
 
       {/* Payment Breakdown + Insights */}
       <div className="an-two-col">
         <ChartCard title="Payment Methods">
-          <DonutChart segments={paymentSegments} centerLabel={PAYMENT_LABEL[stats.topPayMethod] || '—'} centerSub="top method"/>
+          <DonutChart segments={paymentSegments} centerLabel={PAYMENT_LABEL[stats.topPayMethod] || '—'} centerSub="top method" />
         </ChartCard>
 
         <div className="an-insights-stack">
           {peakHour && (
-            <InsightRow icon={<Ic.Clock/>} label="Peak Hour" value={peakHour.hour} sub={`${peakHour.count} orders`} color="#f59e0b"/>
+            <InsightRow icon={<Ic.Clock />} label="Peak Hour" value={peakHour.hour} sub={`${peakHour.count} orders`} color="#f59e0b" />
           )}
           {bestDay && (
-            <InsightRow icon={<Ic.Trophy/>} label="Best Day" value={fmtCurrency(bestDay.value)} sub={bestDay.date} color={BRAND}/>
+            <InsightRow icon={<Ic.Trophy />} label="Best Day" value={fmtCurrency(bestDay.value)} sub={bestDay.date} color={BRAND} />
           )}
           {stats.topItemsByRevenue[0] && (
-            <InsightRow icon={<Ic.Package/>} label="Top Item" value={fmtCurrency(stats.topItemsByRevenue[0].revenue)} sub={stats.topItemsByRevenue[0].name} color={BRAND_GREEN}/>
+            <InsightRow icon={<Ic.Package />} label="Top Item" value={fmtCurrency(stats.topItemsByRevenue[0].revenue)} sub={stats.topItemsByRevenue[0].name} color={BRAND_GREEN} />
           )}
           {stats.orderCount === 0 && (
-            <InsightRow icon={<Ic.Warning/>} label="No Data" value="—" sub="No orders in period" color="#64748b"/>
+            <InsightRow icon={<Ic.Warning />} label="No Data" value="—" sub="No orders in period" color="#64748b" />
           )}
         </div>
       </div>
@@ -829,7 +829,7 @@ function RevenueTab({ orders, stats, prevStats, from, to, currency, granularity 
   }, [orders, stats.revenueByDay, from, to, granularity])
 
   const revenueChange = pctChange(stats.totalRevenue, prevStats?.totalRevenue)
-  const orderChange   = pctChange(stats.orderCount,   prevStats?.orderCount)
+  const orderChange = pctChange(stats.orderCount, prevStats?.orderCount)
 
   const bestDay = useMemo(() => {
     const entries = Object.entries(stats.revenueByDay)
@@ -839,7 +839,7 @@ function RevenueTab({ orders, stats, prevStats, from, to, currency, granularity 
   }, [stats.revenueByDay])
 
   const worstDay = useMemo(() => {
-    const entries = Object.entries(stats.revenueByDay).filter(([,v]) => v > 0)
+    const entries = Object.entries(stats.revenueByDay).filter(([, v]) => v > 0)
     if (!entries.length) return null
     const [key, val] = entries.sort((a, b) => a[1] - b[1])[0]
     return { label: new Date(key + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' }), value: val }
@@ -854,7 +854,7 @@ function RevenueTab({ orders, stats, prevStats, from, to, currency, granularity 
           <div className="an-compare-label">Revenue</div>
           {prevStats && (
             <div className="an-compare-delta">
-              {revenueChange >= 0 ? <Ic.TrendUp/> : <Ic.TrendDown/>}
+              {revenueChange >= 0 ? <Ic.TrendUp /> : <Ic.TrendDown />}
               {Math.abs(revenueChange).toFixed(1)}% vs prev period
             </div>
           )}
@@ -864,7 +864,7 @@ function RevenueTab({ orders, stats, prevStats, from, to, currency, granularity 
           <div className="an-compare-label">Orders</div>
           {prevStats && (
             <div className="an-compare-delta">
-              {orderChange >= 0 ? <Ic.TrendUp/> : <Ic.TrendDown/>}
+              {orderChange >= 0 ? <Ic.TrendUp /> : <Ic.TrendDown />}
               {Math.abs(orderChange).toFixed(1)}% vs prev period
             </div>
           )}
@@ -878,7 +878,7 @@ function RevenueTab({ orders, stats, prevStats, from, to, currency, granularity 
 
       {/* Revenue area chart */}
       <ChartCard title="Revenue Trend" subtitle={granularity === 'hour' ? 'By hour' : granularity === 'month' ? 'By month' : 'By day'}>
-        <AreaChart data={timeSeries} color={BRAND} formatValue={fmtCurrency} emptyMsg="No revenue data" amPmRegions={granularity === 'hour'}/>
+        <AreaChart data={timeSeries} color={BRAND} formatValue={fmtCurrency} emptyMsg="No revenue data" amPmRegions={granularity === 'hour'} />
       </ChartCard>
 
       {/* Best / Worst days */}
@@ -925,7 +925,7 @@ function OrdersTab({ orders, stats, prevStats, from, to, currency, granularity }
       return Array.from({ length: maxH }, (_, h) => ({ label: HOUR_LABELS[h], value: countByHour[h] }))
     }
     // Build day series
-    const cur = new Date(from); cur.setHours(0,0,0,0)
+    const cur = new Date(from); cur.setHours(0, 0, 0, 0)
     const end = new Date(to)
     const series = []
     while (cur <= end) {
@@ -938,44 +938,44 @@ function OrdersTab({ orders, stats, prevStats, from, to, currency, granularity }
   // DOW bars
   const dowData = useMemo(() =>
     DOW_LABELS.map((label, i) => ({ label, value: stats.ordersByDOW[i] }))
-  , [stats.ordersByDOW])
+    , [stats.ordersByDOW])
 
   // Hour bars (grouped: show every 2 hours or full)
   const hourData = useMemo(() =>
     Array.from({ length: 24 }).map((_, i) => ({ label: (i % 12 === 0 ? 12 : i % 12).toString(), value: stats.ordersByHour[i] }))
-  , [stats.ordersByHour])
+    , [stats.ordersByHour])
 
   // Peak analysis
   const peakDOW = DOW_LABELS[stats.ordersByDOW.indexOf(Math.max(...stats.ordersByDOW))]
-  const peakH   = stats.ordersByHour.indexOf(Math.max(...stats.ordersByHour))
-  const slowH   = stats.ordersByHour.reduce((min, v, i, arr) => v > 0 && (arr[min] === 0 || v < arr[min]) ? i : min, 0)
+  const peakH = stats.ordersByHour.indexOf(Math.max(...stats.ordersByHour))
+  const slowH = stats.ordersByHour.reduce((min, v, i, arr) => v > 0 && (arr[min] === 0 || v < arr[min]) ? i : min, 0)
 
   return (
     <div className="an-tab-content">
       {/* Order Volume Chart */}
       <ChartCard title="Order Volume" subtitle={`${stats.orderCount} total orders`}>
-        <AreaChart data={orderTimeSeries} color={BRAND_GREEN} formatValue={(v) => Math.round(v).toString()} emptyMsg="No orders in this period"/>
+        <AreaChart data={orderTimeSeries} color={BRAND_GREEN} formatValue={(v) => Math.round(v).toString()} emptyMsg="No orders in this period" />
       </ChartCard>
 
       {/* Day of Week */}
       <ChartCard title="Orders by Day of Week" subtitle="Which day is busiest?">
-        <BarChart data={dowData} color={BRAND} formatValue={(v) => Math.round(v).toString()}/>
+        <BarChart data={dowData} color={BRAND} formatValue={(v) => Math.round(v).toString()} />
       </ChartCard>
 
       {/* Hour of Day */}
       <ChartCard title="Orders by Hour of Day" subtitle="When do orders come in?">
-        <BarChart data={hourData} color="#8b5cf6" formatValue={(v) => Math.round(v).toString()} maxBars={24} forceLabels={true} amPmRegions={true}/>
+        <BarChart data={hourData} color="#8b5cf6" formatValue={(v) => Math.round(v).toString()} maxBars={24} forceLabels={true} amPmRegions={true} />
       </ChartCard>
 
       {/* Peak insights */}
       {stats.orderCount > 0 && (
         <div className="an-insights-stack">
-          <InsightRow icon={<Ic.Zap/>} label="Peak Day" value={peakDOW} sub={`${Math.max(...stats.ordersByDOW)} orders on avg`} color="#f59e0b"/>
+          <InsightRow icon={<Ic.Zap />} label="Peak Day" value={peakDOW} sub={`${Math.max(...stats.ordersByDOW)} orders on avg`} color="#f59e0b" />
           {stats.ordersByHour[peakH] > 0 && (
-            <InsightRow icon={<Ic.Clock/>} label="Peak Hour" value={HOUR_LABELS[peakH]} sub={`${stats.ordersByHour[peakH]} orders`} color={BRAND}/>
+            <InsightRow icon={<Ic.Clock />} label="Peak Hour" value={HOUR_LABELS[peakH]} sub={`${stats.ordersByHour[peakH]} orders`} color={BRAND} />
           )}
           {stats.ordersByHour[slowH] > 0 && (
-            <InsightRow icon={<Ic.Target/>} label="Avg Order Value" value={<ClickableAmount value={stats.avgOrder} prefix={sym} />} sub="per transaction" color={BRAND_GREEN}/>
+            <InsightRow icon={<Ic.Target />} label="Avg Order Value" value={<ClickableAmount value={stats.avgOrder} prefix={sym} />} sub="per transaction" color={BRAND_GREEN} />
           )}
         </div>
       )}
@@ -1072,23 +1072,23 @@ function CustomersTab({ currency }) {
     return () => { cancelled = true }
   }, [])
 
-  if (loading) return <SkeletonTab/>
+  if (loading) return <SkeletonTab />
   if (!custStats) return <div className="an-chart-empty"><span>Failed to load customer data</span></div>
 
   return (
     <div className="an-tab-content">
       {/* KPI Grid */}
       <div className="an-kpi-grid">
-        <KPICard icon={<Ic.Users/>} label="Total Customers" rawValue={custStats.total} color={BRAND} formatFn={fmt}/>
-        <KPICard icon={<Ic.Pay/>}  label="Udhaar Customers" rawValue={custStats.withUdhaar} color={BRAND_AMBER} formatFn={fmt}/>
-        <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Total Spend" rawValue={custStats.totalSpent} color={BRAND_GREEN} formatFn={(v) => <ClickableAmount value={v} prefix={sym} />}/>
-        <KPICard icon={<Ic.Warning/>} label="Pending Udhaar" rawValue={custStats.outstandingUdhaar} color="#ef4444" formatFn={(v) => <ClickableAmount value={v} prefix={sym} />}/>
+        <KPICard icon={<Ic.Users />} label="Total Customers" rawValue={custStats.total} color={BRAND} formatFn={fmt} />
+        <KPICard icon={<Ic.Pay />} label="Udhaar Customers" rawValue={custStats.withUdhaar} color={BRAND_AMBER} formatFn={fmt} />
+        <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Total Spend" rawValue={custStats.totalSpent} color={BRAND_GREEN} formatFn={(v) => <ClickableAmount value={v} prefix={sym} />} />
+        <KPICard icon={<Ic.Warning />} label="Pending Udhaar" rawValue={custStats.outstandingUdhaar} color="#ef4444" formatFn={(v) => <ClickableAmount value={v} prefix={sym} />} />
       </div>
 
       {/* Udhaar Donut */}
       {custStats.udhaarSegments.length > 0 && (
         <ChartCard title="Udhaar Overview" subtitle="Outstanding vs cleared">
-          <DonutChart segments={custStats.udhaarSegments} centerLabel={<ClickableAmount value={custStats.outstandingUdhaar} prefix={sym} as="tspan" />} centerSub="outstanding"/>
+          <DonutChart segments={custStats.udhaarSegments} centerLabel={<ClickableAmount value={custStats.outstandingUdhaar} prefix={sym} as="tspan" />} centerSub="outstanding" />
         </ChartCard>
       )}
 
@@ -1113,7 +1113,7 @@ function CustomersTab({ currency }) {
 
       {custStats.total === 0 && (
         <div className="an-chart-empty" style={{ height: 200 }}>
-          <Ic.Users s={40}/>
+          <Ic.Users s={40} />
           <span>No customers yet. Add customers via the Customers tool.</span>
         </div>
       )}
@@ -1154,7 +1154,7 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
           <div className="an-compare-label">Total Expenses</div>
           {prevStats && (
             <div className="an-compare-delta">
-              {expensesChange > 0 ? <Ic.TrendDown/> : <Ic.TrendUp/>}
+              {expensesChange > 0 ? <Ic.TrendDown /> : <Ic.TrendUp />}
               {Math.abs(expensesChange).toFixed(1)}% vs prev period
             </div>
           )}
@@ -1170,12 +1170,12 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
       </div>
 
       <ChartCard title={granularity === 'hour' ? 'Expenses by Hour' : granularity === 'week' ? 'Weekly Expenses' : granularity === 'month' ? 'Monthly Expenses' : 'Daily Expenses'} subtitle={`${purchases?.length || 0} purchase logs`}>
-        <AreaChart data={expensesTimeSeries} color="#ef4444"/>
+        <AreaChart data={expensesTimeSeries} color="#ef4444" />
       </ChartCard>
 
       <ChartCard title="Expenses by Category" subtitle="Where is the money going?">
         {catData.length > 0 ? (
-          <DonutChart segments={catData} centerLabel={fmtCurrency(stats.totalExpenses)} centerSub="expenses"/>
+          <DonutChart segments={catData} centerLabel={fmtCurrency(stats.totalExpenses)} centerSub="expenses" />
         ) : (
           <div className="an-chart-empty"><span>No expenses</span></div>
         )}
@@ -1188,9 +1188,9 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
 
       <ChartCard title={view === 'cost' ? "Top Expense Items by Cost" : "Top Expense Items by Quantity"} subtitle="Highest consumption raw materials & items">
         {data?.length > 0 ? (
-          <HorizontalBarChart 
-            data={data} 
-            formatValue={view === 'cost' ? fmtCurrency : (v) => fmt(v)} 
+          <HorizontalBarChart
+            data={data}
+            formatValue={view === 'cost' ? fmtCurrency : (v) => fmt(v)}
             color={view === 'cost' ? "#ef4444" : "#10b981"}
           />
         ) : (
@@ -1216,32 +1216,32 @@ function AIInsightsTab() {
   }
 
   const features = [
-    { icon: <Ic.Wave s={16}/>, text: 'Predict tomorrow\'s peak hours & demand' },
-    { icon: <Ic.Warning s={16}/>, text: 'Detect unusual sales patterns & anomalies' },
-    { icon: <Ic.Package s={16}/>, text: 'Smart inventory replenishment alerts' },
-    { icon: <Ic.Revenue s={16}/>, text: 'Monthly & quarterly revenue forecasting' },
-    { icon: <Ic.Users s={16}/>, text: 'Customer churn risk & lifetime value scoring' },
+    { icon: <Ic.Wave s={16} />, text: 'Predict tomorrow\'s peak hours & demand' },
+    { icon: <Ic.Warning s={16} />, text: 'Detect unusual sales patterns & anomalies' },
+    { icon: <Ic.Package s={16} />, text: 'Smart inventory replenishment alerts' },
+    { icon: <Ic.Revenue s={16} />, text: 'Monthly & quarterly revenue forecasting' },
+    { icon: <Ic.Users s={16} />, text: 'Customer churn risk & lifetime value scoring' },
   ]
 
   return (
     <div className="an-ai-root">
       {/* Background decoration */}
-      <div className="an-ai-bg-orb an-ai-orb-1"/>
-      <div className="an-ai-bg-orb an-ai-orb-2"/>
-      <div className="an-ai-bg-orb an-ai-orb-3"/>
+      <div className="an-ai-bg-orb an-ai-orb-1" />
+      <div className="an-ai-bg-orb an-ai-orb-2" />
+      <div className="an-ai-bg-orb an-ai-orb-3" />
 
       {/* Main glass card */}
       <div className="an-ai-card">
         {/* AI badge */}
         <div className="an-ai-badge">
-          <Ic.Sparkles s={13}/>
+          <Ic.Sparkles s={13} />
           Powered by Nexus AI
         </div>
 
         {/* Lock icon */}
         <div className="an-ai-lock-wrap">
-          <div className="an-ai-lock-glow"/>
-          <Ic.Lock s={52}/>
+          <div className="an-ai-lock-glow" />
+          <Ic.Lock s={52} />
         </div>
 
         {/* Title */}
@@ -1250,14 +1250,14 @@ function AIInsightsTab() {
 
         {/* Blurred preview charts */}
         <div className="an-ai-preview">
-          {[0,1,2].map(i => (
+          {[0, 1, 2].map(i => (
             <div key={i} className="an-ai-preview-card">
-              <div className="an-ai-preview-line"/>
-              <div className="an-ai-preview-line" style={{ width: '70%', marginTop: 6 }}/>
-              <div className="an-ai-preview-chart"/>
+              <div className="an-ai-preview-line" />
+              <div className="an-ai-preview-line" style={{ width: '70%', marginTop: 6 }} />
+              <div className="an-ai-preview-chart" />
             </div>
           ))}
-          <div className="an-ai-preview-blur"/>
+          <div className="an-ai-preview-blur" />
         </div>
 
         {/* Feature list */}
@@ -1272,7 +1272,7 @@ function AIInsightsTab() {
 
         {/* CTA */}
         <button className="an-ai-notify-btn" onClick={handleNotify}>
-          <Ic.Bell s={15}/>
+          <Ic.Bell s={15} />
           Notify Me When It's Ready
         </button>
       </div>
@@ -1282,27 +1282,27 @@ function AIInsightsTab() {
 
 // ─── Tab Bar ──────────────────────────────────────────────────────────────────
 const TABS = [
-  { id: 'overview',  label: 'Overview',   icon: <Ic.Wave s={15}/> },
-  { id: 'revenue',   label: 'Revenue',    icon: <Ic.Revenue s={15}/> },
-  { id: 'orders',    label: 'Orders',     icon: <Ic.Orders s={15}/> },
-  { id: 'products',  label: 'Products',   icon: <Ic.Package s={15}/> },
-  { id: 'customers', label: 'Customers',  icon: <Ic.Users s={15}/> },
-  { id: 'expenses',  label: 'Expenses',   icon: <Ic.Wallet s={15}/> },
-  { id: 'ai',        label: 'AI Insights',icon: <Ic.Sparkles s={15}/> },
+  { id: 'overview', label: 'Overview', icon: <Ic.Wave s={15} /> },
+  { id: 'revenue', label: 'Revenue', icon: <Ic.Revenue s={15} /> },
+  { id: 'orders', label: 'Orders', icon: <Ic.Orders s={15} /> },
+  { id: 'products', label: 'Products', icon: <Ic.Package s={15} /> },
+  { id: 'expenses', label: 'Expenses', icon: <Ic.Wallet s={15} /> },
+  { id: 'customers', label: 'Customers', icon: <Ic.Users s={15} /> },
+  { id: 'ai', label: 'AI Insights', icon: <Ic.Sparkles s={15} /> },
 ]
 
 // ─── Main Analytics Component ─────────────────────────────────────────────────
 export default function Analytics({ onClose, currency }) {
   useBackButton(onClose)
 
-  const [tab, setTab]           = useState('overview')
+  const [tab, setTab] = useState('overview')
   const [dateRange, setDateRange] = useState(() => computeQuick('today'))
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
-  const [orders, setOrders]         = useState([])
+  const [orders, setOrders] = useState([])
   const [prevOrders, setPrevOrders] = useState([])
-  const [purchases, setPurchases]   = useState([])
+  const [purchases, setPurchases] = useState([])
   const [prevPurchases, setPrevPurchases] = useState([])
-  const [loading, setLoading]       = useState(true)
+  const [loading, setLoading] = useState(true)
 
   const tabBarRef = useRef(null)
   const [showScrollHint, setShowScrollHint] = useState(true)
@@ -1326,7 +1326,7 @@ export default function Analytics({ onClose, currency }) {
   }
 
   const from = dateRange.fromTs
-  const to   = dateRange.toTs
+  const to = dateRange.toTs
   const granularity = useMemo(() => getGranularity(from, to), [from, to])
 
   const load = useCallback(async () => {
@@ -1347,7 +1347,7 @@ export default function Analytics({ onClose, currency }) {
 
   useEffect(() => { load() }, [load])
 
-  const stats     = useMemo(() => computeAnalytics(orders, purchases), [orders, purchases])
+  const stats = useMemo(() => computeAnalytics(orders, purchases), [orders, purchases])
   const prevStats = useMemo(() => computeAnalytics(prevOrders, prevPurchases), [prevOrders, prevPurchases])
 
   const tabProps = { orders, purchases, stats, prevStats, from, to, currency, granularity, dateRange }
@@ -1358,7 +1358,7 @@ export default function Analytics({ onClose, currency }) {
       <header className="or-header">
         <button className="or-back-btn" onClick={onClose} aria-label="Back"><Ic.Back s={20} /></button>
         <div className="or-header-title">
-          <div className="an-header-icon"><Ic.Wave s={18}/></div>
+          <div className="an-header-icon"><Ic.Wave s={18} /></div>
           Analytics
         </div>
         {tab !== 'ai' && (
@@ -1402,17 +1402,17 @@ export default function Analytics({ onClose, currency }) {
       {/* Tab Content */}
       <div className="an-body">
         {tab === 'ai' ? (
-          <AIInsightsTab/>
+          <AIInsightsTab />
         ) : loading ? (
-          <SkeletonTab/>
+          <SkeletonTab />
         ) : (
           <>
-            {tab === 'overview'  && <OverviewTab  {...tabProps}/>}
-            {tab === 'revenue'   && <RevenueTab   {...tabProps}/>}
-            {tab === 'orders'    && <OrdersTab    {...tabProps}/>}
-            {tab === 'products'  && <ProductsTab  stats={stats} currency={currency}/>}
-            {tab === 'customers' && <CustomersTab currency={currency}/>}
-            {tab === 'expenses'  && <ExpensesTab  {...tabProps}/>}
+            {tab === 'overview' && <OverviewTab  {...tabProps} />}
+            {tab === 'revenue' && <RevenueTab   {...tabProps} />}
+            {tab === 'orders' && <OrdersTab    {...tabProps} />}
+            {tab === 'products' && <ProductsTab stats={stats} currency={currency} />}
+            {tab === 'customers' && <CustomersTab currency={currency} />}
+            {tab === 'expenses' && <ExpensesTab  {...tabProps} />}
           </>
         )}
       </div>
