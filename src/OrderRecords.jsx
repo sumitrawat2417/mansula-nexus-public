@@ -64,7 +64,13 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
   const [customerInfo, setCustomerInfo] = useState(null)
   
   const [editMode, setEditMode] = useState(false)
-  const [tempDate, setTempDate] = useState(() => record.completedAt ? new Date(record.completedAt).toISOString().slice(0,16) : '')
+  const getLocalDatetime = (ts) => {
+    if (!ts) return '';
+    const d = new Date(ts);
+    const pad = n => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  const [tempDate, setTempDate] = useState(() => getLocalDatetime(record.completedAt))
   const [isSavingDate, setIsSavingDate] = useState(false)
 
   useEffect(() => {

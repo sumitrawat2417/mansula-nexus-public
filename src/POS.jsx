@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import './App.css'
-import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth, getCustomers, saveCustomer, saveUdhaarEntry, recalcUdhaarBalance } from './db.js'
+import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth, getCustomers, saveCustomer, saveUdhaarEntry, recalcUdhaarBalance, getUdhaarByOrderId, getCustomerById } from './db.js'
 import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES, KEY_BUSINESS, DEFAULT_BUSINESS } from './BusinessProfile.jsx'
 import { useBackButton } from './useBackButton.js'
 
@@ -873,6 +873,17 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
         if (editingRecord.customerDetails) {
           setCustomerName(editingRecord.customerDetails.name || '')
           setCustomerPhone(editingRecord.customerDetails.phone || '')
+        } else if (editingRecord.paymentMode === 'udhaar') {
+          getUdhaarByOrderId(editingRecord.orderId).then(info => {
+            if (info && info.customerId) {
+              getCustomerById(info.customerId).then(cust => {
+                if (cust) {
+                  setCustomerName(cust.name || '')
+                  setCustomerPhone(cust.phone || '')
+                }
+              })
+            }
+          })
         }
         setDiscountType(editingRecord.discountAmt > 0 ? 'flat' : 'none')
         setDiscountVal(editingRecord.discountAmt || 0)
