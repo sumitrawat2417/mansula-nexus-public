@@ -346,7 +346,7 @@ function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = '
 }
 
 // ─── BarChart (vertical) ──────────────────────────────────────────────────────
-function BarChart({ data, color = BRAND, formatValue, barLabel, maxBars = 24, forceLabels }) {
+function BarChart({ data, color = BRAND, formatValue, barLabel, maxBars = 24, forceLabels, amPmRegions = false }) {
   const fmtV = formatValue || ((v) => fmtK(v))
   const visible = data ? data.slice(0, maxBars) : []
   if (!visible || visible.length === 0) return <div className="an-chart-empty"><span>No data</span></div>
@@ -359,9 +359,19 @@ function BarChart({ data, color = BRAND, formatValue, barLabel, maxBars = 24, fo
   const gap   = (cW / visible.length) * 0.3
 
   const showLabels = forceLabels || visible.length <= 12
+  const regionW = 12 * (barW + gap)
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
+      {amPmRegions && visible.length === 24 && (
+        <g className="an-chart-regions">
+          <rect x={pL} y={pT} width={regionW} height={cH} fill="#64748b" opacity="0.08" rx="4"/>
+          <text x={pL + regionW / 2} y={12} fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold" letterSpacing="1">AM</text>
+          
+          <rect x={pL + regionW} y={pT} width={regionW} height={cH} fill="#eab308" opacity="0.12" rx="4"/>
+          <text x={pL + regionW + regionW / 2} y={12} fontSize="9" fill="#eab308" textAnchor="middle" fontWeight="bold" letterSpacing="1">PM</text>
+        </g>
+      )}
       {visible.map((d, i) => {
         const barH = Math.max(2, (d.value / maxV) * cH)
         const x = pL + i * (barW + gap) + gap / 2
@@ -793,7 +803,7 @@ function OrdersTab({ orders, stats, prevStats, from, to, currency, granularity }
 
   // Hour bars (grouped: show every 2 hours or full)
   const hourData = useMemo(() =>
-    Array.from({ length: 24 }).map((_, i) => ({ label: i.toString(), value: stats.ordersByHour[i] }))
+    Array.from({ length: 24 }).map((_, i) => ({ label: (i % 12 === 0 ? 12 : i % 12).toString(), value: stats.ordersByHour[i] }))
   , [stats.ordersByHour])
 
   // Peak analysis
@@ -815,7 +825,7 @@ function OrdersTab({ orders, stats, prevStats, from, to, currency, granularity }
 
       {/* Hour of Day */}
       <ChartCard title="Orders by Hour of Day" subtitle="When do orders come in?">
-        <BarChart data={hourData} color="#8b5cf6" formatValue={(v) => Math.round(v).toString()} maxBars={24} forceLabels={true}/>
+        <BarChart data={hourData} color="#8b5cf6" formatValue={(v) => Math.round(v).toString()} maxBars={24} forceLabels={true} amPmRegions={true}/>
       </ChartCard>
 
       {/* Peak insights */}
