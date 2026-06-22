@@ -11391,11 +11391,11 @@ select {
 /* ── Two-column layout ── */
 .an-two-col {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
 }
 @media (max-width: 380px) {
-  .an-two-col { grid-template-columns: 1fr; }
+  .an-two-col { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ── Insight rows ── */

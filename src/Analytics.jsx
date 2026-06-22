@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useBackButton } from './useBackButton.js'
 import { useAlert } from './AlertDialog.jsx'
 import { getAnalyticsData, getCustomers, getUdhaarByCustomer } from './db.js'
+import DateFilterDrawer, { computeQuick } from './DateFilterDrawer.jsx'
 
 // ─── Icon Set ────────────────────────────────────────────────────────────────
 const Ic = {
@@ -25,6 +26,7 @@ const Ic = {
   Trophy:    ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>,
   Warning:   ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
   Zap:       ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+  ChevD:     ({ s=13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -36,42 +38,12 @@ const BRAND        = '#6366f1'
 const BRAND_GREEN  = '#10b981'
 const BRAND_AMBER  = '#f59e0b'
 
-const PERIODS = [
-  { id: 'today', label: 'Today' },
-  { id: '7d',    label: '7 Days' },
-  { id: '30d',   label: '30 Days' },
-  { id: '90d',   label: '90 Days' },
-  { id: 'year',  label: 'This Year' },
-  { id: 'custom',label: 'Custom' },
-]
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const fmt    = (n) => Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })
 const fmtCur = (n, sym = '₹') => `${sym}${fmt(n)}`
 const fmtK   = (n) => n >= 100000 ? `${(n/100000).toFixed(1)}L` : n >= 1000 ? `${(n/1000).toFixed(1)}K` : fmt(n)
 const fmtCurK = (n, sym = '₹') => `${sym}${fmtK(n)}`
 const toDateStr = (d) => d.toISOString().slice(0, 10)
-
-function getPeriodRange(period, customFrom, customTo) {
-  const now = Date.now()
-  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
-  switch (period) {
-    case 'today':  return { from: todayStart.getTime(), to: now }
-    case '7d':     return { from: now - 7  * 86400000, to: now }
-    case '30d':    return { from: now - 30 * 86400000, to: now }
-    case '90d':    return { from: now - 90 * 86400000, to: now }
-    case 'year': {
-      const jan = new Date(new Date().getFullYear(), 0, 1)
-      return { from: jan.getTime(), to: now }
-    }
-    case 'custom': {
-      const from = customFrom ? new Date(customFrom + 'T00:00:00').getTime() : todayStart.getTime()
-      const to   = customTo   ? new Date(customTo   + 'T23:59:59').getTime() : now
-      return { from, to }
-    }
-    default: return { from: todayStart.getTime(), to: now }
-  }
-}
 
 function getGranularity(from, to) {
   const days = (to - from) / 86400000
@@ -1077,28 +1049,6 @@ function AIInsightsTab() {
   )
 }
 
-// ─── Period Selector ──────────────────────────────────────────────────────────
-function PeriodSelector({ period, onPeriod, customFrom, onCustomFrom, customTo, onCustomTo }) {
-  return (
-    <div className="an-period-bar">
-      <div className="an-period-scroll">
-        {PERIODS.map(p => (
-          <button key={p.id} className={`an-period-btn ${period === p.id ? 'active' : ''}`} onClick={() => onPeriod(p.id)}>
-            {p.label}
-          </button>
-        ))}
-      </div>
-      {period === 'custom' && (
-        <div className="an-custom-range">
-          <input type="date" className="an-date-input" value={customFrom} onChange={e => onCustomFrom(e.target.value)} max={customTo || toDateStr(new Date())}/>
-          <span className="an-date-sep">to</span>
-          <input type="date" className="an-date-input" value={customTo} onChange={e => onCustomTo(e.target.value)} min={customFrom} max={toDateStr(new Date())}/>
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ─── Tab Bar ──────────────────────────────────────────────────────────────────
 const TABS = [
   { id: 'overview',  label: 'Overview',   icon: <Ic.Wave s={15}/> },
@@ -1114,15 +1064,14 @@ export default function Analytics({ onClose, currency }) {
   useBackButton(onClose)
 
   const [tab, setTab]           = useState('overview')
-  const [period, setPeriod]     = useState('today')
-  const [customFrom, setCustomFrom] = useState(toDateStr(new Date()))
-  const [customTo, setCustomTo]     = useState(toDateStr(new Date()))
+  const [dateRange, setDateRange] = useState(() => computeQuick('today'))
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
   const [orders, setOrders]         = useState([])
   const [prevOrders, setPrevOrders] = useState([])
   const [loading, setLoading]       = useState(true)
 
-  const from = useMemo(() => getPeriodRange(period, customFrom, customTo).from, [period, customFrom, customTo])
-  const to   = useMemo(() => getPeriodRange(period, customFrom, customTo).to,   [period, customFrom, customTo])
+  const from = dateRange.fromTs
+  const to   = dateRange.toTs
   const granularity = useMemo(() => getGranularity(from, to), [from, to])
 
   const load = useCallback(async () => {
@@ -1158,13 +1107,25 @@ export default function Analytics({ onClose, currency }) {
         <div style={{ width: 36 }} /> {/* Spacer for centering */}
       </header>
 
-      {/* Period Selector */}
-      {tab !== 'ai' && (
-        <PeriodSelector
-          period={period} onPeriod={setPeriod}
-          customFrom={customFrom} onCustomFrom={setCustomFrom}
-          customTo={customTo} onCustomTo={setCustomTo}
+      {filterDrawerOpen && (
+        <DateFilterDrawer
+          current={dateRange}
+          onApply={setDateRange}
+          onClose={() => setFilterDrawerOpen(false)}
         />
+      )}
+
+      {/* Date Filter Bar */}
+      {tab !== 'ai' && (
+        <div style={{ padding: '10px 14px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)' }}>
+          <button onClick={() => setFilterDrawerOpen(true)} style={{ width: '100%', justifyContent: 'space-between', display: 'flex', alignItems: 'center', padding: '8px 14px', background: 'var(--bg-surface-2)', border: '1.5px solid var(--border-color)', borderRadius: 'var(--radius-full)', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Ic.Calend s={14} />
+              <span>{dateRange.label}</span>
+            </div>
+            <Ic.ChevD s={14} />
+          </button>
+        </div>
       )}
 
       {/* Tab Bar */}
