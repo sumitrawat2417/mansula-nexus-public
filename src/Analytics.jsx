@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useBackButton } from './useBackButton.js'
 import { useAlert } from './AlertDialog.jsx'
 import { getAnalyticsData, getPurchaseAnalyticsData, getCustomers, getUdhaarByCustomer } from './db.js'
@@ -48,16 +49,52 @@ const fmtKStr = (n) => n >= 100000 ? `${(n/100000).toFixed(1)}L` : n >= 1000 ? `
 const fmtCurKStr = (n, sym = '₹') => `${sym}${fmtKStr(n)}`
 
 function ClickableAmount({ value, prefix = '', suffix = '', as: Component = 'span' }) {
-  const [exact, setExact] = React.useState(false)
+  const [show, setShow] = React.useState(false)
+  const targetRef = React.useRef(null)
+  
   if (typeof value !== 'number' || value < 1000) return <Component>{prefix}{fmt(value)}{suffix}</Component>
+  
   return (
-    <Component 
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExact(p => !p) }}
-      style={{ cursor: 'pointer', borderBottom: Component !== 'tspan' ? '1px dashed currentColor' : 'none', textDecoration: Component === 'tspan' ? 'underline' : 'none', textDecorationStyle: 'dashed' }}
-      title="Tap to view exact amount"
-    >
-      {exact ? `${prefix}${fmt(value)}${suffix}` : `${prefix}${fmtKStr(value)}${suffix}`}
-    </Component>
+    <>
+      <Component 
+        ref={targetRef}
+        onClick={(e) => { 
+          e.preventDefault()
+          e.stopPropagation()
+          setShow(!show)
+          if (!show) {
+            const hide = () => setShow(false)
+            setTimeout(() => window.addEventListener('click', hide, { once: true }), 10)
+          }
+        }}
+        style={{ cursor: 'pointer', borderBottom: Component !== 'tspan' ? '1px dashed currentColor' : 'none', textDecoration: Component === 'tspan' ? 'underline' : 'none', textDecorationStyle: 'dashed' }}
+      >
+        {`${prefix}${fmtKStr(value)}${suffix}`}
+      </Component>
+      {show && targetRef.current && createPortal(
+        <div 
+          style={{
+            position: 'fixed',
+            top: targetRef.current.getBoundingClientRect().top - 34,
+            left: targetRef.current.getBoundingClientRect().left + (targetRef.current.getBoundingClientRect().width / 2),
+            transform: 'translateX(-50%)',
+            background: 'var(--text-main)',
+            color: 'var(--bg-surface)',
+            padding: '4px 10px',
+            borderRadius: '6px',
+            fontSize: '13px',
+            fontWeight: '600',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+            zIndex: 99999,
+            pointerEvents: 'none',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {`${prefix}${fmt(value)}${suffix}`}
+        </div>,
+        document.body
+      )}
+    </>
   )
 }
 const toDateStr = (d) => d.toISOString().slice(0, 10)
