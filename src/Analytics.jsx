@@ -52,6 +52,19 @@ function ClickableAmount({ value, prefix = '', suffix = '', as: Component = 'spa
   const [show, setShow] = React.useState(false)
   const targetRef = React.useRef(null)
   
+  React.useEffect(() => {
+    if (!show) return
+    const hide = () => setShow(false)
+    setTimeout(() => {
+      window.addEventListener('click', hide, { once: true })
+      window.addEventListener('close-tooltips', hide, { once: true })
+    }, 10)
+    return () => {
+      window.removeEventListener('click', hide)
+      window.removeEventListener('close-tooltips', hide)
+    }
+  }, [show])
+  
   if (typeof value !== 'number' || value < 1000) return <Component>{prefix}{fmt(value)}{suffix}</Component>
   
   return (
@@ -61,11 +74,8 @@ function ClickableAmount({ value, prefix = '', suffix = '', as: Component = 'spa
         onClick={(e) => { 
           e.preventDefault()
           e.stopPropagation()
+          if (!show) window.dispatchEvent(new CustomEvent('close-tooltips'))
           setShow(!show)
-          if (!show) {
-            const hide = () => setShow(false)
-            setTimeout(() => window.addEventListener('click', hide, { once: true }), 10)
-          }
         }}
         style={{ cursor: 'pointer' }}
       >
