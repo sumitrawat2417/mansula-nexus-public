@@ -61,7 +61,7 @@ function computeAnalytics(orders, purchases = []) {
     totalRevenue: 0, orderCount: 0, avgOrder: 0, topPayMethod: '-',
     revenueByDay: {}, ordersByHour: new Array(24).fill(0), ordersByDOW: new Array(7).fill(0),
     paymentCounts: {}, paymentRevenue: {}, topItemsByRevenue: [], topItemsByQty: [],
-    totalExpenses: 0, netProfit: 0, expensesByCategory: {}, topExpenseCategory: '-', expensesByDay: {}
+    totalExpenses: 0, netProfit: 0, expensesByCategory: {}, topExpenseCategory: '-', expensesByDay: {}, topExpenseItems: []
   }
   if ((!orders || orders.length === 0) && (!purchases || purchases.length === 0)) return empty
 
@@ -93,6 +93,7 @@ function computeAnalytics(orders, purchases = []) {
   let totalExpenses = 0
   const expensesByCategory = {}
   const expensesByDay = {}
+  const expensesByItem = {}
   for (const p of purchases) {
     const total = p.totalAmount || 0
     totalExpenses += total
@@ -104,7 +105,11 @@ function computeAnalytics(orders, purchases = []) {
     if (p.items) {
       for (const item of p.items) {
         const cat = item.category || 'Uncategorized'
-        expensesByCategory[cat] = (expensesByCategory[cat] || 0) + (item.qty * item.costPerUnit)
+        const cost = (item.qty || 0) * (item.costPerUnit || 0)
+        expensesByCategory[cat] = (expensesByCategory[cat] || 0) + cost
+        
+        const name = item.name || 'Unknown Item'
+        expensesByItem[name] = (expensesByItem[name] || 0) + cost
       }
     }
   }
@@ -113,6 +118,11 @@ function computeAnalytics(orders, purchases = []) {
   
   const sortedExpenseCats = Object.entries(expensesByCategory).sort((a,b) => b[1] - a[1])
   const topExpenseCategory = sortedExpenseCats.length > 0 ? sortedExpenseCats[0][0] : '-'
+
+  const topExpenseItems = Object.entries(expensesByItem)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([name, revenue]) => ({ name, revenue }))
 
   const topPay = Object.entries(paymentCounts).sort((a,b) => b[1]-a[1])[0]
   const items  = Object.entries(itemMap).map(([name, data]) => ({ name, ...data }))
@@ -123,7 +133,7 @@ function computeAnalytics(orders, purchases = []) {
     revenueByDay, ordersByHour, ordersByDOW, paymentCounts, paymentRevenue,
     topItemsByRevenue: [...items].sort((a,b) => b.revenue-a.revenue).slice(0,10),
     topItemsByQty:     [...items].sort((a,b) => b.qty-a.qty).slice(0,10),
-    totalExpenses, netProfit, expensesByCategory, topExpenseCategory, expensesByDay
+    totalExpenses, netProfit, expensesByCategory, topExpenseCategory, expensesByDay, topExpenseItems
   }
 }
 
@@ -1067,8 +1077,8 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
 
   return (
     <div className="an-tab-content">
-      <div className="an-compare-row">
-        <div className={`an-compare-item ${expensesChange > 0 ? 'down' : 'up'}`}>
+      <div className="an-compare-row" style={{ display: 'flex', gap: '16px' }}>
+        <div className={`an-compare-item ${expensesChange > 0 ? 'down' : 'up'}`} style={{ flex: 1 }}>
           <div className="an-compare-val">{fmtCurrency(stats.totalExpenses)}</div>
           <div className="an-compare-label">Total Expenses</div>
           {prevStats && (
@@ -1077,6 +1087,14 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
               {Math.abs(expensesChange).toFixed(1)}% vs prev period
             </div>
           )}
+        </div>
+        <div className="an-compare-item" style={{ flex: 1 }}>
+          <div className="an-compare-val">{fmt(purchases?.length || 0)}</div>
+          <div className="an-compare-label">Purchase Logs</div>
+        </div>
+        <div className="an-compare-item" style={{ flex: 1 }}>
+          <div className="an-compare-val">{fmtCurrency(purchases?.length > 0 ? stats.totalExpenses / purchases.length : 0)}</div>
+          <div className="an-compare-label">Avg Purchase</div>
         </div>
       </div>
 
@@ -1089,6 +1107,14 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
           <DonutChart segments={catData} centerLabel={fmtCurrency(stats.totalExpenses)} centerSub="expenses"/>
         ) : (
           <div className="an-chart-empty"><span>No expenses</span></div>
+        )}
+      </ChartCard>
+
+      <ChartCard title="Top Expense Items" subtitle="Highest cost raw materials & items">
+        {stats.topExpenseItems?.length > 0 ? (
+          <HorizontalBarChart data={stats.topExpenseItems} formatValue={fmtCurrency} color="#ef4444"/>
+        ) : (
+          <div className="an-chart-empty"><span>No items logged</span></div>
         )}
       </ChartCard>
     </div>
