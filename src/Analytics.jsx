@@ -882,7 +882,10 @@ function OrdersTab({ orders, stats, prevStats, from, to, currency, granularity }
 }
 
 // ─── TAB: Products ────────────────────────────────────────────────────────────
-function ProductsTab({ stats, currency }) {
+/**
+ * Displays top selling products and categories, helping merchants identify bestsellers.
+ */
+function ProductsTab({ orders, stats, currency }) {
   const sym = currency?.symbol || '₹'
   const [view, setView] = useState('revenue')
 
