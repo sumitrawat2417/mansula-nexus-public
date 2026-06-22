@@ -63,7 +63,7 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
   const [udhaarInfo, setUdhaarInfo] = useState(null)
   const [customerInfo, setCustomerInfo] = useState(null)
   
-  const [editDateMode, setEditDateMode] = useState(false)
+  const [editMode, setEditMode] = useState(false)
   const [tempDate, setTempDate] = useState(() => record.completedAt ? new Date(record.completedAt).toISOString().slice(0,16) : '')
   const [isSavingDate, setIsSavingDate] = useState(false)
 
@@ -98,7 +98,7 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
     const updated = { ...record, completedAt: newTs }
     await updateOrderRecord(updated)
     setIsSavingDate(false)
-    setEditDateMode(false)
+    setEditMode(false)
     if (onUpdateRecord) onUpdateRecord(updated)
   }
 
@@ -113,35 +113,45 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
           <div className="or-modal-title">
             <span className="or-modal-icon"><I.Receipt s={20} /></span>
             <div>
-              <div className="or-modal-order-id">#{record.orderId}</div>
-              {editDateMode ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                  <input 
-                    type="datetime-local" 
-                    value={tempDate} 
-                    onChange={e => setTempDate(e.target.value)}
-                    style={{ padding: '2px 4px', fontSize: '0.8rem', borderRadius: 4, border: '1px solid var(--border-color)', background: 'var(--bg-surface)' }}
-                  />
-                  <button onClick={handleSaveDate} disabled={isSavingDate} style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', borderRadius: 4, padding: '2px 8px', fontSize: '0.75rem', cursor: 'pointer' }}>{isSavingDate ? 'Saving...' : 'Save'}</button>
-                  <button onClick={() => setEditDateMode(false)} style={{ background: 'transparent', color: 'var(--text-muted)', border: 'none', cursor: 'pointer', fontSize: '0.75rem' }}>Cancel</button>
-                </div>
-              ) : (
-                <div className="or-modal-date" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {fmtDate(record.completedAt)} · {fmtTime(record.completedAt)}
-                  <button onClick={() => setEditDateMode(true)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', padding: 2 }} title="Edit Date"><I.Edit s={12} /></button>
-                </div>
-              )}
+              <div className="or-modal-order-id">#{record.orderId} {editMode && <span style={{fontSize: '0.75rem', fontWeight: 600, color: 'var(--brand-primary)', marginLeft: 8}}>Editing</span>}</div>
+              <div className="or-modal-date">{fmtDate(record.completedAt)} · {fmtTime(record.completedAt)}</div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button onClick={() => onEdit(record)} title="Edit Items" style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-surface-1)', border: '1px solid var(--border-color)', borderRadius: 6, padding: '4px 8px', color: 'var(--text-primary)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
-              <I.Edit s={12} /> Edit Items
-            </button>
+            {!editMode && <button className="or-icon-btn" onClick={() => setEditMode(true)} title="Edit Order"><I.Edit s={15} /></button>}
             <button className="or-icon-btn" onClick={onClose} title="Close"><I.X s={17} /></button>
           </div>
         </div>
 
-        <div className="or-modal-body">
+        {editMode ? (
+          <div className="or-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div style={{ background: 'var(--bg-surface-1)', padding: 16, borderRadius: 12, border: '1px solid var(--border-color)' }}>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: 12, color: 'var(--text-primary)' }}>Edit Date & Time</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <input 
+                  type="datetime-local" 
+                  value={tempDate} 
+                  onChange={e => setTempDate(e.target.value)}
+                  style={{ padding: '10px 12px', fontSize: '1rem', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)', width: '100%', outline: 'none' }}
+                />
+                <button onClick={handleSaveDate} disabled={isSavingDate} style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', borderRadius: 8, padding: '10px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', width: '100%' }}>{isSavingDate ? 'Saving...' : 'Save Date & Time'}</button>
+              </div>
+            </div>
+
+            <div style={{ background: 'var(--bg-surface-1)', padding: 16, borderRadius: 12, border: '1px solid var(--border-color)' }}>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: 8, color: 'var(--text-primary)' }}>Edit Cart Items</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 12 }}>Modify products, quantities, or payments by returning to the POS.</div>
+              <button onClick={() => onEdit(record)} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', borderRadius: 8, padding: '10px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
+                <I.Edit s={16} /> Open in POS
+              </button>
+            </div>
+
+            <button onClick={() => setEditMode(false)} style={{ background: 'transparent', color: 'var(--text-secondary)', border: 'none', padding: '10px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', marginTop: 'auto' }}>
+              Cancel Editing
+            </button>
+          </div>
+        ) : (
+          <div className="or-modal-body">
           <div className="or-detail-section-label">Items</div>
           <div className="or-detail-items">
             {visibleItems.map((item, idx) => (
@@ -206,12 +216,15 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
             )}
           </div>
         </div>
+        )}
 
-        <div className="or-modal-footer">
-          <button className="or-btn-danger" onClick={handleDelete}>
-            <I.Trash s={14} /> Delete
-          </button>
-        </div>
+        {!editMode && (
+          <div className="or-modal-footer">
+            <button className="or-btn-danger" onClick={handleDelete}>
+              <I.Trash s={14} /> Delete
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
