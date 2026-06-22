@@ -711,6 +711,9 @@ function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity
 }
 
 // ─── TAB: Revenue ─────────────────────────────────────────────────────────────
+/**
+ * Renders detailed revenue breakdowns, including daily/weekly trends and performance comparisons.
+ */
 function RevenueTab({ orders, stats, prevStats, from, to, currency, granularity }) {
   const sym = currency?.symbol || '₹'
   const fmtCurrency = (v) => `${sym}${fmtK(v)}`
