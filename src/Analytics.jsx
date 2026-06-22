@@ -231,7 +231,7 @@ function SparkLine({ data, color = BRAND, height = 36, width = 80 }) {
 }
 
 // ─── AreaChart ────────────────────────────────────────────────────────────────
-function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = 'No data for this period' }) {
+function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = 'No data for this period', amPmRegions = false }) {
   const [tooltip, setTooltip] = useState(null)
   const svgRef = useRef(null)
   const [key, setKey] = useState(0)
@@ -292,6 +292,34 @@ function AreaChart({ data, color = BRAND, formatValue, formatLabel, emptyMsg = '
             <stop offset="100%" stopColor={color} stopOpacity="0"/>
           </linearGradient>
         </defs>
+
+        {amPmRegions && data.length > 0 && (() => {
+          const noonIdx = 12
+          const hasPM = data.length > noonIdx
+          const amStart = toX(0)
+          const amEnd = hasPM ? toX(noonIdx) : toX(data.length - 1)
+          const amW = Math.max(0, amEnd - amStart)
+          const pmStart = hasPM ? toX(noonIdx) : 0
+          const pmEnd = toX(data.length - 1)
+          const pmW = Math.max(0, pmEnd - pmStart)
+
+          return (
+            <g className="an-chart-regions">
+              {amW > 0 && (
+                <>
+                  <rect x={amStart} y={pT} width={amW} height={cH} fill="#64748b" opacity="0.08" rx="4"/>
+                  <text x={amStart + amW / 2} y={12} fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold" letterSpacing="1">AM</text>
+                </>
+              )}
+              {pmW > 0 && (
+                <>
+                  <rect x={pmStart} y={pT} width={pmW} height={cH} fill="#eab308" opacity="0.12" rx="4"/>
+                  <text x={pmStart + pmW / 2} y={12} fontSize="9" fill="#eab308" textAnchor="middle" fontWeight="bold" letterSpacing="1">PM</text>
+                </>
+              )}
+            </g>
+          )
+        })()}
 
         {/* Grid lines */}
         {gridLevels.map(t => {
@@ -651,7 +679,7 @@ function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity
         title={granularity === 'hour' ? 'Revenue by Hour' : granularity === 'week' ? 'Weekly Revenue' : granularity === 'month' ? 'Monthly Revenue' : 'Daily Revenue'}
         subtitle={`${orders.length} orders in period`}
       >
-        <AreaChart data={timeSeries} color={BRAND} formatValue={fmtCurrency} emptyMsg="No orders in this period"/>
+        <AreaChart data={timeSeries} color={BRAND} formatValue={fmtCurrency} emptyMsg="No orders in this period" amPmRegions={granularity === 'hour'}/>
       </ChartCard>
 
       {/* Payment Breakdown + Insights */}
@@ -739,7 +767,7 @@ function RevenueTab({ orders, stats, prevStats, from, to, currency, granularity 
 
       {/* Revenue area chart */}
       <ChartCard title="Revenue Trend" subtitle={granularity === 'hour' ? 'By hour' : granularity === 'month' ? 'By month' : 'By day'}>
-        <AreaChart data={timeSeries} color={BRAND} formatValue={fmtCurrency} emptyMsg="No revenue data"/>
+        <AreaChart data={timeSeries} color={BRAND} formatValue={fmtCurrency} emptyMsg="No revenue data" amPmRegions={granularity === 'hour'}/>
       </ChartCard>
 
       {/* Best / Worst days */}
