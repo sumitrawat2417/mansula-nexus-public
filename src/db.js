@@ -1124,3 +1124,23 @@ export async function getAnalyticsData(fromTs, toTs) {
     })
   } catch { return [] }
 }
+
+export async function getPurchaseAnalyticsData(fromTs, toTs) {
+  try {
+    const db = await openDB()
+    return new Promise((resolve) => {
+      const tx = db.transaction('purchases', 'readonly')
+      const index = tx.objectStore('purchases').index('purchasedAt')
+      const range = IDBKeyRange.bound(fromTs, toTs)
+      const results = []
+      const req = index.openCursor(range)
+      req.onsuccess = (e) => {
+        const cursor = e.target.result
+        if (!cursor) { resolve(results); return }
+        results.push(cursor.value)
+        cursor.continue()
+      }
+      req.onerror = () => resolve([])
+    })
+  } catch { return [] }
+}

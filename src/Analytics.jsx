@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useBackButton } from './useBackButton.js'
 import { useAlert } from './AlertDialog.jsx'
-import { getAnalyticsData, getCustomers, getUdhaarByCustomer } from './db.js'
+import { getAnalyticsData, getPurchaseAnalyticsData, getCustomers, getUdhaarByCustomer } from './db.js'
 import DateFilterDrawer, { computeQuick } from './DateFilterDrawer.jsx'
 
 // ─── Icon Set ────────────────────────────────────────────────────────────────
@@ -13,12 +13,13 @@ const Ic = {
   Revenue:   ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
   Orders:    ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
   Avg:       ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
+  Wallet:    ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/></svg>,
+  Lock:      ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
   Pay:       ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
   Cash:      ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2" ry="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>,
   Package:   ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
   Users:     ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
   Brain:     ({ s=32 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>,
-  Lock:      ({ s=48 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
   Bell:      ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
   Sparkles:  ({ s=20 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>,
   Clock:     ({ s=14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
@@ -47,21 +48,14 @@ const fmtK   = (n) => n >= 100000 ? `${(n/100000).toFixed(1)}L` : n >= 1000 ? `$
 const fmtCurK = (n, sym = '₹') => `${sym}${fmtK(n)}`
 const toDateStr = (d) => d.toISOString().slice(0, 10)
 
-function getGranularity(from, to) {
-  const days = (to - from) / 86400000
-  if (days <= 1.5) return 'hour'
-  if (days <= 31)  return 'day'
-  if (days <= 93)  return 'week'
-  return 'month'
-}
-
-function computeAnalytics(orders) {
+function computeAnalytics(orders, purchases = []) {
   const empty = {
-    totalRevenue: 0, orderCount: 0, avgOrder: 0, topPayMethod: '—',
+    totalRevenue: 0, orderCount: 0, avgOrder: 0, topPayMethod: '-',
     revenueByDay: {}, ordersByHour: new Array(24).fill(0), ordersByDOW: new Array(7).fill(0),
-    paymentCounts: {}, paymentRevenue: {}, topItemsByRevenue: [], topItemsByQty: []
+    paymentCounts: {}, paymentRevenue: {}, topItemsByRevenue: [], topItemsByQty: [],
+    totalExpenses: 0, netProfit: 0, expensesByCategory: {}, topExpenseCategory: '-', expensesByDay: {}
   }
-  if (!orders || orders.length === 0) return empty
+  if ((!orders || orders.length === 0) && (!purchases || purchases.length === 0)) return empty
 
   const revenueByDay = {}, ordersByHour = new Array(24).fill(0), ordersByDOW = new Array(7).fill(0)
   const paymentCounts = {}, paymentRevenue = {}, itemMap = {}
@@ -82,21 +76,46 @@ function computeAnalytics(orders) {
     totalRevenue += total
 
     for (const item of (order.items || [])) {
-      if (!itemMap[item.name]) itemMap[item.name] = { qty: 0, revenue: 0, emoji: item.emoji || '' }
+      if (!itemMap[item.name]) itemMap[item.name] = { qty: 0, revenue: 0, emoji: item.emoji || '📦' }
       itemMap[item.name].qty     += item.qty || 1
       itemMap[item.name].revenue += (item.price || 0) * (item.qty || 1)
     }
   }
+
+  let totalExpenses = 0
+  const expensesByCategory = {}
+  const expensesByDay = {}
+  for (const p of purchases) {
+    const total = p.totalAmount || 0
+    totalExpenses += total
+    
+    const d = new Date(p.purchasedAt)
+    const dayKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+    expensesByDay[dayKey] = (expensesByDay[dayKey] || 0) + total
+
+    if (p.items) {
+      for (const item of p.items) {
+        const cat = item.category || 'Uncategorized'
+        expensesByCategory[cat] = (expensesByCategory[cat] || 0) + (item.qty * item.costPerUnit)
+      }
+    }
+  }
+
+  const netProfit = totalRevenue - totalExpenses
+  
+  const sortedExpenseCats = Object.entries(expensesByCategory).sort((a,b) => b[1] - a[1])
+  const topExpenseCategory = sortedExpenseCats.length > 0 ? sortedExpenseCats[0][0] : '-'
 
   const topPay = Object.entries(paymentCounts).sort((a,b) => b[1]-a[1])[0]
   const items  = Object.entries(itemMap).map(([name, data]) => ({ name, ...data }))
 
   return {
     totalRevenue, orderCount: orders.length, avgOrder: orders.length > 0 ? totalRevenue / orders.length : 0,
-    topPayMethod: topPay?.[0] || '—',
+    topPayMethod: topPay?.[0] || '-',
     revenueByDay, ordersByHour, ordersByDOW, paymentCounts, paymentRevenue,
     topItemsByRevenue: [...items].sort((a,b) => b.revenue-a.revenue).slice(0,10),
     topItemsByQty:     [...items].sort((a,b) => b.qty-a.qty).slice(0,10),
+    totalExpenses, netProfit, expensesByCategory, topExpenseCategory, expensesByDay
   }
 }
 
@@ -616,9 +635,6 @@ function InsightRow({ icon, label, value, sub, color }) {
 }
 
 // ─── TAB: Overview ────────────────────────────────────────────────────────────
-/**
- * Renders the top-level overview metrics, KPI cards, and dynamic charts for quick business insights.
- */
 function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity, dateRange }) {
   const sym = currency?.symbol || '₹'
   const fmtCurrency = (v) => `${sym}${fmtK(v)}`
@@ -664,6 +680,12 @@ function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity
     <div className="an-tab-content">
       {/* KPI Grid */}
       <div className="an-kpi-grid">
+        <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Net Profit" rawValue={stats.netProfit}
+          prevValue={prevStats?.netProfit} color={stats.netProfit >= 0 ? '#10b981' : '#ef4444'}
+          formatFn={(v) => v < 0 ? `-${sym}${fmtK(Math.abs(v))}` : `${sym}${fmtK(v)}`} hideTrend={dateRange?.label === 'Today'} />
+        <KPICard icon={<Ic.Wallet/>} label="Expenses" rawValue={stats.totalExpenses}
+          prevValue={prevStats?.totalExpenses} color="#ef4444"
+          formatFn={(v) => `${sym}${fmtK(v)}`} hideTrend={dateRange?.label === 'Today'} />
         <KPICard icon={<span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{sym}</span>} label="Revenue" rawValue={stats.totalRevenue}
           prevValue={prevStats?.totalRevenue} sparkData={sparkRevenue} color={BRAND}
           formatFn={(v) => `${sym}${fmtK(v)}`} hideTrend={dateRange?.label === 'Today'} />
@@ -711,9 +733,6 @@ function OverviewTab({ orders, stats, prevStats, from, to, currency, granularity
 }
 
 // ─── TAB: Revenue ─────────────────────────────────────────────────────────────
-/**
- * Renders detailed revenue breakdowns, including daily/weekly trends and performance comparisons.
- */
 function RevenueTab({ orders, stats, prevStats, from, to, currency, granularity }) {
   const sym = currency?.symbol || '₹'
   const fmtCurrency = (v) => `${sym}${fmtK(v)}`
@@ -800,9 +819,6 @@ function RevenueTab({ orders, stats, prevStats, from, to, currency, granularity 
 }
 
 // ─── TAB: Orders ──────────────────────────────────────────────────────────────
-/**
- * Renders analytics related to order volume, timing patterns, and peak business hours.
- */
 function OrdersTab({ orders, stats, prevStats, from, to, currency, granularity }) {
   const sym = currency?.symbol || '₹'
 
@@ -882,10 +898,7 @@ function OrdersTab({ orders, stats, prevStats, from, to, currency, granularity }
 }
 
 // ─── TAB: Products ────────────────────────────────────────────────────────────
-/**
- * Displays top selling products and categories, helping merchants identify bestsellers.
- */
-function ProductsTab({ orders, stats, currency }) {
+function ProductsTab({ stats, currency }) {
   const sym = currency?.symbol || '₹'
   const [view, setView] = useState('revenue')
 
@@ -931,10 +944,7 @@ function ProductsTab({ orders, stats, currency }) {
 }
 
 // ─── TAB: Customers ───────────────────────────────────────────────────────────
-/**
- * Analyzes customer retention, new vs returning ratios, and average spend per customer.
- */
-function CustomersTab({ stats, currency }) {
+function CustomersTab({ currency }) {
   const sym = currency?.symbol || '₹'
   const [loading, setLoading] = useState(true)
   const [custStats, setCustStats] = useState(null)
@@ -1025,6 +1035,69 @@ function CustomersTab({ stats, currency }) {
   )
 }
 
+// ─── TAB: Expenses ────────────────────────────────────────────────────────────
+function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granularity, dateRange }) {
+  const sym = currency?.symbol || '₹'
+  const fmtCurrency = (v) => `${sym}${fmtK(v)}`
+
+  const expensesChange = pctChange(stats.totalExpenses, prevStats?.totalExpenses)
+
+  const expensesTimeSeries = useMemo(() => {
+    return buildTimeSeries(stats.expensesByDay || {}, from, to, granularity)
+  }, [stats.expensesByDay, from, to, granularity])
+
+  const catData = useMemo(() => {
+    return Object.entries(stats.expensesByCategory || {})
+      .filter(([, v]) => v > 0)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, value], i) => ({
+        label,
+        value,
+        color: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'][i % 8]
+      }))
+  }, [stats.expensesByCategory])
+
+  return (
+    <div className="an-tab-content">
+      <div className="an-compare-row">
+        <div className={`an-compare-item ${expensesChange > 0 ? 'down' : 'up'}`}>
+          <div className="an-compare-val">{fmtCurrency(stats.totalExpenses)}</div>
+          <div className="an-compare-label">Total Expenses</div>
+          {prevStats && (
+            <div className="an-compare-delta">
+              {expensesChange > 0 ? <Ic.TrendDown/> : <Ic.TrendUp/>}
+              {Math.abs(expensesChange).toFixed(1)}% vs prev period
+            </div>
+          )}
+        </div>
+      </div>
+
+      <ChartCard title={granularity === 'hour' ? 'Expenses by Hour' : granularity === 'week' ? 'Weekly Expenses' : granularity === 'month' ? 'Monthly Expenses' : 'Daily Expenses'} subtitle={`${purchases?.length || 0} purchase logs`}>
+        <AreaChart data={expensesTimeSeries} color="#ef4444"/>
+      </ChartCard>
+
+      <ChartCard title="Expenses by Category" subtitle="Where is the money going?">
+        {catData.length > 0 ? (
+          <div className="an-pay-methods">
+            <PieChart data={catData}/>
+            <div className="an-pay-legend">
+              {catData.map(d => (
+                <div key={d.label} className="an-pay-legend-item">
+                  <div className="an-pay-legend-dot" style={{ background: d.color }}/>
+                  <div className="an-pay-legend-name">{d.label}</div>
+                  <div className="an-pay-legend-pct">{Math.round((d.value / Math.max(1, stats.totalExpenses)) * 100)}%</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="an-chart-empty"><span>No expenses</span></div>
+        )}
+      </ChartCard>
+    </div>
+  )
+}
+
 // ─── TAB: AI Insights ─────────────────────────────────────────────────────────
 function AIInsightsTab() {
   const { alert: showAlert } = useAlert()
@@ -1111,6 +1184,7 @@ const TABS = [
   { id: 'orders',    label: 'Orders',     icon: <Ic.Orders s={15}/> },
   { id: 'products',  label: 'Products',   icon: <Ic.Package s={15}/> },
   { id: 'customers', label: 'Customers',  icon: <Ic.Users s={15}/> },
+  { id: 'expenses',  label: 'Expenses',   icon: <Ic.Wallet s={15}/> },
   { id: 'ai',        label: 'AI Insights',icon: <Ic.Sparkles s={15}/> },
 ]
 
@@ -1123,6 +1197,8 @@ export default function Analytics({ onClose, currency }) {
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
   const [orders, setOrders]         = useState([])
   const [prevOrders, setPrevOrders] = useState([])
+  const [purchases, setPurchases]   = useState([])
+  const [prevPurchases, setPrevPurchases] = useState([])
   const [loading, setLoading]       = useState(true)
 
   const tabBarRef = useRef(null)
@@ -1153,21 +1229,25 @@ export default function Analytics({ onClose, currency }) {
   const load = useCallback(async () => {
     setLoading(true)
     const duration = to - from
-    const [curr, prev] = await Promise.all([
+    const [currOrders, prevOrdersData, currPurchases, prevPurchasesData] = await Promise.all([
       getAnalyticsData(from, to),
-      getAnalyticsData(from - duration, from - 1)
+      getAnalyticsData(from - duration, from - 1),
+      getPurchaseAnalyticsData(from, to),
+      getPurchaseAnalyticsData(from - duration, from - 1)
     ])
-    setOrders(curr)
-    setPrevOrders(prev)
+    setOrders(currOrders)
+    setPrevOrders(prevOrdersData)
+    setPurchases(currPurchases)
+    setPrevPurchases(prevPurchasesData)
     setLoading(false)
   }, [from, to])
 
   useEffect(() => { load() }, [load])
 
-  const stats     = useMemo(() => computeAnalytics(orders), [orders])
-  const prevStats = useMemo(() => computeAnalytics(prevOrders), [prevOrders])
+  const stats     = useMemo(() => computeAnalytics(orders, purchases), [orders, purchases])
+  const prevStats = useMemo(() => computeAnalytics(prevOrders, prevPurchases), [prevOrders, prevPurchases])
 
-  const tabProps = { orders, stats, prevStats, from, to, currency, granularity, dateRange }
+  const tabProps = { orders, purchases, stats, prevStats, from, to, currency, granularity, dateRange }
 
   return (
     <div className="an-root">
@@ -1229,6 +1309,7 @@ export default function Analytics({ onClose, currency }) {
             {tab === 'orders'    && <OrdersTab    {...tabProps}/>}
             {tab === 'products'  && <ProductsTab  stats={stats} currency={currency}/>}
             {tab === 'customers' && <CustomersTab currency={currency}/>}
+            {tab === 'expenses'  && <ExpensesTab  {...tabProps}/>}
           </>
         )}
       </div>
