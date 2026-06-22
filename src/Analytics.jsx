@@ -931,7 +931,10 @@ function ProductsTab({ orders, stats, currency }) {
 }
 
 // ─── TAB: Customers ───────────────────────────────────────────────────────────
-function CustomersTab({ currency }) {
+/**
+ * Analyzes customer retention, new vs returning ratios, and average spend per customer.
+ */
+function CustomersTab({ stats, currency }) {
   const sym = currency?.symbol || '₹'
   const [loading, setLoading] = useState(true)
   const [custStats, setCustStats] = useState(null)
