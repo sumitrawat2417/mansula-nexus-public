@@ -1086,18 +1086,7 @@ function ExpensesTab({ purchases, stats, prevStats, from, to, currency, granular
 
       <ChartCard title="Expenses by Category" subtitle="Where is the money going?">
         {catData.length > 0 ? (
-          <div className="an-pay-methods">
-            <DonutChart segments={catData} centerLabel={fmtCurrency(stats.totalExpenses)} centerSub="expenses"/>
-            <div className="an-pay-legend">
-              {catData.map(d => (
-                <div key={d.label} className="an-pay-legend-item">
-                  <div className="an-pay-legend-dot" style={{ background: d.color }}/>
-                  <div className="an-pay-legend-name">{d.label}</div>
-                  <div className="an-pay-legend-pct">{Math.round((d.value / Math.max(1, stats.totalExpenses)) * 100)}%</div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <DonutChart segments={catData} centerLabel={fmtCurrency(stats.totalExpenses)} centerSub="expenses"/>
         ) : (
           <div className="an-chart-empty"><span>No expenses</span></div>
         )}
