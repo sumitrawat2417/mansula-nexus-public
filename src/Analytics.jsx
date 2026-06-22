@@ -1104,6 +1104,13 @@ export default function Analytics({ onClose, currency }) {
           <div className="an-header-icon"><Ic.Wave s={18}/></div>
           Analytics
         </div>
+        {tab !== 'ai' && (
+          <button className="or-date-filter-btn" onClick={() => setFilterDrawerOpen(true)}>
+            <Ic.Calend s={13} />
+            <span>{dateRange.label}</span>
+            <Ic.ChevD s={12} />
+          </button>
+        )}
       </header>
 
       {filterDrawerOpen && (
@@ -1114,17 +1121,7 @@ export default function Analytics({ onClose, currency }) {
         />
       )}
 
-      {/* Date Filter Bar */}
-      {tab !== 'ai' && (
-        <div style={{ padding: '12px 14px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Date Filter:</span>
-          <button className="or-date-filter-btn" onClick={() => setFilterDrawerOpen(true)}>
-            <Ic.Calend s={13} />
-            <span>{dateRange.label}</span>
-            <Ic.ChevD s={12} />
-          </button>
-        </div>
-      )}
+
 
       {/* Tab Bar */}
       <div className="an-tab-container">
