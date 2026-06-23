@@ -317,32 +317,37 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                   { label: 'Remove Item', type: 'remove', desc: 'When item is removed' },
                   { label: 'Checkout', type: 'checkout', desc: 'On successful order' },
                 ].map(s => (
-                  <button key={s.type} className="hns-sound-card" onClick={() => {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext
-                    if (!AudioContext || volume === 0) return
-                    const ctx = new AudioContext()
-                    const osc = ctx.createOscillator()
-                    const gain = ctx.createGain()
-                    const vol = volume / 100
-                    osc.connect(gain); gain.connect(ctx.destination)
-                    if (s.type === 'add') {
-                      osc.type = 'sine'; osc.frequency.setValueAtTime(440, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1)
-                      gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1)
-                      osc.start(); osc.stop(ctx.currentTime + 0.1)
-                    } else if (s.type === 'remove') {
-                      osc.type = 'sine'; osc.frequency.setValueAtTime(300, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.1)
-                      gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1)
-                      osc.start(); osc.stop(ctx.currentTime + 0.1)
-                    } else {
-                      osc.type = 'triangle'; osc.frequency.setValueAtTime(440, ctx.currentTime); osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.12); osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.24)
-                      gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.36)
-                      osc.start(); osc.stop(ctx.currentTime + 0.36)
-                    }
-                  }}>
-                    <span className="hns-sound-play">▶</span>
-                    <span className="hns-sound-name">{s.label}</span>
-                    <span className="hns-sound-desc">{s.desc}</span>
-                  </button>
+                  <div key={s.type} className="hns-sound-item">
+                    <div className="hns-sound-info">
+                      <span className="hns-sound-name">{s.label}</span>
+                      <span className="hns-sound-desc">{s.desc}</span>
+                    </div>
+                    <button className="hns-sound-btn" onClick={() => {
+                      const AudioContext = window.AudioContext || window.webkitAudioContext
+                      if (!AudioContext || volume === 0) return
+                      const ctx = new AudioContext()
+                      const osc = ctx.createOscillator()
+                      const gain = ctx.createGain()
+                      const vol = volume / 100
+                      osc.connect(gain); gain.connect(ctx.destination)
+                      if (s.type === 'add') {
+                        osc.type = 'sine'; osc.frequency.setValueAtTime(440, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1)
+                        gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1)
+                        osc.start(); osc.stop(ctx.currentTime + 0.1)
+                      } else if (s.type === 'remove') {
+                        osc.type = 'sine'; osc.frequency.setValueAtTime(300, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.1)
+                        gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1)
+                        osc.start(); osc.stop(ctx.currentTime + 0.1)
+                      } else {
+                        osc.type = 'triangle'; osc.frequency.setValueAtTime(440, ctx.currentTime); osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.12); osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.24)
+                        gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.36)
+                        osc.start(); osc.stop(ctx.currentTime + 0.36)
+                      }
+                    }}>
+                      <span className="hns-sound-play">▶</span>
+                      Test
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>

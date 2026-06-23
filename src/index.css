@@ -3538,37 +3538,69 @@ select {
 
 /* Sound cards */
 .hns-sound-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 16px 18px;
 }
 
-.hns-sound-card {
+.hns-sound-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition);
+}
+
+.hns-sound-item:hover {
+  border-color: var(--brand-primary);
+  background: color-mix(in srgb, var(--brand-primary) 5%, var(--bg-surface-2));
+}
+
+.hns-sound-info {
   display: flex;
   flex-direction: column;
+  gap: 4px;
+}
+
+.hns-sound-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.hns-sound-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.hns-sound-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 18px 10px;
-  border-radius: 13px;
-  border: 1.5px solid var(--border-color);
-  background: var(--bg-surface-2);
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  text-align: center;
-  font-family: "Outfit", sans-serif;
+  transition: all var(--transition);
 }
 
-.hns-sound-card:hover {
-  border-color: var(--brand-primary);
-  background: color-mix(in srgb, var(--brand-primary) 8%, var(--bg-surface));
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(99,102,241,0.15);
+.hns-sound-btn:hover {
+  background: var(--brand-primary);
+  color: white;
+  transform: translateY(-1px);
 }
 
-.hns-sound-play { font-size: 1.3rem; color: var(--brand-primary); }
-.hns-sound-name { font-size: 0.8rem; font-weight: 700; color: var(--text-primary); }
-.hns-sound-desc { font-size: 0.66rem; color: var(--text-muted); line-height: 1.3; }
+.hns-sound-play {
+  font-size: 0.8rem;
+}
 
 /* Currency grid */
 .hns-currency-grid { display: flex; flex-wrap: wrap; gap: 8px; }
