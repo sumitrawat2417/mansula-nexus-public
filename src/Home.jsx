@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment, useRef } from 'react'
 import { useBackButton } from './useBackButton.js'
 import { dbClearAll, dbGet, injectStressTestData } from './db.js'
 import { useAlert } from './AlertDialog.jsx'
-import { APP_VERSION, APP_BUILD_DATE, WHATS_NEW } from './appInfo.js'
+import { APP_VERSION, APP_BUILD_DATE, WHATS_NEW, ORG } from './appInfo.js'
 
 // ── Greeting ──
 function getGreeting() {
@@ -138,6 +138,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
   const [activeSection, setActiveSection] = useState('appearance')
   const [resetStep, setResetStep] = useState(0)
   const { alert: showAlert, confirm: showConfirm } = useAlert()
+  const [expandedItem, setExpandedItem] = useState(null)
 
   // Lock body scroll when settings modal is open
   useEffect(() => {
@@ -550,8 +551,8 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
             </div>
 
             <div className="hns-section-title" style={{ marginTop: 24 }}>What's New</div>
-            <div className="hns-card" style={{ padding: '14px 16px' }}>
-              {WHATS_NEW.map(({ icon: iconType, label }, i, arr) => {
+            <div className="hns-card" style={{ padding: '0' }}>
+              {WHATS_NEW.map(({ icon: iconType, label, detail }, i, arr) => {
                 const iconMap = {
                   analytics: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>,
                   lightning: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
@@ -559,18 +560,40 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                   star:      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>,
                   wrench:    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></svg>,
                 }
+                const isOpen = expandedItem === i
                 return (
-                  <div key={label} style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '8px 0',
-                    borderBottom: i < arr.length - 1 ? '1px solid var(--border-color)' : 'none',
-                  }}>
-                    <div style={{
-                      flexShrink: 0, width: 26, height: 26, borderRadius: 7,
-                      background: 'var(--bg-surface-2, rgba(99,102,241,0.07))',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>{iconMap[iconType] ?? iconMap.check}</div>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 500 }}>{label}</span>
+                  <div key={label} style={{ borderBottom: i < arr.length - 1 ? '1px solid var(--border-color)' : 'none' }}>
+                    {/* Header row — always visible */}
+                    <button
+                      onClick={() => setExpandedItem(isOpen ? null : i)}
+                      style={{
+                        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <div style={{
+                        flexShrink: 0, width: 26, height: 26, borderRadius: 7,
+                        background: 'var(--bg-surface-2, rgba(99,102,241,0.07))',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>{iconMap[iconType] ?? iconMap.check}</div>
+                      <span style={{ flex: 1, fontSize: '0.82rem', color: 'var(--text-primary)', fontWeight: 600 }}>{label}</span>
+                      <svg
+                        width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="var(--text-muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                        style={{ flexShrink: 0, transition: 'transform 0.2s ease', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                      ><polyline points="6 9 12 15 18 9" /></svg>
+                    </button>
+                    {/* Expandable detail */}
+                    {isOpen && (
+                      <div style={{
+                        padding: '0 16px 14px 52px',
+                        fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: '1.6',
+                        animation: 'slideDown 0.2s ease',
+                      }}>
+                        {detail}
+                      </div>
+                    )}
                   </div>
                 )
               })}
@@ -587,6 +610,35 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                 <div style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', fontWeight: 600, cursor: 'pointer' }}>Open Source Licenses</div>
               </div>
             </div>
+
+            <div className="hns-section-title" style={{ marginTop: 24 }}>Organisation</div>
+            <div className="hns-card" style={{ padding: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>{ORG.name}</div>
+                <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{ORG.tagline}</div>
+                <div style={{ height: 1, background: 'var(--border-color)', margin: '4px 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 500 }}>Website</span>
+                  <a href={ORG.website} target="_blank" rel="noreferrer"
+                    style={{ fontSize: '0.76rem', color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>
+                    mansula.in
+                  </a>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 500 }}>Support</span>
+                  <a href={`mailto:${ORG.support}`}
+                    style={{ fontSize: '0.76rem', color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>
+                    {ORG.support}
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ padding: '20px 4px 8px', textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              {ORG.copyright}<br />
+              ManSula Nexus {APP_VERSION}
+            </div>
+
           </div>
         )
 
