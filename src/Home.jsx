@@ -710,13 +710,13 @@ function HelpContent() {
             <div className="hns-legal-h">1. Acceptable Use</div>
             <p>You may use this App for lawful business purposes only. You are responsible for all data entered into the system, including product prices, customer records, and transaction history.</p>
             <div className="hns-legal-h">2. Data Responsibility</div>
-            <p>All data is stored locally on your device using browser storage (IndexedDB). The developers are not responsible for any data loss due to browser clearing, device failure, or accidental resets. We strongly recommend enabling Persistent Storage in the Permissions section.</p>
+            <p>All data is stored locally on your device using browser storage (IndexedDB). ManSula Technologies & ManSula DivLabs are not responsible for any data loss due to browser clearing, device failure, or accidental resets. We strongly recommend enabling Persistent Storage in the Permissions section.</p>
             <div className="hns-legal-h">3. No Warranty</div>
-            <p>The App is provided "as is" without any warranty, express or implied. The developers do not guarantee uninterrupted or error-free operation. The App may be updated, modified, or discontinued at any time.</p>
+            <p>The App is provided "as is" without any warranty, express or implied. ManSula Technologies & ManSula DivLabs do not guarantee uninterrupted or error-free operation. The App may be updated, modified, or discontinued at any time.</p>
             <div className="hns-legal-h">4. Limitation of Liability</div>
-            <p>The developers shall not be liable for any indirect, incidental, special, or consequential damages arising from your use or inability to use the App, including but not limited to business losses, data loss, or revenue loss.</p>
+            <p>ManSula Technologies & ManSula DivLabs shall not be liable for any indirect, incidental, special, or consequential damages arising from your use or inability to use the App, including but not limited to business losses, data loss, or revenue loss.</p>
             <div className="hns-legal-h">5. Intellectual Property</div>
-            <p>ManSula Nexus and its UI, design, and code are the property of the developer. You may not copy, redistribute, or reverse-engineer any part of the application without explicit written consent.</p>
+            <p>ManSula Nexus and its UI, design, and code are the property of ManSula Technologies & ManSula DivLabs. You may not copy, redistribute, or reverse-engineer any part of the application without explicit written consent.</p>
             <div className="hns-legal-h">6. Changes to Terms</div>
             <p>We may update these Terms from time to time. Continued use of the App after updates constitutes your acceptance of the revised terms. Major changes will be communicated through an in-app notice.</p>
           </div>
@@ -742,7 +742,7 @@ function HelpContent() {
             <div className="hns-legal-h"><Icon.Pencil style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Your Control</div>
             <p>You have full control over all your data. Use the "Reset App Data" option in Data & Storage settings to permanently and irreversibly delete all data from your device at any time.</p>
             <div className="hns-legal-h"><Icon.Mailbox style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Contact</div>
-            <p>For privacy-related questions or concerns, please reach out to the developer through the app's official channel or support contact.</p>
+            <p>For privacy-related questions or concerns, please reach out to ManSula Support through the app's official channels.</p>
           </div>
         </div>
       )}

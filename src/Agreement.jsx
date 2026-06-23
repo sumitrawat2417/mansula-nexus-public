@@ -22,7 +22,7 @@ const CLAUSES = [
     color: '#6366f1',
     content: `All business profiles, order histories, menu items, and inventory data are stored exclusively on the local storage of your device using IndexedDB. ManSula Nexus does not transmit, harvest, or replicate any of your business data to external cloud servers at any point.
 
-ManSula DevLabs shall bear no liability for any data loss arising from physical device damage, theft, accidental app data clearance, browser cache purging, or operating system updates that affect local storage. The user is solely responsible for regularly utilising the in-app JSON backup and restore functionality to safeguard their business data.
+ManSula Technologies & ManSula DivLabs shall bear no liability for any data loss arising from physical device damage, theft, accidental app data clearance, browser cache purging, or operating system updates that affect local storage. The user is solely responsible for regularly utilising the in-app JSON backup and restore functionality to safeguard their business data.
 
 By accepting these terms, the user acknowledges that data persistence is entirely dependent on the integrity of the local device and its storage subsystems.`,
   },
@@ -34,7 +34,7 @@ By accepting these terms, the user acknowledges that data persistence is entirel
     color: '#10b981',
     content: `ManSula Nexus functions strictly as a display interface that generates dynamic UPI QR strings and formatted payment requests. The platform is not a registered payment gateway, payment aggregator, banking correspondent, or financial institution as defined under the Payment and Settlement Systems Act, 2007.
 
-ManSula DevLabs assumes zero liability for failed UPI transactions, incorrect payment settlements, banking network outages, incorrect amount entries by the merchant, or any revenue loss resulting from payment processing failures by third-party UPI service providers (e.g., PhonePe, Google Pay, Paytm, BHIM).
+ManSula Technologies & ManSula DivLabs assumes zero liability for failed UPI transactions, incorrect payment settlements, banking network outages, incorrect amount entries by the merchant, or any revenue loss resulting from payment processing failures by third-party UPI service providers (e.g., PhonePe, Google Pay, Paytm, BHIM).
 
 The merchant acknowledges that all payment confirmations must be independently verified through their respective banking application or UPI service provider.`,
   },
@@ -48,7 +48,7 @@ The merchant acknowledges that all payment confirmations must be independently v
 
 The merchant is solely responsible for ensuring compliance with all applicable central, state, and local regulations, including but not limited to: Goods and Services Tax (GST) filing obligations, Food Safety and Standards Authority of India (FSSAI) licensing requirements, Shop and Establishment Act registrations, and any other trade-specific regulatory mandates.
 
-ManSula DevLabs does not provide tax advisory, legal counsel, or regulatory compliance consulting services.`,
+ManSula Technologies & ManSula DivLabs do not provide tax advisory, legal counsel, or regulatory compliance consulting services.`,
   },
   {
     id: 'privacy',
@@ -167,7 +167,7 @@ export default function Agreement({ onAccept }) {
               {agreed && <Ic.Check />}
             </div>
             <span>
-              I have read and agree to the <strong>Terms of Service</strong> and <strong>Privacy Policy</strong> of ManSula Nexus by ManSula DevLabs.
+              I have read and agree to the <strong>Terms of Service</strong> and <strong>Privacy Policy</strong> of ManSula Nexus by ManSula Technologies & ManSula DivLabs.
             </span>
           </label>
 
