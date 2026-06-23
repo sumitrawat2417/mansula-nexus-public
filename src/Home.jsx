@@ -1,7 +1,8 @@
-import { useState, useEffect, Fragment, useRef } from 'react'
+import { useState, useEffect, Fragment, useRef, useCallback } from 'react'
 import { useBackButton } from './useBackButton.js'
 import { dbClearAll, dbGet, injectStressTestData } from './db.js'
 import { useAlert } from './AlertDialog.jsx'
+import { useRegisterSW } from 'virtual:pwa-register/react'
 
 // ── Greeting ──
 function getGreeting() {
@@ -137,6 +138,54 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
   const [activeSection, setActiveSection] = useState('appearance')
   const [resetStep, setResetStep] = useState(0)
   const { alert: showAlert, confirm: showConfirm } = useAlert()
+  const [storageUsed, setStorageUsed] = useState('Calculating...')
+  const [updateState, setUpdateState] = useState('idle') // idle | checking | available | upToDate
+
+  const {
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW()
+
+  // Real storage estimate
+  useEffect(() => {
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+      navigator.storage.estimate().then(({ usage }) => {
+        if (usage == null) { setStorageUsed('N/A'); return }
+        if (usage < 1024) setStorageUsed(`${usage} B`)
+        else if (usage < 1024 * 1024) setStorageUsed(`${(usage / 1024).toFixed(1)} KB`)
+        else setStorageUsed(`${(usage / (1024 * 1024)).toFixed(2)} MB`)
+      }).catch(() => setStorageUsed('N/A'))
+    } else {
+      setStorageUsed('N/A')
+    }
+  }, [])
+
+  // Sync update state with SW
+  useEffect(() => {
+    if (needRefresh) setUpdateState('available')
+  }, [needRefresh])
+
+  const handleCheckUpdates = useCallback(async () => {
+    if (updateState === 'available') {
+      updateServiceWorker(true)
+      return
+    }
+    setUpdateState('checking')
+    try {
+      const reg = await navigator.serviceWorker.getRegistration()
+      if (reg) {
+        await reg.update()
+        // Give SW a moment to detect a new version
+        setTimeout(() => {
+          setUpdateState(prev => prev === 'checking' ? 'upToDate' : prev)
+        }, 2500)
+      } else {
+        setUpdateState('upToDate')
+      }
+    } catch {
+      setUpdateState('upToDate')
+    }
+  }, [updateState, updateServiceWorker])
 
   // Lock body scroll when settings modal is open
   useEffect(() => {
@@ -520,16 +569,24 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                 <button
                   style={{
                     padding: '8px 14px', fontSize: '0.75rem', borderRadius: '8px', fontWeight: 600,
-                    border: 'none', cursor: 'pointer',
-                    background: 'var(--bg-surface-2, rgba(99,102,241,0.08))',
-                    color: 'var(--text-primary)',
-                    transition: 'transform 0.15s ease',
+                    border: 'none', cursor: updateState === 'checking' ? 'default' : 'pointer',
+                    background: updateState === 'available'
+                      ? 'linear-gradient(135deg,#6366f1,#8b5cf6)'
+                      : 'var(--bg-surface-2, rgba(99,102,241,0.08))',
+                    color: updateState === 'available' ? 'white' : 'var(--text-primary)',
+                    transition: 'transform 0.15s ease, background 0.2s ease, color 0.2s ease',
+                    opacity: updateState === 'checking' ? 0.7 : 1,
                   }}
-                  onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+                  onMouseDown={e => { if (updateState !== 'checking') e.currentTarget.style.transform = 'scale(0.97)' }}
                   onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                  onClick={handleCheckUpdates}
+                  disabled={updateState === 'checking'}
                 >
-                  Check for Updates
+                  {updateState === 'checking' ? 'Checking…'
+                    : updateState === 'available' ? 'Install Update'
+                    : updateState === 'upToDate' ? '✓ Up to date'
+                    : 'Check for Updates'}
                 </button>
               </div>
             </div>
@@ -539,7 +596,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               {[
                 { label: 'Build', value: 'PWA · Offline-ready' },
                 { label: 'Last Updated', value: 'Today' },
-                { label: 'Storage Used', value: '< 1 MB' },
+                { label: 'Storage Used', value: storageUsed },
               ].map(({ label, value }) => (
                 <div key={label} className="hns-info-row">
                   <span className="hns-info-label">{label}</span>
