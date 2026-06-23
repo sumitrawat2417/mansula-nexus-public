@@ -580,52 +580,63 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
   return (
     <div className="hns-overlay" onClick={onClose}>
       <div className="hns-root" onClick={e => e.stopPropagation()} role="dialog" aria-label="Settings">
-        {/* ── Sidebar ── */}
-        <div className="hns-sidebar">
-          <div className="hns-sidebar-header">
-            <div className="hns-sidebar-logo">
+        
+        {/* ── TOP HEADER BAR ── */}
+        <header className="hns-topbar">
+          <div className="hns-topbar-left">
+            <div className="hns-topbar-logo">
               <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </div>
-            <div>
-              <div className="hns-sidebar-title">Settings</div>
-              <div className="hns-sidebar-sub">ManSula Nexus</div>
-            </div>
+            <div className="hns-topbar-heading">Settings</div>
+            <div className="hns-topbar-divider" />
+            <div className="hns-topbar-section">{activeInfo?.label}</div>
           </div>
-          <nav className="hns-nav">
-            {SETTINGS_SECTIONS.map(s => (
-              <button
-                key={s.id}
-                className={`hns-nav-item ${activeSection === s.id ? 'active' : ''}`}
-                onClick={() => setActiveSection(s.id)}
-                style={{ '--sec-color': s.color }}
-              >
-                <span className="hns-nav-icon"><s.icon /></span>
-                <span className="hns-nav-label">{s.label}</span>
-                {activeSection === s.id && <span className="hns-nav-dot" />}
-              </button>
-            ))}
-          </nav>
-          <button className="hns-close-btn" onClick={onClose} aria-label="Close Settings">
+          <button className="hns-topbar-close" onClick={onClose} aria-label="Close Settings">
             <Icon.X />
           </button>
-        </div>
+        </header>
 
-        {/* ── Main Content ── */}
-        <div className="hns-main">
-          <div className="hns-main-header">
-            <div className="hns-main-title-wrap">
-              <div className="hns-main-icon" style={{ background: `linear-gradient(135deg, ${activeInfo?.color}, ${activeInfo?.color}88)` }}>
-                {activeInfo && <activeInfo.icon />}
-              </div>
-              <div>
-                <div className="hns-main-title">{activeInfo?.label}</div>
-                <div className="hns-main-sub">Manage your {activeInfo?.label.toLowerCase()} preferences</div>
+        {/* ── BODY (Sidebar + Main) ── */}
+        <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+          {/* ── Sidebar ── */}
+          <div className="hns-sidebar">
+            <nav className="hns-nav">
+              {SETTINGS_SECTIONS.map((s, i) => (
+                <React.Fragment key={s.id}>
+                  {/* Group Labels */}
+                  {i === 0 && <div className="hns-nav-group-label">General</div>}
+                  {i === 3 && <div className="hns-nav-group-label">Advanced</div>}
+                  {i === 5 && <div className="hns-nav-group-label">Info</div>}
+
+                  <button
+                    className={`hns-nav-item ${activeSection === s.id ? 'active' : ''}`}
+                    onClick={() => setActiveSection(s.id)}
+                    style={{ '--sec-color': s.color }}
+                  >
+                    <span className="hns-nav-icon-wrap"><s.icon /></span>
+                    <span className="hns-nav-label">{s.label}</span>
+                  </button>
+                </React.Fragment>
+              ))}
+            </nav>
+          </div>
+
+          {/* ── Main Content ── */}
+          <div className="hns-main">
+            <div className="hns-main-header">
+              <div className="hns-main-title-wrap">
+                <div className="hns-main-icon" style={{ background: `linear-gradient(135deg, ${activeInfo?.color}, ${activeInfo?.color}88)` }}>
+                  {activeInfo && <activeInfo.icon />}
+                </div>
+                <div>
+                  <div className="hns-main-title">{activeInfo?.label}</div>
+                  <div className="hns-main-sub">Manage your {activeInfo?.label.toLowerCase()} preferences</div>
+                </div>
               </div>
             </div>
-            <button className="hns-main-close" onClick={onClose} aria-label="Close"><Icon.X /></button>
-          </div>
-          <div className="hns-main-body">
-            {renderContent()}
+            <div className="hns-main-body">
+              {renderContent()}
+            </div>
           </div>
         </div>
       </div>
