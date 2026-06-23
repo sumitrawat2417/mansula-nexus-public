@@ -38,12 +38,18 @@ export default function ReloadPrompt() {
           {needRefresh ? (
             <>
               <strong>Nexus 1.2.0 available</strong>
-              <p>Install now for the latest improvements.</p>
+              <div className="mn-reload-changelog">
+                <p>• Faster startup</p>
+                <p>• Analytics improvements</p>
+                <p>• Bug fixes</p>
+              </div>
             </>
           ) : (
             <>
               <strong>Ready for Offline</strong>
-              <p>The app is cached for offline use.</p>
+              <div className="mn-reload-changelog">
+                <p>The app is cached for offline use.</p>
+              </div>
             </>
           )}
         </div>
