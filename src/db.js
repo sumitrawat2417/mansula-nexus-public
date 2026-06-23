@@ -303,6 +303,7 @@ export async function restoreOrdersBackup(file) {
 export async function clearAllOrderRecords() {
   try {
     const db = await openDB()
+    await dbSet('mn-active-orders', [])
     return new Promise((resolve) => {
       const tx = db.transaction('orders', 'readwrite')
       tx.objectStore('orders').clear()

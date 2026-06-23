@@ -1137,13 +1137,13 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
         ...existingUdhaar,
         customerId: customerIdToLink,
         amount: enrichedOrder.total,
-        items: itemsStr
+        reason: itemsStr
       } : {
         udhaarId: 'udh-' + Date.now(),
         customerId: customerIdToLink,
         amount: enrichedOrder.total,
         date: new Date().toISOString(),
-        items: itemsStr,
+        reason: itemsStr,
         isCleared: false,
         clearedAt: null,
         clearedAmount: 0,
