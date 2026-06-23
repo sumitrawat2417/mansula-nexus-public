@@ -3674,6 +3674,25 @@ select {
 
 .hns-perm-info-box svg { flex-shrink: 0; margin-top: 2px; }
 
+.hns-perm-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hns-perm-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--brand-primary) 8%, var(--bg-surface-2));
+  color: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hns-perm-icon svg { width: 18px; height: 18px; }
+
 .hns-perm-row {
   display: flex;
   align-items: center;

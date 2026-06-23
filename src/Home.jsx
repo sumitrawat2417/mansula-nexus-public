@@ -32,6 +32,11 @@ const Icon = {
   Reset:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>,
   Warn:      () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
   OrderRec:  () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>,
+  Camera:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>,
+  Bell:      () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+  Database:  () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
+  Download:  () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+  ExtLink:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
 }
 
 // ── Tool definitions ──
@@ -91,14 +96,17 @@ const SETTINGS_SECTIONS = [
   },
 ]
 
-function PermRow({ label, desc, state, onAllow }) {
+function PermRow({ icon: IconCmp, label, desc, state, onAllow }) {
   const isGranted = state === 'granted'
   const isDenied = state === 'denied'
   return (
     <div className="hns-perm-row">
-      <div>
-        <div className="hns-perm-label">{label}</div>
-        <div className="hns-perm-desc">{desc}</div>
+      <div className="hns-perm-info">
+        {IconCmp && <div className="hns-perm-icon"><IconCmp /></div>}
+        <div>
+          <div className="hns-perm-label">{label}</div>
+          <div className="hns-perm-desc">{desc}</div>
+        </div>
       </div>
       <button
         className={`hns-perm-btn ${isGranted ? 'granted' : isDenied ? 'denied' : ''}`}
@@ -409,12 +417,12 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               Manage what ManSula Nexus can access on your device. Denied permissions must be reset from browser site settings.
             </div>
             <div className="hns-card">
-              <PermRow label="📷 Camera" desc="For barcode & QR scanning at checkout" state={perms.camera} onAllow={() => requestPerm('camera')} />
-              <PermRow label="🔔 Notifications" desc="For order alerts & background updates" state={perms.notifications} onAllow={() => requestPerm('notifications')} />
-              <PermRow label="🔊 Sound" desc="For chimes, alerts & checkout sounds" state={perms.sound} onAllow={() => requestPerm('sound')} />
-              <PermRow label="💾 Persistent Storage" desc="Prevents browser from clearing app data" state={perms.files} onAllow={() => requestPerm('files')} />
-              <PermRow label="⬇️ Auto Downloads" desc="For saving reports & backup exports" state={perms.downloads} onAllow={() => requestPerm('downloads')} />
-              <PermRow label="🔗 Pop-ups & Redirects" desc="For printing receipts & external links" state={perms.popups} onAllow={() => requestPerm('popups')} />
+              <PermRow icon={Icon.Camera} label="Camera" desc="For barcode & QR scanning at checkout" state={perms.camera} onAllow={() => requestPerm('camera')} />
+              <PermRow icon={Icon.Bell} label="Notifications" desc="For order alerts & background updates" state={perms.notifications} onAllow={() => requestPerm('notifications')} />
+              <PermRow icon={Icon.Volume} label="Sound" desc="For chimes, alerts & checkout sounds" state={perms.sound} onAllow={() => requestPerm('sound')} />
+              <PermRow icon={Icon.Database} label="Persistent Storage" desc="Prevents browser from clearing app data" state={perms.files} onAllow={() => requestPerm('files')} />
+              <PermRow icon={Icon.Download} label="Auto Downloads" desc="For saving reports & backup exports" state={perms.downloads} onAllow={() => requestPerm('downloads')} />
+              <PermRow icon={Icon.ExtLink} label="Pop-ups & Redirects" desc="For printing receipts & external links" state={perms.popups} onAllow={() => requestPerm('popups')} />
             </div>
           </div>
         )
