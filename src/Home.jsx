@@ -479,100 +479,8 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
           </div>
         )
 
-      case 'help': {
-        const [openFaq, setOpenFaq] = useState(null)
-        const [helpTab, setHelpTab] = useState('faq')
-        const faqs = [
-          { q: 'How do I add items to a sale?', a: 'Open the POS from the home screen. Tap any item from your menu to add it to the current order. You can adjust quantities using the +/− buttons on the cart.' },
-          { q: 'How do I create a new product/menu item?', a: 'Go to Business Profile → Menu. Tap the + button to add a new item. Fill in the name, price, and category, then save.' },
-          { q: 'What is Udhaar?', a: 'Udhaar is a credit/debit tracking system. When a customer pays later, select "Udhaar" at checkout and link it to a customer profile. Track dues in the Customers section.' },
-          { q: 'How do I edit or delete a past order?', a: 'Open Order Records, find the order, and tap the edit icon. Change the date/time, or tap "Edit in POS" to modify items. To delete, tap the trash icon.' },
-          { q: 'How do I export my data and reports?', a: 'Go to Order Records and tap the export icon (top right). You can export a JSON backup or open the data export modal.' },
-          { q: 'Is my data safe if I close the browser?', a: 'Yes. All data is stored in your browser\'s IndexedDB and persists across sessions. Enable Persistent Storage from Permissions settings for extra protection.' },
-          { q: 'How do I reset the order counter to #1?', a: 'Go to Order Records → Export/Data modal → Wipe Order Records. This clears all saved orders and resets the counter back to #1.' },
-          { q: 'How do I track inventory?', a: 'Open the Inventory tool from the home screen. Add stock, log purchases from suppliers, and the system tracks current stock levels automatically.' },
-          { q: 'Can I use this app offline?', a: 'Yes! ManSula Nexus is a Progressive Web App (PWA) and works fully offline once loaded. All data stays on your device.' },
-          { q: 'How do I install this as an app on my phone?', a: 'On Android (Chrome): tap the three dots → Install app. On iOS (Safari): tap Share → Add to Home Screen. The app will work just like a native app.' },
-          { q: 'Can multiple people use the same account?', a: 'Currently, ManSula Nexus stores data locally per browser/device. Multi-device sync and staff accounts are planned for a future update.' },
-          { q: 'How do I change the currency?', a: 'Go to Settings → Billing & Region. Select your preferred currency from the available options. It applies instantly across the POS.' },
-        ]
-        return (
-          <div className="hns-content-area">
-            <div className="hns-help-tabs">
-              {[
-                { id: 'faq', label: '❓ FAQ' },
-                { id: 'terms', label: '📄 Terms of Use' },
-                { id: 'privacy', label: '🔒 Privacy Policy' },
-              ].map(t => (
-                <button key={t.id} className={`hns-help-tab ${helpTab === t.id ? 'active' : ''}`} onClick={() => setHelpTab(t.id)}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-
-            {helpTab === 'faq' && (
-              <div className="hns-faq-list">
-                <div className="hns-section-title" style={{ marginBottom: 12 }}>Frequently Asked Questions</div>
-                {faqs.map((f, i) => (
-                  <div key={i} className={`hns-faq-item ${openFaq === i ? 'open' : ''}`}>
-                    <button className="hns-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                      <span>{f.q}</span>
-                      <span className="hns-faq-chevron">{openFaq === i ? '▲' : '▼'}</span>
-                    </button>
-                    {openFaq === i && <div className="hns-faq-a">{f.a}</div>}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {helpTab === 'terms' && (
-              <div className="hns-legal-card">
-                <div className="hns-legal-section-title">📄 Terms of Use</div>
-                <div className="hns-legal-body">
-                  <p><strong>Last updated:</strong> June 2026</p>
-                  <p>By using ManSula Nexus ("the App"), you agree to the following terms and conditions. Please read them carefully.</p>
-                  <div className="hns-legal-h">1. Acceptable Use</div>
-                  <p>You may use this App for lawful business purposes only. You are responsible for all data entered into the system, including product prices, customer records, and transaction history.</p>
-                  <div className="hns-legal-h">2. Data Responsibility</div>
-                  <p>All data is stored locally on your device using browser storage (IndexedDB). The developers are not responsible for any data loss due to browser clearing, device failure, or accidental resets. We strongly recommend enabling Persistent Storage in the Permissions section.</p>
-                  <div className="hns-legal-h">3. No Warranty</div>
-                  <p>The App is provided "as is" without any warranty, express or implied. The developers do not guarantee uninterrupted or error-free operation. The App may be updated, modified, or discontinued at any time.</p>
-                  <div className="hns-legal-h">4. Limitation of Liability</div>
-                  <p>The developers shall not be liable for any indirect, incidental, special, or consequential damages arising from your use or inability to use the App, including but not limited to business losses, data loss, or revenue loss.</p>
-                  <div className="hns-legal-h">5. Intellectual Property</div>
-                  <p>ManSula Nexus and its UI, design, and code are the property of the developer. You may not copy, redistribute, or reverse-engineer any part of the application without explicit written consent.</p>
-                  <div className="hns-legal-h">6. Changes to Terms</div>
-                  <p>We may update these Terms from time to time. Continued use of the App after updates constitutes your acceptance of the revised terms. Major changes will be communicated through an in-app notice.</p>
-                </div>
-              </div>
-            )}
-
-            {helpTab === 'privacy' && (
-              <div className="hns-legal-card">
-                <div className="hns-legal-section-title">🔒 Privacy Policy</div>
-                <div className="hns-legal-body">
-                  <p><strong>Last updated:</strong> June 2026</p>
-                  <p>ManSula Nexus is designed with <strong>privacy-first principles</strong>. We do not collect, store, or transmit any of your personal or business data to external servers.</p>
-                  <div className="hns-legal-h">📦 Data Storage</div>
-                  <p>All data — including orders, customer records, inventory, products, and settings — is stored entirely on <strong>your device</strong> using browser IndexedDB and localStorage. No data is ever sent to any external server or cloud service.</p>
-                  <div className="hns-legal-h">🌐 Network Usage</div>
-                  <p>The App loads fonts (Outfit) from Google Fonts on first launch. No analytics, tracking scripts, cookies, advertising SDKs, or third-party monitoring services are included in this application.</p>
-                  <div className="hns-legal-h">📷 Camera Access</div>
-                  <p>If you grant camera access, it is used exclusively for barcode/QR scanning within the POS screen. No images are captured, stored, or transmitted. Camera access can be revoked from your browser's site settings at any time.</p>
-                  <div className="hns-legal-h">🔔 Notifications</div>
-                  <p>Notification permission is entirely optional. It is only used to display local in-app alerts for order updates. No push notifications are sent through any external service or server.</p>
-                  <div className="hns-legal-h">💾 Persistent Storage</div>
-                  <p>Enabling Persistent Storage requests that your browser protect app data from being automatically cleared. This is a local browser permission — no data leaves your device.</p>
-                  <div className="hns-legal-h">✏️ Your Control</div>
-                  <p>You have full control over all your data. Use the "Reset App Data" option in Data & Storage settings to permanently and irreversibly delete all data from your device at any time.</p>
-                  <div className="hns-legal-h">📬 Contact</div>
-                  <p>For privacy-related questions or concerns, please reach out to the developer through the app's official channel or support contact.</p>
-                </div>
-              </div>
-            )}
-          </div>
-        )
-      }
+      case 'help':
+        return <HelpContent />
 
       default: return null
     }
@@ -638,6 +546,101 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function HelpContent() {
+  const [openFaq, setOpenFaq] = useState(null)
+  const [helpTab, setHelpTab] = useState('faq')
+  const faqs = [
+    { q: 'How do I add items to a sale?', a: 'Open the POS from the home screen. Tap any item from your menu to add it to the current order. You can adjust quantities using the +/− buttons on the cart.' },
+    { q: 'How do I create a new product/menu item?', a: 'Go to Business Profile → Menu. Tap the + button to add a new item. Fill in the name, price, and category, then save.' },
+    { q: 'What is Udhaar?', a: 'Udhaar is a credit/debit tracking system. When a customer pays later, select "Udhaar" at checkout and link it to a customer profile. Track dues in the Customers section.' },
+    { q: 'How do I edit or delete a past order?', a: 'Open Order Records, find the order, and tap the edit icon. Change the date/time, or tap "Edit in POS" to modify items. To delete, tap the trash icon.' },
+    { q: 'How do I export my data and reports?', a: 'Go to Order Records and tap the export icon (top right). You can export a JSON backup or open the data export modal.' },
+    { q: 'Is my data safe if I close the browser?', a: 'Yes. All data is stored in your browser\'s IndexedDB and persists across sessions. Enable Persistent Storage from Permissions settings for extra protection.' },
+    { q: 'How do I reset the order counter to #1?', a: 'Go to Order Records → Export/Data modal → Wipe Order Records. This clears all saved orders and resets the counter back to #1.' },
+    { q: 'How do I track inventory?', a: 'Open the Inventory tool from the home screen. Add stock, log purchases from suppliers, and the system tracks current stock levels automatically.' },
+    { q: 'Can I use this app offline?', a: 'Yes! ManSula Nexus is a Progressive Web App (PWA) and works fully offline once loaded. All data stays on your device.' },
+    { q: 'How do I install this as an app on my phone?', a: 'On Android (Chrome): tap the three dots → Install app. On iOS (Safari): tap Share → Add to Home Screen. The app will work just like a native app.' },
+    { q: 'Can multiple people use the same account?', a: 'Currently, ManSula Nexus stores data locally per browser/device. Multi-device sync and staff accounts are planned for a future update.' },
+    { q: 'How do I change the currency?', a: 'Go to Settings → Billing & Region. Select your preferred currency from the available options. It applies instantly across the POS.' },
+  ]
+  return (
+    <div className="hns-content-area">
+      <div className="hns-help-tabs">
+        {[
+          { id: 'faq', label: '❓ FAQ' },
+          { id: 'terms', label: '📄 Terms of Use' },
+          { id: 'privacy', label: '🔒 Privacy Policy' },
+        ].map(t => (
+          <button key={t.id} className={`hns-help-tab ${helpTab === t.id ? 'active' : ''}`} onClick={() => setHelpTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {helpTab === 'faq' && (
+        <div className="hns-faq-list">
+          <div className="hns-section-title" style={{ marginBottom: 12 }}>Frequently Asked Questions</div>
+          {faqs.map((f, i) => (
+            <div key={i} className={`hns-faq-item ${openFaq === i ? 'open' : ''}`}>
+              <button className="hns-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                <span>{f.q}</span>
+                <span className="hns-faq-chevron">{openFaq === i ? '▲' : '▼'}</span>
+              </button>
+              {openFaq === i && <div className="hns-faq-a">{f.a}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {helpTab === 'terms' && (
+        <div className="hns-legal-card">
+          <div className="hns-legal-section-title">📄 Terms of Use</div>
+          <div className="hns-legal-body">
+            <p><strong>Last updated:</strong> June 2026</p>
+            <p>By using ManSula Nexus ("the App"), you agree to the following terms and conditions. Please read them carefully.</p>
+            <div className="hns-legal-h">1. Acceptable Use</div>
+            <p>You may use this App for lawful business purposes only. You are responsible for all data entered into the system, including product prices, customer records, and transaction history.</p>
+            <div className="hns-legal-h">2. Data Responsibility</div>
+            <p>All data is stored locally on your device using browser storage (IndexedDB). The developers are not responsible for any data loss due to browser clearing, device failure, or accidental resets. We strongly recommend enabling Persistent Storage in the Permissions section.</p>
+            <div className="hns-legal-h">3. No Warranty</div>
+            <p>The App is provided "as is" without any warranty, express or implied. The developers do not guarantee uninterrupted or error-free operation. The App may be updated, modified, or discontinued at any time.</p>
+            <div className="hns-legal-h">4. Limitation of Liability</div>
+            <p>The developers shall not be liable for any indirect, incidental, special, or consequential damages arising from your use or inability to use the App, including but not limited to business losses, data loss, or revenue loss.</p>
+            <div className="hns-legal-h">5. Intellectual Property</div>
+            <p>ManSula Nexus and its UI, design, and code are the property of the developer. You may not copy, redistribute, or reverse-engineer any part of the application without explicit written consent.</p>
+            <div className="hns-legal-h">6. Changes to Terms</div>
+            <p>We may update these Terms from time to time. Continued use of the App after updates constitutes your acceptance of the revised terms. Major changes will be communicated through an in-app notice.</p>
+          </div>
+        </div>
+      )}
+
+      {helpTab === 'privacy' && (
+        <div className="hns-legal-card">
+          <div className="hns-legal-section-title">🔒 Privacy Policy</div>
+          <div className="hns-legal-body">
+            <p><strong>Last updated:</strong> June 2026</p>
+            <p>ManSula Nexus is designed with <strong>privacy-first principles</strong>. We do not collect, store, or transmit any of your personal or business data to external servers.</p>
+            <div className="hns-legal-h">📦 Data Storage</div>
+            <p>All data — including orders, customer records, inventory, products, and settings — is stored entirely on <strong>your device</strong> using browser IndexedDB and localStorage. No data is ever sent to any external server or cloud service.</p>
+            <div className="hns-legal-h">🌐 Network Usage</div>
+            <p>The App loads fonts (Outfit) from Google Fonts on first launch. No analytics, tracking scripts, cookies, advertising SDKs, or third-party monitoring services are included in this application.</p>
+            <div className="hns-legal-h">📷 Camera Access</div>
+            <p>If you grant camera access, it is used exclusively for barcode/QR scanning within the POS screen. No images are captured, stored, or transmitted. Camera access can be revoked from your browser's site settings at any time.</p>
+            <div className="hns-legal-h">🔔 Notifications</div>
+            <p>Notification permission is entirely optional. It is only used to display local in-app alerts for order updates. No push notifications are sent through any external service or server.</p>
+            <div className="hns-legal-h">💾 Persistent Storage</div>
+            <p>Enabling Persistent Storage requests that your browser protect app data from being automatically cleared. This is a local browser permission — no data leaves your device.</p>
+            <div className="hns-legal-h">✏️ Your Control</div>
+            <p>You have full control over all your data. Use the "Reset App Data" option in Data & Storage settings to permanently and irreversibly delete all data from your device at any time.</p>
+            <div className="hns-legal-h">📬 Contact</div>
+            <p>For privacy-related questions or concerns, please reach out to the developer through the app's official channel or support contact.</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
