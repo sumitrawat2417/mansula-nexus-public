@@ -6,7 +6,7 @@ import { useAlert } from './AlertDialog.jsx'
 // ── Greeting ──
 function getGreeting() {
   const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
+  if (h < 12) return 'Hlo Good morning'
   if (h < 17) return 'Good afternoon'
   return 'Good evening'
 }

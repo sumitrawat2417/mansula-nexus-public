@@ -13860,12 +13860,12 @@ select {
 }
 /* -- Reload Prompt -- */
 .mn-reload-prompt {
-  position: fixed; bottom: 84px; left: 16px; right: 16px; max-width: 290px; margin: 0 auto;
+  position: fixed; bottom: 84px; left: 16px; right: 16px; max-width: 340px; margin: 0 auto;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-radius: 14px; padding: 12px 14px;
+  border-radius: 14px; padding: 14px 18px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
-  display: flex; flex-direction: column; gap: 8px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 12px; z-index: 9999;
   animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 [data-theme='dark'] .mn-reload-prompt {
@@ -13874,27 +13874,24 @@ select {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .mn-reload-header {
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: flex-start; gap: 10px;
 }
 .mn-reload-icon {
   color: var(--brand-primary); display: flex; align-items: center; justify-content: center;
+  margin-top: 2px;
 }
-.mn-reload-text { flex: 1; display: flex; flex-direction: column; gap: 0px; }
-.mn-reload-text strong { font-size: 0.88rem; color: var(--text-primary); font-weight: 700; letter-spacing: -0.01em; }
-
-.mn-reload-changelog {
-  margin-top: 4px;
-}
-.mn-reload-changelog p { font-size: 0.72rem; color: var(--text-secondary); margin: 0; line-height: 1.4; }
+.mn-reload-text { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.mn-reload-text strong { font-size: 0.9rem; color: var(--text-primary); font-weight: 700; letter-spacing: -0.01em; }
+.mn-reload-text p { font-size: 0.78rem; color: var(--text-secondary); margin: 0; line-height: 1.4; }
 
 .mn-reload-actions {
-  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  display: flex; align-items: center; justify-content: flex-end; gap: 12px;
 }
 .mn-reload-btn {
-  font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; border: none; background: transparent;
+  font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; border: none; background: transparent;
 }
 .mn-reload-btn.install {
-  background: var(--brand-primary); color: white; padding: 6px 14px; border-radius: 8px;
+  background: var(--brand-primary); color: white; padding: 8px 16px; border-radius: 8px;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 .mn-reload-btn.install:hover {

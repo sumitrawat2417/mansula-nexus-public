@@ -38,18 +38,12 @@ export default function ReloadPrompt() {
           {needRefresh ? (
             <>
               <strong>Nexus 1.2.0 available</strong>
-              <div className="mn-reload-changelog">
-                <p>• Faster startup</p>
-                <p>• Analytics improvements</p>
-                <p>• Bug fixes</p>
-              </div>
+              <p>Install now for the latest improvements.</p>
             </>
           ) : (
             <>
               <strong>Ready for Offline</strong>
-              <div className="mn-reload-changelog">
-                <p>The app is cached for offline use.</p>
-              </div>
+              <p>The app is cached for offline use.</p>
             </>
           )}
         </div>
@@ -61,7 +55,7 @@ export default function ReloadPrompt() {
           </button>
         )}
         <button className="mn-reload-btn close" onClick={close}>
-          Not Now
+          {needRefresh ? 'Not Now' : 'Got it'}
         </button>
       </div>
     </div>
