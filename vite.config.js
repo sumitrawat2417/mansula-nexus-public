@@ -34,7 +34,7 @@ export default defineConfig({
       }
     })
   ],
-  base: './',
+  base: '/',
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
