@@ -527,17 +527,6 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
 
           {/* ── Main Content ── */}
           <div className="hns-main">
-            <div className="hns-main-header">
-              <div className="hns-main-title-wrap">
-                <div className="hns-main-icon" style={{ background: `linear-gradient(135deg, ${activeInfo?.color}, ${activeInfo?.color}88)` }}>
-                  {activeInfo && <activeInfo.icon />}
-                </div>
-                <div>
-                  <div className="hns-main-title">{activeInfo?.label}</div>
-                  <div className="hns-main-sub">Manage your {activeInfo?.label.toLowerCase()} preferences</div>
-                </div>
-              </div>
-            </div>
             <div className="hns-main-body">
               {renderContent()}
             </div>
