@@ -10584,47 +10584,105 @@ select {
   line-height: 1.5;
 }
 
-.hns-support-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 14px;
+.hns-support-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  animation: fadeInOverlay 0.2s ease;
 }
-.hns-support-btn {
+
+.hns-support-sheet {
+  width: 100%;
+  max-width: 500px;
+  background: var(--bg-surface);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 30px;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hns-support-sheet-drag {
+  width: 40px;
+  height: 5px;
+  background: var(--border-color);
+  border-radius: 4px;
+  margin: 0 auto 20px;
+}
+
+.hns-support-list {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.hns-support-list-btn {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 10px;
-  border-radius: 14px;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 16px;
   border: 1.5px solid transparent;
-  font-size: 0.78rem;
+  background: var(--bg-surface-2);
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: var(--bg-surface-2);
+  color: var(--text-primary);
 }
-.hns-support-btn.whatsapp {
-  background: rgba(37, 211, 102, 0.08);
-  color: #128C7E;
+
+.hns-support-list-btn.whatsapp {
   border-color: rgba(37, 211, 102, 0.25);
+  background: rgba(37, 211, 102, 0.05);
 }
-.hns-support-btn.whatsapp:hover { background: rgba(37, 211, 102, 0.15); }
+.hns-support-list-btn.whatsapp .icon {
+  color: #128C7E;
+  background: rgba(37, 211, 102, 0.15);
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+}
 
-.hns-support-btn.call {
-  background: rgba(59, 130, 246, 0.08);
-  color: #2563eb;
+.hns-support-list-btn.call {
   border-color: rgba(59, 130, 246, 0.25);
+  background: rgba(59, 130, 246, 0.05);
 }
-.hns-support-btn.call:hover { background: rgba(59, 130, 246, 0.15); }
+.hns-support-list-btn.call .icon {
+  color: #2563eb;
+  background: rgba(59, 130, 246, 0.15);
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+}
 
-.hns-support-btn.email {
-  background: rgba(107, 114, 128, 0.08);
-  color: #4b5563;
+.hns-support-list-btn.email {
   border-color: rgba(107, 114, 128, 0.25);
+  background: rgba(107, 114, 128, 0.05);
 }
-.hns-support-btn.email:hover { background: rgba(107, 114, 128, 0.15); }
+.hns-support-list-btn.email .icon {
+  color: #4b5563;
+  background: rgba(107, 114, 128, 0.15);
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+}
+
+.hns-support-sheet-cancel {
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  margin-top: 16px;
+  border: none;
+  cursor: pointer;
+}
 
 /* --- Permissions --- */
 .hns-perm-info-box {

@@ -587,6 +587,7 @@ function HelpContent() {
   const [openFaq, setOpenFaq] = useState(null)
   const [helpTab, setHelpTab] = useState('faq')
   const [faqSearch, setFaqSearch] = useState('')
+  const [showSupportSheet, setShowSupportSheet] = useState(false)
   const faqs = [
     { q: 'How do I add items to a sale?', a: 'Open the POS from the home screen. Tap any item from your menu to add it to the current order. You can adjust quantities using the +/− buttons on the cart.' },
     { q: 'How do I create a new product/menu item?', a: 'Go to Business Profile → Menu. Tap the + button to add a new item. Fill in the name, price, and category, then save.' },
@@ -650,30 +651,41 @@ function HelpContent() {
             </div>
           )}
           <div style={{ marginTop: 24, padding: '20px 0', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Can't find what you're looking for?</p>
-            <div className="hns-support-grid">
-              <button 
-                className="hns-support-btn whatsapp" 
-                onClick={() => window.open('https://wa.me/919876543210', '_blank')}
-              >
-                <Icon.Message style={{ width: 22, height: 22 }} /> 
-                WhatsApp
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 10 }}>Can't find what you're looking for?</p>
+            <button 
+              className="hns-btn" 
+              style={{ width: '100%', maxWidth: '220px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              onClick={() => setShowSupportSheet(true)}
+            >
+              <Icon.Mailbox style={{ width: 16, height: 16 }} /> Contact Support
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showSupportSheet && (
+        <div className="hns-support-sheet-overlay" onClick={() => setShowSupportSheet(false)}>
+          <div className="hns-support-sheet" onClick={e => e.stopPropagation()}>
+            <div className="hns-support-sheet-drag" />
+            <h3 style={{ marginTop: 0, marginBottom: '8px', fontSize: '1.2rem', textAlign: 'center' }}>Contact Support</h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center', marginBottom: 0 }}>Choose how you'd like to reach us.</p>
+            <div className="hns-support-list">
+              <button className="hns-support-list-btn whatsapp" onClick={() => { setShowSupportSheet(false); window.open('https://wa.me/919876543210', '_blank'); }}>
+                <div className="icon"><Icon.Message style={{ width: 22, height: 22 }} /></div>
+                <span>WhatsApp Support</span>
               </button>
-              <button 
-                className="hns-support-btn call" 
-                onClick={() => window.location.href = 'tel:+919876543210'}
-              >
-                <Icon.Phone style={{ width: 22, height: 22 }} /> 
-                Call Us
+              <button className="hns-support-list-btn call" onClick={() => { setShowSupportSheet(false); window.location.href = 'tel:+919876543210'; }}>
+                <div className="icon"><Icon.Phone style={{ width: 22, height: 22 }} /></div>
+                <span>Call Us</span>
               </button>
-              <button 
-                className="hns-support-btn email" 
-                onClick={() => window.location.href = 'mailto:support@mansulanexus.com?subject=Support%20Request'}
-              >
-                <Icon.Mailbox style={{ width: 22, height: 22 }} /> 
-                Email
+              <button className="hns-support-list-btn email" onClick={() => { setShowSupportSheet(false); window.location.href = 'mailto:support@mansulanexus.com?subject=Support%20Request'; }}>
+                <div className="icon"><Icon.Mailbox style={{ width: 22, height: 22 }} /></div>
+                <span>Email Support</span>
               </button>
             </div>
+            <button className="hns-support-sheet-cancel" onClick={() => setShowSupportSheet(false)}>
+              Cancel
+            </button>
           </div>
         </div>
       )}
