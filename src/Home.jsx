@@ -706,19 +706,49 @@ function HelpContent() {
           <div className="hns-legal-section-title"><Icon.Doc style={{width: 18, height: 18, marginRight: 8, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Terms of Use</div>
           <div className="hns-legal-body">
             <p><strong>Last updated:</strong> June 2026</p>
-            <p>By using ManSula Nexus ("the App"), you agree to the following terms and conditions. Please read them carefully.</p>
-            <div className="hns-legal-h">1. Acceptable Use</div>
-            <p>You may use this App for lawful business purposes only. You are responsible for all data entered into the system, including product prices, customer records, and transaction history.</p>
-            <div className="hns-legal-h">2. Data Responsibility</div>
-            <p>All data is stored locally on your device using browser storage (IndexedDB). ManSula Technologies & ManSula DivLabs are not responsible for any data loss due to browser clearing, device failure, or accidental resets. We strongly recommend enabling Persistent Storage in the Permissions section.</p>
-            <div className="hns-legal-h">3. No Warranty</div>
-            <p>The App is provided "as is" without any warranty, express or implied. ManSula Technologies & ManSula DivLabs do not guarantee uninterrupted or error-free operation. The App may be updated, modified, or discontinued at any time.</p>
-            <div className="hns-legal-h">4. Limitation of Liability</div>
-            <p>ManSula Technologies & ManSula DivLabs shall not be liable for any indirect, incidental, special, or consequential damages arising from your use or inability to use the App, including but not limited to business losses, data loss, or revenue loss.</p>
-            <div className="hns-legal-h">5. Intellectual Property</div>
+            <p>ManSula Nexus is an offline-first Business Operating System (BOS) that helps businesses manage sales, inventory, customers, staff, analytics, reporting, and operations from a unified platform. By using ManSula Nexus ("the BOS"), you agree to the following terms and conditions. Please read them carefully.</p>
+            
+            <div className="hns-legal-h">1. License Grant</div>
+            <p>ManSula Technologies & ManSula DivLabs grant you a limited, non-exclusive, non-transferable, revocable license to use ManSula Nexus in accordance with these Terms.</p>
+            
+            <div className="hns-legal-h">2. Acceptable Use</div>
+            <p>You may use this BOS for lawful business purposes only. You are responsible for all data entered into the system, including product prices, customer records, and transaction history.</p>
+
+            <div className="hns-legal-h">3. Accounts & Cloud Services</div>
+            <p>Certain features may require an account, internet connectivity, cloud storage, or subscription. Users are responsible for maintaining the security of their credentials and account access.</p>
+
+            <div className="hns-legal-h">4. Data Responsibility</div>
+            <p>Users are responsible for maintaining accurate business records and backups. While ManSula Nexus may provide backup, export, synchronization, or cloud-storage features, ManSula Technologies & ManSula DivLabs cannot guarantee recovery of lost, corrupted, or deleted data.</p>
+            
+            <div className="hns-legal-h">5. Reports & Analytics</div>
+            <p>Reports, dashboards, analytics, forecasts, summaries, and recommendations are provided for informational purposes only and may contain inaccuracies. Users are solely responsible for validating information before making business decisions.</p>
+            
+            <div className="hns-legal-h">6. AI Features</div>
+            <p>AI-generated content, recommendations, forecasts, summaries, and insights are provided as assistance tools only and should not be considered professional, legal, tax, accounting, or financial advice.</p>
+            
+            <div className="hns-legal-h">7. Financial Compliance</div>
+            <p>Users remain solely responsible for maintaining financial records and complying with applicable tax, accounting, invoicing, labor, and regulatory requirements.</p>
+
+            <div className="hns-legal-h">8. No Warranty</div>
+            <p>The BOS is provided "as is" without any warranty, express or implied. ManSula Technologies & ManSula DivLabs do not guarantee uninterrupted or error-free operation. The BOS may be updated, modified, or discontinued at any time.</p>
+            
+            <div className="hns-legal-h">9. Limitation of Liability</div>
+            <p>ManSula Technologies & ManSula DivLabs shall not be liable for any indirect, incidental, special, or consequential damages arising from your use or inability to use the BOS, including but not limited to business losses, data loss, or revenue loss.</p>
+            
+            <div className="hns-legal-h">10. Intellectual Property</div>
             <p>ManSula Nexus and its UI, design, and code are the property of ManSula Technologies & ManSula DivLabs. You may not copy, redistribute, or reverse-engineer any part of the application without explicit written consent.</p>
-            <div className="hns-legal-h">6. Changes to Terms</div>
-            <p>We may update these Terms from time to time. Continued use of the App after updates constitutes your acceptance of the revised terms. Major changes will be communicated through an in-app notice.</p>
+            
+            <div className="hns-legal-h">11. Subscriptions & Paid Features</div>
+            <p>Certain features may require a paid subscription or one-time purchase. Pricing, billing terms, and feature availability may change from time to time.</p>
+
+            <div className="hns-legal-h">12. Feature Availability</div>
+            <p>Features may be modified, restricted, suspended, or discontinued at any time without prior notice.</p>
+            
+            <div className="hns-legal-h">13. Termination</div>
+            <p>We reserve the right to suspend or terminate access to online services for violations of these Terms or misuse of the platform.</p>
+
+            <div className="hns-legal-h">14. Changes to Terms</div>
+            <p>We may update these Terms from time to time. Continued use of the BOS after updates constitutes your acceptance of the revised terms. Major changes will be communicated through an in-app notice.</p>
           </div>
         </div>
       )}
@@ -728,19 +758,35 @@ function HelpContent() {
           <div className="hns-legal-section-title"><Icon.Lock style={{width: 18, height: 18, marginRight: 8, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Privacy Policy</div>
           <div className="hns-legal-body">
             <p><strong>Last updated:</strong> June 2026</p>
-            <p>ManSula Nexus is designed with <strong>privacy-first principles</strong>. We do not collect, store, or transmit any of your personal or business data to external servers.</p>
+            <p>ManSula Nexus is designed with privacy-first principles. Business data is stored locally on your device by default. Certain future features, such as cloud backup, synchronization, account services, or AI-powered functionality, may require data processing and will be clearly disclosed when enabled.</p>
+            
             <div className="hns-legal-h"><Icon.Box style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Data Storage</div>
-            <p>All data — including orders, customer records, inventory, products, and settings — is stored entirely on <strong>your device</strong> using browser IndexedDB and localStorage. No data is ever sent to any external server or cloud service.</p>
-            <div className="hns-legal-h"><Icon.Globe style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Network Usage</div>
-            <p>The App loads fonts (Outfit) from Google Fonts on first launch. No analytics, tracking scripts, cookies, advertising SDKs, or third-party monitoring services are included in this application.</p>
+            <p>All data — including orders, customer records, inventory, products, and settings — is stored locally on <strong>your device</strong> using browser IndexedDB and localStorage by default.</p>
+            
+            <div className="hns-legal-h"><Icon.Cloud style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Cloud Services</div>
+            <p>If cloud-based features are enabled, selected data may be securely transmitted and stored on servers operated by ManSula Technologies or trusted service providers for the purpose of providing those services.</p>
+
+            <div className="hns-legal-h"><Icon.Sparkles style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> AI Services</div>
+            <p>Certain AI-powered features may process user-provided information to generate insights, recommendations, summaries, or forecasts. Data processing requirements will be disclosed before such features are used.</p>
+
+            <div className="hns-legal-h"><Icon.User style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Account Information</div>
+            <p>If account-based services are introduced, information such as name, email address, subscription details, and authentication data may be collected to provide access to those services.</p>
+
+            <div className="hns-legal-h"><Icon.Database style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Diagnostics</div>
+            <p>Optional diagnostic information may be collected to improve reliability, troubleshoot issues, and enhance application performance.</p>
+
+            <div className="hns-legal-h"><Icon.Globe style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Data Processing Locations</div>
+            <p>Cloud-hosted data may be processed or stored in regions outside the user's country depending on the infrastructure used to provide services.</p>
+
+            <div className="hns-legal-h"><Icon.Lock style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Security & Retention</div>
+            <p>Reasonable measures are taken to protect data; however, no storage system or transmission method can be guaranteed completely secure. Data stored through cloud services may be retained for as long as necessary to provide services, comply with legal obligations, resolve disputes, and enforce agreements.</p>
+            
             <div className="hns-legal-h"><Icon.Camera style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Camera Access</div>
             <p>If you grant camera access, it is used exclusively for barcode/QR scanning within the POS screen. No images are captured, stored, or transmitted. Camera access can be revoked from your browser's site settings at any time.</p>
-            <div className="hns-legal-h"><Icon.Bell style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Notifications</div>
-            <p>Notification permission is entirely optional. It is only used to display local in-app alerts for order updates. No push notifications are sent through any external service or server.</p>
-            <div className="hns-legal-h"><Icon.Database style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Persistent Storage</div>
-            <p>Enabling Persistent Storage requests that your browser protect app data from being automatically cleared. This is a local browser permission — no data leaves your device.</p>
+            
             <div className="hns-legal-h"><Icon.Pencil style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Your Control</div>
             <p>You have full control over all your data. Use the "Reset App Data" option in Data & Storage settings to permanently and irreversibly delete all data from your device at any time.</p>
+            
             <div className="hns-legal-h"><Icon.Mailbox style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Contact</div>
             <p>For privacy-related questions or concerns, please reach out to ManSula Support through the app's official channels.</p>
           </div>
