@@ -44,25 +44,88 @@ const TOOLS = [
   { id: 'customers', name: 'Customers',         desc: 'Contacts, CRM & Udhaar',          Icon: Icon.Customers,  color: '#0891b2', bg: 'linear-gradient(135deg,#0891b2,#0d9488)', active: true },
 ]
 
-// ── Home Settings Modal ──
+// ── Full-Screen Settings ──
+const SETTINGS_SECTIONS = [
+  {
+    id: 'appearance',
+    label: 'Appearance',
+    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+    color: '#6366f1',
+  },
+  {
+    id: 'sound',
+    label: 'Sound & Audio',
+    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>,
+    color: '#0ea5e9',
+  },
+  {
+    id: 'billing',
+    label: 'Billing & Region',
+    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
+    color: '#10b981',
+  },
+  {
+    id: 'permissions',
+    label: 'Permissions',
+    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+    color: '#f59e0b',
+  },
+  {
+    id: 'data',
+    label: 'Data & Storage',
+    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
+    color: '#ec4899',
+  },
+  {
+    id: 'about',
+    label: 'About',
+    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+    color: '#8b5cf6',
+  },
+  {
+    id: 'help',
+    label: 'Help & Legal',
+    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+    color: '#06b6d4',
+  },
+]
+
+function PermRow({ label, desc, state, onAllow }) {
+  const isGranted = state === 'granted'
+  const isDenied = state === 'denied'
+  return (
+    <div className="hns-perm-row">
+      <div>
+        <div className="hns-perm-label">{label}</div>
+        <div className="hns-perm-desc">{desc}</div>
+      </div>
+      <button
+        className={`hns-perm-btn ${isGranted ? 'granted' : isDenied ? 'denied' : ''}`}
+        onClick={onAllow}
+        disabled={isDenied}
+      >
+        {isGranted ? '✓ Granted' : isDenied ? 'Denied' : 'Allow'}
+      </button>
+    </div>
+  )
+}
+
 function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, onClose }) {
   useBackButton(onClose)
-  const [resetStep, setResetStep] = useState(0) // 0=idle 2=done
+  const [activeSection, setActiveSection] = useState('appearance')
+  const [resetStep, setResetStep] = useState(0)
   const { alert: showAlert, confirm: showConfirm } = useAlert()
   const [lang, setLang] = useState(localStorage.getItem('pos_lang') || 'en')
-  const [showPerms, setShowPerms] = useState(false)
-  const [perms, setPerms] = useState({ 
-    camera: 'prompt', 
+  const [perms, setPerms] = useState({
+    camera: 'prompt',
     notifications: 'prompt',
     sound: localStorage.getItem('perm_sound') || 'prompt',
     files: localStorage.getItem('perm_files') || 'prompt',
     downloads: localStorage.getItem('perm_downloads') || 'prompt',
     popups: localStorage.getItem('perm_popups') || 'prompt'
   })
-  
   const [volume, setVolume] = useState(() => {
     const val = localStorage.getItem('mn-volume')
-    // If the old 'mn-sound' toggle was disabled, treat as 0%
     if (localStorage.getItem('mn-sound') === 'disabled') return 0
     return val !== null ? parseInt(val, 10) : 100
   })
@@ -97,7 +160,6 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         const p = await Notification.requestPermission()
         setPerms(prev => ({ ...prev, notifications: p }))
       } else if (name === 'sound') {
-        // Play silent sound to register interaction & allow future autoplay
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const ctx = new AudioContext();
         const gainNode = ctx.createGain();
@@ -109,63 +171,45 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         osc.stop(ctx.currentTime + 0.1);
         localStorage.setItem('perm_sound', 'granted');
         setPerms(prev => ({ ...prev, sound: 'granted' }));
-        showAlert("Sound enabled successfully! Your browser has registered this interaction to allow future audio.", { type: 'success' });
+        showAlert("Sound enabled successfully!", { type: 'success' });
       } else if (name === 'files') {
         if (navigator.storage && navigator.storage.persist) {
           const granted = await navigator.storage.persist();
           if (granted) {
             localStorage.setItem('perm_files', 'granted');
             setPerms(prev => ({ ...prev, files: 'granted' }));
-            showAlert("Persistent storage access has been granted by the browser!", { type: 'success' });
+            showAlert("Persistent storage granted!", { type: 'success' });
           } else {
-            showAlert("Persistent storage was denied. Please manage this via the browser's site settings.", { type: 'danger' });
+            showAlert("Persistent storage was denied. Manage via browser site settings.", { type: 'danger' });
           }
         } else {
           showAlert("File permissions are handled automatically when you select a file.", { type: 'info' });
         }
       } else if (name === 'downloads') {
-        // Trigger multiple downloads to prompt the browser's Automatic Downloads block
-        const a1 = document.createElement('a');
-        a1.href = 'data:text/plain;charset=utf-8,dummy';
-        a1.download = 'dummy1.txt';
-        const a2 = document.createElement('a');
-        a2.href = 'data:text/plain;charset=utf-8,dummy';
-        a2.download = 'dummy2.txt';
-        a1.click();
-        setTimeout(() => a2.click(), 100);
+        const a1 = document.createElement('a'); a1.href = 'data:text/plain;charset=utf-8,dummy'; a1.download = 'dummy1.txt';
+        const a2 = document.createElement('a'); a2.href = 'data:text/plain;charset=utf-8,dummy'; a2.download = 'dummy2.txt';
+        a1.click(); setTimeout(() => a2.click(), 100);
         localStorage.setItem('perm_downloads', 'granted');
         setPerms(prev => ({ ...prev, downloads: 'granted' }));
-        showAlert("We requested multiple dummy downloads. If your browser blocks the second one, please click the download block icon in your address bar and choose 'Always allow'.", { type: 'info' });
+        showAlert("Multiple downloads triggered. If blocked, allow from address bar.", { type: 'info' });
       } else if (name === 'popups') {
-        // Trigger async popup to prompt the popup blocker
         localStorage.setItem('perm_popups', 'granted');
         setPerms(prev => ({ ...prev, popups: 'granted' }));
         setTimeout(() => {
           const w = window.open('about:blank', '_blank', 'width=100,height=100');
           if (!w || w.closed || typeof w.closed === 'undefined') {
-            showAlert("Pop-up blocked! Please check the address bar for the pop-up blocker icon (red X) and select 'Always allow pop-ups and redirects from this site'.", { type: 'warning' });
-          } else {
-            w.close();
-            showAlert("Pop-ups are already allowed by your browser!", { type: 'success' });
-          }
+            showAlert("Pop-up blocked! Allow pop-ups in your browser address bar.", { type: 'warning' });
+          } else { w.close(); showAlert("Pop-ups are already allowed!", { type: 'success' }); }
         }, 1000);
-        showAlert("Attempting to open a popup. Please wait 1 second...", { type: 'info' });
       }
-
-      // Re-check
       if (['camera', 'notifications'].includes(name)) {
         const p = await navigator.permissions.query({ name })
         setPerms(prev => ({ ...prev, [name]: p.state }))
       }
     } catch (e) {
-      console.error(e)
-      if (e.name === 'NotFoundError') {
-        showAlert(`No ${name} device was found on this system. Please connect one to grant permissions.`, { type: 'danger' })
-      } else if (e.name === 'NotAllowedError') {
-        showAlert(`Permission to access the ${name} was denied by the browser settings.`, { type: 'danger' })
-      } else {
-        showAlert(`Failed to request ${name} permission: ` + e.message, { type: 'danger' })
-      }
+      if (e.name === 'NotFoundError') showAlert(`No ${name} device found.`, { type: 'danger' })
+      else if (e.name === 'NotAllowedError') showAlert(`${name} permission denied by browser.`, { type: 'danger' })
+      else showAlert(`Failed: ` + e.message, { type: 'danger' })
     }
   }
 
@@ -176,218 +220,412 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
       { title: 'Reset App Data?', type: 'danger', confirmText: 'Yes, Reset Everything', cancelText: 'Cancel', confirmWord: 'RESET' }
     )
     if (!ok) return
-
-    // Confirmed — clear IDB + localStorage
     setResetStep(2)
     await dbClearAll()
     localStorage.clear()
     setTimeout(() => window.location.reload(), 1200)
   }
 
-  return (
-    <div className="hn-settings-overlay" onClick={onClose}>
-      <div className="hn-settings-modal" onClick={e => e.stopPropagation()} role="dialog" aria-label="Home Settings">
-        <div className="hn-settings-handle" />
-        <div className="hn-settings-header">
-          <div className="hn-settings-title">
-            <span className="hn-settings-title-icon"><Icon.Settings /></span>
-            Settings
-          </div>
-          <button className="hn-settings-close" onClick={onClose} aria-label="Close"><Icon.X /></button>
-        </div>
+  const activeInfo = SETTINGS_SECTIONS.find(s => s.id === activeSection)
 
-        <div className="hn-settings-body">
-          {/* Theme */}
-          <div className="hn-srow">
-            <div className="hn-srow-info">
-              <div className="hn-srow-label">Appearance</div>
-              <div className="hn-srow-desc">{theme === 'dark' ? 'Dark mode active' : 'Light mode active'}</div>
-            </div>
-            <button
-              className={`hn-toggle ${theme === 'dark' ? 'on' : ''}`}
-              onClick={onToggleTheme}
-              role="switch"
-              aria-checked={theme === 'dark'}
-            >
-              <span className="hn-toggle-knob">
-                {theme === 'dark' ? <Icon.Moon /> : <Icon.Sun />}
-              </span>
-            </button>
-          </div>
-
-          {/* Sound */}
-          <div className="hn-srow" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12 }}>
-            <div className="hn-srow-info" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div className="hn-srow-label">Sound Volume</div>
-                <div className="hn-srow-desc">Volume level for POS alerts & chimes</div>
-              </div>
-              <span style={{ fontWeight: 600, color: 'var(--brand-primary)', fontSize: '0.9rem' }}>{volume}%</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ color: 'var(--text-muted)', display: 'flex' }}><Icon.VolumeX /></span>
-              <input 
-                type="range" 
-                min="0" 
-                max="100" 
-                value={volume} 
-                onChange={handleVolumeChange} 
-                className="hn-volume-slider" 
-                style={{ flex: 1, accentColor: 'var(--brand-primary)', height: 6, cursor: 'pointer' }}
-              />
-              <span style={{ color: 'var(--text-primary)', display: 'flex' }}><Icon.Volume /></span>
-            </div>
-          </div>
-
-          {/* Currency */}
-          <div className="hn-srow" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
-            <div className="hn-srow-info">
-              <div className="hn-srow-label">Currency</div>
-              <div className="hn-srow-desc">Billing currency for the POS</div>
-            </div>
-            <select
-              className="hn-sselect"
-              value={currency.code}
-              onChange={e => onCurrency(currencies.find(c => c.code === e.target.value))}
-            >
-              {currencies.map(c => <option key={c.code} value={c.code}>{c.code} — {c.symbol}</option>)}
-            </select>
-          </div>
-
-          {/* Language */}
-          <div className="hn-srow" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
-            <div className="hn-srow-info">
-              <div className="hn-srow-label">Language</div>
-              <div className="hn-srow-desc">Display language for the POS interface</div>
-            </div>
-            <select
-              className="hn-sselect"
-              value={lang}
-              onChange={e => {
-                setLang(e.target.value);
-                localStorage.setItem('pos_lang', e.target.value);
-              }}
-            >
-              <option value="en">English</option>
-              <option value="es" disabled>Español (Coming Soon)</option>
-              <option value="fr" disabled>Français (Coming Soon)</option>
-              <option value="hi" disabled>हिन्दी (Coming Soon)</option>
-              <option value="ar" disabled>العربية (Coming Soon)</option>
-            </select>
-          </div>
-
-          {/* App Permissions */}
-          <div className="hn-srow" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
-            <div 
-              className="hn-srow-info" 
-              style={{ marginBottom: 4, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-              onClick={() => setShowPerms(!showPerms)}
-            >
-              <div>
-                <div className="hn-srow-label">App Permissions</div>
-                <div className="hn-srow-desc">Manage system access for POS features</div>
-              </div>
-              <div style={{ transform: showPerms ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'appearance':
+        return (
+          <div className="hns-content-area">
+            <div className="hns-section-title">Display</div>
+            <div className="hns-card">
+              <div className="hns-row">
+                <div className="hns-row-icon" style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
+                  {theme === 'dark' ? <Icon.Moon /> : <Icon.Sun />}
+                </div>
+                <div className="hns-row-info">
+                  <div className="hns-row-label">Theme</div>
+                  <div className="hns-row-desc">{theme === 'dark' ? 'Dark mode active' : 'Light mode active'}</div>
+                </div>
+                <button className={`hns-toggle ${theme === 'dark' ? 'on' : ''}`} onClick={onToggleTheme} role="switch" aria-checked={theme === 'dark'}>
+                  <span className="hns-toggle-knob">{theme === 'dark' ? <Icon.Moon /> : <Icon.Sun />}</span>
+                </button>
               </div>
             </div>
-            
-            {showPerms && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
-                {/* Camera */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Camera</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For barcode scanning</div>
-                  </div>
-                  <button 
-                    onClick={() => requestPerm('camera')}
-                    disabled={perms.camera === 'denied'}
-                    style={{ background: perms.camera === 'granted' ? '#10b981' : (perms.camera === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.camera === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.camera === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
-                    {perms.camera === 'granted' ? 'Granted' : perms.camera === 'denied' ? 'Denied' : 'Allow'}
-                  </button>
-                </div>
 
-                {/* Notifications */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Notifications</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For order alerts & updates</div>
+            <div className="hns-section-title" style={{ marginTop: 24 }}>Localization</div>
+            <div className="hns-card">
+              <div className="hns-row hns-row-col">
+                <div className="hns-row-head">
+                  <div className="hns-row-icon" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                   </div>
-                  <button 
-                    onClick={() => requestPerm('notifications')}
-                    disabled={perms.notifications === 'denied'}
-                    style={{ background: perms.notifications === 'granted' ? '#10b981' : (perms.notifications === 'denied' ? 'var(--border-color)' : 'var(--brand-primary)'), color: perms.notifications === 'denied' ? 'var(--text-tertiary)' : '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: perms.notifications === 'denied' ? 'not-allowed' : 'pointer', minWidth: 70 }}>
-                    {perms.notifications === 'granted' ? 'Granted' : perms.notifications === 'denied' ? 'Denied' : 'Allow'}
-                  </button>
+                  <div className="hns-row-info">
+                    <div className="hns-row-label">Language</div>
+                    <div className="hns-row-desc">Display language for the POS interface</div>
+                  </div>
                 </div>
+                <select className="hns-select" value={lang} onChange={e => { setLang(e.target.value); localStorage.setItem('pos_lang', e.target.value); }}>
+                  <option value="en">🇬🇧 English</option>
+                  <option value="hi" disabled>🇮🇳 हिन्दी (Coming Soon)</option>
+                  <option value="es" disabled>🇪🇸 Español (Coming Soon)</option>
+                  <option value="fr" disabled>🇫🇷 Français (Coming Soon)</option>
+                  <option value="ar" disabled>🇸🇦 العربية (Coming Soon)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )
 
-                {/* Sound */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Sound</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For order chimes & alerts</div>
+      case 'sound':
+        return (
+          <div className="hns-content-area">
+            <div className="hns-section-title">Volume</div>
+            <div className="hns-card">
+              <div className="hns-row hns-row-col">
+                <div className="hns-row-head">
+                  <div className="hns-row-icon" style={{ background: 'linear-gradient(135deg,#0ea5e9,#2dd4bf)' }}>
+                    {volume === 0 ? <Icon.VolumeX /> : <Icon.Volume />}
                   </div>
-                  <button 
-                    onClick={() => requestPerm('sound')}
-                    style={{ background: perms.sound === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
-                    {perms.sound === 'granted' ? 'Granted' : 'Allow'}
-                  </button>
+                  <div className="hns-row-info">
+                    <div className="hns-row-label">Sound Effects Volume</div>
+                    <div className="hns-row-desc">Controls alerts, chimes & checkout sounds</div>
+                  </div>
+                  <span className="hns-vol-pct">{volume}%</span>
                 </div>
-
-                {/* Automatic downloads */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Automatic Downloads</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For saving backups & receipts</div>
-                  </div>
-                  <button 
-                    onClick={() => requestPerm('downloads')}
-                    style={{ background: perms.downloads === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
-                    {perms.downloads === 'granted' ? 'Granted' : 'Allow'}
-                  </button>
+                <div className="hns-vol-slider-wrap">
+                  <span className="hns-vol-icon-sm"><Icon.VolumeX /></span>
+                  <input
+                    type="range" min="0" max="100" value={volume}
+                    onChange={handleVolumeChange}
+                    className="hns-slider"
+                  />
+                  <span className="hns-vol-icon-sm"><Icon.Volume /></span>
                 </div>
+                <div className="hns-vol-steps">
+                  {[0, 25, 50, 75, 100].map(v => (
+                    <button key={v} className={`hns-vol-step ${volume === v ? 'active' : ''}`} onClick={() => handleVolumeChange({ target: { value: v } })}>
+                      {v === 0 ? 'Off' : `${v}%`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-                {/* Pop-ups and redirects */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-subtle, rgba(0,0,0,0.03))', padding: '10px 14px', borderRadius: '10px' }}>
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Pop-ups & Redirects</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>For printing & external links</div>
-                  </div>
-                  <button 
-                    onClick={() => requestPerm('popups')}
-                    style={{ background: perms.popups === 'granted' ? '#10b981' : 'var(--brand-primary)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', minWidth: 70 }}>
-                    {perms.popups === 'granted' ? 'Granted' : 'Allow'}
+            <div className="hns-section-title" style={{ marginTop: 24 }}>Sound Preview</div>
+            <div className="hns-card">
+              <div className="hns-sound-grid">
+                {[
+                  { label: 'Add Item', type: 'add', desc: 'When item is added to cart' },
+                  { label: 'Remove Item', type: 'remove', desc: 'When item is removed' },
+                  { label: 'Checkout', type: 'checkout', desc: 'On successful order' },
+                ].map(s => (
+                  <button key={s.type} className="hns-sound-card" onClick={() => {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext
+                    if (!AudioContext || volume === 0) return
+                    const ctx = new AudioContext()
+                    const osc = ctx.createOscillator()
+                    const gain = ctx.createGain()
+                    const vol = volume / 100
+                    osc.connect(gain); gain.connect(ctx.destination)
+                    if (s.type === 'add') {
+                      osc.type = 'sine'; osc.frequency.setValueAtTime(440, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1)
+                      gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1)
+                      osc.start(); osc.stop(ctx.currentTime + 0.1)
+                    } else if (s.type === 'remove') {
+                      osc.type = 'sine'; osc.frequency.setValueAtTime(300, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.1)
+                      gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1)
+                      osc.start(); osc.stop(ctx.currentTime + 0.1)
+                    } else {
+                      osc.type = 'triangle'; osc.frequency.setValueAtTime(440, ctx.currentTime); osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.12); osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.24)
+                      gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.36)
+                      osc.start(); osc.stop(ctx.currentTime + 0.36)
+                    }
+                  }}>
+                    <span className="hns-sound-play">▶</span>
+                    <span className="hns-sound-name">{s.label}</span>
+                    <span className="hns-sound-desc">{s.desc}</span>
                   </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+
+      case 'billing':
+        return (
+          <div className="hns-content-area">
+            <div className="hns-section-title">Currency</div>
+            <div className="hns-card">
+              <div className="hns-row hns-row-col">
+                <div className="hns-row-head">
+                  <div className="hns-row-icon" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  </div>
+                  <div className="hns-row-info">
+                    <div className="hns-row-label">Billing Currency</div>
+                    <div className="hns-row-desc">Default currency for invoices & billing</div>
+                  </div>
+                </div>
+                <div className="hns-currency-grid">
+                  {currencies.map(c => (
+                    <button
+                      key={c.code}
+                      className={`hns-currency-btn ${currency.code === c.code ? 'active' : ''}`}
+                      onClick={() => onCurrency(c)}
+                    >
+                      <span className="hns-currency-symbol">{c.symbol}</span>
+                      <span className="hns-currency-code">{c.code}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="hns-section-title" style={{ marginTop: 24 }}>Tax</div>
+            <div className="hns-card hns-coming-soon-card">
+              <div className="hns-cs-badge">Coming Soon</div>
+              <div className="hns-cs-title">Tax Configuration</div>
+              <div className="hns-cs-desc">Set default tax rates, GST slabs & tax-inclusive pricing for your region.</div>
+            </div>
+
+            <div className="hns-section-title" style={{ marginTop: 24 }}>Invoice</div>
+            <div className="hns-card hns-coming-soon-card">
+              <div className="hns-cs-badge">Coming Soon</div>
+              <div className="hns-cs-title">Invoice Customization</div>
+              <div className="hns-cs-desc">Custom logo, header, footer & receipt templates.</div>
+            </div>
+          </div>
+        )
+
+      case 'permissions':
+        return (
+          <div className="hns-content-area">
+            <div className="hns-section-title">Browser Permissions</div>
+            <div className="hns-perm-info-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Manage what ManSula Nexus can access on your device. Denied permissions must be reset from browser site settings.
+            </div>
+            <div className="hns-card">
+              <PermRow label="📷 Camera" desc="For barcode & QR scanning at checkout" state={perms.camera} onAllow={() => requestPerm('camera')} />
+              <PermRow label="🔔 Notifications" desc="For order alerts & background updates" state={perms.notifications} onAllow={() => requestPerm('notifications')} />
+              <PermRow label="🔊 Sound" desc="For chimes, alerts & checkout sounds" state={perms.sound} onAllow={() => requestPerm('sound')} />
+              <PermRow label="💾 Persistent Storage" desc="Prevents browser from clearing app data" state={perms.files} onAllow={() => requestPerm('files')} />
+              <PermRow label="⬇️ Auto Downloads" desc="For saving reports & backup exports" state={perms.downloads} onAllow={() => requestPerm('downloads')} />
+              <PermRow label="🔗 Pop-ups & Redirects" desc="For printing receipts & external links" state={perms.popups} onAllow={() => requestPerm('popups')} />
+            </div>
+          </div>
+        )
+
+      case 'data':
+        return (
+          <div className="hns-content-area">
+            <div className="hns-section-title">Backup & Restore</div>
+            <div className="hns-card hns-coming-soon-card">
+              <div className="hns-cs-badge">Coming Soon</div>
+              <div className="hns-cs-title">Cloud Backup</div>
+              <div className="hns-cs-desc">Automatically sync your data to the cloud and restore from any device.</div>
+            </div>
+
+            <div className="hns-section-title" style={{ marginTop: 24 }}>Danger Zone</div>
+            <div className="hns-danger-card">
+              <div className="hns-danger-row">
+                <div>
+                  <div className="hns-danger-label">Reset App Data</div>
+                  <div className="hns-danger-desc">Permanently wipes all orders, products, settings & customer data. Cannot be undone.</div>
+                </div>
+                <button
+                  className={`hns-danger-btn ${resetStep === 2 ? 'done' : ''}`}
+                  onClick={handleReset}
+                  disabled={resetStep === 2}
+                >
+                  {resetStep !== 2 ? <><Icon.Reset /> Reset All</> : '↺ Reloading…'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+
+      case 'about':
+        return (
+          <div className="hns-content-area">
+            <div className="hns-about-hero">
+              <div className="hns-about-logo-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              </div>
+              <div className="hns-about-name">ManSula Nexus</div>
+              <div className="hns-about-version">v1.6.0-alpha · POS & Business Suite</div>
+            </div>
+
+            <div className="hns-section-title">App Info</div>
+            <div className="hns-card">
+              {[
+                { label: 'Version', value: 'v1.6.0-alpha' },
+                { label: 'Build', value: 'PWA · Offline-ready' },
+                { label: 'Storage', value: 'IndexedDB (Local)' },
+                { label: 'Framework', value: 'React + Vite' },
+                { label: 'Environment', value: 'Production' },
+              ].map(({ label, value }) => (
+                <div key={label} className="hns-info-row">
+                  <span className="hns-info-label">{label}</span>
+                  <span className="hns-info-value">{value}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="hns-section-title" style={{ marginTop: 24 }}>Legal</div>
+            <div className="hns-card">
+              <div className="hns-legal-text">
+                ManSula Nexus is a local-first point-of-sale application. All data is stored on this device only and never transmitted to any server. Use of this software is at your own discretion.
+              </div>
+            </div>
+          </div>
+        )
+
+      case 'help': {
+        const [openFaq, setOpenFaq] = useState(null)
+        const [helpTab, setHelpTab] = useState('faq')
+        const faqs = [
+          { q: 'How do I add items to a sale?', a: 'Open the POS from the home screen. Tap any item from your menu to add it to the current order. You can adjust quantities using the +/− buttons on the cart.' },
+          { q: 'How do I create a new product/menu item?', a: 'Go to Business Profile → Menu. Tap the + button to add a new item. Fill in the name, price, and category, then save.' },
+          { q: 'What is Udhaar?', a: 'Udhaar is a credit/debit tracking system. When a customer pays later, select "Udhaar" at checkout and link it to a customer profile. Track dues in the Customers section.' },
+          { q: 'How do I edit or delete a past order?', a: 'Open Order Records, find the order, and tap the edit icon. Change the date/time, or tap "Edit in POS" to modify items. To delete, tap the trash icon.' },
+          { q: 'How do I export my data and reports?', a: 'Go to Order Records and tap the export icon (top right). You can export a JSON backup or open the data export modal.' },
+          { q: 'Is my data safe if I close the browser?', a: 'Yes. All data is stored in your browser\'s IndexedDB and persists across sessions. Enable Persistent Storage from Permissions settings for extra protection.' },
+          { q: 'How do I reset the order counter to #1?', a: 'Go to Order Records → Export/Data modal → Wipe Order Records. This clears all saved orders and resets the counter back to #1.' },
+          { q: 'How do I track inventory?', a: 'Open the Inventory tool from the home screen. Add stock, log purchases from suppliers, and the system tracks current stock levels automatically.' },
+          { q: 'Can I use this app offline?', a: 'Yes! ManSula Nexus is a Progressive Web App (PWA) and works fully offline once loaded. All data stays on your device.' },
+          { q: 'How do I install this as an app on my phone?', a: 'On Android (Chrome): tap the three dots → Install app. On iOS (Safari): tap Share → Add to Home Screen. The app will work just like a native app.' },
+          { q: 'Can multiple people use the same account?', a: 'Currently, ManSula Nexus stores data locally per browser/device. Multi-device sync and staff accounts are planned for a future update.' },
+          { q: 'How do I change the currency?', a: 'Go to Settings → Billing & Region. Select your preferred currency from the available options. It applies instantly across the POS.' },
+        ]
+        return (
+          <div className="hns-content-area">
+            <div className="hns-help-tabs">
+              {[
+                { id: 'faq', label: '❓ FAQ' },
+                { id: 'terms', label: '📄 Terms of Use' },
+                { id: 'privacy', label: '🔒 Privacy Policy' },
+              ].map(t => (
+                <button key={t.id} className={`hns-help-tab ${helpTab === t.id ? 'active' : ''}`} onClick={() => setHelpTab(t.id)}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {helpTab === 'faq' && (
+              <div className="hns-faq-list">
+                <div className="hns-section-title" style={{ marginBottom: 12 }}>Frequently Asked Questions</div>
+                {faqs.map((f, i) => (
+                  <div key={i} className={`hns-faq-item ${openFaq === i ? 'open' : ''}`}>
+                    <button className="hns-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                      <span>{f.q}</span>
+                      <span className="hns-faq-chevron">{openFaq === i ? '▲' : '▼'}</span>
+                    </button>
+                    {openFaq === i && <div className="hns-faq-a">{f.a}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {helpTab === 'terms' && (
+              <div className="hns-legal-card">
+                <div className="hns-legal-section-title">📄 Terms of Use</div>
+                <div className="hns-legal-body">
+                  <p><strong>Last updated:</strong> June 2026</p>
+                  <p>By using ManSula Nexus ("the App"), you agree to the following terms and conditions. Please read them carefully.</p>
+                  <div className="hns-legal-h">1. Acceptable Use</div>
+                  <p>You may use this App for lawful business purposes only. You are responsible for all data entered into the system, including product prices, customer records, and transaction history.</p>
+                  <div className="hns-legal-h">2. Data Responsibility</div>
+                  <p>All data is stored locally on your device using browser storage (IndexedDB). The developers are not responsible for any data loss due to browser clearing, device failure, or accidental resets. We strongly recommend enabling Persistent Storage in the Permissions section.</p>
+                  <div className="hns-legal-h">3. No Warranty</div>
+                  <p>The App is provided "as is" without any warranty, express or implied. The developers do not guarantee uninterrupted or error-free operation. The App may be updated, modified, or discontinued at any time.</p>
+                  <div className="hns-legal-h">4. Limitation of Liability</div>
+                  <p>The developers shall not be liable for any indirect, incidental, special, or consequential damages arising from your use or inability to use the App, including but not limited to business losses, data loss, or revenue loss.</p>
+                  <div className="hns-legal-h">5. Intellectual Property</div>
+                  <p>ManSula Nexus and its UI, design, and code are the property of the developer. You may not copy, redistribute, or reverse-engineer any part of the application without explicit written consent.</p>
+                  <div className="hns-legal-h">6. Changes to Terms</div>
+                  <p>We may update these Terms from time to time. Continued use of the App after updates constitutes your acceptance of the revised terms. Major changes will be communicated through an in-app notice.</p>
+                </div>
+              </div>
+            )}
+
+            {helpTab === 'privacy' && (
+              <div className="hns-legal-card">
+                <div className="hns-legal-section-title">🔒 Privacy Policy</div>
+                <div className="hns-legal-body">
+                  <p><strong>Last updated:</strong> June 2026</p>
+                  <p>ManSula Nexus is designed with <strong>privacy-first principles</strong>. We do not collect, store, or transmit any of your personal or business data to external servers.</p>
+                  <div className="hns-legal-h">📦 Data Storage</div>
+                  <p>All data — including orders, customer records, inventory, products, and settings — is stored entirely on <strong>your device</strong> using browser IndexedDB and localStorage. No data is ever sent to any external server or cloud service.</p>
+                  <div className="hns-legal-h">🌐 Network Usage</div>
+                  <p>The App loads fonts (Outfit) from Google Fonts on first launch. No analytics, tracking scripts, cookies, advertising SDKs, or third-party monitoring services are included in this application.</p>
+                  <div className="hns-legal-h">📷 Camera Access</div>
+                  <p>If you grant camera access, it is used exclusively for barcode/QR scanning within the POS screen. No images are captured, stored, or transmitted. Camera access can be revoked from your browser's site settings at any time.</p>
+                  <div className="hns-legal-h">🔔 Notifications</div>
+                  <p>Notification permission is entirely optional. It is only used to display local in-app alerts for order updates. No push notifications are sent through any external service or server.</p>
+                  <div className="hns-legal-h">💾 Persistent Storage</div>
+                  <p>Enabling Persistent Storage requests that your browser protect app data from being automatically cleared. This is a local browser permission — no data leaves your device.</p>
+                  <div className="hns-legal-h">✏️ Your Control</div>
+                  <p>You have full control over all your data. Use the "Reset App Data" option in Data & Storage settings to permanently and irreversibly delete all data from your device at any time.</p>
+                  <div className="hns-legal-h">📬 Contact</div>
+                  <p>For privacy-related questions or concerns, please reach out to the developer through the app's official channel or support contact.</p>
                 </div>
               </div>
             )}
           </div>
+        )
+      }
 
-          {/* Reset */}
-          <div className="hn-srow hn-srow-reset">
-            <div className="hn-srow-info">
-              <div className="hn-srow-label hn-srow-label-danger">Reset App Data</div>
-              <div className="hn-srow-desc">Clears all settings, products & saved data</div>
-            </div>
-            <button
-              className={`hn-reset-btn ${resetStep === 2 ? 'done' : ''}`}
-              onClick={handleReset}
-              disabled={resetStep === 2}
-            >
-              {resetStep !== 2 ? <><Icon.Reset /> Reset</> : '↺ Reloading…'}
-            </button>
-          </div>
+      default: return null
+    }
+  }
 
-          {/* About */}
-          <div className="hn-settings-about">
-            <div className="hn-about-logo">
-              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+  return (
+    <div className="hns-overlay" onClick={onClose}>
+      <div className="hns-root" onClick={e => e.stopPropagation()} role="dialog" aria-label="Settings">
+        {/* ── Sidebar ── */}
+        <div className="hns-sidebar">
+          <div className="hns-sidebar-header">
+            <div className="hns-sidebar-logo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </div>
             <div>
-              <div className="hn-about-name">ManSula Nexus</div>
-              <div className="hn-about-ver">v1.6.0-alpha · POS &amp; Business Suite</div>
+              <div className="hns-sidebar-title">Settings</div>
+              <div className="hns-sidebar-sub">ManSula Nexus</div>
             </div>
+          </div>
+          <nav className="hns-nav">
+            {SETTINGS_SECTIONS.map(s => (
+              <button
+                key={s.id}
+                className={`hns-nav-item ${activeSection === s.id ? 'active' : ''}`}
+                onClick={() => setActiveSection(s.id)}
+                style={{ '--sec-color': s.color }}
+              >
+                <span className="hns-nav-icon"><s.icon /></span>
+                <span className="hns-nav-label">{s.label}</span>
+                {activeSection === s.id && <span className="hns-nav-dot" />}
+              </button>
+            ))}
+          </nav>
+          <button className="hns-close-btn" onClick={onClose} aria-label="Close Settings">
+            <Icon.X />
+          </button>
+        </div>
+
+        {/* ── Main Content ── */}
+        <div className="hns-main">
+          <div className="hns-main-header">
+            <div className="hns-main-title-wrap">
+              <div className="hns-main-icon" style={{ background: `linear-gradient(135deg, ${activeInfo?.color}, ${activeInfo?.color}88)` }}>
+                {activeInfo && <activeInfo.icon />}
+              </div>
+              <div>
+                <div className="hns-main-title">{activeInfo?.label}</div>
+                <div className="hns-main-sub">Manage your {activeInfo?.label.toLowerCase()} preferences</div>
+              </div>
+            </div>
+            <button className="hns-main-close" onClick={onClose} aria-label="Close"><Icon.X /></button>
+          </div>
+          <div className="hns-main-body">
+            {renderContent()}
           </div>
         </div>
       </div>
