@@ -25,13 +25,13 @@ function OfflineBanner({ onDismiss }) {
   return (
     <div className="mn-offline-banner" onClick={handleShowInfo}>
       <div className="mn-offline-icon">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="2" y1="2" x2="22" y2="22"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 4.17-2.65"/><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.82"/><path d="M5.33 12.68a10 10 0 0 1 2.37-1.39"/><path d="M14.67 10c2.3.62 4.4 1.83 6 3.5"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="2" y1="2" x2="22" y2="22" /><path d="M8.5 16.5a5 5 0 0 1 7 0" /><path d="M2 8.82a15 15 0 0 1 4.17-2.65" /><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.82" /><path d="M5.33 12.68a10 10 0 0 1 2.37-1.39" /><path d="M14.67 10c2.3.62 4.4 1.83 6 3.5" /><line x1="12" y1="20" x2="12.01" y2="20" /></svg>
       </div>
       <div className="mn-offline-text">
         <strong>Working Offline</strong> — Your data is securely saved.
       </div>
       <button className="mn-offline-close" onClick={handleShowInfo} aria-label="Learn More">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
       </button>
     </div>
   )

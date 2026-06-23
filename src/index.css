@@ -13859,14 +13859,47 @@ select {
   to   { opacity: 1; transform: translateY(0); }
 }
 /* -- Reload Prompt -- */
-.mn-reload-prompt { position: fixed; bottom: 84px; left: 16px; right: 16px; max-width: 400px; margin: 0 auto; background: var(--bg-surface); border: 1px solid var(--brand-primary); border-radius: var(--radius-lg); padding: 14px; box-shadow: 0 12px 32px rgba(99,102,241,0.25); display: flex; align-items: center; gap: 12px; z-index: 9999; animation: slideUp 0.3s cubic-bezier(0.175,0.885,0.32,1.275); }
-.mn-reload-icon { color: var(--brand-primary); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.mn-reload-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.mn-reload-text strong { font-size: 0.85rem; color: var(--text-primary); font-weight: 700; }
-.mn-reload-text p { font-size: 0.75rem; color: var(--text-secondary); margin: 0; }
-.mn-reload-actions { display: flex; flex-direction: column; gap: 6px; }
-.mn-reload-btn { padding: 6px 12px; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; border: none; }
-.mn-reload-btn.install { background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); color: white; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
-.mn-reload-btn.install:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99,102,241,0.4); }
-.mn-reload-btn.close { background: rgba(0,0,0,0.05); color: var(--text-primary); }
-[data-theme='dark'] .mn-reload-btn.close { background: rgba(255,255,255,0.08); }
+.mn-reload-prompt {
+  position: fixed; bottom: 84px; left: 16px; right: 16px; max-width: 340px; margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 14px; padding: 14px 18px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex; flex-direction: column; gap: 12px; z-index: 9999;
+  animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+[data-theme='dark'] .mn-reload-prompt {
+  background: rgba(30, 30, 40, 0.85);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.mn-reload-header {
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.mn-reload-icon {
+  color: var(--brand-primary); display: flex; align-items: center; justify-content: center;
+  margin-top: 2px;
+}
+.mn-reload-text { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.mn-reload-text strong { font-size: 0.9rem; color: var(--text-primary); font-weight: 700; letter-spacing: -0.01em; }
+.mn-reload-text p { font-size: 0.78rem; color: var(--text-secondary); margin: 0; line-height: 1.4; }
+
+.mn-reload-actions {
+  display: flex; align-items: center; justify-content: flex-end; gap: 12px;
+}
+.mn-reload-btn {
+  font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; border: none; background: transparent;
+}
+.mn-reload-btn.install {
+  background: var(--brand-primary); color: white; padding: 8px 16px; border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+.mn-reload-btn.install:hover {
+  transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4); background: var(--brand-secondary);
+}
+.mn-reload-btn.close {
+  color: var(--text-secondary); padding: 8px;
+}
+.mn-reload-btn.close:hover {
+  color: var(--text-primary);
+}
