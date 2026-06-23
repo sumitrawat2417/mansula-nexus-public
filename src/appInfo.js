@@ -8,7 +8,7 @@ export const APP_NAME = 'ManSula Nexus'
 export const APP_VERSION = 'v1.6.0-alpha'
 
 export const APP_BUILD_DATE = 'June 24, 2025'
-
+export const LEGAL_LAST_UPDATED = 'June 2026'
 /** What's New items for the current release.
  *  Each entry has:
  *    icon:   'analytics' | 'lightning' | 'check' | 'star' | 'wrench'
@@ -39,7 +39,7 @@ export const WHATS_NEW = [
 /** Organization / Company Info */
 export const ORG = {
   name: 'ManSula Technologies & ManSula DivLabs',
-  tagline: 'Powering the next generation of offline-first business tools.',
+  tagline: 'Empowering Commerce with Smart Technology',
   website: 'https://mansulatech.netlify.app',
   support: 'mansula.rwt@gmail.com',
   phone1: '+919818013446',
