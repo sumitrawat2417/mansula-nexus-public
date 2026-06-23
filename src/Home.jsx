@@ -517,7 +517,18 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Current Version</div>
                   <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>v1.6.0-alpha</div>
                 </div>
-                <button className="hn-btn-primary" style={{ padding: '8px 14px', fontSize: '0.75rem', borderRadius: '6px' }}>
+                <button
+                  style={{
+                    padding: '8px 14px', fontSize: '0.75rem', borderRadius: '8px', fontWeight: 600,
+                    border: 'none', cursor: 'pointer',
+                    background: 'var(--bg-surface-2, rgba(99,102,241,0.08))',
+                    color: 'var(--text-primary)',
+                    transition: 'transform 0.15s ease',
+                  }}
+                  onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+                  onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                >
                   Check for Updates
                 </button>
               </div>
@@ -526,7 +537,6 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
             <div className="hns-section-title" style={{ marginTop: 24 }}>App Info</div>
             <div className="hns-card">
               {[
-                { label: 'Version', value: 'v1.6.0-alpha' },
                 { label: 'Build', value: 'PWA · Offline-ready' },
                 { label: 'Last Updated', value: 'Today' },
                 { label: 'Storage Used', value: '< 1 MB' },
@@ -539,12 +549,34 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
             </div>
 
             <div className="hns-section-title" style={{ marginTop: 24 }}>What's New</div>
-            <div className="hns-card" style={{ padding: '16px' }}>
-              <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: '1.8' }}>
-                <li>Analytics Module</li>
-                <li>Faster POS</li>
-                <li>Bug Fixes</li>
-              </ul>
+            <div className="hns-card" style={{ padding: '14px 16px' }}>
+              {[
+                {
+                  icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>,
+                  label: 'Analytics Module',
+                },
+                {
+                  icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
+                  label: 'Faster POS',
+                },
+                {
+                  icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
+                  label: 'Bug Fixes',
+                },
+              ].map(({ icon, label }, i, arr) => (
+                <div key={label} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '8px 0',
+                  borderBottom: i < arr.length - 1 ? '1px solid var(--border-color)' : 'none',
+                }}>
+                  <div style={{
+                    flexShrink: 0, width: 26, height: 26, borderRadius: 7,
+                    background: 'var(--bg-surface-2, rgba(99,102,241,0.07))',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>{icon}</div>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 500 }}>{label}</span>
+                </div>
+              ))}
             </div>
 
             <div className="hns-section-title" style={{ marginTop: 24 }}>Legal</div>
