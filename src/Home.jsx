@@ -584,6 +584,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
 function HelpContent() {
   const [openFaq, setOpenFaq] = useState(null)
   const [helpTab, setHelpTab] = useState('faq')
+  const [faqSearch, setFaqSearch] = useState('')
   const faqs = [
     { q: 'How do I add items to a sale?', a: 'Open the POS from the home screen. Tap any item from your menu to add it to the current order. You can adjust quantities using the +/− buttons on the cart.' },
     { q: 'How do I create a new product/menu item?', a: 'Go to Business Profile → Menu. Tap the + button to add a new item. Fill in the name, price, and category, then save.' },
@@ -615,7 +616,24 @@ function HelpContent() {
       {helpTab === 'faq' && (
         <div className="hns-faq-list">
           <div className="hns-section-title" style={{ marginBottom: 12 }}>Frequently Asked Questions</div>
-          {faqs.map((f, i) => (
+          <input
+            type="search"
+            placeholder="Search FAQs..."
+            value={faqSearch}
+            onChange={(e) => { setFaqSearch(e.target.value); setOpenFaq(null); }}
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              borderRadius: '10px',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-surface-2)',
+              marginBottom: '16px',
+              fontSize: '0.85rem',
+              color: 'var(--text-primary)',
+              outline: 'none'
+            }}
+          />
+          {faqs.filter(f => f.q.toLowerCase().includes(faqSearch.toLowerCase()) || f.a.toLowerCase().includes(faqSearch.toLowerCase())).map((f, i) => (
             <div key={i} className={`hns-faq-item ${openFaq === i ? 'open' : ''}`}>
               <button className="hns-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
                 <span>{f.q}</span>
@@ -624,6 +642,21 @@ function HelpContent() {
               {openFaq === i && <div className="hns-faq-a">{f.a}</div>}
             </div>
           ))}
+          {faqs.filter(f => f.q.toLowerCase().includes(faqSearch.toLowerCase()) || f.a.toLowerCase().includes(faqSearch.toLowerCase())).length === 0 && (
+            <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+              No FAQs found matching "{faqSearch}"
+            </div>
+          )}
+          <div style={{ marginTop: 24, padding: '20px 0', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 10 }}>Can't find what you're looking for?</p>
+            <button 
+              className="hns-btn" 
+              style={{ width: '100%', maxWidth: '220px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              onClick={() => window.location.href = 'mailto:support@mansulanexus.com?subject=Support%20Request'}
+            >
+              <Icon.Mailbox style={{ width: 15, height: 15 }} /> Contact Support
+            </button>
+          </div>
         </div>
       )}
 
