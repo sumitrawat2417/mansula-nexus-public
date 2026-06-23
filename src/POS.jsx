@@ -46,6 +46,7 @@ const INIT_ORDER = makeOrder() // created once at module level
 // ─────────────── SOUND ───────────────
 let audioCtx = null
 const playSound = (type) => {
+  if (localStorage.getItem('mn-sound') === 'disabled') return
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
     if (audioCtx.state === 'suspended') audioCtx.resume()

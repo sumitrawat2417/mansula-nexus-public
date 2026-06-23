@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 
 // ── Web Audio Synthesizer (Premium Chimes) ──
 const playSound = (type) => {
+  if (localStorage.getItem('mn-sound') === 'disabled') return
   try {
     // Suppress console warning if user hasn't interacted yet
     if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
