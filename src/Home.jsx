@@ -651,13 +651,12 @@ function HelpContent() {
             </div>
           )}
           <div style={{ marginTop: 24, padding: '20px 0', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 10 }}>Can't find what you're looking for?</p>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 14 }}>Can't find what you're looking for?</p>
             <button 
-              className="hns-btn" 
-              style={{ width: '100%', maxWidth: '220px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              className="hns-support-trigger-btn"
               onClick={() => setShowSupportSheet(true)}
             >
-              <Icon.Mailbox style={{ width: 16, height: 16 }} /> Contact Support
+              <Icon.Mailbox style={{ width: 18, height: 18 }} /> Contact Support
             </button>
           </div>
         </div>
