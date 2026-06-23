@@ -1,8 +1,8 @@
-import { useState, useEffect, Fragment, useRef, useCallback } from 'react'
+import { useState, useEffect, Fragment, useRef } from 'react'
 import { useBackButton } from './useBackButton.js'
 import { dbClearAll, dbGet, injectStressTestData } from './db.js'
 import { useAlert } from './AlertDialog.jsx'
-import { useRegisterSW } from 'virtual:pwa-register/react'
+import { APP_VERSION, APP_BUILD_DATE, WHATS_NEW } from './appInfo.js'
 
 // ── Greeting ──
 function getGreeting() {
@@ -138,54 +138,6 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
   const [activeSection, setActiveSection] = useState('appearance')
   const [resetStep, setResetStep] = useState(0)
   const { alert: showAlert, confirm: showConfirm } = useAlert()
-  const [storageUsed, setStorageUsed] = useState('Calculating...')
-  const [updateState, setUpdateState] = useState('idle') // idle | checking | available | upToDate
-
-  const {
-    needRefresh: [needRefresh, setNeedRefresh],
-    updateServiceWorker,
-  } = useRegisterSW()
-
-  // Real storage estimate
-  useEffect(() => {
-    if ('storage' in navigator && 'estimate' in navigator.storage) {
-      navigator.storage.estimate().then(({ usage }) => {
-        if (usage == null) { setStorageUsed('N/A'); return }
-        if (usage < 1024) setStorageUsed(`${usage} B`)
-        else if (usage < 1024 * 1024) setStorageUsed(`${(usage / 1024).toFixed(1)} KB`)
-        else setStorageUsed(`${(usage / (1024 * 1024)).toFixed(2)} MB`)
-      }).catch(() => setStorageUsed('N/A'))
-    } else {
-      setStorageUsed('N/A')
-    }
-  }, [])
-
-  // Sync update state with SW
-  useEffect(() => {
-    if (needRefresh) setUpdateState('available')
-  }, [needRefresh])
-
-  const handleCheckUpdates = useCallback(async () => {
-    if (updateState === 'available') {
-      updateServiceWorker(true)
-      return
-    }
-    setUpdateState('checking')
-    try {
-      const reg = await navigator.serviceWorker.getRegistration()
-      if (reg) {
-        await reg.update()
-        // Give SW a moment to detect a new version
-        setTimeout(() => {
-          setUpdateState(prev => prev === 'checking' ? 'upToDate' : prev)
-        }, 2500)
-      } else {
-        setUpdateState('upToDate')
-      }
-    } catch {
-      setUpdateState('upToDate')
-    }
-  }, [updateState, updateServiceWorker])
 
   // Lock body scroll when settings modal is open
   useEffect(() => {
@@ -564,29 +516,21 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Current Version</div>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>v1.6.0-alpha</div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>{APP_VERSION}</div>
                 </div>
                 <button
                   style={{
                     padding: '8px 14px', fontSize: '0.75rem', borderRadius: '8px', fontWeight: 600,
-                    border: 'none', cursor: updateState === 'checking' ? 'default' : 'pointer',
-                    background: updateState === 'available'
-                      ? 'linear-gradient(135deg,#6366f1,#8b5cf6)'
-                      : 'var(--bg-surface-2, rgba(99,102,241,0.08))',
-                    color: updateState === 'available' ? 'white' : 'var(--text-primary)',
-                    transition: 'transform 0.15s ease, background 0.2s ease, color 0.2s ease',
-                    opacity: updateState === 'checking' ? 0.7 : 1,
+                    border: 'none', cursor: 'pointer',
+                    background: 'var(--bg-surface-2, rgba(99,102,241,0.08))',
+                    color: 'var(--text-primary)',
+                    transition: 'transform 0.15s ease',
                   }}
-                  onMouseDown={e => { if (updateState !== 'checking') e.currentTarget.style.transform = 'scale(0.97)' }}
+                  onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
                   onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-                  onClick={handleCheckUpdates}
-                  disabled={updateState === 'checking'}
                 >
-                  {updateState === 'checking' ? 'Checking…'
-                    : updateState === 'available' ? 'Install Update'
-                    : updateState === 'upToDate' ? '✓ Up to date'
-                    : 'Check for Updates'}
+                  Check for Updates
                 </button>
               </div>
             </div>
@@ -595,8 +539,8 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
             <div className="hns-card">
               {[
                 { label: 'Build', value: 'PWA · Offline-ready' },
-                { label: 'Last Updated', value: 'Today' },
-                { label: 'Storage Used', value: storageUsed },
+                { label: 'Last Updated', value: APP_BUILD_DATE },
+                { label: 'Storage Used', value: '< 1 MB' },
               ].map(({ label, value }) => (
                 <div key={label} className="hns-info-row">
                   <span className="hns-info-label">{label}</span>
@@ -607,33 +551,29 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
 
             <div className="hns-section-title" style={{ marginTop: 24 }}>What's New</div>
             <div className="hns-card" style={{ padding: '14px 16px' }}>
-              {[
-                {
-                  icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>,
-                  label: 'Analytics Module',
-                },
-                {
-                  icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
-                  label: 'Faster POS',
-                },
-                {
-                  icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
-                  label: 'Bug Fixes',
-                },
-              ].map(({ icon, label }, i, arr) => (
-                <div key={label} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '8px 0',
-                  borderBottom: i < arr.length - 1 ? '1px solid var(--border-color)' : 'none',
-                }}>
-                  <div style={{
-                    flexShrink: 0, width: 26, height: 26, borderRadius: 7,
-                    background: 'var(--bg-surface-2, rgba(99,102,241,0.07))',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>{icon}</div>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 500 }}>{label}</span>
-                </div>
-              ))}
+              {WHATS_NEW.map(({ icon: iconType, label }, i, arr) => {
+                const iconMap = {
+                  analytics: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>,
+                  lightning: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
+                  check:     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
+                  star:      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>,
+                  wrench:    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></svg>,
+                }
+                return (
+                  <div key={label} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '8px 0',
+                    borderBottom: i < arr.length - 1 ? '1px solid var(--border-color)' : 'none',
+                  }}>
+                    <div style={{
+                      flexShrink: 0, width: 26, height: 26, borderRadius: 7,
+                      background: 'var(--bg-surface-2, rgba(99,102,241,0.07))',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>{iconMap[iconType] ?? iconMap.check}</div>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 500 }}>{label}</span>
+                  </div>
+                )
+              })}
             </div>
 
             <div className="hns-section-title" style={{ marginTop: 24 }}>Legal</div>
