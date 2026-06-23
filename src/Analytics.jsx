@@ -1295,6 +1295,18 @@ const TABS = [
 export default function Analytics({ onClose, currency }) {
   useBackButton(onClose)
 
+  useEffect(() => {
+    // Temporarily allow zooming in Analytics for better graph visibility
+    const meta = document.querySelector('meta[name="viewport"]')
+    const originalContent = meta?.getAttribute('content') || 'width=device-width, initial-scale=1.0'
+    if (meta) {
+      meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes')
+    }
+    return () => {
+      if (meta) meta.setAttribute('content', originalContent)
+    }
+  }, [])
+
   const [tab, setTab] = useState('overview')
   const [dateRange, setDateRange] = useState(() => computeQuick('today'))
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
