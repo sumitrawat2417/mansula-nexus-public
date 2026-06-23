@@ -8632,10 +8632,10 @@ select {
   z-index: 1;
   width: 100%;
   max-width: 520px;
-  padding: 40px 20px 32px;
+  padding: 24px 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 /* ── Header ── */
@@ -8644,16 +8644,16 @@ select {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .agr-logo-wrap {
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .agr-logo-circle {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   display: flex;
@@ -8679,8 +8679,8 @@ select {
 }
 
 .agr-logo-circle svg {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   color: #ffffff;
 }
 
@@ -8717,7 +8717,7 @@ select {
 .agr-clauses {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .agr-clause {
@@ -8739,9 +8739,9 @@ select {
 .agr-clause-header {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
-  padding: 16px 18px;
+  padding: 12px 16px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -8751,8 +8751,8 @@ select {
 }
 
 .agr-clause-icon {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   border-radius: 12px;
   display: flex;
   align-items: center;
