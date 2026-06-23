@@ -504,27 +504,20 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
 
         {/* ── BODY (Sidebar + Main) ── */}
         <div className="hns-body-wrapper">
-          {/* ── Sidebar ── */}
-          <div className="hns-sidebar">
-            <nav className="hns-nav">
-              {SETTINGS_SECTIONS.map((s, i) => (
-                <Fragment key={s.id}>
-                  {/* Group Labels */}
-                  {i === 0 && <div className="hns-nav-group-label">General</div>}
-                  {i === 3 && <div className="hns-nav-group-label">Advanced</div>}
-                  {i === 5 && <div className="hns-nav-group-label">Info</div>}
-
-                  <button
-                    className={`hns-nav-item ${activeSection === s.id ? 'active' : ''}`}
-                    onClick={() => setActiveSection(s.id)}
-                    style={{ '--sec-color': s.color }}
-                  >
-                    <span className="hns-nav-icon-wrap"><s.icon /></span>
-                    <span className="hns-nav-label">{s.label}</span>
-                  </button>
-                </Fragment>
+          {/* ── Tab Bar ── */}
+          <div className="an-tab-container" style={{ borderBottom: '1px solid var(--border-color)', borderRight: 'none' }}>
+            <div className="an-tab-bar">
+              {SETTINGS_SECTIONS.map((s) => (
+                <button
+                  key={s.id}
+                  className={`an-tab-btn ${activeSection === s.id ? 'active' : ''}`}
+                  onClick={() => setActiveSection(s.id)}
+                >
+                  <s.icon style={{ width: 15, height: 15 }} />
+                  <span>{s.label}</span>
+                </button>
               ))}
-            </nav>
+            </div>
           </div>
 
           {/* ── Main Content ── */}
