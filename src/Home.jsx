@@ -1,16 +1,17 @@
 import { useState, useEffect, Fragment, useRef } from 'react'
 import { useBackButton } from './useBackButton.js'
-import { dbClearAll, dbGet, dbSet, injectStressTestData } from './db.js'
+import { dbClearAll, dbGet, dbSet, injectStressTestData, exportUltimateBackup, restoreUltimateBackup } from './db.js'
 import { useAlert } from './AlertDialog.jsx'
 import { APP_VERSION, APP_BUILD_DATE, WHATS_NEW, ORG, LEGAL_LAST_UPDATED } from './appInfo.js'
-import { DndContext, closestCenter, TouchSensor, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
 // ── Premium Feature Lock ──
 const CAN_REORDER_TOOLS = true
 
-function SortableToolCard({ tool, onLaunch }) {
+function SortableToolCard({ tool, onLaunch, onboardingStep, setOnboardingStep }) {
+  const isSpotlight = onboardingStep === 'spotlight-business' && tool.id === 'business'
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: tool.id })
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -24,24 +25,32 @@ function SortableToolCard({ tool, onLaunch }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`hn-tool-card ${tool.active ? 'hn-tool-active' : 'hn-tool-soon'}`}
-      onClick={tool.active ? () => onLaunch(tool.id) : undefined}
+      className={`hn-tool-card ${tool.active ? 'hn-tool-active' : 'hn-tool-soon'} ${isSpotlight ? 'mn-spotlight-active' : ''}`}
+      onClick={tool.active ? () => {
+        if (isSpotlight) setOnboardingStep('spotlight-setup')
+        onLaunch(tool.id)
+      } : undefined}
       role={tool.active ? 'button' : undefined}
       tabIndex={tool.active ? 0 : undefined}
-      onKeyDown={tool.active ? e => e.key === 'Enter' && onLaunch(tool.id) : undefined}
+      onKeyDown={tool.active ? e => {
+        if (e.key === 'Enter') {
+          if (isSpotlight) setOnboardingStep('spotlight-setup')
+          onLaunch(tool.id)
+        }
+      } : undefined}
       aria-label={tool.active ? `Open ${tool.name}` : `${tool.name} — Coming Soon`}
     >
       {CAN_REORDER_TOOLS && (
-        <div 
-          className="hn-tool-drag-handle" 
-          {...attributes} 
-          {...listeners} 
+        <div
+          className="hn-tool-drag-handle"
+          {...attributes}
+          {...listeners}
           onClick={e => e.stopPropagation()}
-          style={{ position: 'absolute', top: 4, right: 4, padding: 8, cursor: 'grab', color: 'var(--text-muted)' }}
+          style={{ position: 'absolute', top: 4, right: 4, padding: 8, cursor: 'grab', color: 'var(--text-muted)', touchAction: 'none' }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="9" cy="12" r="1.5"/><circle cx="9" cy="5" r="1.5"/><circle cx="9" cy="19" r="1.5"/>
-            <circle cx="15" cy="12" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
+            <circle cx="9" cy="12" r="1.5" /><circle cx="9" cy="5" r="1.5" /><circle cx="9" cy="19" r="1.5" />
+            <circle cx="15" cy="12" r="1.5" /><circle cx="15" cy="5" r="1.5" /><circle cx="15" cy="19" r="1.5" />
           </svg>
         </div>
       )}
@@ -133,16 +142,16 @@ const SETTINGS_SECTIONS = [
     color: '#0ea5e9',
   },
   {
-    id: 'permissions',
-    label: 'Permissions',
-    icon: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>,
-    color: '#f59e0b',
-  },
-  {
     id: 'data',
     label: 'Data & Storage',
     icon: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></svg>,
     color: '#ec4899',
+  },
+  {
+    id: 'permissions',
+    label: 'Permissions',
+    icon: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>,
+    color: '#f59e0b',
   },
   {
     id: 'about',
@@ -347,6 +356,44 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
     setTimeout(() => window.location.reload(), 1200)
   }
 
+  const handleBackupExport = async () => {
+    const blob = await exportUltimateBackup()
+    if (!blob) {
+      showAlert('Failed to export ultimate backup.', { type: 'danger' })
+      return
+    }
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `MansulaNexus_FullBackup_${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    showAlert('Backup exported successfully.', { type: 'success' })
+  }
+
+  const fileInputRef = useRef(null)
+
+  const handleBackupRestore = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = '' // reset
+
+    const ok = await showConfirm(
+      'Restoring a backup will COMPLETELY OVERWRITE all your current business data, orders, and settings. This cannot be undone. Are you absolutely sure?',
+      { title: 'Restore Ultimate Backup?', type: 'danger', confirmText: 'Yes, Overwrite Everything', cancelText: 'Cancel', confirmWord: 'RESTORE' }
+    )
+    if (!ok) return
+
+    setResetStep(2) // Disable interactions
+    const success = await restoreUltimateBackup(file)
+    if (success) {
+      setTimeout(() => window.location.reload(), 800)
+    } else {
+      setResetStep(0)
+      showAlert('Failed to restore backup. Invalid or corrupted file.', { type: 'danger' })
+    }
+  }
+
   const activeInfo = SETTINGS_SECTIONS.find(s => s.id === activeSection)
 
   const renderContent = () => {
@@ -542,11 +589,47 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
       case 'data':
         return (
           <div className="hns-content-area">
-            <div className="hns-section-title">Backup & Restore</div>
-            <div className="hns-card hns-coming-soon-card">
-              <div className="hns-cs-badge">Coming Soon</div>
-              <div className="hns-cs-title">Cloud Backup</div>
-              <div className="hns-cs-desc">Automatically sync your data to the cloud and restore from any device.</div>
+            <div className="hns-section-title">Ultimate Full Backup</div>
+            <div className="hns-card" style={{ padding: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600 }}>All-in-One Data Export</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                    Downloads a single backup file containing all your settings, order records, inventory, purchases, customers, and udhaar ledgers.
+                  </div>
+                </div>
+                <button
+                  className="bp-btn-primary"
+                  onClick={handleBackupExport}
+                  style={{ alignSelf: 'flex-start' }}
+                >
+                  <Icon.Download style={{ width: 16, height: 16, marginRight: 6 }} /> Export Ultimate Backup
+                </button>
+
+                <div style={{ height: '1px', background: 'var(--border-color)', margin: '8px 0' }} />
+
+                <div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600 }}>Restore from Backup</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                    Select a previously exported ultimate backup file. This will safely overwrite your current data.
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  accept=".json"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleBackupRestore}
+                />
+                <button
+                  className="bp-btn-outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{ alignSelf: 'flex-start' }}
+                  disabled={resetStep === 2}
+                >
+                  <Icon.Cloud style={{ width: 16, height: 16, marginRight: 6 }} /> Restore Ultimate Backup
+                </button>
+              </div>
             </div>
 
             <div className="hns-section-title" style={{ marginTop: 24 }}>Danger Zone</div>
@@ -852,17 +935,19 @@ function HelpContent() {
     { q: 'How do I change the currency?', a: 'Go to Settings → Billing & Region. Select your preferred currency from the available options. It applies instantly across the POS.' },
   ]
   return (
-    <div className="hns-content-area">
-      <div className="hns-help-tabs">
-        {[
-          { id: 'faq', label: <><Icon.FAQ style={{ width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom' }} /> FAQ</> },
-          { id: 'terms', label: <><Icon.Doc style={{ width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Terms of Use</> },
-          { id: 'privacy', label: <><Icon.Lock style={{ width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Privacy Policy</> },
-        ].map(t => (
-          <button key={t.id} className={`hns-help-tab ${helpTab === t.id ? 'active' : ''}`} onClick={() => setHelpTab(t.id)}>
-            {t.label}
-          </button>
-        ))}
+    <div className="hn-container">
+      <div className="hn-header">
+        <div className="hns-help-tabs">
+          {[
+            { id: 'faq', label: <><Icon.FAQ style={{ width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom' }} /> FAQ</> },
+            { id: 'terms', label: <><Icon.Doc style={{ width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Terms of Use</> },
+            { id: 'privacy', label: <><Icon.Lock style={{ width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Privacy Policy</> },
+          ].map(t => (
+            <button key={t.id} className={`hns-help-tab ${helpTab === t.id ? 'active' : ''}`} onClick={() => setHelpTab(t.id)}>
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {helpTab === 'faq' && (
@@ -1033,12 +1118,12 @@ function HelpContent() {
   )
 }
 
-export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurrency, currencies }) {
+export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurrency, currencies, onboardingStep, setOnboardingStep }) {
   const [time, setTime] = useState(new Date())
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [businessName, setBusinessName] = useState('')
   const { alert: showAlert, confirm: showConfirm } = useAlert()
-  
+
   const [toolsOrder, setToolsOrder] = useState([])
   const [orderedTools, setOrderedTools] = useState(TOOLS)
 
@@ -1062,8 +1147,8 @@ export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurre
   }, [toolsOrder])
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
+    useSensor(MouseSensor, { activationConstraint: { distance: 2 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 0, tolerance: 5 } })
   )
 
   const handleDragEnd = (event) => {
@@ -1109,6 +1194,11 @@ export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurre
 
   return (
     <div className="hn-root">
+      {onboardingStep === 'spotlight-business' && (
+        <div className="mn-spotlight-overlay">
+          <button className="mn-skip-tutorial-btn" onClick={() => setOnboardingStep(null)}>Skip Tutorial</button>
+        </div>
+      )}
       {settingsOpen && (
         <HomeSettings
           theme={theme}
@@ -1188,7 +1278,13 @@ export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurre
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={orderedTools.map(t => t.id)} strategy={rectSortingStrategy}>
                 {orderedTools.map(tool => (
-                  <SortableToolCard key={tool.id} tool={tool} onLaunch={onLaunch} />
+                  <SortableToolCard
+                    key={tool.id}
+                    tool={tool}
+                    onLaunch={onLaunch}
+                    onboardingStep={onboardingStep}
+                    setOnboardingStep={setOnboardingStep}
+                  />
                 ))}
               </SortableContext>
             </DndContext>

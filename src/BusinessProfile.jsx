@@ -486,7 +486,7 @@ function CategoryForm({ categories, onAdd, onDelete }) {
 }
 
 // ─── PROFILE VIEW (read-only) ───
-function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
+function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup, onboardingStep }) {
   const hasData = business.name || business.phone || business.email
 
   // Draws a premium branded QR card on a canvas and returns a blob
@@ -701,7 +701,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
         <div className="bp-profile-empty-logo">🏪</div>
         <div className="bp-profile-empty-title">No business info yet</div>
         <div className="bp-profile-empty-sub">Set up your business name, contact, and legal details to get started.</div>
-        <button className="bp-btn-primary" onClick={onEdit}><Ic.Edit /> Set Up Business</button>
+        <button className={`bp-btn-primary ${onboardingStep === 'spotlight-setup' ? 'mn-spotlight-active' : ''}`} onClick={onEdit}><Ic.Edit /> Set Up Business</button>
         <div className="bp-profile-empty-divider">or</div>
         <button className="bp-btn-outline" onClick={onRestoreBackup} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px', fontSize: '0.9rem' }}>
           <Ic.Upload /> Restore from Backup
@@ -799,7 +799,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup }) {
 }
 
 // ─── MAIN COMPONENT ───
-export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRates }) {
+export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRates, onboardingStep, setOnboardingStep }) {
   useBackButton(onClose)
   const [tab, setTab] = useState('info')
   const [infoMode, setInfoMode] = useState('view')   // 'view' | 'edit'
@@ -832,6 +832,7 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
     await dbSet(KEY_BUSINESS, business)
     setSaved(true)
     setInfoMode('view')
+    if (onboardingStep === 'spotlight-setup') setOnboardingStep(null)
     setTimeout(() => setSaved(false), 2500)
   }
 
@@ -909,6 +910,11 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
 
   return (
     <div className="bp-root">
+      {onboardingStep === 'spotlight-setup' && (
+        <div className="mn-spotlight-overlay">
+          <button className="mn-skip-tutorial-btn" onClick={() => setOnboardingStep(null)}>Skip Tutorial</button>
+        </div>
+      )}
       {showScanner && (
         <UpiScanner
           onClose={() => setShowScanner(false)}
@@ -962,17 +968,17 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
       {tab === 'info' && (
         <div className="bp-body">
           {infoMode === 'view' ? (
-            <ProfileView business={business} taxRateObj={taxRateObj} onEdit={() => setInfoMode('edit')} onRestoreBackup={() => importRef.current?.click()} />
+            <ProfileView business={business} taxRateObj={taxRateObj} onEdit={() => { setInfoMode('edit'); if (onboardingStep === 'spotlight-setup') setOnboardingStep(null); }} onRestoreBackup={() => importRef.current?.click()} onboardingStep={onboardingStep} />
           ) : (
             <>
-              {/* Edit form */}
-              <div className="bp-logo-section">
-                <div className="bp-logo-preview"><span>{business.logo || '🏪'}</span></div>
-                <div className="bp-logo-hint">Change logo emoji below</div>
-                <input className="bp-input bp-logo-input" value={business.logo} onChange={e => setBusiness(b => ({ ...b, logo: e.target.value }))} maxLength={2} placeholder="🏪" />
-              </div>
-
-              <div className="bp-section-label">Basic Info</div>
+              <div className="bp-edit-form">
+                <div className="bp-logo-section">
+                  <div className="bp-logo-preview"><span>{business.logo || '🏪'}</span></div>
+                  <div className="bp-logo-hint">Change logo emoji below</div>
+                  <input className="bp-input bp-logo-input" value={business.logo} onChange={e => setBusiness(b => ({ ...b, logo: e.target.value }))} maxLength={2} placeholder="🏪" />
+                </div>
+  
+                <div className="bp-section-label">Basic Info</div>
               <div className="bp-field">
                 <label className="bp-label">Business Name</label>
                 <input className="bp-input" value={business.name} onChange={e => setBusiness(b => ({ ...b, name: e.target.value }))} placeholder="e.g. Mansu's Café" />
@@ -1034,6 +1040,7 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
                 <button className="bp-btn-primary bp-save-full" style={{ flex: 2 }} onClick={saveBusiness}>
                   {saved ? <><Ic.Check /> Saved!</> : <><Ic.Save /> Save Profile</>}
                 </button>
+              </div>
               </div>
             </>
           )}

@@ -11,6 +11,51 @@ import Analytics from './Analytics.jsx'
 import { AlertProvider, useAlert } from './AlertDialog.jsx'
 import ReloadPrompt from './ReloadPrompt.jsx'
 import { APP_NAME } from './appInfo.js'
+import { dbGet } from './db.js'
+
+function ThemeModal({ onConfirm, onChangeTheme, currentTheme }) {
+  return (
+    <div className="mn-theme-modal-overlay">
+      <div className="mn-theme-modal">
+        <h2>Choose Your Theme</h2>
+        <p>You can change this later in settings.</p>
+        <div className="mn-theme-options">
+          <button
+            className={`mn-theme-btn ${currentTheme === 'light' ? 'active' : ''}`}
+            onClick={() => onChangeTheme('light')}
+          >
+            <div className="mn-theme-preview light-preview">
+              <div className="p-header" />
+              <div className="p-card" />
+              <div className="p-card" />
+            </div>
+            <span>Light</span>
+          </button>
+          <button
+            className={`mn-theme-btn ${currentTheme === 'dark' ? 'active' : ''}`}
+            onClick={() => onChangeTheme('dark')}
+          >
+            <div className="mn-theme-preview dark-preview">
+              <div className="p-header" />
+              <div className="p-card" />
+              <div className="p-card" />
+            </div>
+            <span>Dark</span>
+          </button>
+        </div>
+        <div style={{ marginTop: '24px' }}>
+          <button 
+            className="bp-btn-primary" 
+            style={{ width: '100%', padding: '14px', fontSize: '1.05rem', borderRadius: '12px' }} 
+            onClick={onConfirm}
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function OfflineBanner({ onDismiss }) {
   const { alert } = useAlert()
@@ -61,6 +106,8 @@ export default function App() {
   const [screen, setScreen] = useState('home')
   const [editingRecord, setEditingRecord] = useState(null)
   const [agreed, setAgreed] = useState(() => localStorage.getItem(AGREEMENT_KEY) === 'true')
+  const [hasPickedTheme, setHasPickedTheme] = useState(() => localStorage.getItem('mn-has-picked-theme') === 'true')
+  const [onboardingStep, setOnboardingStep] = useState(null)
   const [theme, setTheme] = useState(() => {
     const stored = localStorage.getItem('mn-theme')
     if (stored) return stored
@@ -74,6 +121,15 @@ export default function App() {
   })
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [dismissOffline, setDismissOffline] = useState(false)
+
+  useEffect(() => {
+    // Check if business profile is setup
+    dbGet('mn-business').then(b => {
+      if (!b || !b.name) {
+        setOnboardingStep('spotlight-business')
+      }
+    })
+  }, [])
 
   useEffect(() => {
     const handleOnline = () => {
@@ -111,6 +167,11 @@ export default function App() {
     setShowWelcome(false)
   }
 
+  const handleThemeConfirm = () => {
+    setHasPickedTheme(true)
+    localStorage.setItem('mn-has-picked-theme', 'true')
+  }
+
   const renderScreen = () => {
     // ── Gate 1: Cinematic Splash Screen ──
     if (showWelcome) {
@@ -135,7 +196,16 @@ export default function App() {
     }
 
     if (screen === 'business') {
-      return <BusinessProfile onClose={() => setScreen('home')} taxRateObj={taxRateObj} onTaxRate={setTaxRateObj} taxRates={TAX_RATES} />
+      return (
+        <BusinessProfile 
+          onClose={() => setScreen('home')} 
+          taxRateObj={taxRateObj} 
+          onTaxRate={setTaxRateObj} 
+          taxRates={TAX_RATES}
+          onboardingStep={onboardingStep}
+          setOnboardingStep={setOnboardingStep}
+        />
+      )
     }
 
     if (screen === 'records') {
@@ -169,12 +239,17 @@ export default function App() {
         currency={currency}
         onCurrency={setCurrency}
         currencies={CURRENCIES}
+        onboardingStep={onboardingStep}
+        setOnboardingStep={setOnboardingStep}
       />
     )
   }
 
   return (
     <AlertProvider>
+      {agreed && !hasPickedTheme && (
+        <ThemeModal onConfirm={handleThemeConfirm} onChangeTheme={setTheme} currentTheme={theme} />
+      )}
       {renderScreen()}
       {!isOnline && !dismissOffline && (
         <OfflineBanner onDismiss={() => setDismissOffline(true)} />

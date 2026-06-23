@@ -1145,3 +1145,131 @@ export async function getPurchaseAnalyticsData(fromTs, toTs) {
     })
   } catch { return [] }
 }
+
+
+// ════════════════════════════════════════════════════════════════════
+// ULTIMATE FULL BACKUP & RESTORE
+// ════════════════════════════════════════════════════════════════════
+
+export async function exportUltimateBackup() {
+  try {
+    const db = await openDB()
+    const backupData = {
+      type: 'mansula_nexus_ultimate_backup',
+      version: 1,
+      timestamp: Date.now(),
+      kv: [],
+      orders: [],
+      inventory: [],
+      purchases: [],
+      customers: [],
+      udhaar: [],
+      localSettings: {}
+    }
+
+    // 1. Get all object stores
+    await new Promise((resolve) => {
+      const tx = db.transaction(['kv', 'orders', 'inventory', 'purchases', 'customers', 'udhaar'], 'readonly')
+      
+      const kvReq = tx.objectStore('kv').getAll()
+      const ordersReq = tx.objectStore('orders').getAll()
+      const invReq = tx.objectStore('inventory').getAll()
+      const purReq = tx.objectStore('purchases').getAll()
+      const custReq = tx.objectStore('customers').getAll()
+      const udhReq = tx.objectStore('udhaar').getAll()
+      
+      tx.oncomplete = () => {
+        backupData.kv = kvReq.result || []
+        backupData.orders = ordersReq.result || []
+        backupData.inventory = invReq.result || []
+        backupData.purchases = purReq.result || []
+        backupData.customers = custReq.result || []
+        backupData.udhaar = udhReq.result || []
+        resolve()
+      }
+      tx.onerror = () => resolve()
+    })
+
+    // 2. Get local storage settings (anything starting with mn-)
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith('mn-')) {
+        try {
+          backupData.localSettings[key] = localStorage.getItem(key)
+        } catch { }
+      }
+    }
+
+    const jsonStr = JSON.stringify(backupData)
+    return new Blob([jsonStr], { type: 'application/json' })
+  } catch (err) {
+    console.error('Ultimate Backup failed:', err)
+    return null
+  }
+}
+
+export async function restoreUltimateBackup(file) {
+  try {
+    const jsonStr = await file.text()
+    const data = JSON.parse(jsonStr)
+    
+    if (data.type !== 'mansula_nexus_ultimate_backup') {
+      throw new Error('Invalid backup file. This is not an Ultimate Backup file.')
+    }
+
+    // 1. Clear all existing DB data completely
+    await clearAllOrderRecords()
+    await clearAllInventoryData()
+    await clearAllCustomerData()
+    
+    const db = await openDB()
+    
+    // 2. Write all new data in giant transaction
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(['kv', 'orders', 'inventory', 'purchases', 'customers', 'udhaar'], 'readwrite')
+      
+      if (data.kv) {
+        const store = tx.objectStore('kv')
+        store.clear()
+        data.kv.forEach(item => store.put(item))
+      }
+      if (data.orders) {
+        const store = tx.objectStore('orders')
+        data.orders.forEach(item => store.put(item))
+      }
+      if (data.inventory) {
+        const store = tx.objectStore('inventory')
+        data.inventory.forEach(item => store.put(item))
+      }
+      if (data.purchases) {
+        const store = tx.objectStore('purchases')
+        data.purchases.forEach(item => store.put(item))
+      }
+      if (data.customers) {
+        const store = tx.objectStore('customers')
+        data.customers.forEach(item => store.put(item))
+      }
+      if (data.udhaar) {
+        const store = tx.objectStore('udhaar')
+        data.udhaar.forEach(item => store.put(item))
+      }
+      
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+
+    // 3. Restore local storage keys safely
+    if (data.localSettings) {
+      for (const [key, val] of Object.entries(data.localSettings)) {
+        if (key && key.startsWith('mn-')) {
+          localStorage.setItem(key, val)
+        }
+      }
+    }
+    
+    return true
+  } catch (err) {
+    console.error('Ultimate Restore failed:', err)
+    return false
+  }
+}

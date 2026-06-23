@@ -5675,12 +5675,13 @@ select {
 
 /* Section label */
 .bp-section-label {
+  margin-top: 12px;
+  margin-bottom: -8px;
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--text-muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding-top: 4px;
 }
 
 /* Fields */
@@ -13902,4 +13903,81 @@ select {
 }
 .mn-reload-btn.close:hover {
   color: var(--text-primary);
+}
+
+
+/* Edit form layout */
+.bp-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Onboarding / Theme Modal ── */
+.mn-theme-modal-overlay {
+  position: fixed; inset: 0; z-index: 99999;
+  background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; animation: fadeIn 0.3s ease;
+}
+.mn-theme-modal {
+  background: var(--bg-surface); padding: 30px; border-radius: 20px;
+  max-width: 400px; width: 100%; text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+.mn-theme-modal h2 { font-size: 1.5rem; margin-bottom: 8px; color: var(--text-primary); }
+.mn-theme-modal p { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 24px; }
+.mn-theme-options { display: flex; gap: 16px; justify-content: center; }
+.mn-theme-btn {
+  flex: 1; background: var(--bg-base); border: 2px solid transparent;
+  border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s ease;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.mn-theme-btn span { font-weight: 600; color: var(--text-primary); }
+.mn-theme-btn:hover { border-color: var(--brand-primary-light); background: var(--bg-surface-2); }
+.mn-theme-btn.active { border-color: var(--brand-primary); background: var(--brand-primary-light); }
+
+.mn-theme-preview {
+  width: 100%; height: 60px; border-radius: 8px; border: 1px solid var(--border-color);
+  padding: 6px; display: flex; flex-direction: column; gap: 4px;
+}
+.mn-theme-preview.light-preview { background: #f1f3f9; }
+.mn-theme-preview.dark-preview { background: #0d1117; }
+.mn-theme-preview .p-header { height: 8px; width: 60%; background: #a0aec0; border-radius: 4px; }
+.mn-theme-preview .p-card { height: 16px; width: 100%; background: #fff; border-radius: 4px; opacity: 0.8; }
+.dark-preview .p-card { background: #161b27; }
+
+/* ── Spotlight / Tutorial Overlay ── */
+.mn-spotlight-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);
+  animation: fadeIn 0.4s ease;
+  display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+  padding-bottom: 40px;
+}
+.mn-skip-tutorial-btn {
+  background: rgba(255, 255, 255, 0.2); color: #fff; border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 10px 24px; border-radius: 20px; font-weight: 600; cursor: pointer;
+  backdrop-filter: blur(8px); transition: all 0.2s ease;
+}
+.mn-skip-tutorial-btn:hover {
+  background: rgba(255, 255, 255, 0.3); border-color: #fff;
+}
+.mn-spotlight-active {
+  position: relative !important; z-index: 9001 !important;
+  box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.3), 0 0 30px rgba(99, 102, 241, 0.6) !important;
+  animation: pulse-glow 2s infinite !important;
+  border-radius: inherit;
+}
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0px rgba(99, 102, 241, 0.4), 0 0 20px rgba(99, 102, 241, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.1), 0 0 40px rgba(99, 102, 241, 0.8); }
+  100% { box-shadow: 0 0 0 0px rgba(99, 102, 241, 0), 0 0 20px rgba(99, 102, 241, 0.5); }
+}
+
+.hn-tool-drag-handle { touch-action: none; }
+
+.hn-tool-card {
+  user-select: none;
+  -webkit-user-select: none;
 }
