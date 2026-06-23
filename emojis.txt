@@ -1,0 +1,46 @@
+6: // ── Greeting ──
+14: // ── SVG Icon set ──
+42: // ── Tool definitions ──
+53: // ── Full-Screen Settings ──
+116: {isGranted ? '✓ Granted' : isDenied ? 'Denied' : 'Allow'}
+274: <option value="en">🇬🇧 English</option>
+275: <option value="hi" disabled>🇮🇳 हिन्दी (Coming Soon)</option>
+276: <option value="es" disabled>🇪🇸 Español (Coming Soon)</option>
+277: <option value="fr" disabled>🇫🇷 Français (Coming Soon)</option>
+278: <option value="ar" disabled>🇸🇦 العربية (Coming Soon)</option>
+355: <span className="hns-sound-play">▶</span>
+452: {resetStep !== 2 ? <><Icon.Reset /> Reset All</> : '↺ Reloading…'}
+467: <div className="hns-about-version">v1.6.0-alpha · POS & Business Suite</div>
+474: { label: 'Build', value: 'PWA · Offline-ready' },
+506: {/* ── TOP HEADER BAR ── */}
+518: {/* ── BODY (Sidebar + Main) ── */}
+520: {/* ── Tab Bar ── */}
+536: {/* ── Main Content ── */}
+552: { q: 'How do I add items to a sale?', a: 'Open the POS from the home screen. Tap any item from your menu to add it to the current order. You can adjust quantities using the +/− buttons on the cart.' },
+553: { q: 'How do I create a new product/menu item?', a: 'Go to Business Profile → Menu. Tap the + button to add a new item. Fill in the name, price, and category, then save.' },
+558: { q: 'How do I reset the order counter to #1?', a: 'Go to Order Records → Export/Data modal → Wipe Order Records. This clears all saved orders and resets the counter back to #1.' },
+561: { q: 'How do I install this as an app on my phone?', a: 'On Android (Chrome): tap the three dots → Install app. On iOS (Safari): tap Share → Add to Home Screen. The app will work just like a native app.' },
+563: { q: 'How do I change the currency?', a: 'Go to Settings → Billing & Region. Select your preferred currency from the available options. It applies instantly across the POS.' },
+569: { id: 'faq', label: '❓ FAQ' },
+570: { id: 'terms', label: '📄 Terms of Use' },
+571: { id: 'privacy', label: '🔒 Privacy Policy' },
+586: <span className="hns-faq-chevron">{openFaq === i ? '▲' : '▼'}</span>
+596: <div className="hns-legal-section-title">📄 Terms of Use</div>
+618: <div className="hns-legal-section-title">🔒 Privacy Policy</div>
+622: <div className="hns-legal-h">📦 Data Storage</div>
+623: <p>All data — including orders, customer records, inventory, products, and settings — is stored entirely on <strong>your device</strong> using browser IndexedDB and localStorage. No data is ever sent to any external server or cloud service.</p>
+624: <div className="hns-legal-h">🌐 Network Usage</div>
+626: <div className="hns-legal-h">📷 Camera Access</div>
+628: <div className="hns-legal-h">🔔 Notifications</div>
+630: <div className="hns-legal-h">💾 Persistent Storage</div>
+631: <p>Enabling Persistent Storage requests that your browser protect app data from being automatically cleared. This is a local browser permission — no data leaves your device.</p>
+632: <div className="hns-legal-h">✏️ Your Control</div>
+634: <div className="hns-legal-h">📬 Contact</div>
+690: {/* ── Topbar ── */}
+708: {/* ── Hero ── */}
+715: {timeStr} · {dateStr}
+722: {/* ── POS Launch Card ── */}
+751: {/* ── Tools Grid ── */}
+763: aria-label={tool.active ? `Open ${tool.name}` : `${tool.name} — Coming Soon`}
+784: {stressing ? 'Injecting 10,000 orders...' : '⚙️ Run Stress Test (10k Orders)'}
+789: <div className="hn-footer-text">ManSula Nexus · v1.6.0-alpha</div>

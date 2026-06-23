@@ -37,6 +37,13 @@ const Icon = {
   Database:  () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
   Download:  () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
   ExtLink:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+  FAQ:       () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  Doc:       () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
+  Lock:      () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+  Box:       () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
+  Globe:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+  Pencil:    () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  Mailbox:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
 }
 
 // ── Tool definitions ──
@@ -566,9 +573,9 @@ function HelpContent() {
     <div className="hns-content-area">
       <div className="hns-help-tabs">
         {[
-          { id: 'faq', label: '❓ FAQ' },
-          { id: 'terms', label: '📄 Terms of Use' },
-          { id: 'privacy', label: '🔒 Privacy Policy' },
+          { id: 'faq', label: <><Icon.FAQ style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> FAQ</> },
+          { id: 'terms', label: <><Icon.Doc style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Terms of Use</> },
+          { id: 'privacy', label: <><Icon.Lock style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Privacy Policy</> },
         ].map(t => (
           <button key={t.id} className={`hns-help-tab ${helpTab === t.id ? 'active' : ''}`} onClick={() => setHelpTab(t.id)}>
             {t.label}
@@ -593,7 +600,7 @@ function HelpContent() {
 
       {helpTab === 'terms' && (
         <div className="hns-legal-card">
-          <div className="hns-legal-section-title">📄 Terms of Use</div>
+          <div className="hns-legal-section-title"><Icon.Doc style={{width: 18, height: 18, marginRight: 8, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Terms of Use</div>
           <div className="hns-legal-body">
             <p><strong>Last updated:</strong> June 2026</p>
             <p>By using ManSula Nexus ("the App"), you agree to the following terms and conditions. Please read them carefully.</p>
@@ -615,23 +622,23 @@ function HelpContent() {
 
       {helpTab === 'privacy' && (
         <div className="hns-legal-card">
-          <div className="hns-legal-section-title">🔒 Privacy Policy</div>
+          <div className="hns-legal-section-title"><Icon.Lock style={{width: 18, height: 18, marginRight: 8, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Privacy Policy</div>
           <div className="hns-legal-body">
             <p><strong>Last updated:</strong> June 2026</p>
             <p>ManSula Nexus is designed with <strong>privacy-first principles</strong>. We do not collect, store, or transmit any of your personal or business data to external servers.</p>
-            <div className="hns-legal-h">📦 Data Storage</div>
+            <div className="hns-legal-h"><Icon.Box style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Data Storage</div>
             <p>All data — including orders, customer records, inventory, products, and settings — is stored entirely on <strong>your device</strong> using browser IndexedDB and localStorage. No data is ever sent to any external server or cloud service.</p>
-            <div className="hns-legal-h">🌐 Network Usage</div>
+            <div className="hns-legal-h"><Icon.Globe style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Network Usage</div>
             <p>The App loads fonts (Outfit) from Google Fonts on first launch. No analytics, tracking scripts, cookies, advertising SDKs, or third-party monitoring services are included in this application.</p>
-            <div className="hns-legal-h">📷 Camera Access</div>
+            <div className="hns-legal-h"><Icon.Camera style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Camera Access</div>
             <p>If you grant camera access, it is used exclusively for barcode/QR scanning within the POS screen. No images are captured, stored, or transmitted. Camera access can be revoked from your browser's site settings at any time.</p>
-            <div className="hns-legal-h">🔔 Notifications</div>
+            <div className="hns-legal-h"><Icon.Bell style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Notifications</div>
             <p>Notification permission is entirely optional. It is only used to display local in-app alerts for order updates. No push notifications are sent through any external service or server.</p>
-            <div className="hns-legal-h">💾 Persistent Storage</div>
+            <div className="hns-legal-h"><Icon.Database style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Persistent Storage</div>
             <p>Enabling Persistent Storage requests that your browser protect app data from being automatically cleared. This is a local browser permission — no data leaves your device.</p>
-            <div className="hns-legal-h">✏️ Your Control</div>
+            <div className="hns-legal-h"><Icon.Pencil style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Your Control</div>
             <p>You have full control over all your data. Use the "Reset App Data" option in Data & Storage settings to permanently and irreversibly delete all data from your device at any time.</p>
-            <div className="hns-legal-h">📬 Contact</div>
+            <div className="hns-legal-h"><Icon.Mailbox style={{width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom'}}/> Contact</div>
             <p>For privacy-related questions or concerns, please reach out to the developer through the app's official channel or support contact.</p>
           </div>
         </div>
