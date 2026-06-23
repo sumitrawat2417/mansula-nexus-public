@@ -3038,19 +3038,27 @@ select {
   min-width: 0;
 }
 
-.hns-topbar-logo {
+.hns-topbar-back {
   width: 32px;
   height: 32px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 3px 10px rgba(99,102,241,0.4);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  margin-left: -6px;
 }
 
-.hns-topbar-logo svg { width: 16px; height: 16px; }
+.hns-topbar-back:hover {
+  background: var(--bg-surface-2);
+}
+
+.hns-topbar-back svg { width: 18px; height: 18px; }
 
 .hns-topbar-heading {
   font-size: 1.05rem;
@@ -3955,6 +3963,8 @@ select {
   }
 
   .hns-nav-dot { display: none; }
+
+  .hns-nav-group-label { display: none; }
 
   .hns-close-btn { display: none; }  /* Close is in topbar */
 
