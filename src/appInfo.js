@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────
 
 export const APP_NAME = 'ManSula Nexus'
-export const APP_VERSION = 'v1.6.0-alpha'
+export const APP_VERSION = 'v1.6.1-alpha'
 
 export const APP_BUILD_DATE = 'June 24, 2025'
 export const LEGAL_LAST_UPDATED = 'June 2026'
@@ -16,6 +16,12 @@ export const LEGAL_LAST_UPDATED = 'June 2026'
  *    detail: Full description shown when the user expands the item
  */
 export const WHATS_NEW = [
+  {
+    icon: 'wrench',
+    label: 'Customizable Tools Grid',
+    detail:
+      'You can now hold and drag any tool in the "More Tools" section to reorder them exactly how you like. The app will save your custom layout so your most-used tools are always right at the top!',
+  },
   {
     icon: 'analytics',
     label: 'Analytics Module',
@@ -44,5 +50,5 @@ export const ORG = {
   support: 'mansula.rwt@gmail.com',
   phone1: '+919818013446',
   phone2: '+918851947954',
-  copyright: `© ${new Date().getFullYear()} ManSula Technologies & ManSula DivLabs. All rights reserved.`,
+  copyright: `© 2024 - ${new Date().getFullYear()} ManSula Technologies & ManSula DivLabs. All rights reserved.`,
 }

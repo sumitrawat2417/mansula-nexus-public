@@ -1,8 +1,62 @@
 import { useState, useEffect, Fragment, useRef } from 'react'
 import { useBackButton } from './useBackButton.js'
-import { dbClearAll, dbGet, injectStressTestData } from './db.js'
+import { dbClearAll, dbGet, dbSet, injectStressTestData } from './db.js'
 import { useAlert } from './AlertDialog.jsx'
 import { APP_VERSION, APP_BUILD_DATE, WHATS_NEW, ORG, LEGAL_LAST_UPDATED } from './appInfo.js'
+import { DndContext, closestCenter, TouchSensor, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
+// ── Premium Feature Lock ──
+const CAN_REORDER_TOOLS = true
+
+function SortableToolCard({ tool, onLaunch }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: tool.id })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 99 : 'auto',
+    position: 'relative'
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`hn-tool-card ${tool.active ? 'hn-tool-active' : 'hn-tool-soon'}`}
+      onClick={tool.active ? () => onLaunch(tool.id) : undefined}
+      role={tool.active ? 'button' : undefined}
+      tabIndex={tool.active ? 0 : undefined}
+      onKeyDown={tool.active ? e => e.key === 'Enter' && onLaunch(tool.id) : undefined}
+      aria-label={tool.active ? `Open ${tool.name}` : `${tool.name} — Coming Soon`}
+    >
+      {CAN_REORDER_TOOLS && (
+        <div 
+          className="hn-tool-drag-handle" 
+          {...attributes} 
+          {...listeners} 
+          onClick={e => e.stopPropagation()}
+          style={{ position: 'absolute', top: 4, right: 4, padding: 8, cursor: 'grab', color: 'var(--text-muted)' }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="9" cy="12" r="1.5"/><circle cx="9" cy="5" r="1.5"/><circle cx="9" cy="19" r="1.5"/>
+            <circle cx="15" cy="12" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
+          </svg>
+        </div>
+      )}
+      <div className="hn-tool-icon" style={{ background: tool.bg }}>
+        <tool.Icon />
+      </div>
+      <div className="hn-tool-name">{tool.name}</div>
+      <div className="hn-tool-desc">{tool.desc}</div>
+      {tool.active
+        ? <span className="hn-tool-open-pill">Open <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg></span>
+        : <span className="hn-soon-pill">Soon</span>
+      }
+    </div>
+  )
+}
 
 // ── Greeting ──
 function getGreeting() {
@@ -79,12 +133,6 @@ const SETTINGS_SECTIONS = [
     color: '#0ea5e9',
   },
   {
-    id: 'billing',
-    label: 'Billing & Region',
-    icon: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>,
-    color: '#10b981',
-  },
-  {
     id: 'permissions',
     label: 'Permissions',
     icon: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>,
@@ -101,6 +149,12 @@ const SETTINGS_SECTIONS = [
     label: 'About',
     icon: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>,
     color: '#8b5cf6',
+  },
+  {
+    id: 'billing',
+    label: 'Billing & Region',
+    icon: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>,
+    color: '#10b981',
   },
   {
     id: 'help',
@@ -572,7 +626,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                       Check for Updates
                     </button>
                   )}
-                  
+
                   {updateStatus === 'checking' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>
                       Checking...
@@ -984,6 +1038,46 @@ export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurre
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [businessName, setBusinessName] = useState('')
   const { alert: showAlert, confirm: showConfirm } = useAlert()
+  
+  const [toolsOrder, setToolsOrder] = useState([])
+  const [orderedTools, setOrderedTools] = useState(TOOLS)
+
+  useEffect(() => {
+    dbGet('mn-tools-order').then(savedOrder => {
+      if (savedOrder && Array.isArray(savedOrder) && savedOrder.length > 0) {
+        setToolsOrder(savedOrder)
+      } else {
+        setToolsOrder(TOOLS.map(t => t.id))
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    if (toolsOrder.length === 0) return
+    const ordered = toolsOrder.map(id => TOOLS.find(t => t.id === id)).filter(Boolean)
+    TOOLS.forEach(t => {
+      if (!ordered.some(ot => ot.id === t.id)) ordered.push(t)
+    })
+    setOrderedTools(ordered)
+  }, [toolsOrder])
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
+  )
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      setOrderedTools(items => {
+        const oldIndex = items.findIndex(t => t.id === active.id)
+        const newIndex = items.findIndex(t => t.id === over.id)
+        const newArray = arrayMove(items, oldIndex, newIndex)
+        dbSet('mn-tools-order', newArray.map(t => t.id))
+        return newArray
+      })
+    }
+  }
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 60000)
@@ -1091,27 +1185,13 @@ export default function Home({ onLaunch, theme, onToggleTheme, currency, onCurre
         <div className="hn-tools-section">
           <div className="hn-tools-heading">More Tools</div>
           <div className="hn-tools-grid">
-            {TOOLS.map(tool => (
-              <div
-                key={tool.id}
-                className={`hn-tool-card ${tool.active ? 'hn-tool-active' : 'hn-tool-soon'}`}
-                onClick={tool.active ? () => onLaunch(tool.id) : undefined}
-                role={tool.active ? 'button' : undefined}
-                tabIndex={tool.active ? 0 : undefined}
-                onKeyDown={tool.active ? e => e.key === 'Enter' && onLaunch(tool.id) : undefined}
-                aria-label={tool.active ? `Open ${tool.name}` : `${tool.name} — Coming Soon`}
-              >
-                <div className="hn-tool-icon" style={{ background: tool.bg }}>
-                  <tool.Icon />
-                </div>
-                <div className="hn-tool-name">{tool.name}</div>
-                <div className="hn-tool-desc">{tool.desc}</div>
-                {tool.active
-                  ? <span className="hn-tool-open-pill">Open <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg></span>
-                  : <span className="hn-soon-pill">Soon</span>
-                }
-              </div>
-            ))}
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={orderedTools.map(t => t.id)} strategy={rectSortingStrategy}>
+                {orderedTools.map(tool => (
+                  <SortableToolCard key={tool.id} tool={tool} onLaunch={onLaunch} />
+                ))}
+              </SortableContext>
+            </DndContext>
           </div>
 
           <button
