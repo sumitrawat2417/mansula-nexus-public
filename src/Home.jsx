@@ -140,6 +140,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
   const { alert: showAlert, confirm: showConfirm } = useAlert()
   const [expandedItem, setExpandedItem] = useState(null)
   const [storageUsed, setStorageUsed] = useState('< 1 MB')
+  const [updateStatus, setUpdateStatus] = useState('uptodate')
 
   useEffect(() => {
     if (navigator.storage && navigator.storage.estimate) {
@@ -531,20 +532,62 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Current Version</div>
                   <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>{APP_VERSION}</div>
                 </div>
-                <button
-                  style={{
-                    padding: '8px 14px', fontSize: '0.75rem', borderRadius: '8px', fontWeight: 600,
-                    border: 'none', cursor: 'pointer',
-                    background: 'var(--bg-surface-2, rgba(99,102,241,0.08))',
-                    color: 'var(--text-primary)',
-                    transition: 'transform 0.15s ease',
-                  }}
-                  onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-                  onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-                >
-                  Check for Updates
-                </button>
+                <div style={{ textAlign: 'right' }}>
+                  {updateStatus === 'uptodate' && (
+                    <button
+                      style={{
+                        padding: '8px 14px', fontSize: '0.75rem', borderRadius: '8px', fontWeight: 600,
+                        border: 'none', cursor: 'pointer',
+                        background: 'var(--bg-surface-2, rgba(99,102,241,0.08))',
+                        color: 'var(--text-primary)',
+                        transition: 'transform 0.15s ease',
+                      }}
+                      onClick={() => {
+                        setUpdateStatus('checking')
+                        if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(reg => reg.update())
+                        setTimeout(() => setUpdateStatus('available'), 1500)
+                      }}
+                      onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+                      onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+                      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      Check for Updates
+                    </button>
+                  )}
+                  
+                  {updateStatus === 'checking' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>
+                      Checking...
+                    </div>
+                  )}
+
+                  {updateStatus === 'available' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#f59e0b', fontSize: '0.75rem', fontWeight: 600 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
+                        Update Available
+                      </div>
+                      <button
+                        style={{
+                          padding: '6px 14px', fontSize: '0.75rem', borderRadius: '6px', fontWeight: 600,
+                          border: 'none', cursor: 'pointer',
+                          background: 'var(--brand-primary)',
+                          color: '#fff',
+                        }}
+                        onClick={() => {
+                          if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.getRegistration().then(reg => {
+                              if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' })
+                            })
+                          }
+                          setTimeout(() => window.location.reload(), 300)
+                        }}
+                      >
+                        Install Update
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
