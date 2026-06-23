@@ -3101,8 +3101,17 @@ select {
   transform: scale(1.08);
 }
 
-/* ── BODY: sidebar + main ── */
+/* ── ROOT CONTAINER ── */
 .hns-root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── BODY: sidebar + main ── */
+.hns-body-wrapper {
   flex: 1;
   display: flex;
   overflow: hidden;
@@ -3898,7 +3907,7 @@ select {
   .hns-topbar-divider { display: none; }
   .hns-topbar-section { display: none; }
 
-  .hns-root { flex-direction: column; }
+  .hns-body-wrapper { flex-direction: column; }
 
   /* Sidebar becomes a horizontal scrollable tab strip */
   .hns-sidebar {

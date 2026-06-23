@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { useBackButton } from './useBackButton.js'
 import { dbClearAll, dbGet, injectStressTestData } from './db.js'
 import { useAlert } from './AlertDialog.jsx'
@@ -597,12 +597,12 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         </header>
 
         {/* ── BODY (Sidebar + Main) ── */}
-        <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+        <div className="hns-body-wrapper">
           {/* ── Sidebar ── */}
           <div className="hns-sidebar">
             <nav className="hns-nav">
               {SETTINGS_SECTIONS.map((s, i) => (
-                <React.Fragment key={s.id}>
+                <Fragment key={s.id}>
                   {/* Group Labels */}
                   {i === 0 && <div className="hns-nav-group-label">General</div>}
                   {i === 3 && <div className="hns-nav-group-label">Advanced</div>}
@@ -616,7 +616,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                     <span className="hns-nav-icon-wrap"><s.icon /></span>
                     <span className="hns-nav-label">{s.label}</span>
                   </button>
-                </React.Fragment>
+                </Fragment>
               ))}
             </nav>
           </div>
