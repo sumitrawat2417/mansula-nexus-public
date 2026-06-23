@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { APP_NAME, ORG } from './appInfo.js'
 
 // ── Icons ──
 const Ic = {
@@ -22,7 +23,7 @@ const CLAUSES = [
     color: '#6366f1',
     content: `Business data is stored locally on your device by default. Future optional features such as cloud backup, synchronization, account services, or AI-powered functionality may require secure processing of selected data and will be disclosed before use.
 
-Users are responsible for maintaining backups of their business information. While ManSula Nexus may provide backup, export, import, and recovery tools, ManSula Technologies & ManSula DivLabs cannot guarantee restoration of lost, corrupted, or deleted data.
+Users are responsible for maintaining backups of their business information. While ${APP_NAME} may provide backup, export, import, and recovery tools, ${ORG.name} cannot guarantee restoration of lost, corrupted, or deleted data.
 
 By accepting these terms, the user acknowledges that data persistence is entirely dependent on the integrity of the local device and its storage subsystems.`,
   },
@@ -44,11 +45,11 @@ Availability of third-party services is outside the control of ManSula Technolog
     title: 'Payments & UPI',
     subtitle: 'Transaction liability',
     color: '#10b981',
-    content: `ManSula Nexus functions strictly as a display interface that generates dynamic UPI QR strings and formatted payment requests. The platform is not a registered payment gateway, payment aggregator, banking correspondent, or financial institution as defined under the Payment and Settlement Systems Act, 2007.
+    content: `${APP_NAME} functions strictly as a display interface that generates dynamic UPI QR strings and formatted payment requests. The platform is not a registered payment gateway, payment aggregator, banking correspondent, or financial institution as defined under the Payment and Settlement Systems Act, 2007.
 
 ManSula Technologies & ManSula DivLabs assumes zero liability for failed UPI transactions, incorrect payment settlements, banking network outages, incorrect amount entries by the merchant, or any revenue loss resulting from payment processing failures by third-party UPI service providers (e.g., PhonePe, Google Pay, Paytm, BHIM).
 
-ManSula Nexus does not guarantee payment settlement, transaction success, transaction status accuracy, or banking network availability. The merchant acknowledges that all payment confirmations must be independently verified through their respective banking application or UPI service provider.`,
+${APP_NAME} does not guarantee payment settlement, transaction success, transaction status accuracy, or banking network availability. The merchant acknowledges that all payment confirmations must be independently verified through their respective banking application or UPI service provider.`,
   },
   {
     id: 'tax',
@@ -56,7 +57,7 @@ ManSula Nexus does not guarantee payment settlement, transaction success, transa
     title: 'Tax & Compliance',
     subtitle: 'Regulatory responsibilities',
     color: '#f59e0b',
-    content: `Tax slabs, GST rates, GSTIN numbers, and all regulatory details entered within the application are configured entirely by the merchant. ManSula Nexus assumes no liability for inaccuracies, miscalculations, or misinformation regarding applied taxes, invoicing errors, or non-compliance with applicable tax laws.
+    content: `Tax slabs, GST rates, GSTIN numbers, and all regulatory details entered within the application are configured entirely by the merchant. ${APP_NAME} assumes no liability for inaccuracies, miscalculations, or misinformation regarding applied taxes, invoicing errors, or non-compliance with applicable tax laws.
 
 The merchant is solely responsible for ensuring compliance with all applicable central, state, and local regulations, including but not limited to: Goods and Services Tax (GST) filing obligations, Food Safety and Standards Authority of India (FSSAI) licensing requirements, Shop and Establishment Act registrations, and any other trade-specific regulatory mandates.
 
@@ -78,7 +79,7 @@ Users remain solely responsible for verifying records and making business, finan
     title: 'Intellectual Property',
     subtitle: 'Ownership of software',
     color: '#0ea5e9',
-    content: `ManSula Nexus, its branding, software, interface designs, source code, and associated materials remain the intellectual property of ManSula Technologies & ManSula DivLabs.
+    content: `${APP_NAME}, its branding, software, interface designs, source code, and associated materials remain the intellectual property of ${ORG.name}.
 
 Unauthorized reproduction, redistribution, modification, or commercial use is prohibited without written permission.`,
   },
@@ -153,7 +154,7 @@ export default function Agreement({ onAccept }) {
               <Ic.Shield />
             </div>
           </div>
-          <h1 className="agr-title">Welcome to ManSula Nexus</h1>
+          <h1 className="agr-title">Welcome to {APP_NAME}</h1>
           <p className="agr-subtitle">Before you begin, please review the platform terms and privacy information.</p>
           <div className="agr-version-pill">Privacy-First Architecture · v1.0</div>
         </header>
@@ -195,7 +196,7 @@ export default function Agreement({ onAccept }) {
               {agreed && <Ic.Check />}
             </div>
             <span>
-              I have read and agree to the <strong>Terms of Service</strong> and <strong>Privacy Policy</strong> of ManSula Nexus by ManSula Technologies & ManSula DivLabs.
+              I have read and agree to the <strong>Terms of Service</strong> and <strong>Privacy Policy</strong> of {APP_NAME} by {ORG.name}.
             </span>
           </label>
 

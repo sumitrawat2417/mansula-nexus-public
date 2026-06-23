@@ -556,9 +556,9 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                 const iconMap = {
                   analytics: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>,
                   lightning: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
-                  check:     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
-                  star:      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>,
-                  wrench:    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></svg>,
+                  check: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
+                  star: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>,
+                  wrench: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></svg>,
                 }
                 const isOpen = expandedItem === i
                 return (
@@ -621,7 +621,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                   <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 500 }}>Website</span>
                   <a href={ORG.website} target="_blank" rel="noreferrer"
                     style={{ fontSize: '0.76rem', color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>
-                    mansula.in
+                    mansulatech.netlify.app
                   </a>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -791,15 +791,15 @@ function HelpContent() {
             <h3 style={{ marginTop: 0, marginBottom: '8px', fontSize: '1.2rem', textAlign: 'center' }}>Contact Support</h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center', marginBottom: 0 }}>Choose how you'd like to reach us.</p>
             <div className="hns-support-list">
-              <button className="hns-support-list-btn whatsapp" onClick={() => { setShowSupportSheet(false); window.open('https://wa.me/919876543210', '_blank'); }}>
+              <button className="hns-support-list-btn whatsapp" onClick={() => { setShowSupportSheet(false); window.open('https://wa.me/919818013446', '_blank'); }}>
                 <div className="icon"><Icon.Message style={{ width: 22, height: 22 }} /></div>
                 <span>WhatsApp Support</span>
               </button>
-              <button className="hns-support-list-btn call" onClick={() => { setShowSupportSheet(false); window.location.href = 'tel:+919876543210'; }}>
+              <button className="hns-support-list-btn call" onClick={() => { setShowSupportSheet(false); window.location.href = 'tel:+919818013446'; }}>
                 <div className="icon"><Icon.Phone style={{ width: 22, height: 22 }} /></div>
                 <span>Call Us</span>
               </button>
-              <button className="hns-support-list-btn email" onClick={() => { setShowSupportSheet(false); window.location.href = 'mailto:support@mansulanexus.com?subject=Support%20Request'; }}>
+              <button className="hns-support-list-btn email" onClick={() => { setShowSupportSheet(false); window.location.href = 'mailto:mansula.rwt@gmail.com?subject=Support%20Request'; }}>
                 <div className="icon"><Icon.Mailbox style={{ width: 22, height: 22 }} /></div>
                 <span>Email Support</span>
               </button>

@@ -3,6 +3,7 @@ import './App.css'
 import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth, getCustomers, saveCustomer, saveUdhaarEntry, recalcUdhaarBalance, getUdhaarByOrderId, getCustomerById, deleteUdhaarEntry } from './db.js'
 import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES, KEY_BUSINESS, DEFAULT_BUSINESS } from './BusinessProfile.jsx'
 import { useBackButton } from './useBackButton.js'
+import { APP_NAME, APP_VERSION } from './appInfo.js'
 
 // ─────────────── DATA (loaded from IDB, fallback to defaults) ───────────────
 
@@ -545,7 +546,7 @@ function SettingsDrawer({ cols, onCols, onExit, onClose }) {
 
           {/* About */}
           <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'center', gap: 4, opacity: 0.5, paddingTop: 16, borderBottom: 'none', marginTop: 'auto' }}>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mansula Nexus v1.6.0-alpha</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{APP_NAME} {APP_VERSION}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>POS &amp; Billing System</div>
           </div>
         </div>
@@ -1479,7 +1480,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                             <>
                               <div className="upi-qr-wrap">
                                 <img
-                                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'Mansula Nexus')}&am=${total}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`)}`}
+                                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ${APP_NAME}`)}`)}`}
                                   alt="UPI QR Code"
                                   className="upi-qr-img"
                                   width={180} height={180}
@@ -1642,7 +1643,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                                 <>
                                   <div className="upi-qr-wrap" style={{ margin: '0 auto', boxShadow: 'none', border: '1px solid var(--border-color)', padding: 4 }}>
                                     <img
-                                      src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || 'Mansula Nexus')}&am=${total - splitCash}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ManSula Nexus`)}`)}`}
+                                      src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&am=${total - splitCash}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ${APP_NAME}`)}`)}`}
                                       alt="UPI QR Code"
                                       className="upi-qr-img"
                                       width={170} height={170}

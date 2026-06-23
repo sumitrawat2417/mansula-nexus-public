@@ -10,6 +10,7 @@ import Customers from './Customers.jsx'
 import Analytics from './Analytics.jsx'
 import { AlertProvider, useAlert } from './AlertDialog.jsx'
 import ReloadPrompt from './ReloadPrompt.jsx'
+import { APP_NAME } from './appInfo.js'
 
 function OfflineBanner({ onDismiss }) {
   const { alert } = useAlert()
@@ -17,7 +18,7 @@ function OfflineBanner({ onDismiss }) {
   const handleShowInfo = (e) => {
     e.stopPropagation()
     alert(
-      "ManSula Nexus is a fully capable Progressive Web App. All your orders, inventory, and settings are saved locally to your device. You can continue using the POS seamlessly without internet. Your data will sync automatically when you reconnect.",
+      `${APP_NAME} is a fully capable Progressive Web App. All your orders, inventory, and settings are saved locally to your device. You can continue using the POS seamlessly without internet. Your data will sync automatically when you reconnect.`,
       { title: 'Offline Mode Active', type: 'info', confirmText: 'Got it' }
     ).then(() => onDismiss())
   }

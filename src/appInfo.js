@@ -4,6 +4,7 @@
 //  Everything in the UI reads from here automatically.
 // ─────────────────────────────────────────────────
 
+export const APP_NAME = 'ManSula Nexus'
 export const APP_VERSION = 'v1.6.0-alpha'
 
 export const APP_BUILD_DATE = 'June 24, 2025'
@@ -39,7 +40,9 @@ export const WHATS_NEW = [
 export const ORG = {
   name: 'ManSula Technologies & ManSula DivLabs',
   tagline: 'Powering the next generation of offline-first business tools.',
-  website: 'https://mansula.in',
-  support: 'support@mansula.in',
+  website: 'https://mansulatech.netlify.app',
+  support: 'mansula.rwt@gmail.com',
+  phone1: '+919818013446',
+  phone2: '+918851947954',
   copyright: `© ${new Date().getFullYear()} ManSula Technologies. All rights reserved.`,
 }
