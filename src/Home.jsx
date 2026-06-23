@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react'
+import { useState, useEffect, Fragment, useRef } from 'react'
 import { useBackButton } from './useBackButton.js'
 import { dbClearAll, dbGet, injectStressTestData } from './db.js'
 import { useAlert } from './AlertDialog.jsx'
@@ -28,6 +28,7 @@ const Icon = {
   Back:      (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>,
   X:         (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>,
   ChevR:     (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
+  ChevL:     (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>,
   Rocket:    (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>,
   Reset:     (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>,
   Warn:      (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
@@ -131,6 +132,24 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
   const [activeSection, setActiveSection] = useState('appearance')
   const [resetStep, setResetStep] = useState(0)
   const { alert: showAlert, confirm: showConfirm } = useAlert()
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+  const tabRef = useRef(null)
+
+  const handleTabScroll = () => {
+    if (tabRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabRef.current
+      setCanScrollLeft(scrollLeft > 0)
+      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 1)
+    }
+  }
+
+  useEffect(() => {
+    handleTabScroll()
+    window.addEventListener('resize', handleTabScroll)
+    return () => window.removeEventListener('resize', handleTabScroll)
+  }, [])
+
   const [lang, setLang] = useState(localStorage.getItem('pos_lang') || 'en')
   const [perms, setPerms] = useState({
     camera: 'prompt',
@@ -526,7 +545,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         <div className="hns-body-wrapper">
           {/* ── Tab Bar ── */}
           <div className="an-tab-container" style={{ borderBottom: '1px solid var(--border-color)', borderRight: 'none' }}>
-            <div className="an-tab-bar">
+            <div className="an-tab-bar" ref={tabRef} onScroll={handleTabScroll}>
               {SETTINGS_SECTIONS.map((s) => (
                 <button
                   key={s.id}
@@ -538,9 +557,16 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                 </button>
               ))}
             </div>
-            <div className="an-tab-scroll-hint">
-              <Icon.ChevR style={{ width: 16, height: 16 }} />
-            </div>
+            {canScrollRight && (
+              <div className="an-tab-scroll-hint">
+                <Icon.ChevR style={{ width: 16, height: 16 }} />
+              </div>
+            )}
+            {canScrollLeft && (
+              <div className="an-tab-scroll-hint left">
+                <Icon.ChevL style={{ width: 16, height: 16 }} />
+              </div>
+            )}
           </div>
 
           {/* ── Main Content ── */}

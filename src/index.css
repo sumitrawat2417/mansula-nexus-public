@@ -13232,6 +13232,20 @@ select {
   0%, 100% { transform: translateX(0); opacity: 0.6; }
   50% { transform: translateX(4px); opacity: 1; }
 }
+
+.an-tab-scroll-hint.left {
+  right: auto;
+  left: 0;
+  background: linear-gradient(to left, transparent, var(--bg-surface) 60%);
+  justify-content: flex-start;
+  padding-right: 0;
+  padding-left: 6px;
+  animation: pulseHintLeft 2s infinite;
+}
+@keyframes pulseHintLeft {
+  0%, 100% { transform: translateX(0); opacity: 0.6; }
+  50% { transform: translateX(-4px); opacity: 1; }
+}
 .an-tab-bar::-webkit-scrollbar { display: none; }
 .an-tab-btn {
   display: flex; align-items: center; gap: 5px;
