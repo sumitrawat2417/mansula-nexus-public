@@ -139,6 +139,18 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
   const [resetStep, setResetStep] = useState(0)
   const { alert: showAlert, confirm: showConfirm } = useAlert()
   const [expandedItem, setExpandedItem] = useState(null)
+  const [storageUsed, setStorageUsed] = useState('< 1 MB')
+
+  useEffect(() => {
+    if (navigator.storage && navigator.storage.estimate) {
+      navigator.storage.estimate().then(estimate => {
+        if (estimate.usage) {
+          const mb = (estimate.usage / (1024 * 1024)).toFixed(2)
+          setStorageUsed(mb >= 0.01 ? `${mb} MB` : '< 0.01 MB')
+        }
+      }).catch(console.error)
+    }
+  }, [])
 
   // Lock body scroll when settings modal is open
   useEffect(() => {
@@ -541,7 +553,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               {[
                 { label: 'Build', value: 'PWA · Offline-ready' },
                 { label: 'Last Updated', value: APP_BUILD_DATE },
-                { label: 'Storage Used', value: '< 1 MB' },
+                { label: 'Storage Used', value: storageUsed },
               ].map(({ label, value }) => (
                 <div key={label} className="hns-info-row">
                   <span className="hns-info-label">{label}</span>
