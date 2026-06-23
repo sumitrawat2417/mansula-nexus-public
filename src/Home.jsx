@@ -544,8 +544,26 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                       }}
                       onClick={() => {
                         setUpdateStatus('checking')
-                        if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(reg => reg.update())
-                        setTimeout(() => setUpdateStatus('available'), 1500)
+                        const minWait = new Promise(r => setTimeout(r, 1000))
+                        if ('serviceWorker' in navigator) {
+                          navigator.serviceWorker.ready.then(reg => {
+                            reg.update().then(() => {
+                              minWait.then(() => {
+                                if (reg.waiting) {
+                                  setUpdateStatus('available')
+                                } else if (reg.installing) {
+                                  reg.installing.addEventListener('statechange', (e) => {
+                                    if (e.target.state === 'installed') setUpdateStatus('available')
+                                  })
+                                } else {
+                                  setUpdateStatus('uptodate')
+                                }
+                              })
+                            }).catch(() => minWait.then(() => setUpdateStatus('uptodate')))
+                          })
+                        } else {
+                          minWait.then(() => setUpdateStatus('uptodate'))
+                        }
                       }}
                       onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
                       onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
