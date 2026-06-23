@@ -859,6 +859,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
             items: editingRecord.items || [],
             createdAt: new Date(editingRecord.createdAt || Date.now()),
             originalCompletedAt: editingRecord.completedAt,
+            originalPaymentMode: editingRecord.paymentMode,
             status: 'active',
             alarmed: false
           }
@@ -1123,11 +1124,11 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
       return
     }
 
-    const completedAtTimestamp = editingRecord ? editingRecord.completedAt : Date.now();
+    const completedAtTimestamp = order.originalCompletedAt || Date.now();
 
     let existingUdhaar = null
-    if (editingRecord && editingRecord.paymentMode === 'udhaar') {
-      existingUdhaar = await getUdhaarByOrderId(editingRecord.orderId)
+    if (order.originalPaymentMode === 'udhaar') {
+      existingUdhaar = await getUdhaarByOrderId(order.id)
     }
 
     if (paymentMode === 'udhaar') {
