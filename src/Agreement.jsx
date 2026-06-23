@@ -17,53 +17,81 @@ const CLAUSES = [
   {
     id: 'data',
     icon: Ic.Lock,
-    title: 'Your Data Ownership',
-    subtitle: 'Local-first architecture',
+    title: 'Data & Storage',
+    subtitle: 'Local-first by default',
     color: '#6366f1',
-    content: `All business profiles, order histories, menu items, and inventory data are stored exclusively on the local storage of your device using IndexedDB. ManSula Nexus does not transmit, harvest, or replicate any of your business data to external cloud servers at any point.
+    content: `Business data is stored locally on your device by default. Future optional features such as cloud backup, synchronization, account services, or AI-powered functionality may require secure processing of selected data and will be disclosed before use.
 
-ManSula Technologies & ManSula DivLabs shall bear no liability for any data loss arising from physical device damage, theft, accidental app data clearance, browser cache purging, or operating system updates that affect local storage. The user is solely responsible for regularly utilising the in-app JSON backup and restore functionality to safeguard their business data.
+Users are responsible for maintaining backups of their business information. While ManSula Nexus may provide backup, export, import, and recovery tools, ManSula Technologies & ManSula DivLabs cannot guarantee restoration of lost, corrupted, or deleted data.
 
 By accepting these terms, the user acknowledges that data persistence is entirely dependent on the integrity of the local device and its storage subsystems.`,
   },
   {
+    id: 'privacy',
+    icon: Ic.Eye,
+    title: 'Privacy & Permissions',
+    subtitle: 'Data handling',
+    color: '#8b5cf6',
+    content: `The application currently does not require the collection of personal account information for core functionality. Future account-based features may require limited information, which will be disclosed at the time of collection.
+
+The only external network requests made by the application are: (a) fetching QR code images from a public QR generation API using the merchant's self-entered UPI ID, and (b) loading web font assets for the user interface.
+
+Availability of third-party services is outside the control of ManSula Technologies & ManSula DivLabs.`,
+  },
+  {
     id: 'payments',
     icon: Ic.CreditCard,
-    title: 'Payment & UPI Disclaimer',
+    title: 'Payments & UPI',
     subtitle: 'Transaction liability',
     color: '#10b981',
     content: `ManSula Nexus functions strictly as a display interface that generates dynamic UPI QR strings and formatted payment requests. The platform is not a registered payment gateway, payment aggregator, banking correspondent, or financial institution as defined under the Payment and Settlement Systems Act, 2007.
 
 ManSula Technologies & ManSula DivLabs assumes zero liability for failed UPI transactions, incorrect payment settlements, banking network outages, incorrect amount entries by the merchant, or any revenue loss resulting from payment processing failures by third-party UPI service providers (e.g., PhonePe, Google Pay, Paytm, BHIM).
 
-The merchant acknowledges that all payment confirmations must be independently verified through their respective banking application or UPI service provider.`,
+ManSula Nexus does not guarantee payment settlement, transaction success, transaction status accuracy, or banking network availability. The merchant acknowledges that all payment confirmations must be independently verified through their respective banking application or UPI service provider.`,
   },
   {
     id: 'tax',
     icon: Ic.FileText,
-    title: 'Regulatory & Tax Compliance',
-    subtitle: 'GST, FSSAI & licensing',
+    title: 'Tax & Compliance',
+    subtitle: 'Regulatory responsibilities',
     color: '#f59e0b',
     content: `Tax slabs, GST rates, GSTIN numbers, and all regulatory details entered within the application are configured entirely by the merchant. ManSula Nexus assumes no liability for inaccuracies, miscalculations, or misinformation regarding applied taxes, invoicing errors, or non-compliance with applicable tax laws.
 
 The merchant is solely responsible for ensuring compliance with all applicable central, state, and local regulations, including but not limited to: Goods and Services Tax (GST) filing obligations, Food Safety and Standards Authority of India (FSSAI) licensing requirements, Shop and Establishment Act registrations, and any other trade-specific regulatory mandates.
 
-ManSula Technologies & ManSula DivLabs do not provide tax advisory, legal counsel, or regulatory compliance consulting services.`,
+The application is not accounting, auditing, legal, or tax advisory software. Professional advice should be obtained where required. ManSula Technologies & ManSula DivLabs do not provide tax advisory, legal counsel, or regulatory compliance consulting services.`,
   },
   {
-    id: 'privacy',
-    icon: Ic.Eye,
-    title: 'Privacy Policy',
-    subtitle: 'Zero data collection',
-    color: '#8b5cf6',
-    content: `ManSula Nexus is an offline-first application. We do not harvest, transmit, or store your business data or your customers' data on any external cloud servers. Complete data ownership and privacy remain isolated on your local hardware.
+    id: 'analytics',
+    icon: Ic.Rocket,
+    title: 'Reports, Analytics & AI',
+    subtitle: 'Informational purposes only',
+    color: '#ec4899',
+    content: `Reports, analytics, forecasts, recommendations, and AI-generated insights are provided for informational purposes only.
 
-The application does not employ analytics trackers, advertising SDKs, third-party cookies, or behavioural profiling mechanisms. No personally identifiable information (PII) of the merchant or their customers is collected, processed, or shared with any third party.
-
-In compliance with the Digital Personal Data Protection Act (DPDPA) 2023, this application processes personal data only on the user's local device, with no cross-border data transfer. The merchant retains full rights as both the Data Principal and Data Fiduciary for all information entered into the application.
-
-The only external network requests made by the application are: (a) fetching QR code images from a public QR generation API using the merchant's self-entered UPI ID, and (b) loading web font assets for the user interface.`,
+Users remain solely responsible for verifying records and making business, financial, tax, legal, or operational decisions.`,
   },
+  {
+    id: 'ip',
+    icon: Ic.Shield,
+    title: 'Intellectual Property',
+    subtitle: 'Ownership of software',
+    color: '#0ea5e9',
+    content: `ManSula Nexus, its branding, software, interface designs, source code, and associated materials remain the intellectual property of ManSula Technologies & ManSula DivLabs.
+
+Unauthorized reproduction, redistribution, modification, or commercial use is prohibited without written permission.`,
+  },
+  {
+    id: 'liability',
+    icon: Ic.FileText,
+    title: 'Limitation of Liability',
+    subtitle: 'Changes & limitations',
+    color: '#ef4444',
+    content: `To the maximum extent permitted by law, ManSula Technologies & ManSula DivLabs shall not be liable for indirect, incidental, consequential, special, business, financial, tax, regulatory, or data-related losses arising from use of the application.
+
+Features, functionality, pricing, cloud services, AI services, integrations, and legal terms may be modified, expanded, restricted, or discontinued at any time.`,
+  }
 ]
 
 // ── Success Sound (Synthesized) ──
@@ -126,8 +154,8 @@ export default function Agreement({ onAccept }) {
             </div>
           </div>
           <h1 className="agr-title">Welcome to ManSula Nexus</h1>
-          <p className="agr-subtitle">Before we begin, please review and accept our terms</p>
-          <div className="agr-version-pill">DPDPA 2023 Compliant · v1.0</div>
+          <p className="agr-subtitle">Before you begin, please review the platform terms and privacy information.</p>
+          <div className="agr-version-pill">Privacy-First Architecture · v1.0</div>
         </header>
 
         {/* Accordion clauses */}
@@ -181,7 +209,7 @@ export default function Agreement({ onAccept }) {
           </button>
 
           <p className="agr-footer-note">
-            By proceeding, you confirm compliance with the Digital Personal Data Protection Act (DPDPA) 2023.
+            By proceeding, you acknowledge and accept the Terms of Service and Privacy Policy.
           </p>
         </div>
       </div>
