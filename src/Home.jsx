@@ -671,7 +671,10 @@ function HelpContent() {
             <div className="hns-support-list">
               <button className="hns-support-list-btn whatsapp" onClick={() => { setShowSupportSheet(false); window.open('https://wa.me/919876543210', '_blank'); }}>
                 <div className="icon"><Icon.Message style={{ width: 22, height: 22 }} /></div>
-                <span>WhatsApp Support</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <span>WhatsApp Support</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400, marginTop: '2px' }}>Fastest response (under 5 mins)</span>
+                </div>
               </button>
               <button className="hns-support-list-btn call" onClick={() => { setShowSupportSheet(false); window.location.href = 'tel:+919876543210'; }}>
                 <div className="icon"><Icon.Phone style={{ width: 22, height: 22 }} /></div>
