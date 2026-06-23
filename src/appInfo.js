@@ -44,5 +44,5 @@ export const ORG = {
   support: 'mansula.rwt@gmail.com',
   phone1: '+919818013446',
   phone2: '+918851947954',
-  copyright: `© ${new Date().getFullYear()} ManSula Technologies. All rights reserved.`,
+  copyright: `© ${new Date().getFullYear()} ManSula Technologies & ManSula DivLabs. All rights reserved.`,
 }

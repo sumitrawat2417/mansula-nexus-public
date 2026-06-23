@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment, useRef } from 'react'
 import { useBackButton } from './useBackButton.js'
 import { dbClearAll, dbGet, injectStressTestData } from './db.js'
 import { useAlert } from './AlertDialog.jsx'
-import { APP_VERSION, APP_BUILD_DATE, WHATS_NEW, ORG } from './appInfo.js'
+import { APP_VERSION, APP_BUILD_DATE, WHATS_NEW, ORG, LEGAL_LAST_UPDATED } from './appInfo.js'
 
 // ── Greeting ──
 function getGreeting() {
@@ -888,7 +888,7 @@ function HelpContent() {
         <div className="hns-legal-card">
           <div className="hns-legal-section-title"><Icon.Doc style={{ width: 18, height: 18, marginRight: 8, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Terms of Use</div>
           <div className="hns-legal-body">
-            <p><strong>Last updated:</strong> June 2026</p>
+            <p><strong>Last updated:</strong> {LEGAL_LAST_UPDATED}</p>
             <p>ManSula Nexus is an offline-first Business Operating System (BOS) that helps businesses manage sales, inventory, customers, staff, analytics, reporting, and operations from a unified platform. By using ManSula Nexus ("the BOS"), you agree to the following terms and conditions. Please read them carefully.</p>
 
             <div className="hns-legal-h">1. License Grant</div>
@@ -940,7 +940,7 @@ function HelpContent() {
         <div className="hns-legal-card">
           <div className="hns-legal-section-title"><Icon.Lock style={{ width: 18, height: 18, marginRight: 8, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Privacy Policy</div>
           <div className="hns-legal-body">
-            <p><strong>Last updated:</strong> June 2026</p>
+            <p><strong>Last updated:</strong> {LEGAL_LAST_UPDATED}</p>
             <p>ManSula Nexus is designed with privacy-first principles. Business data is stored locally on your device by default. Certain future features, such as cloud backup, synchronization, account services, or AI-powered functionality, may require data processing and will be clearly disclosed when enabled.</p>
 
             <div className="hns-legal-h"><Icon.Box style={{ width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Data Storage</div>
