@@ -588,7 +588,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
             <button className="hns-topbar-back" onClick={onClose} aria-label="Back">
               <Icon.Back />
             </button>
-            <div className="hns-topbar-heading">Settings</div>
+            <div className="hns-topbar-heading"><Icon.Settings /> Settings</div>
             <div className="hns-topbar-divider" />
             <div className="hns-topbar-section">{activeInfo?.label}</div>
           </div>

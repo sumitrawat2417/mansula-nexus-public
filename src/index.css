@@ -3061,10 +3061,19 @@ select {
 .hns-topbar-back svg { width: 18px; height: 18px; }
 
 .hns-topbar-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 1.05rem;
   font-weight: 800;
   color: var(--text-primary);
   letter-spacing: -0.025em;
+}
+
+.hns-topbar-heading svg {
+  width: 18px;
+  height: 18px;
+  color: var(--brand-primary);
 }
 
 .hns-topbar-divider {
