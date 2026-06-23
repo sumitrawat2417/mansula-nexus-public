@@ -6,7 +6,7 @@ import { useAlert } from './AlertDialog.jsx'
 // ── Greeting ──
 function getGreeting() {
   const h = new Date().getHours()
-  if (h < 12) return 'Hlo Good morning'
+  if (h < 12) return 'Good morning'
   if (h < 17) return 'Good afternoon'
   return 'Good evening'
 }
@@ -507,17 +507,29 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                 <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
               </div>
               <div className="hns-about-name">ManSula Nexus</div>
-              <div className="hns-about-version">v1.6.0-alpha · POS & Business Suite</div>
+              <div className="hns-about-version">Business Operating System</div>
             </div>
 
-            <div className="hns-section-title">App Info</div>
+            <div className="hns-section-title">Software Updates</div>
+            <div className="hns-card" style={{ padding: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Current Version</div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>v1.6.0-alpha</div>
+                </div>
+                <button className="hn-btn-primary" style={{ padding: '8px 14px', fontSize: '0.75rem', borderRadius: '6px' }}>
+                  Check for Updates
+                </button>
+              </div>
+            </div>
+
+            <div className="hns-section-title" style={{ marginTop: 24 }}>App Info</div>
             <div className="hns-card">
               {[
                 { label: 'Version', value: 'v1.6.0-alpha' },
                 { label: 'Build', value: 'PWA · Offline-ready' },
-                { label: 'Storage', value: 'IndexedDB (Local)' },
-                { label: 'Framework', value: 'React + Vite' },
-                { label: 'Environment', value: 'Production' },
+                { label: 'Last Updated', value: 'Today' },
+                { label: 'Storage Used', value: '< 1 MB' },
               ].map(({ label, value }) => (
                 <div key={label} className="hns-info-row">
                   <span className="hns-info-label">{label}</span>
@@ -526,10 +538,24 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               ))}
             </div>
 
+            <div className="hns-section-title" style={{ marginTop: 24 }}>What's New</div>
+            <div className="hns-card" style={{ padding: '16px' }}>
+              <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: '1.8' }}>
+                <li>Analytics Module</li>
+                <li>Faster POS</li>
+                <li>Bug Fixes</li>
+              </ul>
+            </div>
+
             <div className="hns-section-title" style={{ marginTop: 24 }}>Legal</div>
-            <div className="hns-card">
-              <div className="hns-legal-text">
-                ManSula Nexus is a local-first point-of-sale application. All data is stored on this device only and never transmitted to any server. Use of this software is at your own discretion.
+            <div className="hns-card" style={{ padding: '16px' }}>
+              <div className="hns-legal-text" style={{ marginBottom: 16 }}>
+                ManSula Nexus is an offline-first Business Operating System. Business data remains under your control. Review the Terms of Service and Privacy Policy for complete information.
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', fontWeight: 600, cursor: 'pointer' }}>Terms of Service</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', fontWeight: 600, cursor: 'pointer' }}>Privacy Policy</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', fontWeight: 600, cursor: 'pointer' }}>Open Source Licenses</div>
               </div>
             </div>
           </div>
