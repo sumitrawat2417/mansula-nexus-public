@@ -9,6 +9,7 @@ import Inventory from './Inventory.jsx'
 import Customers from './Customers.jsx'
 import Analytics from './Analytics.jsx'
 import { AlertProvider, useAlert } from './AlertDialog.jsx'
+import ReloadPrompt from './ReloadPrompt.jsx'
 
 function OfflineBanner({ onDismiss }) {
   const { alert } = useAlert()
@@ -177,6 +178,7 @@ export default function App() {
       {!isOnline && !dismissOffline && (
         <OfflineBanner onDismiss={() => setDismissOffline(true)} />
       )}
+      <ReloadPrompt />
     </AlertProvider>
   )
 }
