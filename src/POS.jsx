@@ -46,7 +46,10 @@ const INIT_ORDER = makeOrder() // created once at module level
 // ─────────────── SOUND ───────────────
 let audioCtx = null
 const playSound = (type) => {
-  if (localStorage.getItem('mn-sound') === 'disabled') return
+  const volStr = localStorage.getItem('mn-volume')
+  const vol = volStr !== null ? parseInt(volStr, 10) / 100 : 1
+  if (vol === 0 || localStorage.getItem('mn-sound') === 'disabled') return
+
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
     if (audioCtx.state === 'suspended') audioCtx.resume()
@@ -57,23 +60,23 @@ const playSound = (type) => {
       osc.type = 'sine'
       osc.frequency.setValueAtTime(440, audioCtx.currentTime)
       osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1)
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1)
+      gain.gain.setValueAtTime(0.1 * vol, audioCtx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.01 * vol, audioCtx.currentTime + 0.1)
       osc.start(); osc.stop(audioCtx.currentTime + 0.1)
     } else if (type === 'remove') {
       osc.type = 'sine'
       osc.frequency.setValueAtTime(300, audioCtx.currentTime)
       osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1)
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1)
+      gain.gain.setValueAtTime(0.1 * vol, audioCtx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.01 * vol, audioCtx.currentTime + 0.1)
       osc.start(); osc.stop(audioCtx.currentTime + 0.1)
     } else if (type === 'checkout') {
       osc.type = 'triangle'
       osc.frequency.setValueAtTime(440, audioCtx.currentTime)
       osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.12)
       osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.24)
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime)
-      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.36)
+      gain.gain.setValueAtTime(0.1 * vol, audioCtx.currentTime)
+      gain.gain.linearRampToValueAtTime(0.01 * vol, audioCtx.currentTime + 0.36)
       osc.start(); osc.stop(audioCtx.currentTime + 0.36)
     } else if (type === 'alarm') {
       osc.type = 'square'
@@ -82,9 +85,9 @@ const playSound = (type) => {
         osc.frequency.setValueAtTime(800, t + i * 0.5)
         osc.frequency.setValueAtTime(1200, t + i * 0.5 + 0.25)
       }
-      gain.gain.setValueAtTime(0.04, t)
-      gain.gain.linearRampToValueAtTime(0.04, t + 3)
-      gain.gain.linearRampToValueAtTime(0.01, t + 3.1)
+      gain.gain.setValueAtTime(0.04 * vol, t)
+      gain.gain.linearRampToValueAtTime(0.04 * vol, t + 3)
+      gain.gain.linearRampToValueAtTime(0.01 * vol, t + 3.1)
       osc.start(t); osc.stop(t + 3.1)
     }
   } catch (_) { }

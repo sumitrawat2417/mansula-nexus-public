@@ -60,16 +60,19 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
     popups: localStorage.getItem('perm_popups') || 'prompt'
   })
   
-  const [soundEnabled, setSoundEnabled] = useState(localStorage.getItem('mn-sound') !== 'disabled')
+  const [volume, setVolume] = useState(() => {
+    const val = localStorage.getItem('mn-volume')
+    // If the old 'mn-sound' toggle was disabled, treat as 0%
+    if (localStorage.getItem('mn-sound') === 'disabled') return 0
+    return val !== null ? parseInt(val, 10) : 100
+  })
 
-  const toggleSound = () => {
-    const nextState = !soundEnabled
-    if (nextState) {
-      localStorage.removeItem('mn-sound')
-    } else {
-      localStorage.setItem('mn-sound', 'disabled')
-    }
-    setSoundEnabled(nextState)
+  const handleVolumeChange = (e) => {
+    const val = parseInt(e.target.value, 10)
+    setVolume(val)
+    localStorage.setItem('mn-volume', val)
+    if (val === 0) localStorage.setItem('mn-sound', 'disabled')
+    else localStorage.removeItem('mn-sound')
   }
 
   useEffect(() => {
@@ -213,21 +216,27 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
           </div>
 
           {/* Sound */}
-          <div className="hn-srow">
-            <div className="hn-srow-info">
-              <div className="hn-srow-label">Sound Effects</div>
-              <div className="hn-srow-desc">{soundEnabled ? 'Volume enabled' : 'Volume disabled'}</div>
+          <div className="hn-srow" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12 }}>
+            <div className="hn-srow-info" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div className="hn-srow-label">Sound Volume</div>
+                <div className="hn-srow-desc">Volume level for POS alerts & chimes</div>
+              </div>
+              <span style={{ fontWeight: 600, color: 'var(--brand-primary)', fontSize: '0.9rem' }}>{volume}%</span>
             </div>
-            <button
-              className={`hn-toggle ${soundEnabled ? 'on' : ''}`}
-              onClick={toggleSound}
-              role="switch"
-              aria-checked={soundEnabled}
-            >
-              <span className="hn-toggle-knob">
-                {soundEnabled ? <Icon.Volume /> : <Icon.VolumeX />}
-              </span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ color: 'var(--text-muted)', display: 'flex' }}><Icon.VolumeX /></span>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value={volume} 
+                onChange={handleVolumeChange} 
+                className="hn-volume-slider" 
+                style={{ flex: 1, accentColor: 'var(--brand-primary)', height: 6, cursor: 'pointer' }}
+              />
+              <span style={{ color: 'var(--text-primary)', display: 'flex' }}><Icon.Volume /></span>
+            </div>
           </div>
 
           {/* Currency */}
