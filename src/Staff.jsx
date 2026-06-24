@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useBackButton } from './useBackButton.js'
 import { useAlert } from './AlertDialog.jsx'
 import { dbGet, dbSet } from './db.js'
@@ -44,28 +44,45 @@ const initials = (name) => {
 
 // ── Constants ──
 const ROLES = [
-  { key: 'owner', label: 'Owner', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', desc: 'Full access to all features & settings' },
-  { key: 'manager', label: 'Manager', color: '#6366f1', bg: 'rgba(99,102,241,0.12)', desc: 'Access to analytics, inventory & staff management' },
-  { key: 'cashier', label: 'Cashier', color: '#10b981', bg: 'rgba(16,185,129,0.12)', desc: 'POS, order records & own profile only' },
+  { key: 'owner', label: 'Owner', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', desc: 'Full access — does not clock in/out' },
+  { key: 'manager', label: 'Manager', color: '#6366f1', bg: 'rgba(99,102,241,0.12)', desc: 'Analytics, inventory, staff & all tools' },
+  { key: 'cashier', label: 'Cashier', color: '#10b981', bg: 'rgba(16,185,129,0.12)', desc: 'POS & order records only by default' },
 ]
 
 const ROLE_COLORS = { owner: '#f59e0b', manager: '#6366f1', cashier: '#10b981' }
 const MAX_ABANDONED_SHIFT_HOURS = 12
 
+// Tool definitions for permission control
+const TOOL_PERMISSIONS = [
+  { id: 'pos', label: 'Point of Sale (POS)', icon: '🛒', ownerDefault: true, managerDefault: true, cashierDefault: true, lockOwner: true, lockManager: true },
+  { id: 'records', label: 'Order Records', icon: '🧾', ownerDefault: true, managerDefault: true, cashierDefault: true, lockOwner: true, lockManager: true },
+  { id: 'inventory', label: 'Inventory', icon: '📦', ownerDefault: true, managerDefault: true, cashierDefault: false, lockOwner: true, lockManager: true },
+  { id: 'customers', label: 'Customers & Udhaar', icon: '👥', ownerDefault: true, managerDefault: true, cashierDefault: false, lockOwner: true, lockManager: true },
+  { id: 'analytics', label: 'Analytics', icon: '📊', ownerDefault: true, managerDefault: true, cashierDefault: false, lockOwner: true, lockManager: true },
+  { id: 'staff', label: 'Staff Management', icon: '🪪', ownerDefault: true, managerDefault: true, cashierDefault: false, lockOwner: true, lockManager: true },
+  { id: 'reports', label: 'Reports', icon: '📋', ownerDefault: true, managerDefault: true, cashierDefault: false, lockOwner: true, lockManager: true },
+  { id: 'business', label: 'Business Profile', icon: '🏢', ownerDefault: true, managerDefault: false, cashierDefault: false, lockOwner: true, lockManager: false },
+]
+
+const getDefaultPerms = (role) => {
+  const perms = {}
+  TOOL_PERMISSIONS.forEach(t => {
+    perms[t.id] = role === 'owner' ? t.ownerDefault : role === 'manager' ? t.managerDefault : t.cashierDefault
+  })
+  return perms
+}
+
 // Storage keys
 const KEY_STAFF = 'mn-staff-members'
 const KEY_SHIFTS = 'mn-staff-shifts'
-const KEY_ACTIVE_MEMBER = 'mn-active-staff'
 
 // ── Icons ──
 const Ic = {
   Close: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>,
   Plus: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>,
-  Trash: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>,
   Edit: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>,
   Clock: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
   Check: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
-  ChevR: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>,
   Back: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>,
   User: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
   Users: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
@@ -75,6 +92,8 @@ const Ic = {
   Del: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /></svg>,
   Eye: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>,
   EyeOff: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>,
+  Crown: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 20h20M4 20l2-10 6 5 6-5 2 10" /></svg>,
+  Lock: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>,
 }
 
 // ── PIN Pad Component ──
@@ -94,18 +113,8 @@ function PinPad({ title, subtitle, onSuccess, onCancel, pinLength = 4 }) {
 
   const handleBackspace = () => setPin(p => p.slice(0, -1))
 
-  const triggerError = () => {
-    setShake(true)
-    setError(true)
-    setPin('')
-    setTimeout(() => { setShake(false); setError(false) }, 700)
-  }
-
-  // Expose triggerError via ref pattern via prop
   useEffect(() => {
-    if (pin.length === pinLength) {
-      setError(false)
-    }
+    if (pin.length === pinLength) setError(false)
   }, [pin, pinLength])
 
   return (
@@ -157,18 +166,34 @@ function AddEditStaffModal({ member, onSave, onClose }) {
   const [showPin, setShowPin] = useState(false)
   const [saving, setSaving] = useState(false)
   const [pinError, setPinError] = useState('')
+  // Tool permissions — keyed by tool id
+  const [perms, setPerms] = useState(
+    member?.toolPerms || getDefaultPerms(member?.role || 'cashier')
+  )
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  // When role changes, reset perms to role defaults (unless editing existing)
+  const handleRoleChange = (roleKey) => {
+    set('role', roleKey)
+    if (!member) setPerms(getDefaultPerms(roleKey))
+    else setPerms(prev => ({ ...getDefaultPerms(roleKey), ...prev }))
+  }
+
+  const togglePerm = (toolId) => {
+    setPerms(p => ({ ...p, [toolId]: !p[toolId] }))
+  }
 
   const handleSave = async () => {
     if (!form.name.trim()) return
-    if (!member) {
-      // Creating new — PIN required
-      if (pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
-      if (pin !== confirmPin) { setPinError('PINs do not match'); return }
-    } else {
-      // Editing — PIN change optional
-      if (pin && pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
-      if (pin && pin !== confirmPin) { setPinError('PINs do not match'); return }
+    // Owner doesn't need PIN (no clock-in)
+    if (form.role !== 'owner') {
+      if (!member) {
+        if (pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
+        if (pin !== confirmPin) { setPinError('PINs do not match'); return }
+      } else {
+        if (pin && pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
+        if (pin && pin !== confirmPin) { setPinError('PINs do not match'); return }
+      }
     }
     setPinError('')
     setSaving(true)
@@ -178,8 +203,9 @@ function AddEditStaffModal({ member, onSave, onClose }) {
       name: form.name.trim(),
       role: form.role,
       phone: form.phone.trim(),
-      hourlyRate: parseFloat(form.hourlyRate) || 0,
-      pin: pin || member?.pin || '',
+      hourlyRate: form.role === 'owner' ? 0 : (parseFloat(form.hourlyRate) || 0),
+      pin: form.role === 'owner' ? '' : (pin || member?.pin || ''),
+      toolPerms: perms,
       createdAt: member?.createdAt || Date.now(),
       updatedAt: Date.now(),
       isActive: member?.isActive ?? true,
@@ -187,6 +213,8 @@ function AddEditStaffModal({ member, onSave, onClose }) {
     setSaving(false)
     onSave(record)
   }
+
+  const isOwner = form.role === 'owner'
 
   return (
     <div className="stf-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -218,10 +246,10 @@ function AddEditStaffModal({ member, onSave, onClose }) {
                 <button key={r.key}
                   className={`stf-role-btn ${form.role === r.key ? 'active' : ''}`}
                   style={form.role === r.key ? { borderColor: r.color, background: r.bg, color: r.color } : {}}
-                  onClick={() => set('role', r.key)}
+                  onClick={() => handleRoleChange(r.key)}
                 >
                   <span className="stf-role-icon">
-                    {r.key === 'owner' ? <Ic.Shield /> : r.key === 'manager' ? <Ic.Users /> : <Ic.User />}
+                    {r.key === 'owner' ? <Ic.Crown /> : r.key === 'manager' ? <Ic.Users /> : <Ic.User />}
                   </span>
                   <span className="stf-role-name">{r.label}</span>
                 </button>
@@ -236,38 +264,86 @@ function AddEditStaffModal({ member, onSave, onClose }) {
               onChange={e => set('phone', e.target.value)} type="tel" />
           </div>
 
-          <div className="stf-form-group">
-            <label className="stf-label">Hourly Rate (₹)</label>
-            <input className="stf-input" placeholder="e.g. 60" value={form.hourlyRate}
-              onChange={e => set('hourlyRate', e.target.value)} type="number" min="0" />
+          {!isOwner && (
+            <div className="stf-form-group">
+              <label className="stf-label">Hourly Rate (₹)</label>
+              <input className="stf-input" placeholder="e.g. 60" value={form.hourlyRate}
+                onChange={e => set('hourlyRate', e.target.value)} type="number" min="0" />
+            </div>
+          )}
+
+          {/* ── Tool Access Permissions ── */}
+          <div className="stf-perms-section">
+            <div className="stf-perms-title">
+              <Ic.Shield />
+              Tool Access Permissions
+            </div>
+            <div className="stf-perms-desc">
+              Control which tools this member can access on the device.
+            </div>
+            <div className="stf-perms-list">
+              {TOOL_PERMISSIONS.map(tool => {
+                const isLocked = isOwner
+                  ? tool.lockOwner
+                  : form.role === 'manager' && tool.lockManager
+                const checked = isLocked ? true : !!perms[tool.id]
+                return (
+                  <label key={tool.id} className={`stf-perm-row ${isLocked ? 'locked' : ''}`}>
+                    <span className="stf-perm-icon">{tool.icon}</span>
+                    <span className="stf-perm-label">{tool.label}</span>
+                    {isLocked
+                      ? <span className="stf-perm-lock"><Ic.Lock /></span>
+                      : (
+                        <div
+                          className={`stf-toggle ${checked ? 'on' : ''}`}
+                          onClick={() => togglePerm(tool.id)}
+                        >
+                          <div className="stf-toggle-thumb" />
+                        </div>
+                      )
+                    }
+                  </label>
+                )
+              })}
+            </div>
           </div>
 
-          <div className="stf-pin-section">
-            <div className="stf-pin-section-title">
-              <Ic.Shield />
-              {member ? 'Change PIN (leave blank to keep current)' : 'Set 4-Digit PIN *'}
-            </div>
-            <div className="stf-pin-inputs">
-              <div className="stf-form-group" style={{ flex: 1 }}>
-                <label className="stf-label">PIN</label>
-                <div className="stf-pin-input-wrap">
+          {/* ── PIN Section — only for non-Owner ── */}
+          {!isOwner && (
+            <div className="stf-pin-section">
+              <div className="stf-pin-section-title">
+                <Ic.Shield />
+                {member ? 'Change PIN (leave blank to keep current)' : 'Set 4-Digit PIN *'}
+              </div>
+              <div className="stf-pin-inputs">
+                <div className="stf-form-group" style={{ flex: 1 }}>
+                  <label className="stf-label">PIN</label>
+                  <div className="stf-pin-input-wrap">
+                    <input className="stf-input" placeholder="••••"
+                      value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                      type={showPin ? 'text' : 'password'} inputMode="numeric" maxLength={4} />
+                    <button className="stf-pin-eye" onClick={() => setShowPin(s => !s)}>
+                      {showPin ? <Ic.EyeOff /> : <Ic.Eye />}
+                    </button>
+                  </div>
+                </div>
+                <div className="stf-form-group" style={{ flex: 1 }}>
+                  <label className="stf-label">Confirm PIN</label>
                   <input className="stf-input" placeholder="••••"
-                    value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                     type={showPin ? 'text' : 'password'} inputMode="numeric" maxLength={4} />
-                  <button className="stf-pin-eye" onClick={() => setShowPin(s => !s)}>
-                    {showPin ? <Ic.EyeOff /> : <Ic.Eye />}
-                  </button>
                 </div>
               </div>
-              <div className="stf-form-group" style={{ flex: 1 }}>
-                <label className="stf-label">Confirm PIN</label>
-                <input className="stf-input" placeholder="••••"
-                  value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                  type={showPin ? 'text' : 'password'} inputMode="numeric" maxLength={4} />
-              </div>
+              {pinError && <div className="stf-pin-error"><Ic.Warn />{pinError}</div>}
             </div>
-            {pinError && <div className="stf-pin-error"><Ic.Warn />{pinError}</div>}
-          </div>
+          )}
+
+          {isOwner && (
+            <div className="stf-owner-note">
+              <Ic.Crown />
+              Owners have full access to all features and do not clock in/out.
+            </div>
+          )}
         </div>
 
         <div className="stf-modal-footer">
@@ -377,9 +453,10 @@ function ShiftHistoryModal({ member, shifts, onClose }) {
 }
 
 // ── Staff Member Card ──
-function StaffCard({ member, activeShift, onSelect, onEdit, onHistory }) {
+// Cards are read-only for navigation (clock-in/out). Edit is ONLY in the Manage section below.
+function StaffCard({ member, activeShift, onSelect, onHistory }) {
   const role = ROLES.find(r => r.key === member.role)
-  const shiftDur = activeShift ? Date.now() - activeShift.clockIn : null
+  const isOwner = member.role === 'owner'
   const [now, setNow] = useState(Date.now())
 
   useEffect(() => {
@@ -390,42 +467,56 @@ function StaffCard({ member, activeShift, onSelect, onEdit, onHistory }) {
 
   const liveDur = activeShift ? now - activeShift.clockIn : null
 
+  const handleCardClick = () => {
+    if (isOwner) return // Owners do not clock in/out
+    onSelect(member)
+  }
+
   return (
-    <div className={`stf-card ${activeShift ? 'stf-card-active' : ''}`} onClick={() => onSelect(member)}>
+    <div
+      className={`stf-card ${activeShift ? 'stf-card-active' : ''} ${isOwner ? 'stf-card-owner' : ''}`}
+      onClick={handleCardClick}
+      style={{ cursor: isOwner ? 'default' : 'pointer' }}
+    >
       <div className="stf-card-inner">
         {/* Avatar + Status */}
         <div className="stf-card-avatar-wrap">
           <div className="stf-card-avatar" style={{ background: avatarGrad(member.name) }}>
             {initials(member.name)}
           </div>
-          <div className={`stf-card-status ${activeShift ? 'on' : 'off'}`} />
+          {isOwner
+            ? <div className="stf-card-status stf-card-status--owner" title="Owner — Always Active" />
+            : <div className={`stf-card-status ${activeShift ? 'on' : 'off'}`} />
+          }
         </div>
 
         {/* Info */}
         <div className="stf-card-info">
           <div className="stf-card-name">{member.name}</div>
           <div className="stf-card-role-chip" style={{ background: role?.bg, color: role?.color }}>
+            {isOwner && <span style={{ marginRight: 3, fontSize: '0.7rem' }}>👑</span>}
             {role?.label}
           </div>
-          {activeShift ? (
+          {isOwner ? (
+            <div className="stf-card-owner-label">Full Access · No Shift Tracking</div>
+          ) : activeShift ? (
             <div className="stf-card-shift-live">
               <span className="stf-card-live-dot" />
               Clocked in {fmtTime(activeShift.clockIn)} · {fmtDuration(liveDur)}
             </div>
           ) : (
-            <div className="stf-card-off-label">Off Shift</div>
+            <div className="stf-card-off-label">Tap to Clock In</div>
           )}
         </div>
 
-        {/* Actions */}
-        <div className="stf-card-actions" onClick={e => e.stopPropagation()}>
-          <button className="stf-card-action-btn" onClick={() => onHistory(member)} title="Shift History">
-            <Ic.Clock />
-          </button>
-          <button className="stf-card-action-btn" onClick={() => onEdit(member)} title="Edit">
-            <Ic.Edit />
-          </button>
-        </div>
+        {/* Only history button — no edit on the card */}
+        {!isOwner && (
+          <div className="stf-card-actions" onClick={e => e.stopPropagation()}>
+            <button className="stf-card-action-btn" onClick={() => onHistory(member)} title="Shift History">
+              <Ic.Clock />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -473,17 +564,13 @@ export default function Staff({ onClose }) {
   const [showAdd, setShowAdd] = useState(false)
   const [editingMember, setEditingMember] = useState(null)
   const [historyMember, setHistoryMember] = useState(null)
-  const [pinTarget, setPinTarget] = useState(null) // { member, action: 'clockin'|'clockout'|'delete' }
-  const [pinError, setPinError] = useState(false)
-  const [tab, setTab] = useState('directory') // directory | shifts
+  const [pinTarget, setPinTarget] = useState(null)
+  const [tab, setTab] = useState('directory')
   const { alert: showAlert, confirm: showConfirm } = useAlert()
 
   // Load data
   const loadData = useCallback(async () => {
-    const [m, s] = await Promise.all([
-      dbGet(KEY_STAFF),
-      dbGet(KEY_SHIFTS),
-    ])
+    const [m, s] = await Promise.all([dbGet(KEY_STAFF), dbGet(KEY_SHIFTS)])
     setMembers(Array.isArray(m) ? m : [])
     setShifts(Array.isArray(s) ? s : [])
     setLoading(false)
@@ -504,10 +591,7 @@ export default function Staff({ onClose }) {
         }
         return s
       })
-      if (changed) {
-        await dbSet(KEY_SHIFTS, updated)
-        setShifts(updated)
-      }
+      if (changed) { await dbSet(KEY_SHIFTS, updated); setShifts(updated) }
     }
     capAbandoned()
   }, [])
@@ -538,34 +622,25 @@ export default function Staff({ onClose }) {
     setShifts(updatedShifts)
   }
 
+  // Only non-owners can clock in/out
   const handleSelectMember = (member) => {
+    if (member.role === 'owner') return
     const active = getActiveShift(member.memberId)
-    setPinError(false)
     setPinTarget({ member, action: active ? 'clockout' : 'clockin' })
   }
 
   const handlePinSuccess = async (enteredPin) => {
     const { member, action } = pinTarget
     if (enteredPin !== member.pin) {
-      setPinError(true)
-      // PinPad will re-render with error state; we close after short delay
       setTimeout(() => {
         setPinTarget(null)
-        setPinError(false)
         showAlert('Incorrect PIN. Please try again.', { type: 'danger' })
-      }, 800)
+      }, 600)
       return
     }
 
-    // PIN correct
     if (action === 'clockin') {
-      const newShift = {
-        shiftId: shiftId(),
-        memberId: member.memberId,
-        clockIn: Date.now(),
-        clockOut: null,
-        autoCapped: false,
-      }
+      const newShift = { shiftId: shiftId(), memberId: member.memberId, clockIn: Date.now(), clockOut: null, autoCapped: false }
       const updatedShifts = [...shifts, newShift]
       await dbSet(KEY_SHIFTS, updatedShifts)
       setShifts(updatedShifts)
@@ -574,9 +649,7 @@ export default function Staff({ onClose }) {
     } else if (action === 'clockout') {
       const active = getActiveShift(member.memberId)
       if (active) {
-        const updatedShifts = shifts.map(s =>
-          s.shiftId === active.shiftId ? { ...s, clockOut: Date.now() } : s
-        )
+        const updatedShifts = shifts.map(s => s.shiftId === active.shiftId ? { ...s, clockOut: Date.now() } : s)
         await dbSet(KEY_SHIFTS, updatedShifts)
         setShifts(updatedShifts)
         const dur = Date.now() - active.clockIn
@@ -586,12 +659,12 @@ export default function Staff({ onClose }) {
     }
   }
 
-  // Summary stats
-  const activeCount = members.filter(m => getActiveShift(m.memberId)).length
+  // Stats — owners excluded from shift stats
+  const shiftableMembers = members.filter(m => m.role !== 'owner')
+  const activeCount = shiftableMembers.filter(m => getActiveShift(m.memberId)).length
   const todayShifts = shifts.filter(s => {
     const today = new Date()
-    const sDate = new Date(s.clockIn)
-    return sDate.toDateString() === today.toDateString()
+    return new Date(s.clockIn).toDateString() === today.toDateString()
   })
   const todayMs = todayShifts.filter(s => s.clockOut).reduce((sum, s) => sum + (s.clockOut - s.clockIn), 0)
 
@@ -646,6 +719,9 @@ export default function Staff({ onClose }) {
         <button className={`stf-tab ${tab === 'shifts' ? 'active' : ''}`} onClick={() => setTab('shifts')}>
           <Ic.Clock /> Shift Logs
         </button>
+        <button className={`stf-tab ${tab === 'manage' ? 'active' : ''}`} onClick={() => setTab('manage')}>
+          <Ic.Shield /> Manage
+        </button>
       </div>
 
       <div className="stf-body">
@@ -664,66 +740,42 @@ export default function Staff({ onClose }) {
               </div>
             ) : (
               <div className="stf-section">
-                {/* Active first */}
-                {members.filter(m => getActiveShift(m.memberId)).length > 0 && (
+                {/* Owner members — always shown first, no clock-in */}
+                {members.filter(m => m.role === 'owner').length > 0 && (
                   <>
-                    <div className="stf-section-label">
+                    <div className="stf-section-label" style={{ color: '#f59e0b' }}>
+                      👑 Owners
+                    </div>
+                    {members.filter(m => m.role === 'owner').map(m => (
+                      <StaffCard key={m.memberId} member={m} activeShift={null}
+                        onSelect={handleSelectMember} onHistory={setHistoryMember} />
+                    ))}
+                  </>
+                )}
+
+                {/* Staff on shift */}
+                {shiftableMembers.filter(m => getActiveShift(m.memberId)).length > 0 && (
+                  <>
+                    <div className="stf-section-label" style={{ marginTop: 14 }}>
                       <span className="stf-live-pulse" /> On Shift Now
                     </div>
-                    {members
-                      .filter(m => getActiveShift(m.memberId))
-                      .map(m => (
-                        <StaffCard
-                          key={m.memberId}
-                          member={m}
-                          activeShift={getActiveShift(m.memberId)}
-                          onSelect={handleSelectMember}
-                          onEdit={setEditingMember}
-                          onHistory={setHistoryMember}
-                        />
-                      ))}
+                    {shiftableMembers.filter(m => getActiveShift(m.memberId)).map(m => (
+                      <StaffCard key={m.memberId} member={m} activeShift={getActiveShift(m.memberId)}
+                        onSelect={handleSelectMember} onHistory={setHistoryMember} />
+                    ))}
                   </>
                 )}
 
-                {members.filter(m => !getActiveShift(m.memberId)).length > 0 && (
+                {/* Staff off shift */}
+                {shiftableMembers.filter(m => !getActiveShift(m.memberId)).length > 0 && (
                   <>
-                    <div className="stf-section-label" style={{ marginTop: 16 }}>Off Shift</div>
-                    {members
-                      .filter(m => !getActiveShift(m.memberId))
-                      .map(m => (
-                        <StaffCard
-                          key={m.memberId}
-                          member={m}
-                          activeShift={null}
-                          onSelect={handleSelectMember}
-                          onEdit={setEditingMember}
-                          onHistory={setHistoryMember}
-                        />
-                      ))}
+                    <div className="stf-section-label" style={{ marginTop: 14 }}>Off Shift</div>
+                    {shiftableMembers.filter(m => !getActiveShift(m.memberId)).map(m => (
+                      <StaffCard key={m.memberId} member={m} activeShift={null}
+                        onSelect={handleSelectMember} onHistory={setHistoryMember} />
+                    ))}
                   </>
                 )}
-
-                {/* Manage section */}
-                <div className="stf-manage-section">
-                  <div className="stf-section-label" style={{ marginTop: 20 }}>Manage</div>
-                  {members.map(m => (
-                    <div key={m.memberId} className="stf-manage-row">
-                      <div className="stf-manage-ava" style={{ background: avatarGrad(m.name) }}>
-                        {initials(m.name)}
-                      </div>
-                      <div className="stf-manage-info">
-                        <div className="stf-manage-name">{m.name}</div>
-                        <div className="stf-manage-role" style={{ color: ROLE_COLORS[m.role] }}>
-                          {ROLES.find(r => r.key === m.role)?.label}
-                        </div>
-                      </div>
-                      <div className="stf-manage-btns">
-                        <button className="stf-manage-btn" onClick={() => setEditingMember(m)} title="Edit"><Ic.Edit /></button>
-                        <button className="stf-manage-btn stf-manage-btn--danger" onClick={() => handleDeleteMember(m)} title="Delete"><Ic.Del /></button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
             )}
           </>
@@ -745,39 +797,87 @@ export default function Staff({ onClose }) {
               <div className="stf-empty-state">
                 <div className="stf-empty-icon"><Ic.Clock /></div>
                 <div className="stf-empty-title">No Shifts Yet</div>
-                <div className="stf-empty-sub">Shift logs will appear here after staff members clock in.</div>
+                <div className="stf-empty-sub">Shift logs appear after staff clock in for the first time.</div>
               </div>
             ) : (
               <div className="stf-shift-log">
-                {[...shifts]
-                  .sort((a, b) => b.clockIn - a.clockIn)
-                  .map(s => {
-                    const m = members.find(x => x.memberId === s.memberId)
-                    const dur = s.clockOut ? s.clockOut - s.clockIn : Date.now() - s.clockIn
-                    const isOpen = !s.clockOut
-                    return (
-                      <div key={s.shiftId} className={`stf-log-row ${isOpen ? 'open' : ''}`}>
-                        <div className="stf-log-ava" style={{ background: m ? avatarGrad(m.name) : '#ccc' }}>
-                          {initials(m?.name || '?')}
-                        </div>
-                        <div className="stf-log-info">
-                          <div className="stf-log-name">{m?.name || 'Unknown'}</div>
-                          <div className="stf-log-date">{fmtDateTime(s.clockIn)} {s.clockOut ? `→ ${fmtTime(s.clockOut)}` : ''}</div>
-                          {s.autoCapped && <div className="stf-log-cap"><Ic.Warn /> Auto-capped</div>}
-                        </div>
-                        <div className="stf-log-right">
-                          {isOpen ? (
-                            <span className="stf-log-live">Live</span>
-                          ) : (
-                            <div className="stf-log-dur">{fmtDuration(dur)}</div>
-                          )}
-                          {m?.hourlyRate > 0 && s.clockOut && (
-                            <div className="stf-log-pay">₹{Math.round((dur / 3600000) * m.hourlyRate)}</div>
-                          )}
-                        </div>
+                {[...shifts].sort((a, b) => b.clockIn - a.clockIn).map(s => {
+                  const m = members.find(x => x.memberId === s.memberId)
+                  const dur = s.clockOut ? s.clockOut - s.clockIn : Date.now() - s.clockIn
+                  const isOpen = !s.clockOut
+                  return (
+                    <div key={s.shiftId} className={`stf-log-row ${isOpen ? 'open' : ''}`}>
+                      <div className="stf-log-ava" style={{ background: m ? avatarGrad(m.name) : '#ccc' }}>
+                        {initials(m?.name || '?')}
                       </div>
-                    )
-                  })}
+                      <div className="stf-log-info">
+                        <div className="stf-log-name">{m?.name || 'Unknown'}</div>
+                        <div className="stf-log-date">{fmtDateTime(s.clockIn)} {s.clockOut ? `→ ${fmtTime(s.clockOut)}` : ''}</div>
+                        {s.autoCapped && <div className="stf-log-cap"><Ic.Warn /> Auto-capped</div>}
+                      </div>
+                      <div className="stf-log-right">
+                        {isOpen ? <span className="stf-log-live">Live</span> : <div className="stf-log-dur">{fmtDuration(dur)}</div>}
+                        {m?.hourlyRate > 0 && s.clockOut && (
+                          <div className="stf-log-pay">₹{Math.round((dur / 3600000) * m.hourlyRate)}</div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── MANAGE TAB — Owner/Manager only ── */}
+        {tab === 'manage' && (
+          <div className="stf-section">
+            <div className="stf-manage-info-banner">
+              <Ic.Shield />
+              <div>
+                <strong>Admin Area</strong>
+                <div style={{ fontSize: '0.78rem', opacity: 0.8, marginTop: 2 }}>
+                  Edit details, permissions, and remove staff members here.
+                </div>
+              </div>
+            </div>
+
+            {members.length === 0 ? (
+              <div className="stf-empty-state">
+                <div className="stf-empty-icon"><Ic.Users /></div>
+                <div className="stf-empty-title">No Members to Manage</div>
+                <button className="stf-btn-primary" onClick={() => { setShowAdd(true); setTab('directory') }}>
+                  <Ic.Plus /> Add First Member
+                </button>
+              </div>
+            ) : (
+              <div className="stf-manage-section">
+                {members.map(m => (
+                  <div key={m.memberId} className="stf-manage-row">
+                    <div className="stf-manage-ava" style={{ background: avatarGrad(m.name) }}>
+                      {initials(m.name)}
+                    </div>
+                    <div className="stf-manage-info">
+                      <div className="stf-manage-name">{m.name}</div>
+                      <div className="stf-manage-role" style={{ color: ROLE_COLORS[m.role] }}>
+                        {m.role === 'owner' && '👑 '}{ROLES.find(r => r.key === m.role)?.label}
+                      </div>
+                      {/* Show which tools are enabled */}
+                      <div className="stf-manage-perms-preview">
+                        {TOOL_PERMISSIONS.filter(t => {
+                          if (m.role === 'owner') return t.ownerDefault
+                          return m.toolPerms?.[t.id] ?? (m.role === 'manager' ? t.managerDefault : t.cashierDefault)
+                        }).map(t => (
+                          <span key={t.id} className="stf-perm-mini">{t.icon}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="stf-manage-btns">
+                      <button className="stf-manage-btn" onClick={() => setEditingMember(m)} title="Edit"><Ic.Edit /></button>
+                      <button className="stf-manage-btn stf-manage-btn--danger" onClick={() => handleDeleteMember(m)} title="Delete"><Ic.Del /></button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -820,7 +920,7 @@ export default function Staff({ onClose }) {
             : `Clock Out — ${pinTarget.member.name}`}
           subtitle={pinTarget.action === 'clockin' ? 'Enter your PIN to start your shift' : 'Enter your PIN to end your shift'}
           onSuccess={handlePinSuccess}
-          onCancel={() => { setPinTarget(null); setPinError(false) }}
+          onCancel={() => setPinTarget(null)}
         />
       )}
     </div>
