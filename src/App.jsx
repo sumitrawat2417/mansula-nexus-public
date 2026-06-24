@@ -8,6 +8,7 @@ import Agreement from './Agreement.jsx'
 import Inventory from './Inventory.jsx'
 import Customers from './Customers.jsx'
 import Analytics from './Analytics.jsx'
+import Staff from './Staff.jsx'
 import { AlertProvider, useAlert } from './AlertDialog.jsx'
 import ReloadPrompt from './ReloadPrompt.jsx'
 import { APP_NAME } from './appInfo.js'
@@ -229,6 +230,10 @@ export default function App() {
 
     if (screen === 'analytics') {
       return <Analytics onClose={() => setScreen('home')} currency={currency} />
+    }
+
+    if (screen === 'staff') {
+      return <Staff onClose={() => setScreen('home')} />
     }
 
     return (
