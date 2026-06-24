@@ -122,6 +122,32 @@ export default function App() {
   })
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [dismissOffline, setDismissOffline] = useState(false)
+  const [activeUserId, setActiveUserId] = useState(() => localStorage.getItem('mn-active-staff-id') || null)
+  const [staffMembers, setStaffMembers] = useState([])
+
+  const loadStaff = () => {
+    dbGet('mn-staff-members').then(members => {
+      const arr = Array.isArray(members) ? members : []
+      setStaffMembers(arr)
+      if (arr.length > 0 && !activeUserId) {
+        setActiveUserId(arr[0].memberId)
+        localStorage.setItem('mn-active-staff-id', arr[0].memberId)
+      } else if (arr.length === 0 && activeUserId) {
+        setActiveUserId(null)
+        localStorage.removeItem('mn-active-staff-id')
+      }
+    })
+  }
+
+  useEffect(() => { loadStaff() }, [])
+
+  const handleSetActiveUser = (id) => {
+    setActiveUserId(id)
+    if (id) localStorage.setItem('mn-active-staff-id', id)
+    else localStorage.removeItem('mn-active-staff-id')
+  }
+
+  const activeUser = staffMembers.find(m => m.memberId === activeUserId) || null
 
   useEffect(() => {
     // Check if business profile is setup
@@ -233,7 +259,7 @@ export default function App() {
     }
 
     if (screen === 'staff') {
-      return <Staff onClose={() => setScreen('home')} />
+      return <Staff onClose={() => setScreen('home')} activeUser={activeUser} onStaffChanged={loadStaff} />
     }
 
     return (
@@ -246,6 +272,9 @@ export default function App() {
         currencies={CURRENCIES}
         onboardingStep={onboardingStep}
         setOnboardingStep={setOnboardingStep}
+        activeUser={activeUser}
+        staffMembers={staffMembers}
+        onSetActiveUser={handleSetActiveUser}
       />
     )
   }

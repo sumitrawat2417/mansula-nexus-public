@@ -20,7 +20,7 @@ const fmtDuration = (ms) => {
   return `${h}h ${m}m`
 }
 
-const avatarGrad = (name) => {
+export const avatarGrad = (name) => {
   const grads = [
     'linear-gradient(135deg,#6366f1,#8b5cf6)',
     'linear-gradient(135deg,#06b6d4,#0284c7)',
@@ -35,7 +35,7 @@ const avatarGrad = (name) => {
   return grads[Math.abs(hash) % grads.length]
 }
 
-const initials = (name) => {
+export const initials = (name) => {
   if (!name) return '?'
   const parts = name.trim().split(/\s+/)
   if (parts.length === 1) return parts[0][0].toUpperCase()
@@ -97,7 +97,7 @@ const Ic = {
 }
 
 // ── PIN Pad Component ──
-function PinPad({ title, subtitle, onSuccess, onCancel, pinLength = 4 }) {
+export function PinPad({ title, subtitle, onSuccess, onCancel, pinLength = 4 }) {
   const [pin, setPin] = useState('')
   const [error, setError] = useState(false)
   const [shake, setShake] = useState(false)
@@ -185,15 +185,13 @@ function AddEditStaffModal({ member, onSave, onClose }) {
 
   const handleSave = async () => {
     if (!form.name.trim()) return
-    // Owner doesn't need PIN (no clock-in)
-    if (form.role !== 'owner') {
-      if (!member) {
-        if (pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
-        if (pin !== confirmPin) { setPinError('PINs do not match'); return }
-      } else {
-        if (pin && pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
-        if (pin && pin !== confirmPin) { setPinError('PINs do not match'); return }
-      }
+    // All roles need a PIN except if we want to make it optional, but here we enforce 4 digits for everyone.
+    if (!member) {
+      if (pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
+      if (pin !== confirmPin) { setPinError('PINs do not match'); return }
+    } else {
+      if (pin && pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
+      if (pin && pin !== confirmPin) { setPinError('PINs do not match'); return }
     }
     setPinError('')
     setSaving(true)
@@ -204,7 +202,7 @@ function AddEditStaffModal({ member, onSave, onClose }) {
       role: form.role,
       phone: form.phone.trim(),
       hourlyRate: form.role === 'owner' ? 0 : (parseFloat(form.hourlyRate) || 0),
-      pin: form.role === 'owner' ? '' : (pin || member?.pin || ''),
+      pin: pin || member?.pin || '',
       toolPerms: perms,
       createdAt: member?.createdAt || Date.now(),
       updatedAt: Date.now(),
@@ -308,40 +306,38 @@ function AddEditStaffModal({ member, onSave, onClose }) {
             </div>
           </div>
 
-          {/* ── PIN Section — only for non-Owner ── */}
-          {!isOwner && (
-            <div className="stf-pin-section">
-              <div className="stf-pin-section-title">
-                <Ic.Shield />
-                {member ? 'Change PIN (leave blank to keep current)' : 'Set 4-Digit PIN *'}
-              </div>
-              <div className="stf-pin-inputs">
-                <div className="stf-form-group" style={{ flex: 1 }}>
-                  <label className="stf-label">PIN</label>
-                  <div className="stf-pin-input-wrap">
-                    <input className="stf-input" placeholder="••••"
-                      value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                      type={showPin ? 'text' : 'password'} inputMode="numeric" maxLength={4} />
-                    <button className="stf-pin-eye" onClick={() => setShowPin(s => !s)}>
-                      {showPin ? <Ic.EyeOff /> : <Ic.Eye />}
-                    </button>
-                  </div>
-                </div>
-                <div className="stf-form-group" style={{ flex: 1 }}>
-                  <label className="stf-label">Confirm PIN</label>
-                  <input className="stf-input" placeholder="••••"
-                    value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                    type={showPin ? 'text' : 'password'} inputMode="numeric" maxLength={4} />
-                </div>
-              </div>
-              {pinError && <div className="stf-pin-error"><Ic.Warn />{pinError}</div>}
+          {/* ── PIN Section — all roles ── */}
+          <div className="stf-pin-section">
+            <div className="stf-pin-section-title">
+              <Ic.Shield />
+              {member ? 'Change PIN (leave blank to keep current)' : 'Set 4-Digit PIN *'}
             </div>
-          )}
+            <div className="stf-pin-inputs">
+              <div className="stf-form-group" style={{ flex: 1 }}>
+                <label className="stf-label">PIN</label>
+                <div className="stf-pin-input-wrap">
+                  <input className="stf-input" placeholder="••••"
+                    value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    type={showPin ? 'text' : 'password'} inputMode="numeric" maxLength={4} />
+                  <button className="stf-pin-eye" onClick={() => setShowPin(s => !s)}>
+                    {showPin ? <Ic.EyeOff /> : <Ic.Eye />}
+                  </button>
+                </div>
+              </div>
+              <div className="stf-form-group" style={{ flex: 1 }}>
+                <label className="stf-label">Confirm PIN</label>
+                <input className="stf-input" placeholder="••••"
+                  value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  type={showPin ? 'text' : 'password'} inputMode="numeric" maxLength={4} />
+              </div>
+            </div>
+            {pinError && <div className="stf-pin-error"><Ic.Warn />{pinError}</div>}
+          </div>
 
           {isOwner && (
             <div className="stf-owner-note">
               <Ic.Crown />
-              Owners have full access to all features and do not clock in/out.
+              Owners have full access to all features and do not clock in/out, but need a PIN to switch profiles.
             </div>
           )}
         </div>
@@ -555,7 +551,7 @@ function exportShiftsCsv(members, shifts) {
 // ══════════════════════════════════════════════════════
 // MAIN STAFF COMPONENT
 // ══════════════════════════════════════════════════════
-export default function Staff({ onClose }) {
+export default function Staff({ onClose, activeUser, onStaffChanged }) {
   useBackButton(onClose)
 
   const [members, setMembers] = useState([])
@@ -606,6 +602,7 @@ export default function Staff({ onClose }) {
     setMembers(updated)
     setShowAdd(false)
     setEditingMember(null)
+    if (onStaffChanged) onStaffChanged()
   }
 
   const handleDeleteMember = async (member) => {
@@ -620,6 +617,7 @@ export default function Staff({ onClose }) {
     await dbSet(KEY_SHIFTS, updatedShifts)
     setMembers(updatedMembers)
     setShifts(updatedShifts)
+    if (onStaffChanged) onStaffChanged()
   }
 
   // Only non-owners can clock in/out
@@ -719,9 +717,11 @@ export default function Staff({ onClose }) {
         <button className={`stf-tab ${tab === 'shifts' ? 'active' : ''}`} onClick={() => setTab('shifts')}>
           <Ic.Clock /> Shift Logs
         </button>
-        <button className={`stf-tab ${tab === 'manage' ? 'active' : ''}`} onClick={() => setTab('manage')}>
-          <Ic.Shield /> Manage
-        </button>
+        {(!activeUser || activeUser.role === 'owner' || activeUser.role === 'manager') && (
+          <button className={`stf-tab ${tab === 'manage' ? 'active' : ''}`} onClick={() => setTab('manage')}>
+            <Ic.Shield /> Manage
+          </button>
+        )}
       </div>
 
       <div className="stf-body">
