@@ -38,7 +38,7 @@ export default function ReloadPrompt() {
         <div className="mn-reload-text">
           {needRefresh ? (
             <>
-              <strong>{APP_NAME} {APP_VERSION} available</strong>
+              <strong>New {APP_NAME} update available</strong>
               <p>Install now for the latest improvements.</p>
             </>
           ) : (
