@@ -1071,6 +1071,11 @@ function HelpContent() {
 
             <div className="hns-legal-h">14. Changes to Terms</div>
             <p>We may update these Terms from time to time. Continued use of the BOS after updates constitutes your acceptance of the revised terms. Major changes will be communicated through an in-app notice.</p>
+
+            <div style={{ marginTop: '24px', padding: '16px', background: 'var(--bg-surface-2)', borderRadius: '12px', textAlign: 'center' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '10px', marginTop: 0 }}>For the complete, legally-binding document, please visit our official website.</p>
+              <a href="https://mansulabos.netlify.app/terms.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.9rem', color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>Read Full Terms &amp; Conditions ↗</a>
+            </div>
           </div>
         </div>
       )}
@@ -1111,6 +1116,11 @@ function HelpContent() {
 
             <div className="hns-legal-h"><Icon.Mailbox style={{ width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Contact</div>
             <p>For privacy-related questions or concerns, please reach out to ManSula Support through the app's official channels.</p>
+
+            <div style={{ marginTop: '24px', padding: '16px', background: 'var(--bg-surface-2)', borderRadius: '12px', textAlign: 'center' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '10px', marginTop: 0 }}>For the complete, legally-binding privacy details, please visit our official website.</p>
+              <a href="https://mansulabos.netlify.app/privacy.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.9rem', color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>Read Full Privacy Policy ↗</a>
+            </div>
           </div>
         </div>
       )}
