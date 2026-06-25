@@ -185,13 +185,16 @@ function AddEditStaffModal({ member, onSave, onClose }) {
 
   const handleSave = async () => {
     if (!form.name.trim()) return
-    // All roles need a PIN except if we want to make it optional, but here we enforce 4 digits for everyone.
-    if (!member) {
-      if (pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
-      if (pin !== confirmPin) { setPinError('PINs do not match'); return }
-    } else {
-      if (pin && pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
-      if (pin && pin !== confirmPin) { setPinError('PINs do not match'); return }
+    // Only Owners and Managers need a PIN.
+    const needsPin = form.role === 'owner' || form.role === 'manager'
+    if (needsPin) {
+      if (!member) {
+        if (pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
+        if (pin !== confirmPin) { setPinError('PINs do not match'); return }
+      } else {
+        if (pin && pin.length !== 4) { setPinError('PIN must be 4 digits'); return }
+        if (pin && pin !== confirmPin) { setPinError('PINs do not match'); return }
+      }
     }
     setPinError('')
     setSaving(true)
@@ -202,7 +205,7 @@ function AddEditStaffModal({ member, onSave, onClose }) {
       role: form.role,
       phone: form.phone.trim(),
       hourlyRate: form.role === 'owner' ? 0 : (parseFloat(form.hourlyRate) || 0),
-      pin: pin || member?.pin || '',
+      pin: needsPin ? (pin || member?.pin || '') : '',
       toolPerms: perms,
       createdAt: member?.createdAt || Date.now(),
       updatedAt: Date.now(),
@@ -306,33 +309,35 @@ function AddEditStaffModal({ member, onSave, onClose }) {
             </div>
           </div>
 
-          {/* ── PIN Section — all roles ── */}
-          <div className="stf-pin-section">
-            <div className="stf-pin-section-title">
-              <Ic.Shield />
-              {member ? 'Change PIN (leave blank to keep current)' : 'Set 4-Digit PIN *'}
-            </div>
-            <div className="stf-pin-inputs">
-              <div className="stf-form-group" style={{ flex: 1 }}>
-                <label className="stf-label">PIN</label>
-                <div className="stf-pin-input-wrap">
+          {/* ── PIN Section — Only for Owners/Managers ── */}
+          {(form.role === 'owner' || form.role === 'manager') && (
+            <div className="stf-pin-section">
+              <div className="stf-pin-section-title">
+                <Ic.Shield />
+                {member ? 'Change PIN (leave blank to keep current)' : 'Set 4-Digit PIN *'}
+              </div>
+              <div className="stf-pin-inputs">
+                <div className="stf-form-group" style={{ flex: 1 }}>
+                  <label className="stf-label">PIN</label>
+                  <div className="stf-pin-input-wrap">
+                    <input className="stf-input" placeholder="••••"
+                      value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                      type={showPin ? 'text' : 'password'} inputMode="numeric" maxLength={4} />
+                    <button className="stf-pin-eye" onClick={() => setShowPin(s => !s)}>
+                      {showPin ? <Ic.EyeOff /> : <Ic.Eye />}
+                    </button>
+                  </div>
+                </div>
+                <div className="stf-form-group" style={{ flex: 1 }}>
+                  <label className="stf-label">Confirm PIN</label>
                   <input className="stf-input" placeholder="••••"
-                    value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                     type={showPin ? 'text' : 'password'} inputMode="numeric" maxLength={4} />
-                  <button className="stf-pin-eye" onClick={() => setShowPin(s => !s)}>
-                    {showPin ? <Ic.EyeOff /> : <Ic.Eye />}
-                  </button>
                 </div>
               </div>
-              <div className="stf-form-group" style={{ flex: 1 }}>
-                <label className="stf-label">Confirm PIN</label>
-                <input className="stf-input" placeholder="••••"
-                  value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                  type={showPin ? 'text' : 'password'} inputMode="numeric" maxLength={4} />
-              </div>
+              {pinError && <div className="stf-pin-error"><Ic.Warn />{pinError}</div>}
             </div>
-            {pinError && <div className="stf-pin-error"><Ic.Warn />{pinError}</div>}
-          </div>
+          )}
 
           {isOwner && (
             <div className="stf-owner-note">
@@ -620,11 +625,36 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
     if (onStaffChanged) onStaffChanged()
   }
 
+  const toggleShift = async (member, action) => {
+    if (action === 'clockin') {
+      const newShift = { shiftId: shiftId(), memberId: member.memberId, clockIn: Date.now(), clockOut: null, autoCapped: false }
+      const updatedShifts = [...shifts, newShift]
+      await dbSet(KEY_SHIFTS, updatedShifts)
+      setShifts(updatedShifts)
+      showAlert(`${member.name} clocked in successfully!`, { type: 'success' })
+    } else if (action === 'clockout') {
+      const active = getActiveShift(member.memberId)
+      if (active) {
+        const updatedShifts = shifts.map(s => s.shiftId === active.shiftId ? { ...s, clockOut: Date.now() } : s)
+        await dbSet(KEY_SHIFTS, updatedShifts)
+        setShifts(updatedShifts)
+        const dur = Date.now() - active.clockIn
+        showAlert(`${member.name} clocked out. Shift: ${fmtDuration(dur)}`, { type: 'success' })
+      }
+    }
+  }
+
   // Only non-owners can clock in/out
   const handleSelectMember = (member) => {
     if (member.role === 'owner') return
     const active = getActiveShift(member.memberId)
-    setPinTarget({ member, action: active ? 'clockout' : 'clockin' })
+    const action = active ? 'clockout' : 'clockin'
+
+    if (member.pin) {
+      setPinTarget({ member, action })
+    } else {
+      toggleShift(member, action)
+    }
   }
 
   const handlePinSuccess = async (enteredPin) => {
@@ -636,25 +666,66 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
       }, 600)
       return
     }
+    
+    await toggleShift(member, action)
+    setPinTarget(null)
+  }
 
-    if (action === 'clockin') {
-      const newShift = { shiftId: shiftId(), memberId: member.memberId, clockIn: Date.now(), clockOut: null, autoCapped: false }
-      const updatedShifts = [...shifts, newShift]
-      await dbSet(KEY_SHIFTS, updatedShifts)
-      setShifts(updatedShifts)
-      setPinTarget(null)
-      showAlert(`${member.name} clocked in successfully!`, { type: 'success' })
-    } else if (action === 'clockout') {
-      const active = getActiveShift(member.memberId)
-      if (active) {
-        const updatedShifts = shifts.map(s => s.shiftId === active.shiftId ? { ...s, clockOut: Date.now() } : s)
-        await dbSet(KEY_SHIFTS, updatedShifts)
-        setShifts(updatedShifts)
-        const dur = Date.now() - active.clockIn
-        setPinTarget(null)
-        showAlert(`${member.name} clocked out. Shift: ${fmtDuration(dur)}`, { type: 'success' })
-      }
-    }
+  const isManagerOrOwner = !activeUser || activeUser.role === 'owner' || activeUser.role === 'manager'
+
+  // If a Cashier accesses Staff tool, they get a personalized "My Attendance" screen
+  if (!isManagerOrOwner) {
+    const myShift = getActiveShift(activeUser.memberId)
+    const myTodayShifts = shifts.filter(s => s.memberId === activeUser.memberId && new Date(s.clockIn).toDateString() === new Date().toDateString())
+    const myTodayMs = myTodayShifts.filter(s => s.clockOut).reduce((sum, s) => sum + (s.clockOut - s.clockIn), 0) + (myShift ? (Date.now() - myShift.clockIn) : 0)
+
+    return (
+      <div className="stf-root">
+        <div className="stf-header">
+          <button className="stf-back-btn" onClick={onClose}><Ic.Back /></button>
+          <div className="stf-header-title">My Attendance</div>
+        </div>
+        
+        <div className="stf-body" style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: avatarGrad(activeUser.name), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', fontWeight: 700, margin: '0 auto 16px' }}>
+              {initials(activeUser.name)}
+            </div>
+            <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.5rem' }}>{activeUser.name}</h2>
+            <p style={{ margin: '4px 0 0', color: 'var(--brand-primary)', fontWeight: 600, textTransform: 'capitalize' }}>{activeUser.role}</p>
+          </div>
+
+          <div style={{ background: 'var(--bg-surface-2)', border: '1px solid var(--border-color)', padding: '24px', borderRadius: '20px', width: '100%', maxWidth: 400, textAlign: 'center' }}>
+            <h3 style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Hours Today</h3>
+            <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{fmtDuration(myTodayMs)}</div>
+            {myShift && <div style={{ marginTop: '12px', color: 'var(--success-color)', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><div className="stf-shift-live-dot" /> Currently on shift</div>}
+          </div>
+
+          <button 
+            onClick={() => toggleShift(activeUser, myShift ? 'clockout' : 'clockin')}
+            style={{
+              padding: '18px 32px',
+              borderRadius: '30px',
+              border: 'none',
+              fontSize: '1.2rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              color: 'white',
+              background: myShift ? 'var(--danger-color)' : 'var(--success-color)',
+              width: '100%',
+              maxWidth: 400,
+              boxShadow: myShift ? '0 4px 12px rgba(239, 68, 68, 0.3)' : '0 4px 12px rgba(16, 185, 129, 0.3)',
+              transition: 'transform 0.1s, opacity 0.2s'
+            }}
+            onPointerDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+            onPointerUp={e => e.currentTarget.style.transform = 'scale(1)'}
+            onPointerLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            {myShift ? 'Clock Out' : 'Clock In'}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   // Stats — owners excluded from shift stats
