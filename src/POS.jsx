@@ -776,6 +776,8 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   const [searchOpen, setSearchOpen] = useState(false)
   const [variantProduct, setVariantProduct] = useState(null)
   const [cartOpen, setCartOpen] = useState(false)
+  const handleCartClose = useCallback(() => setCartOpen(false), [])
+  useBackButton(cartOpen ? handleCartClose : null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [ordersOpen, setOrdersOpen] = useState(false)
   const [successOrder, setSuccessOrder] = useState(null)

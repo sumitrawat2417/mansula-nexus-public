@@ -10,9 +10,11 @@ export function useBackButton(onBack) {
     window.history.pushState({ modalId }, '')
     activeModals.push(modalId)
 
-    const handlePopState = () => {
+    const handlePopState = (e) => {
+      if (e.__mn_handled) return
       // Only trigger onBack if this modal is at the top of the stack
       if (activeModals[activeModals.length - 1] === modalId) {
+        e.__mn_handled = true
         activeModals.pop()
         onBack()
       }
