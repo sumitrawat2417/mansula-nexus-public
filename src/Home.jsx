@@ -816,9 +816,8 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                 ManSula BOS is an offline-first Business Operating System. Business data remains under your control. Review the Terms of Service and Privacy Policy for complete information.
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', fontWeight: 600, cursor: 'pointer' }}>Terms of Service</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', fontWeight: 600, cursor: 'pointer' }}>Privacy Policy</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', fontWeight: 600, cursor: 'pointer' }}>Open Source Licenses</div>
+                <a href="https://mansulabos.netlify.app/terms.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>Terms of Service</a>
+                <a href="https://mansulabos.netlify.app/privacy.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>Privacy Policy</a>
               </div>
             </div>
 
@@ -1230,13 +1229,13 @@ export default function Home({
           </div>
           <div>
             <div className="hn-brand-main">ManSula</div>
-            <div className="hn-brand-sub">BOS</div>
+            <div className="hn-brand-sub">Business OS</div>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>          <button className="hn-settings-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
-            <Icon.Settings />
-          </button>
+          <Icon.Settings />
+        </button>
         </div>
       </header>
 

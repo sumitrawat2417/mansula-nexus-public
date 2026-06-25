@@ -196,7 +196,7 @@ export default function Agreement({ onAccept }) {
               {agreed && <Ic.Check />}
             </div>
             <span>
-              I have read and agree to the <strong>Terms of Service</strong> and <strong>Privacy Policy</strong> of {APP_NAME} by {ORG.name}.
+              I have read and agree to the <a href="https://mansulabos.netlify.app/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}><strong>Terms of Service</strong></a> and <a href="https://mansulabos.netlify.app/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}><strong>Privacy Policy</strong></a> of {APP_NAME} by {ORG.name}.
             </span>
           </label>
 
