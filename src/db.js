@@ -177,7 +177,8 @@ export async function getOrdersByDateRange({ fromTs, toTs, paymentMode, search, 
         }
         const r = cursor.value
         // Apply filters
-        const matchPayment = !paymentMode || paymentMode === 'all' || r.paymentMode === paymentMode
+        const isSplit = r.paymentMode === 'split'
+        const matchPayment = !paymentMode || paymentMode === 'all' || r.paymentMode === paymentMode || (isSplit && (paymentMode === 'cash' || paymentMode === 'upi'))
         const matchSearch = !searchLower || r.orderId.toLowerCase().includes(searchLower) ||
           (r.items || []).some(i => i.name.toLowerCase().includes(searchLower))
         
@@ -216,13 +217,19 @@ export async function getStatsForDateRange({ fromTs, toTs, paymentMode, search }
           return
         }
         const r = cursor.value
-        const matchPayment = !paymentMode || paymentMode === 'all' || r.paymentMode === paymentMode
+        const isSplit = r.paymentMode === 'split'
+        const matchPayment = !paymentMode || paymentMode === 'all' || r.paymentMode === paymentMode || (isSplit && (paymentMode === 'cash' || paymentMode === 'upi'))
         const matchSearch = !searchLower || r.orderId.toLowerCase().includes(searchLower) ||
           (r.items || []).some(i => i.name.toLowerCase().includes(searchLower))
         if (matchPayment && matchSearch) {
           count++
           revenue += (r.total || 0)
-          payCounts[r.paymentMode] = (payCounts[r.paymentMode] || 0) + 1
+          if (isSplit && r.paymentDetails) {
+            payCounts['cash'] = (payCounts['cash'] || 0) + 1
+            payCounts['upi'] = (payCounts['upi'] || 0) + 1
+          } else {
+            payCounts[r.paymentMode] = (payCounts[r.paymentMode] || 0) + 1
+          }
         }
         cursor.continue()
       }

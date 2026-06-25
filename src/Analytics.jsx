@@ -140,8 +140,21 @@ function computeAnalytics(orders, purchases = []) {
     ordersByDOW[d.getDay()]++
 
     const pm = order.paymentMode || 'other'
-    paymentCounts[pm] = (paymentCounts[pm] || 0) + 1
-    paymentRevenue[pm] = (paymentRevenue[pm] || 0) + total
+    if (pm === 'split') {
+      const c = order.paymentDetails?.cash || total;
+      const u = order.paymentDetails?.upi || 0;
+      if (c > 0) {
+        paymentCounts['cash'] = (paymentCounts['cash'] || 0) + 1
+        paymentRevenue['cash'] = (paymentRevenue['cash'] || 0) + c
+      }
+      if (u > 0) {
+        paymentCounts['upi'] = (paymentCounts['upi'] || 0) + 1
+        paymentRevenue['upi'] = (paymentRevenue['upi'] || 0) + u
+      }
+    } else {
+      paymentCounts[pm] = (paymentCounts[pm] || 0) + 1
+      paymentRevenue[pm] = (paymentRevenue[pm] || 0) + total
+    }
     totalRevenue += total
 
     for (const item of (order.items || [])) {
