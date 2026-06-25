@@ -1315,6 +1315,15 @@ export default function Home({
         <div className="hn-footer">
           <div className="hn-footer-text">ManSula BOS · v1.6.0-alpha</div>
         </div>
+
+        <div className="hn-seo-footer" style={{ marginTop: '40px', padding: '20px', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.6', borderTop: '1px solid var(--border-color)' }}>
+          <p>
+            <strong>ManSula BOS</strong> is a premium <strong>Business Operating System</strong> and <strong>POS Software</strong> designed for modern merchants. Whether you need reliable <strong>Inventory Management Software</strong> or fast <strong>Billing Software</strong>, ManSula provides a comprehensive <strong>Business Management Software</strong> suite.
+          </p>
+          <p style={{ marginTop: '8px' }}>
+            Built as an <strong>Offline POS Software</strong>, it works seamlessly without internet. Perfect as a <strong>Retail Management System</strong> or a <strong>Restaurant POS</strong>. Take control of your operations with advanced <strong>Inventory Tracking</strong>, seamless <strong>Customer Management</strong>, and powerful <strong>Business Analytics</strong>.
+          </p>
+        </div>
       </div>
     </div>
   )
