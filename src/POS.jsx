@@ -4,6 +4,7 @@ import { dbGet, dbSet, saveOrderRecord, getNextOrderNum, getOrdersByMonth, getCu
 import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES, KEY_BUSINESS, DEFAULT_BUSINESS } from './BusinessProfile.jsx'
 import { useBackButton } from './useBackButton.js'
 import { APP_NAME, APP_VERSION } from './appInfo.js'
+import { QRCodeSVG } from 'qrcode.react'
 
 // ─────────────── DATA (loaded from IDB, fallback to defaults) ───────────────
 
@@ -163,8 +164,8 @@ const I = {
   Plus: ({ s = 13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>,
   Minus: ({ s = 13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12h14" /></svg>,
   Trash: ({ s = 13 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>,
-  Users: ({ s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-  Calendar: ({ s = 15 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  Users: ({ s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
+  Calendar: ({ s = 15 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>,
   Check: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
   Orders: ({ s = 17 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /><path d="M9 12h6M9 16h4" /></svg>,
   Back: ({ s = 17 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>,
@@ -547,7 +548,7 @@ function SettingsDrawer({ cols, onCols, onExit, onClose }) {
           {/* About */}
           <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'center', gap: 4, opacity: 0.5, paddingTop: 16, borderBottom: 'none', marginTop: 'auto' }}>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{APP_NAME} {APP_VERSION}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>POS &amp; Billing System</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Business OS, POS &amp; Billing System</div>
           </div>
         </div>
       </div>
@@ -1096,14 +1097,14 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
     let customerIdToLink = null;
     let customerNameToLink = null;
     let customerPhoneToLink = null;
-    
+
     if (customerName.trim() || customerPhone.trim()) {
       const allCustomers = await getCustomers() || []
       let customer = customerPhone.trim() ? allCustomers.find(c => c.phone === customerPhone.trim()) : null
       if (!customer && customerName.trim()) {
         customer = allCustomers.find(c => c.name.toLowerCase() === customerName.trim().toLowerCase())
       }
-      
+
       if (!customer) {
         customer = {
           customerId: 'cust-' + Date.now(),
@@ -1117,7 +1118,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
         customer.phone = customerPhone.trim()
         await saveCustomer(customer)
       }
-      
+
       customerIdToLink = customer.customerId;
       customerNameToLink = customer.name;
       customerPhoneToLink = customer.phone;
@@ -1158,7 +1159,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
       }
       await saveUdhaarEntry(udhaarEntry)
       await recalcUdhaarBalance(customerIdToLink)
-      
+
       if (existingUdhaar && existingUdhaar.customerId && existingUdhaar.customerId !== customerIdToLink) {
         await recalcUdhaarBalance(existingUdhaar.customerId)
       }
@@ -1232,7 +1233,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
     const n = customerName.trim().toLowerCase()
     const p = customerPhone.trim()
     if (!n && !p) return customersList.slice(0, 5)
-    
+
     return customersList.filter(c => {
       const matchName = n ? (c.name || '').toLowerCase().includes(n) : true;
       const matchPhone = p ? (c.phone || '').includes(p) : true;
@@ -1479,12 +1480,15 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                           {business.upiId ? (
                             <>
                               <div className="upi-qr-wrap">
-                                <img
-                                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ${APP_NAME}`)}`)}`}
-                                  alt="UPI QR Code"
-                                  className="upi-qr-img"
-                                  width={180} height={180}
-                                />
+                                  <QRCodeSVG
+                                    value={`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ${APP_NAME}`)}`}
+                                    size={180}
+                                    fgColor="#3730a3"
+                                    bgColor="#ffffff"
+                                    level="M"
+                                    marginSize={1}
+                                    className="upi-qr-img"
+                                  />
                                 {/* UPI logo overlay */}
                                 <div className="upi-qr-logo">
                                   <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
@@ -1529,67 +1533,67 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
 
                       {paymentMode === 'udhaar' && (
                         <div className="cash-calc-section" style={{ padding: '16px', background: 'linear-gradient(145deg, rgba(99,102,241,0.05) 0%, rgba(139,92,246,0.05) 100%)', border: '1px solid rgba(99,102,241,0.1)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                          <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', borderRadius: '8px', padding: '6px' }}>
-                            <I.Users s={16}/>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                            <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', borderRadius: '8px', padding: '6px' }}>
+                              <I.Users s={16} />
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Customer Details</div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Link customer for Udhaar or loyalty</div>
+                            </div>
                           </div>
-                          <div>
-                            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Customer Details</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Link customer for Udhaar or loyalty</div>
-                          </div>
-                        </div>
-                        
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden', transition: 'border-color 0.2s', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}>
-                            <span style={{ padding: '12px 0 12px 16px', color: '#6366f1', fontSize: '0.95rem', fontWeight: 600 }}>+91</span>
-                            <input 
-                              type="tel"
-                              placeholder="Phone Number (Required for Udhaar)" 
-                              value={customerPhone} 
-                              onChange={handlePhoneChange} 
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden', transition: 'border-color 0.2s', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}>
+                              <span style={{ padding: '12px 0 12px 16px', color: '#6366f1', fontSize: '0.95rem', fontWeight: 600 }}>+91</span>
+                              <input
+                                type="tel"
+                                placeholder="Phone Number (Required for Udhaar)"
+                                value={customerPhone}
+                                onChange={handlePhoneChange}
+                                onFocus={() => setCustomerFocus(true)}
+                                onBlur={() => setTimeout(() => setCustomerFocus(false), 200)}
+                                style={{ padding: '12px 16px 12px 8px', background: 'transparent', border: 'none', fontSize: '0.95rem', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
+                              />
+                              {customerPhone.length >= 10 && <div style={{ paddingRight: 16, color: '#10b981' }}><I.Check s={16} /></div>}
+                            </div>
+
+                            <input
+                              type="text"
+                              placeholder="Customer Name"
+                              value={customerName}
+                              onChange={e => setCustomerName(e.target.value)}
                               onFocus={() => setCustomerFocus(true)}
                               onBlur={() => setTimeout(() => setCustomerFocus(false), 200)}
-                              style={{ padding: '12px 16px 12px 8px', background: 'transparent', border: 'none', fontSize: '0.95rem', width: '100%', color: 'var(--text-primary)', outline: 'none' }}
+                              style={{ padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}
                             />
-                            {customerPhone.length >= 10 && <div style={{ paddingRight: 16, color: '#10b981' }}><I.Check s={16}/></div>}
+
+                            {customerFocus && filteredCusts.length > 0 && (
+                              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', marginTop: 8, zIndex: 100, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
+                                <div style={{ padding: '8px 12px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', background: 'var(--bg-surface-1)' }}>SUGGESTED CUSTOMERS</div>
+                                {filteredCusts.map(c => (
+                                  <div
+                                    key={c.customerId}
+                                    style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: 12 }}
+                                    onMouseDown={(e) => {
+                                      e.preventDefault() // prevent blur
+                                      setCustomerName(c.name || '')
+                                      setCustomerPhone(c.phone || '')
+                                      setCustomerFocus(false)
+                                    }}
+                                  >
+                                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6, #6366f1)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 600 }}>
+                                      {(c.name || 'C')[0].toUpperCase()}
+                                    </div>
+                                    <div>
+                                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{c.name || 'Unknown'}</div>
+                                      {c.phone && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>+91 {c.phone}</div>}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          
-                          <input 
-                            type="text" 
-                            placeholder="Customer Name" 
-                            value={customerName} 
-                            onChange={e => setCustomerName(e.target.value)} 
-                            onFocus={() => setCustomerFocus(true)}
-                            onBlur={() => setTimeout(() => setCustomerFocus(false), 200)}
-                            style={{ padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}
-                          />
-                          
-                          {customerFocus && filteredCusts.length > 0 && (
-                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', marginTop: 8, zIndex: 100, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
-                              <div style={{ padding: '8px 12px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', background: 'var(--bg-surface-1)' }}>SUGGESTED CUSTOMERS</div>
-                              {filteredCusts.map(c => (
-                                <div 
-                                  key={c.customerId} 
-                                  style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: 12 }}
-                                  onMouseDown={(e) => {
-                                    e.preventDefault() // prevent blur
-                                    setCustomerName(c.name || '')
-                                    setCustomerPhone(c.phone || '')
-                                    setCustomerFocus(false)
-                                  }}
-                                >
-                                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6, #6366f1)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 600 }}>
-                                    {(c.name || 'C')[0].toUpperCase()}
-                                  </div>
-                                  <div>
-                                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{c.name || 'Unknown'}</div>
-                                    {c.phone && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>+91 {c.phone}</div>}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
                         </div>
                       )}
 
@@ -1642,11 +1646,14 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                               {business.upiId ? (
                                 <>
                                   <div className="upi-qr-wrap" style={{ margin: '0 auto', boxShadow: 'none', border: '1px solid var(--border-color)', padding: 4 }}>
-                                    <img
-                                      src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&am=${total - splitCash}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ${APP_NAME}`)}`)}`}
-                                      alt="UPI QR Code"
+                                    <QRCodeSVG
+                                      value={`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&am=${total - splitCash}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ${APP_NAME}`)}`}
+                                      size={170}
+                                      fgColor="#3730a3"
+                                      bgColor="#ffffff"
+                                      level="M"
+                                      marginSize={1}
                                       className="upi-qr-img"
-                                      width={170} height={170}
                                     />
                                     <div className="upi-qr-logo">
                                       <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />

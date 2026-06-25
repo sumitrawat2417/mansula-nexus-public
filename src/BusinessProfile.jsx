@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useBackButton } from './useBackButton.js'
 import { dbGet, dbSet } from './db.js'
 import { APP_NAME } from './appInfo.js'
+import QRCode from 'qrcode'
+import { QRCodeSVG } from 'qrcode.react'
 
 import { Html5Qrcode } from 'html5-qrcode'
 
@@ -587,8 +589,11 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup, onboarding
       // ── QR code ──
       const qrSize = 288
       const qrX = W / 2 - qrSize / 2, qrY = cardY + 78
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&qzone=2&color=1e1b4b&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&cu=INR`)}`
-      const qrImg = new Image(); qrImg.crossOrigin = 'anonymous'
+      const qrUrl = await QRCode.toDataURL(
+        `upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&cu=INR`,
+        { width: 600, margin: 2, color: { dark: '#1e1b4b', light: '#ffffff' } }
+      )
+      const qrImg = new Image()
       await new Promise((res2, rej2) => { qrImg.onload = res2; qrImg.onerror = rej2; qrImg.src = qrUrl })
 
       ctx.save()
@@ -759,11 +764,14 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup, onboarding
             <div style={{ borderBottom: taxRateObj ? '1px solid var(--border-color)' : 'none', paddingBottom: taxRateObj ? 20 : 0, marginBottom: taxRateObj ? 8 : 0 }}>
               <div className="upi-qr-section" style={{ margin: '0 16px', border: '1px dashed var(--border-color)', background: 'var(--bg-subtle, rgba(0,0,0,0.02))' }}>
                 <div className="upi-qr-wrap">
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&qzone=1&color=3730a3&bgcolor=ffffff&data=${encodeURIComponent(`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&cu=INR`)}`}
-                    alt="UPI QR Code"
+                  <QRCodeSVG
+                    value={`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&cu=INR`}
+                    size={180}
+                    fgColor="#3730a3"
+                    bgColor="#ffffff"
+                    level="M"
+                    marginSize={1}
                     className="upi-qr-img"
-                    width={180} height={180}
                   />
                   <div className="upi-qr-logo">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
