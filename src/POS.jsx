@@ -1292,7 +1292,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
         <header className="app-header">
           <div className="header-brand" onClick={onExit} style={{ cursor: onExit ? 'pointer' : 'default' }}>
             <div className="header-brand-icon"><I.Logo /></div>
-            <span className="header-brand-name">ManSula <span>Nexus</span></span>
+            <span className="header-brand-name">ManSula <span>BOS</span></span>
           </div>
 
           {/* Current order ID pill (opens console on click) */}

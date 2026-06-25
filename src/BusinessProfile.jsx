@@ -663,7 +663,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup, onboarding
       ctx.fillText(APP_NAME, W / 2, fY + 24)
       ctx.font = '12px Arial, sans-serif'
       ctx.fillStyle = 'rgba(255,255,255,0.3)'
-      ctx.fillText('https://mansula-nexus.netlify.app/', W / 2, fY + 42)
+      ctx.fillText('https://mansula-bos.netlify.app/', W / 2, fY + 42)
 
       canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Canvas failed')), 'image/png')
     } catch (err) { reject(err) }
@@ -849,7 +849,7 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
     const blob = new Blob([json], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    const name = (business.name || 'mansula-nexus').replace(/\s+/g, '-').toLowerCase()
+    const name = (business.name || 'mansula-bos').replace(/\s+/g, '-').toLowerCase()
     a.href = url
     a.download = `${name}-backup-${new Date().toISOString().slice(0, 10)}.json`
     a.click()

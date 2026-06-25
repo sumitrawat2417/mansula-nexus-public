@@ -366,7 +366,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `MansulaNexus_FullBackup_${new Date().toISOString().split('T')[0]}.json`
+    a.download = `MansulaBOS_FullBackup_${new Date().toISOString().split('T')[0]}.json`
     a.click()
     URL.revokeObjectURL(url)
     showAlert('Backup exported successfully.', { type: 'success' })
@@ -1230,7 +1230,7 @@ export default function Home({
           </div>
           <div>
             <div className="hn-brand-main">ManSula</div>
-            <div className="hn-brand-sub">Nexus</div>
+            <div className="hn-brand-sub">BOS</div>
           </div>
         </div>
 

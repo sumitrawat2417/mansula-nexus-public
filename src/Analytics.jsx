@@ -1210,7 +1210,7 @@ function AIInsightsTab() {
     const count = parseInt(localStorage.getItem('mn-ai-interest') || '0') + 1
     localStorage.setItem('mn-ai-interest', String(count))
     showAlert(
-      "Noted! We'll let you know the moment Nexus AI drops — our team is actively building the machine learning models behind it.",
+      "Noted! We'll let you know the moment ManSula AI drops — our team is actively building the machine learning models behind it.",
       { title: 'You\'re on the list!', type: 'info', confirmText: 'Can\'t wait!' }
     )
   }
@@ -1235,7 +1235,7 @@ function AIInsightsTab() {
         {/* AI badge */}
         <div className="an-ai-badge">
           <Ic.Sparkles s={13} />
-          Powered by Nexus AI
+          Powered by ManSula AI
         </div>
 
         {/* Lock icon */}

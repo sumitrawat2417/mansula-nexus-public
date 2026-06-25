@@ -113,7 +113,7 @@ export default function Welcome({ onComplete }) {
         <div className="wel-text-wrap">
           <h1 className={`wel-title ${stage >= 2 ? 'show' : ''}`}>
             <span className="wel-word">ManSula</span>
-            <span className="wel-word wel-highlight">Nexus</span>
+            <span className="wel-word wel-highlight">BOS</span>
           </h1>
           
           <div className={`wel-subtitle-wrap ${stage >= 2 ? 'show' : ''}`}>
