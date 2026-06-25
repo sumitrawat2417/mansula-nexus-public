@@ -102,7 +102,7 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
     setIsSavingDate(true)
     const newTs = new Date(tempDate).getTime()
     const updated = { ...record, completedAt: newTs }
-    await updateOrderRecord(updated)
+    await updateOrderRecord(record.orderId, { completedAt: newTs })
     setIsSavingDate(false)
     setEditMode(false)
     if (onUpdateRecord) onUpdateRecord(updated)
