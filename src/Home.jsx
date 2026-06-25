@@ -6,12 +6,12 @@ import { APP_VERSION, APP_BUILD_DATE, WHATS_NEW, ORG, LEGAL_LAST_UPDATED } from 
 import { DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { PinPad, avatarGrad, initials } from './Staff.jsx'
+import { avatarGrad, initials } from './Staff.jsx'
 
 // ── Premium Feature Lock ──
 const CAN_REORDER_TOOLS = true
 
-function SortableToolCard({ tool, onLaunch, onboardingStep, setOnboardingStep, activeUser }) {
+function SortableToolCard({ tool, onLaunch, onboardingStep, setOnboardingStep }) {
   const isSpotlight = onboardingStep === 'spotlight-business' && tool.id === 'business'
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: tool.id })
   const style = {
@@ -21,8 +21,6 @@ function SortableToolCard({ tool, onLaunch, onboardingStep, setOnboardingStep, a
     zIndex: isDragging ? 99 : 'auto',
     position: 'relative'
   }
-
-  const isLocked = activeUser && activeUser.role !== 'owner' && !(activeUser.toolPerms || {})[tool.id]
 
   return (
     <div
@@ -62,13 +60,8 @@ function SortableToolCard({ tool, onLaunch, onboardingStep, setOnboardingStep, a
       </div>
       <div className="hn-tool-name">{tool.name}</div>
       <div className="hn-tool-desc">{tool.desc}</div>
-      {isLocked && (
-        <div style={{ position: 'absolute', top: 8, right: 8, color: 'rgba(255,255,255,0.7)', background: 'var(--bg-surface)', borderRadius: '50%', padding: '4px', display: 'flex' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-        </div>
-      )}
       {tool.active
-        ? <span className="hn-tool-open-pill">{isLocked ? 'Locked' : 'Open'} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg></span>
+        ? <span className="hn-tool-open-pill">Open <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg></span>
         : <span className="hn-soon-pill">Soon</span>
       }
     </div>
@@ -1130,15 +1123,12 @@ export default function Home({
   onLaunch,
   theme, onToggleTheme,
   currency, onCurrency, currencies,
-  onboardingStep, setOnboardingStep,
-  activeUser, staffMembers, onSetActiveUser
+  onboardingStep, setOnboardingStep
 }) {
   const [time, setTime] = useState(new Date())
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [businessName, setBusinessName] = useState('')
   const { alert: showAlert, confirm: showConfirm } = useAlert()
-  const [showSwitchProfile, setShowSwitchProfile] = useState(false)
-  const [pinTarget, setPinTarget] = useState(null)
 
   const [toolsOrder, setToolsOrder] = useState([])
   const [orderedTools, setOrderedTools] = useState(TOOLS)
@@ -1209,36 +1199,7 @@ export default function Home({
   }
 
   const handleLaunch = (toolId) => {
-    if (activeUser && activeUser.role !== 'owner') {
-      const perms = activeUser.toolPerms || {}
-      if (!perms[toolId]) {
-        showAlert('Access Denied: You do not have permission to use this tool.', { type: 'danger' })
-        return
-      }
-    }
     onLaunch(toolId)
-  }
-
-  const handlePinSuccess = (enteredPin) => {
-    if (enteredPin !== pinTarget.pin) {
-      setTimeout(() => {
-        setPinTarget(null)
-        showAlert('Incorrect PIN. Please try again.', { type: 'danger' })
-      }, 600)
-      return
-    }
-    onSetActiveUser(pinTarget.memberId)
-    setPinTarget(null)
-    setShowSwitchProfile(false)
-  }
-
-  const handleSelectProfile = (member) => {
-    if (member.pin) {
-      setPinTarget(member)
-    } else {
-      onSetActiveUser(member.memberId)
-      setShowSwitchProfile(false)
-    }
   }
 
   return (
@@ -1273,27 +1234,7 @@ export default function Home({
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          {staffMembers?.length > 0 && (
-            <div 
-              onClick={() => setShowSwitchProfile(true)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
-                background: 'var(--bg-surface-2)', padding: '4px 12px 4px 4px',
-                borderRadius: '30px', transition: 'background 0.2s', border: '1px solid var(--border-color)'
-              }}
-              className="hn-active-profile-btn"
-            >
-              <div style={{ width: 28, height: 28, borderRadius: '50%', background: activeUser ? avatarGrad(activeUser.name) : '#555', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700 }}>
-                {activeUser ? initials(activeUser.name) : '?'}
-              </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                {activeUser ? activeUser.name.split(' ')[0] : 'Profile'}
-              </div>
-            </div>
-          )}
-
-          <button className="hn-settings-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>          <button className="hn-settings-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
             <Icon.Settings />
           </button>
         </div>
@@ -1355,7 +1296,6 @@ export default function Home({
                     onLaunch={handleLaunch}
                     onboardingStep={onboardingStep}
                     setOnboardingStep={setOnboardingStep}
-                    activeUser={activeUser}
                   />
                 ))}
               </SortableContext>
@@ -1376,54 +1316,6 @@ export default function Home({
           <div className="hn-footer-text">ManSula Nexus · v1.6.0-alpha</div>
         </div>
       </div>
-
-      {/* Switch Profile Modal */}
-      {showSwitchProfile && (
-        <div className="stf-modal-overlay" onClick={e => e.target === e.currentTarget && setShowSwitchProfile(false)}>
-          <div className="stf-modal" style={{ maxWidth: 360 }}>
-            <div className="stf-modal-header">
-              <h3 className="stf-modal-title">Switch User</h3>
-              <button className="stf-modal-close" onClick={() => setShowSwitchProfile(false)}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-            <div className="stf-modal-body" style={{ paddingTop: 10 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {staffMembers.map(m => (
-                  <div 
-                    key={m.memberId} 
-                    onClick={() => handleSelectProfile(m)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
-                      background: activeUser?.memberId === m.memberId ? 'var(--brand-primary-light)' : 'var(--bg-surface-2)',
-                      border: `1px solid ${activeUser?.memberId === m.memberId ? 'var(--brand-primary)' : 'var(--border-color)'}`,
-                      borderRadius: '12px', cursor: 'pointer'
-                    }}
-                  >
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: avatarGrad(m.name), color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', fontWeight: 700 }}>
-                      {initials(m.name)}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{m.name}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{m.role === 'owner' ? '👑 Owner' : m.role}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* PIN Pad */}
-      {pinTarget && (
-        <PinPad
-          title={`Log in as ${pinTarget.name}`}
-          subtitle="Enter your 4-digit PIN"
-          onSuccess={handlePinSuccess}
-          onCancel={() => setPinTarget(null)}
-        />
-      )}
     </div>
   )
 }
