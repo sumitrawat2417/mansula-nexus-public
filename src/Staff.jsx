@@ -159,7 +159,6 @@ function AddEditStaffModal({ member, onSave, onClose }) {
     name: member?.name || '',
     role: member?.role || 'cashier',
     phone: member?.phone || '',
-    hourlyRate: member?.hourlyRate || '',
   })
   const [pin, setPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
@@ -204,7 +203,6 @@ function AddEditStaffModal({ member, onSave, onClose }) {
       name: form.name.trim(),
       role: form.role,
       phone: form.phone.trim(),
-      hourlyRate: form.role === 'owner' ? 0 : (parseFloat(form.hourlyRate) || 0),
       pin: needsPin ? (pin || member?.pin || '') : '',
       toolPerms: perms,
       createdAt: member?.createdAt || Date.now(),
@@ -264,14 +262,6 @@ function AddEditStaffModal({ member, onSave, onClose }) {
             <input className="stf-input" placeholder="e.g. 9876543210" value={form.phone}
               onChange={e => set('phone', e.target.value)} type="tel" />
           </div>
-
-          {!isOwner && (
-            <div className="stf-form-group">
-              <label className="stf-label">Hourly Rate (₹)</label>
-              <input className="stf-input" placeholder="e.g. 60" value={form.hourlyRate}
-                onChange={e => set('hourlyRate', e.target.value)} type="number" min="0" />
-            </div>
-          )}
 
           {/* ── Tool Access Permissions ── */}
           <div className="stf-perms-section">
@@ -432,20 +422,12 @@ function ShiftHistoryModal({ member, shifts, onClose }) {
     .filter(s => s.memberId === member.memberId)
     .sort((a, b) => b.clockIn - a.clockIn)
 
-  const totalMs = memberShifts
-    .filter(s => s.clockOut)
-    .reduce((sum, s) => sum + (s.clockOut - s.clockIn), 0)
-
-  const totalPay = member.hourlyRate
-    ? (totalMs / 3600000) * member.hourlyRate
-    : null
-
   return (
     <div className="stf-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="stf-modal stf-modal-wide">
         <div className="stf-modal-handle" />
         <div className="stf-modal-header">
-          <h3 className="stf-modal-title">Shift History</h3>
+          <h3 className="stf-modal-title">Attendance History</h3>
           <button className="stf-modal-close" onClick={onClose}><Ic.Close /></button>
         </div>
 
@@ -459,18 +441,8 @@ function ShiftHistoryModal({ member, shifts, onClose }) {
           <div className="stf-sh-hero-stats">
             <div className="stf-sh-stat">
               <div className="stf-sh-stat-v">{memberShifts.length}</div>
-              <div className="stf-sh-stat-l">Shifts</div>
+              <div className="stf-sh-stat-l">Attendance Days</div>
             </div>
-            <div className="stf-sh-stat">
-              <div className="stf-sh-stat-v">{fmtDuration(totalMs)}</div>
-              <div className="stf-sh-stat-l">Total Hours</div>
-            </div>
-            {totalPay !== null && (
-              <div className="stf-sh-stat">
-                <div className="stf-sh-stat-v">₹{Math.round(totalPay)}</div>
-                <div className="stf-sh-stat-l">Est. Pay</div>
-              </div>
-            )}
           </div>
         </div>
 
@@ -478,41 +450,27 @@ function ShiftHistoryModal({ member, shifts, onClose }) {
           <AttendanceCalendar memberShifts={memberShifts} />
 
           <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
-            All Shift Records
+            All Attendance Records
           </div>
 
           {memberShifts.length === 0 ? (
             <div className="stf-empty">
-              <Ic.Clock />
-              <div>No shifts recorded yet</div>
+              <Ic.Check />
+              <div>No attendance recorded yet</div>
             </div>
           ) : (
             <div className="stf-shift-list">
               {memberShifts.map(s => {
-                const dur = s.clockOut ? s.clockOut - s.clockIn : Date.now() - s.clockIn
-                const isOpen = !s.clockOut
-                const isAbandoned = isOpen && dur > MAX_ABANDONED_SHIFT_HOURS * 3600000
                 return (
-                  <div key={s.shiftId} className={`stf-shift-item ${isOpen ? 'open' : ''} ${isAbandoned ? 'abandoned' : ''}`}>
+                  <div key={s.shiftId} className={`stf-shift-item open`}>
                     <div className="stf-shift-left">
-                      <div className={`stf-shift-dot ${isOpen ? 'live' : ''}`} />
+                      <div className={`stf-shift-dot live`} />
                       <div>
                         <div className="stf-shift-date">{fmtDate(s.clockIn)}</div>
                         <div className="stf-shift-times">
-                          <span>{fmtTime(s.clockIn)}</span>
-                          <span className="stf-shift-arrow">→</span>
-                          <span>{s.clockOut ? fmtTime(s.clockOut) : <span className="stf-shift-live">Live</span>}</span>
+                          <span>Marked Present at {fmtTime(s.clockIn)}</span>
                         </div>
-                        {isAbandoned && (
-                          <div className="stf-shift-warn"><Ic.Warn /> Auto-capped at {MAX_ABANDONED_SHIFT_HOURS}h</div>
-                        )}
                       </div>
-                    </div>
-                    <div className="stf-shift-right">
-                      <div className="stf-shift-dur">{fmtDuration(dur)}</div>
-                      {member.hourlyRate > 0 && s.clockOut && (
-                        <div className="stf-shift-pay">₹{Math.round((dur / 3600000) * member.hourlyRate)}</div>
-                      )}
                     </div>
                   </div>
                 )
@@ -526,19 +484,10 @@ function ShiftHistoryModal({ member, shifts, onClose }) {
 }
 
 // ── Staff Member Card ──
-// Cards are read-only for navigation (clock-in/out). Edit is ONLY in the Manage section below.
+// Cards are read-only for navigation (mark present). Edit is ONLY in the Manage section below.
 function StaffCard({ member, activeShift, onSelect, onHistory }) {
   const role = ROLES.find(r => r.key === member.role)
   const isOwner = member.role === 'owner'
-  const [now, setNow] = useState(Date.now())
-
-  useEffect(() => {
-    if (!activeShift) return
-    const t = setInterval(() => setNow(Date.now()), 30000)
-    return () => clearInterval(t)
-  }, [activeShift])
-
-  const liveDur = activeShift ? now - activeShift.clockIn : null
 
   const handleCardClick = () => {
     if (isOwner) return // Owners do not clock in/out
@@ -571,22 +520,22 @@ function StaffCard({ member, activeShift, onSelect, onHistory }) {
             {role?.label}
           </div>
           {isOwner ? (
-            <div className="stf-card-owner-label">Full Access · No Shift Tracking</div>
+            <div className="stf-card-owner-label">Full Access · No Attendance Tracking</div>
           ) : activeShift ? (
             <div className="stf-card-shift-live">
               <span className="stf-card-live-dot" />
-              Clocked in {fmtTime(activeShift.clockIn)} · {fmtDuration(liveDur)}
+              Marked Present Today
             </div>
           ) : (
-            <div className="stf-card-off-label">Tap to Clock In</div>
+            <div className="stf-card-off-label">Tap to Mark Present</div>
           )}
         </div>
 
         {/* Only history button — no edit on the card */}
         {!isOwner && (
           <div className="stf-card-actions" onClick={e => e.stopPropagation()}>
-            <button className="stf-card-action-btn" onClick={() => onHistory(member)} title="Shift History">
-              <Ic.Clock />
+            <button className="stf-card-action-btn" onClick={() => onHistory(member)} title="Attendance History">
+              <Ic.Check />
             </button>
           </div>
         )}
@@ -597,21 +546,16 @@ function StaffCard({ member, activeShift, onSelect, onHistory }) {
 
 // ── Export Shifts Data ──
 function exportShiftsCsv(members, shifts) {
-  const headers = ['Name', 'Role', 'Clock In', 'Clock Out', 'Duration (h)', 'Est. Pay (₹)']
+  const headers = ['Name', 'Role', 'Date', 'Time Marked']
   const rows = shifts
-    .filter(s => s.clockOut)
     .sort((a, b) => b.clockIn - a.clockIn)
     .map(s => {
       const m = members.find(x => x.memberId === s.memberId)
-      const dur = ((s.clockOut - s.clockIn) / 3600000).toFixed(2)
-      const pay = m?.hourlyRate ? (parseFloat(dur) * m.hourlyRate).toFixed(0) : ''
       return [
         m?.name || 'Unknown',
         ROLES.find(r => r.key === m?.role)?.label || '',
-        new Date(s.clockIn).toLocaleString('en-IN'),
-        new Date(s.clockOut).toLocaleString('en-IN'),
-        dur,
-        pay,
+        new Date(s.clockIn).toLocaleDateString('en-IN'),
+        new Date(s.clockIn).toLocaleTimeString('en-IN'),
       ]
     })
 
@@ -651,25 +595,9 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
 
   useEffect(() => { loadData() }, [loadData])
 
-  // Auto-cap abandoned shifts
-  useEffect(() => {
-    const capAbandoned = async () => {
-      const raw = await dbGet(KEY_SHIFTS)
-      if (!Array.isArray(raw)) return
-      let changed = false
-      const updated = raw.map(s => {
-        if (!s.clockOut && (Date.now() - s.clockIn) > MAX_ABANDONED_SHIFT_HOURS * 3600000) {
-          changed = true
-          return { ...s, clockOut: s.clockIn + MAX_ABANDONED_SHIFT_HOURS * 3600000, autoCapped: true }
-        }
-        return s
-      })
-      if (changed) { await dbSet(KEY_SHIFTS, updated); setShifts(updated) }
-    }
-    capAbandoned()
-  }, [])
+  useEffect(() => { loadData() }, [loadData])
 
-  const getActiveShift = (memberId) => shifts.find(s => s.memberId === memberId && !s.clockOut) || null
+  const getTodayAttendance = (memberId) => shifts.find(s => s.memberId === memberId && new Date(s.clockIn).toDateString() === new Date().toDateString()) || null
 
   const handleSaveMember = async (record) => {
     const updated = members.some(m => m.memberId === record.memberId)
@@ -684,7 +612,7 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
 
   const handleDeleteMember = async (member) => {
     const ok = await showConfirm(
-      `Delete "${member.name}" and all their shift records? This cannot be undone.`,
+      `Delete "${member.name}" and all their attendance records? This cannot be undone.`,
       { title: 'Delete Staff Member', type: 'danger', confirmText: 'Delete', confirmWord: 'DELETE' }
     )
     if (!ok) return
@@ -697,40 +625,37 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
     if (onStaffChanged) onStaffChanged()
   }
 
-  const toggleShift = async (member, action) => {
-    if (action === 'clockin') {
-      const newShift = { shiftId: shiftId(), memberId: member.memberId, clockIn: Date.now(), clockOut: null, autoCapped: false }
+  const toggleAttendance = async (member) => {
+    const active = getTodayAttendance(member.memberId)
+    if (active) {
+      // Unmark attendance
+      const updatedShifts = shifts.filter(s => s.shiftId !== active.shiftId)
+      await dbSet(KEY_SHIFTS, updatedShifts)
+      setShifts(updatedShifts)
+      showAlert(`${member.name}'s attendance removed.`, { type: 'success' })
+    } else {
+      // Mark attendance
+      const newShift = { shiftId: shiftId(), memberId: member.memberId, clockIn: Date.now() }
       const updatedShifts = [...shifts, newShift]
       await dbSet(KEY_SHIFTS, updatedShifts)
       setShifts(updatedShifts)
-      showAlert(`${member.name} clocked in successfully!`, { type: 'success' })
-    } else if (action === 'clockout') {
-      const active = getActiveShift(member.memberId)
-      if (active) {
-        const updatedShifts = shifts.map(s => s.shiftId === active.shiftId ? { ...s, clockOut: Date.now() } : s)
-        await dbSet(KEY_SHIFTS, updatedShifts)
-        setShifts(updatedShifts)
-        const dur = Date.now() - active.clockIn
-        showAlert(`${member.name} clocked out. Shift: ${fmtDuration(dur)}`, { type: 'success' })
-      }
+      showAlert(`${member.name} marked present!`, { type: 'success' })
     }
   }
 
-  // Only non-owners can clock in/out
+  // Only non-owners can mark attendance
   const handleSelectMember = (member) => {
     if (member.role === 'owner') return
-    const active = getActiveShift(member.memberId)
-    const action = active ? 'clockout' : 'clockin'
 
     if (member.pin) {
-      setPinTarget({ member, action })
+      setPinTarget({ member, action: 'toggle' })
     } else {
-      toggleShift(member, action)
+      toggleAttendance(member)
     }
   }
 
   const handlePinSuccess = async (enteredPin) => {
-    const { member, action } = pinTarget
+    const { member } = pinTarget
     if (enteredPin !== member.pin) {
       setTimeout(() => {
         setPinTarget(null)
@@ -739,7 +664,7 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
       return
     }
     
-    await toggleShift(member, action)
+    await toggleAttendance(member)
     setPinTarget(null)
   }
 
@@ -747,9 +672,7 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
 
   // If a Cashier accesses Staff tool, they get a personalized "My Attendance" screen
   if (!isManagerOrOwner) {
-    const myShift = getActiveShift(activeUser.memberId)
-    const myTodayShifts = shifts.filter(s => s.memberId === activeUser.memberId && new Date(s.clockIn).toDateString() === new Date().toDateString())
-    const myTodayMs = myTodayShifts.filter(s => s.clockOut).reduce((sum, s) => sum + (s.clockOut - s.clockIn), 0) + (myShift ? (Date.now() - myShift.clockIn) : 0)
+    const isPresent = getTodayAttendance(activeUser.memberId)
 
     return (
       <div className="stf-root">
@@ -768,13 +691,14 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
           </div>
 
           <div style={{ background: 'var(--bg-surface-2)', border: '1px solid var(--border-color)', padding: '24px', borderRadius: '20px', width: '100%', maxWidth: 400, textAlign: 'center' }}>
-            <h3 style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Hours Today</h3>
-            <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{fmtDuration(myTodayMs)}</div>
-            {myShift && <div style={{ marginTop: '12px', color: 'var(--success-color)', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><div className="stf-shift-live-dot" /> Currently on shift</div>}
+            <h3 style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Today's Status</h3>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: isPresent ? 'var(--success-color)' : 'var(--text-muted)' }}>
+              {isPresent ? 'Present' : 'Not Marked'}
+            </div>
           </div>
 
           <button 
-            onClick={() => toggleShift(activeUser, myShift ? 'clockout' : 'clockin')}
+            onClick={() => toggleAttendance(activeUser)}
             style={{
               padding: '18px 32px',
               borderRadius: '30px',
@@ -783,17 +707,17 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
               fontWeight: 700,
               cursor: 'pointer',
               color: 'white',
-              background: myShift ? 'var(--danger-color)' : 'var(--success-color)',
+              background: isPresent ? 'var(--danger-color)' : 'var(--success-color)',
               width: '100%',
               maxWidth: 400,
-              boxShadow: myShift ? '0 4px 12px rgba(239, 68, 68, 0.3)' : '0 4px 12px rgba(16, 185, 129, 0.3)',
+              boxShadow: isPresent ? '0 4px 12px rgba(239, 68, 68, 0.3)' : '0 4px 12px rgba(16, 185, 129, 0.3)',
               transition: 'transform 0.1s, opacity 0.2s'
             }}
             onPointerDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
             onPointerUp={e => e.currentTarget.style.transform = 'scale(1)'}
             onPointerLeave={e => e.currentTarget.style.transform = 'scale(1)'}
           >
-            {myShift ? 'Clock Out' : 'Clock In'}
+            {isPresent ? 'Undo Attendance' : 'Mark Present'}
           </button>
         </div>
       </div>
@@ -802,12 +726,7 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
 
   // Stats — owners excluded from shift stats
   const shiftableMembers = members.filter(m => m.role !== 'owner')
-  const activeCount = shiftableMembers.filter(m => getActiveShift(m.memberId)).length
-  const todayShifts = shifts.filter(s => {
-    const today = new Date()
-    return new Date(s.clockIn).toDateString() === today.toDateString()
-  })
-  const todayMs = todayShifts.filter(s => s.clockOut).reduce((sum, s) => sum + (s.clockOut - s.clockIn), 0)
+  const presentCount = shiftableMembers.filter(m => getTodayAttendance(m.memberId)).length
 
   if (loading) {
     return (
@@ -839,16 +758,8 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
           <div className="stf-stat-pill-l">Members</div>
         </div>
         <div className="stf-stat-pill stf-stat-pill--green">
-          <div className="stf-stat-pill-v">{activeCount}</div>
-          <div className="stf-stat-pill-l">On Shift</div>
-        </div>
-        <div className="stf-stat-pill">
-          <div className="stf-stat-pill-v">{todayShifts.length}</div>
-          <div className="stf-stat-pill-l">Today's Shifts</div>
-        </div>
-        <div className="stf-stat-pill">
-          <div className="stf-stat-pill-v">{fmtDuration(todayMs)}</div>
-          <div className="stf-stat-pill-l">Hours Today</div>
+          <div className="stf-stat-pill-v">{presentCount}</div>
+          <div className="stf-stat-pill-l">Present Today</div>
         </div>
       </div>
 
@@ -896,24 +807,24 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
                   </>
                 )}
 
-                {/* Staff on shift */}
-                {shiftableMembers.filter(m => getActiveShift(m.memberId)).length > 0 && (
+                {/* Staff Present Today */}
+                {shiftableMembers.filter(m => getTodayAttendance(m.memberId)).length > 0 && (
                   <>
                     <div className="stf-section-label" style={{ marginTop: 14 }}>
-                      <span className="stf-live-pulse" /> On Shift Now
+                      <span className="stf-live-pulse" /> Present Today
                     </div>
-                    {shiftableMembers.filter(m => getActiveShift(m.memberId)).map(m => (
-                      <StaffCard key={m.memberId} member={m} activeShift={getActiveShift(m.memberId)}
+                    {shiftableMembers.filter(m => getTodayAttendance(m.memberId)).map(m => (
+                      <StaffCard key={m.memberId} member={m} activeShift={getTodayAttendance(m.memberId)}
                         onSelect={handleSelectMember} onHistory={setHistoryMember} />
                     ))}
                   </>
                 )}
 
-                {/* Staff off shift */}
-                {shiftableMembers.filter(m => !getActiveShift(m.memberId)).length > 0 && (
+                {/* Staff Not Marked */}
+                {shiftableMembers.filter(m => !getTodayAttendance(m.memberId)).length > 0 && (
                   <>
-                    <div className="stf-section-label" style={{ marginTop: 14 }}>Off Shift</div>
-                    {shiftableMembers.filter(m => !getActiveShift(m.memberId)).map(m => (
+                    <div className="stf-section-label" style={{ marginTop: 14 }}>Not Marked</div>
+                    {shiftableMembers.filter(m => !getTodayAttendance(m.memberId)).map(m => (
                       <StaffCard key={m.memberId} member={m} activeShift={null}
                         onSelect={handleSelectMember} onHistory={setHistoryMember} />
                     ))}
@@ -928,8 +839,8 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
         {tab === 'shifts' && (
           <div className="stf-section">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <div className="stf-section-label" style={{ margin: 0 }}>All Shift Records</div>
-              {shifts.filter(s => s.clockOut).length > 0 && (
+              <div className="stf-section-label" style={{ margin: 0 }}>All Attendance Records</div>
+              {shifts.length > 0 && (
                 <button className="stf-export-btn" onClick={() => exportShiftsCsv(members, shifts)}>
                   <Ic.Download /> Export CSV
                 </button>
@@ -938,31 +849,28 @@ export default function Staff({ onClose, activeUser, onStaffChanged }) {
 
             {shifts.length === 0 ? (
               <div className="stf-empty-state">
-                <div className="stf-empty-icon"><Ic.Clock /></div>
-                <div className="stf-empty-title">No Shifts Yet</div>
-                <div className="stf-empty-sub">Shift logs appear after staff clock in for the first time.</div>
+                <div className="stf-empty-icon"><Ic.Check /></div>
+                <div className="stf-empty-title">No Attendance Yet</div>
+                <div className="stf-empty-sub">Attendance records appear after staff are marked present.</div>
               </div>
             ) : (
               <div className="stf-shift-log">
                 {[...shifts].sort((a, b) => b.clockIn - a.clockIn).map(s => {
                   const m = members.find(x => x.memberId === s.memberId)
-                  const dur = s.clockOut ? s.clockOut - s.clockIn : Date.now() - s.clockIn
-                  const isOpen = !s.clockOut
                   return (
-                    <div key={s.shiftId} className={`stf-log-row ${isOpen ? 'open' : ''}`}>
+                    <div key={s.shiftId} className={`stf-log-row open`}>
                       <div className="stf-log-ava" style={{ background: m ? avatarGrad(m.name) : '#ccc' }}>
                         {initials(m?.name || '?')}
                       </div>
                       <div className="stf-log-info">
                         <div className="stf-log-name">{m?.name || 'Unknown'}</div>
-                        <div className="stf-log-date">{fmtDateTime(s.clockIn)} {s.clockOut ? `→ ${fmtTime(s.clockOut)}` : ''}</div>
-                        {s.autoCapped && <div className="stf-log-cap"><Ic.Warn /> Auto-capped</div>}
+                        <div className="stf-log-date">{fmtDate(s.clockIn)}</div>
                       </div>
-                      <div className="stf-log-right">
-                        {isOpen ? <span className="stf-log-live">Live</span> : <div className="stf-log-dur">{fmtDuration(dur)}</div>}
-                        {m?.hourlyRate > 0 && s.clockOut && (
-                          <div className="stf-log-pay">₹{Math.round((dur / 3600000) * m.hourlyRate)}</div>
-                        )}
+                      <div className="stf-log-right" style={{ textAlign: 'right' }}>
+                        <span className="stf-log-live" style={{ background: 'var(--success-color)' }}>Present</span>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                          {fmtTime(s.clockIn)}
+                        </div>
                       </div>
                     </div>
                   )
