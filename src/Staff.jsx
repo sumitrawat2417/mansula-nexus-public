@@ -359,6 +359,72 @@ function AddEditStaffModal({ member, onSave, onClose }) {
   )
 }
 
+const calStyles = {
+  container: { background: 'var(--bg-surface-2)', borderRadius: 16, padding: '16px 20px', marginBottom: 20, border: '1px solid var(--border-color)' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  nav: { background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', padding: 8, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  title: { fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-primary)' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px 4px', textAlign: 'center' },
+  weekday: { fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase' },
+  day: { height: 36, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', position: 'relative', fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600, margin: '0 auto', width: 36 },
+  dayEmpty: { visibility: 'hidden' },
+  dayToday: { background: 'var(--brand-primary)', color: 'white', boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)' },
+  dayShift: { border: '2px solid var(--success-color)', color: 'var(--text-primary)' },
+  dot: { width: 4, height: 4, background: 'var(--success-color)', borderRadius: '50%', position: 'absolute', bottom: 4 }
+}
+
+function AttendanceCalendar({ memberShifts }) {
+  const [currentMonth, setCurrentMonth] = useState(() => { const d = new Date(); d.setDate(1); return d })
+  const year = currentMonth.getFullYear()
+  const month = currentMonth.getMonth()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const firstDay = new Date(year, month, 1).getDay()
+  const today = new Date()
+
+  const shiftMap = {}
+  memberShifts.forEach(s => {
+    const dStr = new Date(s.clockIn).toDateString()
+    if (!shiftMap[dStr]) shiftMap[dStr] = []
+    shiftMap[dStr].push(s)
+  })
+
+  const days = []
+  for (let i = 0; i < firstDay; i++) days.push(null)
+  for (let i = 1; i <= daysInMonth; i++) days.push(new Date(year, month, i))
+
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+  return (
+    <div style={calStyles.container}>
+      <div style={calStyles.header}>
+        <button style={calStyles.nav} onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}><Ic.Back /></button>
+        <div style={calStyles.title}>{monthNames[month]} {year}</div>
+        <button style={{...calStyles.nav, transform: 'rotate(180deg)'}} onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}><Ic.Back /></button>
+      </div>
+      <div style={calStyles.grid}>
+        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => <div key={d} style={calStyles.weekday}>{d}</div>)}
+      </div>
+      <div style={calStyles.grid}>
+        {days.map((d, i) => {
+          if (!d) return <div key={`empty-${i}`} style={{...calStyles.day, ...calStyles.dayEmpty}} />
+          const isToday = d.toDateString() === today.toDateString()
+          const hasShift = !!shiftMap[d.toDateString()]
+          let style = { ...calStyles.day }
+          if (isToday) style = { ...style, ...calStyles.dayToday }
+          if (hasShift && !isToday) style = { ...style, ...calStyles.dayShift }
+          
+          return (
+            <div key={i} style={style}>
+              {d.getDate()}
+              {hasShift && !isToday && <div style={calStyles.dot} />}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── Shift History Modal ──
 function ShiftHistoryModal({ member, shifts, onClose }) {
   useBackButton(onClose)
@@ -408,7 +474,13 @@ function ShiftHistoryModal({ member, shifts, onClose }) {
           </div>
         </div>
 
-        <div className="stf-modal-body" style={{ paddingTop: 8 }}>
+        <div className="stf-modal-body" style={{ paddingTop: 16 }}>
+          <AttendanceCalendar memberShifts={memberShifts} />
+
+          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
+            All Shift Records
+          </div>
+
           {memberShifts.length === 0 ? (
             <div className="stf-empty">
               <Ic.Clock />
