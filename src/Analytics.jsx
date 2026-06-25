@@ -24,6 +24,7 @@ const Ic = {
   Bell: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>,
   Sparkles: ({ s = 20 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" /></svg>,
   Clock: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
+  ChevronDown: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>,
   Target: ({ s = 14 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>,
   Calend: ({ s = 15 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>,
   Trophy: ({ s = 16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>,
@@ -158,10 +159,15 @@ function computeAnalytics(orders, purchases = []) {
     totalRevenue += total
 
     for (const item of (order.items || [])) {
-      const itemName = item.name + (item.variantLabel ? ` (${item.variantLabel})` : '')
-      if (!itemMap[itemName]) itemMap[itemName] = { qty: 0, revenue: 0, emoji: item.emoji || '🍽️' }
-      itemMap[itemName].qty += item.qty || 1
-      itemMap[itemName].revenue += (item.price || 0) * (item.qty || 1)
+      if (!itemMap[item.name]) itemMap[item.name] = { qty: 0, revenue: 0, emoji: item.emoji || '🍽️', variants: {} }
+      itemMap[item.name].qty += item.qty || 1
+      itemMap[item.name].revenue += (item.price || 0) * (item.qty || 1)
+      
+      if (item.variantLabel) {
+        if (!itemMap[item.name].variants[item.variantLabel]) itemMap[item.name].variants[item.variantLabel] = { qty: 0, revenue: 0 }
+        itemMap[item.name].variants[item.variantLabel].qty += item.qty || 1
+        itemMap[item.name].variants[item.variantLabel].revenue += (item.price || 0) * (item.qty || 1)
+      }
     }
   }
 
@@ -550,6 +556,7 @@ function BarChart({ data, color = BRAND, formatValue, barLabel, maxBars = 24, fo
 
 // ─── HorizontalBarChart ───────────────────────────────────────────────────────
 function HorizontalBarChart({ data, color = BRAND, formatValue }) {
+  const [expandedRow, setExpandedRow] = useState(null)
   const fmtV = formatValue || ((v) => fmtCur(v))
   if (!data || data.length === 0) return <div className="an-chart-empty"><span>No items sold</span></div>
   const maxV = Math.max(...data.map(d => d.value), 1)
@@ -559,24 +566,44 @@ function HorizontalBarChart({ data, color = BRAND, formatValue }) {
       {data.map((d, i) => {
         const pct = (d.value / maxV) * 100
         const delay = i * 0.04
+        const hasVariants = d.variants && Object.keys(d.variants).length > 0
+        const isExpanded = expandedRow === i
         return (
-          <div key={i} className="an-hbar-row">
-            <div className="an-hbar-label" title={d.name}>
-              {d.emoji ? <span style={{ marginRight: 4 }}>{d.emoji}</span> : null}
-              <span className="an-hbar-name">{d.name}</span>
+          <div key={i} className="an-hbar-row-wrap" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
+            <div className="an-hbar-row" style={{ cursor: hasVariants ? 'pointer' : 'default', marginBottom: 0 }} onClick={() => hasVariants && setExpandedRow(isExpanded ? null : i)}>
+              <div className="an-hbar-label" title={d.name} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {d.emoji ? <span>{d.emoji}</span> : null}
+                <span className="an-hbar-name">{d.name}</span>
+                {hasVariants && (
+                   <span style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', display: 'flex', color: 'var(--text-muted)' }}><Ic.ChevronDown s={14} /></span>
+                )}
+              </div>
+              <div className="an-hbar-track">
+                <div
+                  className="an-hbar-fill"
+                  style={{
+                    width: `${pct}%`,
+                    background: color,
+                    animationDelay: `${delay}s`,
+                    opacity: 0.85 + (i === 0 ? 0.15 : 0)
+                  }}
+                />
+              </div>
+              <div className="an-hbar-value">{fmtV(d.value)}</div>
             </div>
-            <div className="an-hbar-track">
-              <div
-                className="an-hbar-fill"
-                style={{
-                  width: `${pct}%`,
-                  background: color,
-                  animationDelay: `${delay}s`,
-                  opacity: 0.85 + (i === 0 ? 0.15 : 0)
-                }}
-              />
-            </div>
-            <div className="an-hbar-value">{fmtV(d.value)}</div>
+            {isExpanded && hasVariants && (
+              <div className="an-hbar-variants" style={{ paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                {Object.entries(d.variants).sort((a,b) => (d.viewType === 'revenue' ? b[1].revenue - a[1].revenue : b[1].qty - a[1].qty)).map(([vLabel, vData], vi) => {
+                  const val = d.viewType === 'revenue' ? vData.revenue : vData.qty
+                  return (
+                    <div key={vi} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>{vLabel}</span>
+                      <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{fmtV(val)}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         )
       })}
@@ -1003,8 +1030,8 @@ function ProductsTab({ stats, currency }) {
   const [view, setView] = useState('revenue')
 
   const data = view === 'revenue'
-    ? stats.topItemsByRevenue.map(i => ({ ...i, value: i.revenue }))
-    : stats.topItemsByQty.map(i => ({ ...i, value: i.qty }))
+    ? stats.topItemsByRevenue.map(i => ({ ...i, value: i.revenue, viewType: 'revenue' }))
+    : stats.topItemsByQty.map(i => ({ ...i, value: i.qty, viewType: 'qty' }))
 
   return (
     <div className="an-tab-content">
