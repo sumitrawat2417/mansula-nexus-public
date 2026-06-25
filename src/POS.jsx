@@ -463,7 +463,7 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
                       </div>
                       <div className="order-row-right">
                         <div className="order-row-total">{fmt(total, currency)}</div>
-                        <span className="order-row-badge done">Done</span>
+                        <span className="order-row-badge done">{String(order.paymentMode || 'DONE').toUpperCase()}</span>
                         <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14} /></span>
                       </div>
                     </div>
