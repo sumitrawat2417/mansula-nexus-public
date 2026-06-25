@@ -367,7 +367,9 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `MansulaBOS_FullBackup_${new Date().toISOString().split('T')[0]}.json`
+    const d = new Date()
+    const dStr = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear()
+    a.download = `MansulaBOS_FullBackup_${dStr}.msbos`
     a.click()
     URL.revokeObjectURL(url)
     showAlert('Backup exported successfully.', { type: 'success' })
@@ -618,7 +620,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                 </div>
                 <input
                   type="file"
-                  accept=".json"
+                  accept=".json,.msbos"
                   ref={fileInputRef}
                   style={{ display: 'none' }}
                   onChange={handleBackupRestore}
@@ -933,7 +935,7 @@ function HelpContent() {
     { q: 'How do I create a new product/menu item?', a: 'Go to Business Profile → Menu. Tap the + button to add a new item. Fill in the name, price, and category, then save.' },
     { q: 'What is Udhaar?', a: 'Udhaar is a credit/debit tracking system. When a customer pays later, select "Udhaar" at checkout and link it to a customer profile. Track dues in the Customers section.' },
     { q: 'How do I edit or delete a past order?', a: 'Open Order Records, find the order, and tap the edit icon. Change the date/time, or tap "Edit in POS" to modify items. To delete, tap the trash icon.' },
-    { q: 'How do I export my data and reports?', a: 'Go to Order Records and tap the export icon (top right). You can export a JSON backup or open the data export modal.' },
+    { q: 'How do I export my data and reports?', a: 'Go to Order Records and tap the export icon (top right). You can export a backup or open the data export modal.' },
     { q: 'Is my data safe if I close the browser?', a: 'Yes. All data is stored in your browser\'s IndexedDB and persists across sessions. Enable Persistent Storage from Permissions settings for extra protection.' },
     { q: 'How do I reset the order counter to #1?', a: 'Go to Order Records → Export/Data modal → Wipe Order Records. This clears all saved orders and resets the counter back to #1.' },
     { q: 'How do I track inventory?', a: 'Open the Inventory tool from the home screen. Add stock, log purchases from suppliers, and the system tracks current stock levels automatically.' },

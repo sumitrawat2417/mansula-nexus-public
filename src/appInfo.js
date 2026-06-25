@@ -5,9 +5,9 @@
 // ─────────────────────────────────────────────────
 
 export const APP_NAME = 'ManSula BOS'
-export const APP_VERSION = 'v1.6.1-alpha'
+export const APP_VERSION = 'v1.7.0-alpha'
 
-export const APP_BUILD_DATE = 'June 24, 2025'
+export const APP_BUILD_DATE = 'June 26, 2025'
 export const LEGAL_LAST_UPDATED = 'June 2026'
 /** What's New items for the current release.
  *  Each entry has:
@@ -44,7 +44,7 @@ export const WHATS_NEW = [
 
 /** Organization / Company Info */
 export const ORG = {
-  name: 'ManSula Technologies & ManSula DivLabs',
+  name: 'ManSula DivLabs & ManSula Technologies',
   tagline: 'Empowering Commerce with Smart Technology',
   website: 'https://mansulatech.netlify.app',
   support: 'mansula.rwt@gmail.com',

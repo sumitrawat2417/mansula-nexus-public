@@ -270,7 +270,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll 
               <div className="bp-backup-card-icon" style={iconStyle}><I.Download s={18} /></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Save Backup to Device</div>
-                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.json</code> file containing all your order records. Keep it safe to restore later.</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.msbos</code> file containing all your order records. Keep it safe to restore later.</div>
               </div>
             </div>
             <button className="bp-btn-primary" style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
@@ -283,7 +283,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll 
               <div className="bp-backup-card-icon" style={iconStyle}><I.Upload s={18} /></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Restore from Backup</div>
-                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.json</code> backup file to restore your historical order records.</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.msbos</code> backup file to restore your historical order records.</div>
               </div>
             </div>
             <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
@@ -430,7 +430,9 @@ export default function OrderRecords({ onClose, currency, onEdit, onNavigate }) 
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `mansula-orders-backup-${new Date().toISOString().slice(0, 10)}.json`
+    const d = new Date()
+    const dStr = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear()
+    a.download = `MansulaBOS_OrdersBackup_${dStr}.msbos`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -493,7 +495,7 @@ export default function OrderRecords({ onClose, currency, onEdit, onNavigate }) 
         <button className="or-back-btn" onClick={onClose} aria-label="Back"><I.Back s={20} /></button>
         <div className="or-header-title"><I.Receipt s={19} /> Order Records</div>
         <button className="or-export-btn" onClick={() => setExportModalOpen(true)} title="Data & Export"><I.DB s={15} /> Data</button>
-        <input type="file" accept=".json" style={{ display: 'none' }} ref={fileInputRef} onChange={handleRestore} />
+        <input type="file" accept=".json,.msbos" style={{ display: 'none' }} ref={fileInputRef} onChange={handleRestore} />
       </header>
 
       {/* Storage Bar */}
