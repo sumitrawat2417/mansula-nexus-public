@@ -1372,13 +1372,14 @@ function SeoFooter() {
 
 function SettingsThemeModal({ onClose, onChangeTheme, currentTheme }) {
   return (
-    <div className="mn-theme-modal-overlay" style={{ zIndex: 999999 }}>
-      <div className="mn-theme-modal">
+    <div className="mn-theme-modal-overlay" style={{ zIndex: 999999 }} onClick={(e) => { e.stopPropagation(); onClose(); }}>
+      <div className="mn-theme-modal" onClick={e => e.stopPropagation()}>
         <h2 style={{ color: 'var(--text-primary)' }}>Choose Your Theme</h2>
         <div className="mn-theme-options">
           <button
+            type="button"
             className={`mn-theme-btn ${currentTheme === 'light' ? 'active' : ''}`}
-            onClick={() => { onChangeTheme('light'); onClose(); }}
+            onClick={(e) => { e.stopPropagation(); onChangeTheme('light'); }}
           >
             <div className="mn-theme-preview light-preview">
               <div className="p-header" />
@@ -1388,8 +1389,9 @@ function SettingsThemeModal({ onClose, onChangeTheme, currentTheme }) {
             <span style={{ color: 'var(--text-primary)' }}>Light</span>
           </button>
           <button
+            type="button"
             className={`mn-theme-btn ${currentTheme === 'dark' ? 'active' : ''}`}
-            onClick={() => { onChangeTheme('dark'); onClose(); }}
+            onClick={(e) => { e.stopPropagation(); onChangeTheme('dark'); }}
           >
             <div className="mn-theme-preview dark-preview">
               <div className="p-header" />
@@ -1401,9 +1403,10 @@ function SettingsThemeModal({ onClose, onChangeTheme, currentTheme }) {
         </div>
         <div style={{ marginTop: '24px' }}>
           <button 
+            type="button"
             className="bp-btn-primary" 
             style={{ width: '100%', padding: '14px', fontSize: '1.05rem', borderRadius: '12px' }} 
-            onClick={onClose}
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
           >
             Close
           </button>
