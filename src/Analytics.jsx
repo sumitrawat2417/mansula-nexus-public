@@ -158,9 +158,10 @@ function computeAnalytics(orders, purchases = []) {
     totalRevenue += total
 
     for (const item of (order.items || [])) {
-      if (!itemMap[item.name]) itemMap[item.name] = { qty: 0, revenue: 0, emoji: item.emoji || '📦' }
-      itemMap[item.name].qty += item.qty || 1
-      itemMap[item.name].revenue += (item.price || 0) * (item.qty || 1)
+      const itemName = item.name + (item.variantLabel ? ` (${item.variantLabel})` : '')
+      if (!itemMap[itemName]) itemMap[itemName] = { qty: 0, revenue: 0, emoji: item.emoji || '🍽️' }
+      itemMap[itemName].qty += item.qty || 1
+      itemMap[itemName].revenue += (item.price || 0) * (item.qty || 1)
     }
   }
 
