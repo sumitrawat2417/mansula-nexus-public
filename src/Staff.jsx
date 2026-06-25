@@ -73,6 +73,7 @@ function AddEditStaffModal({ member, onSave, onClose }) {
   const [form, setForm] = useState({
     name: member?.name || '',
     phone: member?.phone || '',
+    address: member?.address || '',
   })
   const [saving, setSaving] = useState(false)
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
@@ -85,6 +86,7 @@ function AddEditStaffModal({ member, onSave, onClose }) {
       memberId: member?.memberId || uid(),
       name: form.name.trim(),
       phone: form.phone.trim(),
+      address: form.address.trim(),
       createdAt: member?.createdAt || Date.now(),
       updatedAt: Date.now(),
       isActive: member?.isActive ?? true,
@@ -120,6 +122,12 @@ function AddEditStaffModal({ member, onSave, onClose }) {
             <label className="stf-label">Phone Number</label>
             <input className="stf-input" placeholder="e.g. 9876543210" value={form.phone}
               onChange={e => set('phone', e.target.value)} type="tel" />
+          </div>
+
+          <div className="stf-form-group">
+            <label className="stf-label">Address</label>
+            <textarea className="stf-input" placeholder="e.g. 123 Main St, City" value={form.address}
+              onChange={e => set('address', e.target.value)} rows="2" style={{ resize: 'vertical' }} />
           </div>
         </div>
 
