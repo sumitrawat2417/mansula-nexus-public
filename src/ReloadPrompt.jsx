@@ -50,14 +50,15 @@ export default function ReloadPrompt() {
         </div>
       </div>
       <div className="mn-reload-actions">
-        {needRefresh && (
+        {needRefresh ? (
           <button className="mn-reload-btn install" onClick={() => updateServiceWorker(true)}>
             Update Now
           </button>
+        ) : (
+          <button className="mn-reload-btn close" onClick={close}>
+            Got it
+          </button>
         )}
-        <button className="mn-reload-btn close" onClick={close}>
-          {needRefresh ? 'Not Now' : 'Got it'}
-        </button>
       </div>
     </div>
   )
