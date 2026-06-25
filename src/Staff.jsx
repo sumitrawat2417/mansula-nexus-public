@@ -230,7 +230,7 @@ function ShiftHistoryModal({ member, shifts, onClose }) {
           <div className="stf-sh-hero-ava">{initials(member.name)}</div>
           <div className="stf-sh-hero-info">
             <div className="stf-sh-hero-name">{member.name}</div>
-            <div className="stf-sh-hero-role">{ROLES.find(r => r.key === member.role)?.label}</div>
+            <div className="stf-sh-hero-role">Staff</div>
           </div>
           <div className="stf-sh-hero-stats">
             <div className="stf-sh-stat">
