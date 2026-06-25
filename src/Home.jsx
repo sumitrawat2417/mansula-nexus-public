@@ -1312,7 +1312,10 @@ export default function Home({
         </div>
 
         <div className="hn-footer">
-          <div className="hn-footer-text">ManSula BOS · v1.6.0-alpha</div>
+          <div className="hn-footer-text" style={{ lineHeight: '1.5' }}>
+            ManSula BOS · v1.6.0-alpha<br />
+            &copy; {new Date().getFullYear()} {ORG?.name || 'ManSula Technologies'}. All rights reserved.
+          </div>
         </div>
 
         <div className="hn-seo-footer" style={{ marginTop: '40px', padding: '20px', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.6', borderTop: '1px solid var(--border-color)' }}>
