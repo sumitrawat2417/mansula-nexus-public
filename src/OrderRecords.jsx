@@ -595,7 +595,7 @@ export default function OrderRecords({ onClose, currency, onEdit, onNavigate }) 
                       <span>{itemCount} item{itemCount!==1?'s':''}</span>
                     </div>
                     <div className="or-record-items-preview">
-                      {(r.items||[]).slice(0,3).map((i,idx) => <span key={idx} className="or-item-pill">{i.name}</span>)}
+                      {(r.items||[]).slice(0,3).map((i,idx) => <span key={idx} className="or-item-pill">{i.name}{i.variantLabel ? ` (${i.variantLabel})` : ''}</span>)}
                       {(r.items||[]).length>3 && <span className="or-item-pill muted">+{r.items.length-3} more</span>}
                     </div>
                   </div>
