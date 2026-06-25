@@ -1314,11 +1314,32 @@ export default function Home({
         <div className="hn-footer">
           <div className="hn-footer-text" style={{ lineHeight: '1.5' }}>
             ManSula BOS · {APP_VERSION}<br />
-            {ORG?.copyright || `© ${new Date().getFullYear()} ManSula Technologies. All rights reserved.`}
+            {ORG?.copyright || `© 2024 - ${new Date().getFullYear()} ManSula Technologies. All rights reserved.`}
           </div>
         </div>
 
-        <div className="hn-seo-footer" style={{ marginTop: '40px', padding: '20px', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.6', borderTop: '1px solid var(--border-color)' }}>
+        <SeoFooter />
+      </div>
+    </div>
+  )
+}
+
+function SeoFooter() {
+  const [expanded, setExpanded] = useState(false)
+  return (
+    <div className="hn-seo-footer" style={{ marginTop: '40px', padding: '20px', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.6', borderTop: '1px solid var(--border-color)' }}>
+      <div 
+        style={{ display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: '6px', cursor: 'pointer', padding: '4px 12px', borderRadius: '20px', background: 'transparent' }} 
+        onClick={() => setExpanded(!expanded)}
+      >
+        <span style={{ fontWeight: 600 }}>About ManSula BOS</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+      
+      {expanded && (
+        <div style={{ marginTop: '16px', opacity: 1, transition: 'opacity 0.3s' }}>
           <p>
             <strong>ManSula BOS</strong> is a premium <strong>Business Operating System</strong> and <strong>POS Software</strong> designed for modern merchants. Whether you need reliable <strong>Inventory Management Software</strong> or fast <strong>Billing Software</strong>, ManSula provides a comprehensive <strong>Business Management Software</strong> suite.
           </p>
@@ -1326,7 +1347,7 @@ export default function Home({
             Built as an <strong>Offline POS Software</strong>, it works seamlessly without internet. Perfect as a <strong>Retail Management System</strong> or a <strong>Restaurant POS</strong>. Take control of your operations with advanced <strong>Inventory Tracking</strong>, seamless <strong>Customer Management</strong>, and powerful <strong>Business Analytics</strong>.
           </p>
         </div>
-      </div>
+      )}
     </div>
   )
 }
