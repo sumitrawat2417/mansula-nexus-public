@@ -1313,8 +1313,8 @@ export default function Home({
 
         <div className="hn-footer">
           <div className="hn-footer-text" style={{ lineHeight: '1.5' }}>
-            ManSula BOS · v1.6.0-alpha<br />
-            &copy; {new Date().getFullYear()} {ORG?.name || 'ManSula Technologies'}. All rights reserved.
+            ManSula BOS · {APP_VERSION}<br />
+            {ORG?.copyright || `© ${new Date().getFullYear()} ManSula Technologies. All rights reserved.`}
           </div>
         </div>
 
