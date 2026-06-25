@@ -1145,6 +1145,7 @@ export default function Home({
   const [time, setTime] = useState(new Date())
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [businessName, setBusinessName] = useState('')
+  const [businessLogo, setBusinessLogo] = useState('')
   const { alert: showAlert, confirm: showConfirm } = useAlert()
 
   const [toolsOrder, setToolsOrder] = useState([])
@@ -1191,6 +1192,7 @@ export default function Home({
     const t = setInterval(() => setTime(new Date()), 60000)
     dbGet('mn-business').then(b => {
       if (b && b.name) setBusinessName(b.name)
+      if (b && b.logo) setBusinessLogo(b.logo)
     })
     return () => clearInterval(t)
   }, [])
@@ -1266,7 +1268,7 @@ export default function Home({
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
             {timeStr} · {dateStr}
           </div>
-          <h1 className="hn-greeting">{greeting}{businessName ? `, ${businessName}` : ''}</h1>
+          <h1 className="hn-greeting">{greeting}{businessName ? `, ${businessName}` : ''}{businessLogo ? ` ${businessLogo}` : ''}</h1>
           <p className="hn-tagline">Your business hub is ready</p>
         </div>
       </div>
