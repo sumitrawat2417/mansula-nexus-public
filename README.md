@@ -1,6 +1,6 @@
-# Mansula Nexus (POS & Billing System)
+# ManSula BOS (POS & Billing System)
 
-Mansula Nexus is a modern, premium web-based Point of Sale (POS) and Billing System built with React and Vite. It is designed to be highly responsive, aesthetically pleasing, and easy to use.
+ManSula BOS is a modern, premium web-based Point of Sale (POS) and Billing System built with React and Vite. It is designed to be highly responsive, aesthetically pleasing, and easy to use.
 
 ## Architecture
 
@@ -72,7 +72,7 @@ This project uses a dual-repository deployment strategy:
 *   **Fix: Card Click Propagation** — Clicking the emoji itself on a product card now correctly triggers the cart addition.
 *   **UI: Inline Order Details** — In the Order Console, clicking an order now expands the details inline (accordion style) rather than opening a new page, with a quick 'Switch' button.
 *   **Fix: Order ID Format** — Orders now use the format `#N-DD/MM/YY` (e.g., `#1-17/06/26`) and start at 1.
-*   **UI: Mobile Brand Name** — The "ManSula Nexus" brand name is now visible on mobile, with correctly stylized casing.
+*   **UI: Mobile Brand Name** — The "ManSula BOS" brand name is now visible on mobile, with correctly stylized casing.
 
 ---
 
@@ -82,7 +82,7 @@ This project uses a dual-repository deployment strategy:
 *   **Feature: Order Detail View** — Clicking any order row in the Order Console opens a detail panel showing the full item list, quantities, subtotal, tax, and total. Active orders also show a "Switch" button. Press back to return to the list.
 *   **Fix: Settings Drawer on Right** — The settings panel now slides in from the right side (matching the hamburger position).
 *   **UI: Removed Duplicate Button** — Removed the redundant orders clipboard icon from the header; the centre `#ORD-XXX` pill already opens the console.
-*   **Feature: GST Disclaimer** — Added a ⚠️ Disclaimer button next to the Tax Rate selector in settings. Tapping it shows a legal notice clarifying that the user is responsible for configuring the correct GST slab, and Mansula Nexus accepts no liability.
+*   **Feature: GST Disclaimer** — Added a ⚠️ Disclaimer button next to the Tax Rate selector in settings. Tapping it shows a legal notice clarifying that the user is responsible for configuring the correct GST slab, and ManSula BOS accepts no liability.
 *   **UI: Responsive Overlay Scaling** — Card overlay controls (+/−/qty) and badges (Popular/New) now scale proportionally with the grid column size via `data-cols` CSS selectors.
 
 ---

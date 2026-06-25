@@ -1,10 +1,10 @@
 // ─────────────────────────────────────────────────
-//  ManSula Nexus — App Version & Release Info
+//  ManSula BOS — App Version & Release Info
 //  Edit ONLY this file when shipping a new update.
 //  Everything in the UI reads from here automatically.
 // ─────────────────────────────────────────────────
 
-export const APP_NAME = 'ManSula Nexus'
+export const APP_NAME = 'ManSula BOS'
 export const APP_VERSION = 'v1.6.1-alpha'
 
 export const APP_BUILD_DATE = 'June 24, 2025'
@@ -26,7 +26,7 @@ export const WHATS_NEW = [
     icon: 'analytics',
     label: 'Analytics Module',
     detail:
-      'A full-featured Analytics dashboard has been added to ManSula Nexus. Track revenue trends, top-selling products, peak hours, and customer insights — all powered by your local data. The dashboard includes a Revenue Overview chart, a product performance Podium, and a Customer Leaderboard. AI-powered insights are coming in a future update.',
+      'A full-featured Analytics dashboard has been added to ManSula BOS. Track revenue trends, top-selling products, peak hours, and customer insights — all powered by your local data. The dashboard includes a Revenue Overview chart, a product performance Podium, and a Customer Leaderboard. AI-powered insights are coming in a future update.',
   },
   {
     icon: 'lightning',

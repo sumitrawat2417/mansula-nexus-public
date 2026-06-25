@@ -1,4 +1,4 @@
-// ── Mansula Nexus — IndexedDB persistence layer v3 ──
+// ── ManSula BOS — IndexedDB persistence layer v3 ──
 // - 'kv' store: generic key-value (settings, products, suppliers, etc.)
 // - 'orders' store: completed order records, indexed by date
 // - 'inventory' store: live stock items, indexed by productId

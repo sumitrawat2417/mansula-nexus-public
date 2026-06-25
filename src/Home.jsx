@@ -574,7 +574,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
             <div className="hns-section-title">Browser Permissions</div>
             <div className="hns-perm-info-box">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-              Manage what ManSula Nexus can access on your device. Denied permissions must be reset from browser site settings.
+              Manage what ManSula BOS can access on your device. Denied permissions must be reset from browser site settings.
             </div>
             <div className="hns-card">
               <PermRow icon={Icon.Camera} label="Camera" desc="For barcode & QR scanning at checkout" state={perms.camera} onAllow={() => requestPerm('camera')} />
@@ -659,7 +659,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
               <div className="hns-about-logo-wrap">
                 <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
               </div>
-              <div className="hns-about-name">ManSula Nexus</div>
+              <div className="hns-about-name">ManSula BOS</div>
               <div className="hns-about-version">Business Operating System</div>
             </div>
 
@@ -813,7 +813,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
             <div className="hns-section-title" style={{ marginTop: 24 }}>Legal</div>
             <div className="hns-card" style={{ padding: '16px' }}>
               <div className="hns-legal-text" style={{ marginBottom: 16 }}>
-                ManSula Nexus is an offline-first Business Operating System. Business data remains under your control. Review the Terms of Service and Privacy Policy for complete information.
+                ManSula BOS is an offline-first Business Operating System. Business data remains under your control. Review the Terms of Service and Privacy Policy for complete information.
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', fontWeight: 600, cursor: 'pointer' }}>Terms of Service</div>
@@ -847,7 +847,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
 
             <div style={{ padding: '20px 4px 8px', textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
               {ORG.copyright}<br />
-              ManSula Nexus {APP_VERSION}
+              ManSula BOS {APP_VERSION}
             </div>
 
           </div>
@@ -930,9 +930,9 @@ function HelpContent() {
     { q: 'Is my data safe if I close the browser?', a: 'Yes. All data is stored in your browser\'s IndexedDB and persists across sessions. Enable Persistent Storage from Permissions settings for extra protection.' },
     { q: 'How do I reset the order counter to #1?', a: 'Go to Order Records → Export/Data modal → Wipe Order Records. This clears all saved orders and resets the counter back to #1.' },
     { q: 'How do I track inventory?', a: 'Open the Inventory tool from the home screen. Add stock, log purchases from suppliers, and the system tracks current stock levels automatically.' },
-    { q: 'Can I use this app offline?', a: 'Yes! ManSula Nexus is a Progressive Web App (PWA) and works fully offline once loaded. All data stays on your device.' },
+    { q: 'Can I use this app offline?', a: 'Yes! ManSula BOS is a Progressive Web App (PWA) and works fully offline once loaded. All data stays on your device.' },
     { q: 'How do I install this as an app on my phone?', a: 'On Android (Chrome): tap the three dots → Install app. On iOS (Safari): tap Share → Add to Home Screen. The app will work just like a native app.' },
-    { q: 'Can multiple people use the same account?', a: 'Currently, ManSula Nexus stores data locally per browser/device. Multi-device sync and staff accounts are planned for a future update.' },
+    { q: 'Can multiple people use the same account?', a: 'Currently, ManSula BOS stores data locally per browser/device. Multi-device sync and staff accounts are planned for a future update.' },
     { q: 'How do I change the currency?', a: 'Go to Settings → Billing & Region. Select your preferred currency from the available options. It applies instantly across the POS.' },
   ]
   return (
@@ -1029,10 +1029,10 @@ function HelpContent() {
           <div className="hns-legal-section-title"><Icon.Doc style={{ width: 18, height: 18, marginRight: 8, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Terms of Use</div>
           <div className="hns-legal-body">
             <p><strong>Last updated:</strong> {LEGAL_LAST_UPDATED}</p>
-            <p>ManSula Nexus is an offline-first Business Operating System (BOS) that helps businesses manage sales, inventory, customers, staff, analytics, reporting, and operations from a unified platform. By using ManSula Nexus ("the BOS"), you agree to the following terms and conditions. Please read them carefully.</p>
+            <p>ManSula BOS is an offline-first Business Operating System (BOS) that helps businesses manage sales, inventory, customers, staff, analytics, reporting, and operations from a unified platform. By using ManSula BOS ("the BOS"), you agree to the following terms and conditions. Please read them carefully.</p>
 
             <div className="hns-legal-h">1. License Grant</div>
-            <p>ManSula Technologies & ManSula DivLabs grant you a limited, non-exclusive, non-transferable, revocable license to use ManSula Nexus in accordance with these Terms.</p>
+            <p>ManSula Technologies & ManSula DivLabs grant you a limited, non-exclusive, non-transferable, revocable license to use ManSula BOS in accordance with these Terms.</p>
 
             <div className="hns-legal-h">2. Acceptable Use</div>
             <p>You may use this BOS for lawful business purposes only. You are responsible for all data entered into the system, including product prices, customer records, and transaction history.</p>
@@ -1041,7 +1041,7 @@ function HelpContent() {
             <p>Certain features may require an account, internet connectivity, cloud storage, or subscription. Users are responsible for maintaining the security of their credentials and account access.</p>
 
             <div className="hns-legal-h">4. Data Responsibility</div>
-            <p>Users are responsible for maintaining accurate business records and backups. While ManSula Nexus may provide backup, export, synchronization, or cloud-storage features, ManSula Technologies & ManSula DivLabs cannot guarantee recovery of lost, corrupted, or deleted data.</p>
+            <p>Users are responsible for maintaining accurate business records and backups. While ManSula BOS may provide backup, export, synchronization, or cloud-storage features, ManSula Technologies & ManSula DivLabs cannot guarantee recovery of lost, corrupted, or deleted data.</p>
 
             <div className="hns-legal-h">5. Reports & Analytics</div>
             <p>Reports, dashboards, analytics, forecasts, summaries, and recommendations are provided for informational purposes only and may contain inaccuracies. Users are solely responsible for validating information before making business decisions.</p>
@@ -1059,7 +1059,7 @@ function HelpContent() {
             <p>ManSula Technologies & ManSula DivLabs shall not be liable for any indirect, incidental, special, or consequential damages arising from your use or inability to use the BOS, including but not limited to business losses, data loss, or revenue loss.</p>
 
             <div className="hns-legal-h">10. Intellectual Property</div>
-            <p>ManSula Nexus and its UI, design, and code are the property of ManSula Technologies & ManSula DivLabs. You may not copy, redistribute, or reverse-engineer any part of the application without explicit written consent.</p>
+            <p>ManSula BOS and its UI, design, and code are the property of ManSula Technologies & ManSula DivLabs. You may not copy, redistribute, or reverse-engineer any part of the application without explicit written consent.</p>
 
             <div className="hns-legal-h">11. Subscriptions & Paid Features</div>
             <p>Certain features may require a paid subscription or one-time purchase. Pricing, billing terms, and feature availability may change from time to time.</p>
@@ -1081,7 +1081,7 @@ function HelpContent() {
           <div className="hns-legal-section-title"><Icon.Lock style={{ width: 18, height: 18, marginRight: 8, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Privacy Policy</div>
           <div className="hns-legal-body">
             <p><strong>Last updated:</strong> {LEGAL_LAST_UPDATED}</p>
-            <p>ManSula Nexus is designed with privacy-first principles. Business data is stored locally on your device by default. Certain future features, such as cloud backup, synchronization, account services, or AI-powered functionality, may require data processing and will be clearly disclosed when enabled.</p>
+            <p>ManSula BOS is designed with privacy-first principles. Business data is stored locally on your device by default. Certain future features, such as cloud backup, synchronization, account services, or AI-powered functionality, may require data processing and will be clearly disclosed when enabled.</p>
 
             <div className="hns-legal-h"><Icon.Box style={{ width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Data Storage</div>
             <p>All data — including orders, customer records, inventory, products, and settings — is stored locally on <strong>your device</strong> using browser IndexedDB and localStorage by default.</p>
@@ -1313,7 +1313,7 @@ export default function Home({
         </div>
 
         <div className="hn-footer">
-          <div className="hn-footer-text">ManSula Nexus · v1.6.0-alpha</div>
+          <div className="hn-footer-text">ManSula BOS · v1.6.0-alpha</div>
         </div>
       </div>
     </div>

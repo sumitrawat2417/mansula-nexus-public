@@ -10,7 +10,7 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'robots.txt'],
       manifest: {
-        name: 'ManSula Nexus',
+        name: 'ManSula BOS',
         short_name: 'Nexus',
         description: 'Next-Generation POS & Business Suite',
         theme_color: '#ffffff',
