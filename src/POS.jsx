@@ -1035,10 +1035,22 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   const decreaseQty = (cartKey) => {
     playSound('remove')
     setCartItems(prev => {
-      const item = prev.find(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) === cartKey)
-      if (!item) return prev
-      if (item.qty === 1) return prev.filter(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) !== cartKey)
-      return prev.map(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) === cartKey ? { ...i, qty: i.qty - 1 } : i)
+      let matchKey = cartKey
+      let item = prev.find(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) === cartKey)
+      
+      if (!item) {
+        // Fallback: if raw product ID is passed from the grid but item has variants in cart
+        const variants = prev.filter(i => i.id === cartKey)
+        if (variants.length > 0) {
+          item = variants[variants.length - 1]
+          matchKey = `${item.id}|${item.variantKey}`
+        } else {
+          return prev
+        }
+      }
+
+      if (item.qty === 1) return prev.filter(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) !== matchKey)
+      return prev.map(i => (i.variantKey ? `${i.id}|${i.variantKey}` : i.id) === matchKey ? { ...i, qty: i.qty - 1 } : i)
     })
   }
   const clearCart = () => { setCartItems([]); setCartStep('cart') }
