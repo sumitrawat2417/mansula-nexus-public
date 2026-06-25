@@ -156,7 +156,10 @@ export default function App() {
   useEffect(() => { localStorage.setItem('mn-currency', JSON.stringify(currency)) }, [currency])
   useEffect(() => { localStorage.setItem('mn-taxrate', JSON.stringify(taxRateObj)) }, [taxRateObj])
 
-  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
+  const toggleTheme = (t) => {
+    if (typeof t === 'string') setTheme(t)
+    else setTheme(curr => curr === 'light' ? 'dark' : 'light')
+  }
 
   const handleAcceptAgreement = () => {
     localStorage.setItem(AGREEMENT_KEY, 'true')

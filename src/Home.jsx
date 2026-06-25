@@ -205,6 +205,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
   const [expandedItem, setExpandedItem] = useState(null)
   const [storageUsed, setStorageUsed] = useState('< 1 MB')
   const [updateStatus, setUpdateStatus] = useState('uptodate')
+  const [showThemeModal, setShowThemeModal] = useState(false)
 
   useEffect(() => {
     if (navigator.storage && navigator.storage.estimate) {
@@ -404,7 +405,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
           <div className="hns-content-area">
             <div className="hns-section-title">Display</div>
             <div className="hns-card">
-              <div className="hns-row">
+              <div className="hns-row" style={{ cursor: 'pointer' }} onClick={() => setShowThemeModal(true)}>
                 <div className="hns-row-icon" style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
                   {theme === 'dark' ? <Icon.Moon /> : <Icon.Sun />}
                 </div>
@@ -412,9 +413,9 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                   <div className="hns-row-label">Theme</div>
                   <div className="hns-row-desc">{theme === 'dark' ? 'Dark mode active' : 'Light mode active'}</div>
                 </div>
-                <button className={`hns-toggle ${theme === 'dark' ? 'on' : ''}`} onClick={onToggleTheme} role="switch" aria-checked={theme === 'dark'}>
-                  <span className="hns-toggle-knob">{theme === 'dark' ? <Icon.Moon /> : <Icon.Sun />}</span>
-                </button>
+                <div style={{ color: 'var(--text-muted)' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                </div>
               </div>
             </div>
 
@@ -911,6 +912,13 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
           </div>
         </div>
       </div>
+      {showThemeModal && (
+        <SettingsThemeModal 
+          currentTheme={theme} 
+          onChangeTheme={onToggleTheme} 
+          onClose={() => setShowThemeModal(false)} 
+        />
+      )}
     </div>
   )
 }
@@ -1358,6 +1366,49 @@ function SeoFooter() {
           </p>
         </div>
       )}
+    </div>
+  )
+}
+
+function SettingsThemeModal({ onClose, onChangeTheme, currentTheme }) {
+  return (
+    <div className="mn-theme-modal-overlay" style={{ zIndex: 999999 }}>
+      <div className="mn-theme-modal">
+        <h2 style={{ color: 'var(--text-primary)' }}>Choose Your Theme</h2>
+        <div className="mn-theme-options">
+          <button
+            className={`mn-theme-btn ${currentTheme === 'light' ? 'active' : ''}`}
+            onClick={() => { onChangeTheme('light'); onClose(); }}
+          >
+            <div className="mn-theme-preview light-preview">
+              <div className="p-header" />
+              <div className="p-card" />
+              <div className="p-card" />
+            </div>
+            <span style={{ color: 'var(--text-primary)' }}>Light</span>
+          </button>
+          <button
+            className={`mn-theme-btn ${currentTheme === 'dark' ? 'active' : ''}`}
+            onClick={() => { onChangeTheme('dark'); onClose(); }}
+          >
+            <div className="mn-theme-preview dark-preview">
+              <div className="p-header" />
+              <div className="p-card" />
+              <div className="p-card" />
+            </div>
+            <span style={{ color: 'var(--text-primary)' }}>Dark</span>
+          </button>
+        </div>
+        <div style={{ marginTop: '24px' }}>
+          <button 
+            className="bp-btn-primary" 
+            style={{ width: '100%', padding: '14px', fontSize: '1.05rem', borderRadius: '12px' }} 
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
