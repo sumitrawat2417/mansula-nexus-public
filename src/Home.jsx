@@ -1279,15 +1279,15 @@ export default function Home({
               onClick={() => setShowSwitchProfile(true)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
-                background: 'rgba(255,255,255,0.1)', padding: '4px 10px 4px 4px',
-                borderRadius: '20px', transition: 'background 0.2s'
+                background: 'var(--bg-surface-2)', padding: '4px 12px 4px 4px',
+                borderRadius: '30px', transition: 'background 0.2s', border: '1px solid var(--border-color)'
               }}
               className="hn-active-profile-btn"
             >
-              <div style={{ width: 26, height: 26, borderRadius: '50%', background: activeUser ? avatarGrad(activeUser.name) : '#555', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700 }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: activeUser ? avatarGrad(activeUser.name) : '#555', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700 }}>
                 {activeUser ? initials(activeUser.name) : '?'}
               </div>
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'white', marginRight: '4px' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                 {activeUser ? activeUser.name.split(' ')[0] : 'Profile'}
               </div>
             </div>
