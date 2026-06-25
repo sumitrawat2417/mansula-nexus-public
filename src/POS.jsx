@@ -462,8 +462,8 @@ function OrderConsole({ orders, currentOrderId, onSwitch, onSuccess, onNew, onCl
                         </div>
                       </div>
                       <div className="order-row-right">
+                        <span className="order-row-badge" style={{ backgroundColor: { cash: '#10b981', upi: '#6366f1', card: '#0ea5e9', udhaar: '#f59e0b', split: '#8b5cf6', other: '#64748b' }[order.paymentMode] || '#10b981' }}>{String(order.paymentMode || 'DONE').toUpperCase()}</span>
                         <div className="order-row-total">{fmt(total, currency)}</div>
-                        <span className="order-row-badge done">{String(order.paymentMode || 'DONE').toUpperCase()}</span>
                         <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: '0.2s', display: 'flex' }}><I.ChevRight s={14} /></span>
                       </div>
                     </div>
