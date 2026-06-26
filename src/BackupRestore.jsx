@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import { dbClearAll, exportUltimateBackup, restoreUltimateBackup } from './db.js'
 import { useBackButton } from './useBackButton.js'
 import { useAlert } from './AlertDialog.jsx'
-import { requestNotificationPermission, getNotificationPermission } from './notificationUtils.js'
+import { requestNotificationPermission, getNotificationPermission, sendLocalNotification } from './notificationUtils.js'
 
 const Ic = {
   Close: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>,
