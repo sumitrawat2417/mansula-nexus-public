@@ -76,99 +76,84 @@ export default function BackupRestore({ onClose }) {
   }
 
   return (
-    <div className="pos-layout" style={{ background: 'var(--bg-main)' }}>
+    <div className="bp-root">
       {/* Header */}
-      <div className="pos-header" style={{ justifyContent: 'space-between' }}>
-        <h2 style={{ margin: 0, fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ color: 'var(--brand-primary)', display: 'flex' }}><Ic.Shield /></span> 
-          Backup & Restore
-        </h2>
-        <button className="bp-btn-outline" onClick={onClose} disabled={resetStep > 0} style={{ padding: '8px', border: 'none' }}>
+      <header className="bp-header">
+        <button className="bp-back-btn" onClick={onClose} disabled={resetStep > 0}>
           <Ic.Close />
         </button>
-      </div>
+        <div className="bp-header-title">
+          <div className="bp-header-main">Backup & Restore</div>
+        </div>
+      </header>
 
-      <div className="pos-scrollable" style={{ padding: '24px 16px' }}>
-        <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div className="bp-body" style={{ maxWidth: '600px', margin: '0 auto', width: '100%', padding: '20px 16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
           {/* Status Panel */}
           <div style={{ background: 'linear-gradient(135deg, #6c3de5, #8b5cf6)', borderRadius: '20px', padding: '24px', color: '#fff', boxShadow: '0 12px 32px rgba(108, 61, 229, 0.25)', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', right: '-20px', top: '-20px', opacity: 0.1, transform: 'scale(3)' }}><Ic.Shield /></div>
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>System Status</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '16px' }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>System Status</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '16px' }}>
                 {lastBackup === new Date().toDateString() ? 'Data is secure today.' : 'Backup recommended.'}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.2)', padding: '8px 12px', borderRadius: '10px', width: 'fit-content', backdropFilter: 'blur(10px)' }}>
-                <span style={{ width: 16, height: 16 }}><Ic.Check /></span>
+                <span style={{ width: 16, height: 16, display: 'flex' }}><Ic.Check /></span>
                 <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Last Backup: {lastBackup ? new Date(lastBackup).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Never'}</span>
               </div>
             </div>
           </div>
 
-          <div style={{ fontSize: '1.1rem', fontWeight: 700, marginTop: '10px' }}>Data Operations</div>
+          <div style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '8px', color: 'var(--text-primary)' }}>Data Operations</div>
 
           {/* Export Card */}
-          <div className="bp-backup-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(108, 61, 229, 0.1)', color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ width: 24, height: 24, display: 'flex' }}><Ic.Download /></span>
-              </div>
-              <div>
-                <h3 style={{ margin: '0 0 4px', fontSize: '1.05rem', color: 'var(--text-primary)' }}>Create Backup (.msbos)</h3>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>Download a complete snapshot of your products, settings, and order history.</p>
-              </div>
+          <div className="bp-backup-card bp-backup-export" style={{ marginBottom: 0 }}>
+            <div className="bp-backup-card-icon"><Ic.Download /></div>
+            <div className="bp-backup-card-info">
+              <div className="bp-backup-card-title">Create Ultimate Backup</div>
+              <div className="bp-backup-card-desc">Downloads a full snapshot <code>.msbos</code> file of your entire system.</div>
             </div>
             <button 
               className="bp-btn-primary" 
               onClick={handleBackupExport}
               disabled={resetStep > 0}
-              style={{ padding: '14px', borderRadius: '12px', fontSize: '0.95rem', display: 'flex', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 20px rgba(108, 61, 229, 0.3)' }}
             >
-              <Ic.Download style={{ width: 18, height: 18 }} /> Download Backup Now
+              <Ic.Download /> Download Now
             </button>
           </div>
 
           {/* Restore Card */}
-          <div className="bp-backup-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ width: 24, height: 24, display: 'flex' }}><Ic.Upload /></span>
-              </div>
-              <div>
-                <h3 style={{ margin: '0 0 4px', fontSize: '1.05rem', color: 'var(--text-primary)' }}>Restore Backup</h3>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>Upload a previously saved `.msbos` or `.json` backup file to restore your data.</p>
-              </div>
+          <div className="bp-backup-card bp-backup-import" style={{ marginBottom: 0 }}>
+            <div className="bp-backup-card-icon"><Ic.Upload /></div>
+            <div className="bp-backup-card-info">
+              <div className="bp-backup-card-title">Restore Ultimate Backup</div>
+              <div className="bp-backup-card-desc">Upload a previously saved <code>.msbos</code> or <code>.json</code> file to overwrite and restore your data.</div>
             </div>
             <input type="file" accept=".json,.msbos" style={{ display: 'none' }} ref={fileInputRef} onChange={handleBackupRestore} />
             <button 
               className="bp-btn-outline" 
               onClick={() => fileInputRef.current?.click()}
               disabled={resetStep > 0}
-              style={{ padding: '14px', borderRadius: '12px', fontSize: '0.95rem', display: 'flex', justifyContent: 'center', gap: '8px', borderColor: '#10b981', color: '#10b981' }}
             >
-              <Ic.Upload style={{ width: 18, height: 18 }} /> Select Backup File
+              <Ic.Upload /> Select Backup File
             </button>
           </div>
 
           {/* Wipe Card */}
-          <div className="bp-backup-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ width: 24, height: 24, display: 'flex' }}><Ic.Trash /></span>
-              </div>
-              <div>
-                <h3 style={{ margin: '0 0 4px', fontSize: '1.05rem', color: '#ef4444' }}>Danger Zone</h3>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>Permanently delete all your business data, products, and settings from this device.</p>
-              </div>
+          <div className="bp-backup-card" style={{ marginBottom: 0, borderColor: 'rgba(239, 68, 68, 0.2)', backgroundColor: 'rgba(239,68,68,0.02)' }}>
+            <div className="bp-backup-card-icon" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}><Ic.Trash /></div>
+            <div className="bp-backup-card-info">
+              <div className="bp-backup-card-title" style={{ color: '#ef4444' }}>Danger Zone</div>
+              <div className="bp-backup-card-desc">Permanently delete all your business data, products, and settings. Cannot be undone.</div>
             </div>
             <button 
               className="bp-btn-danger" 
               onClick={handleWipeData}
               disabled={resetStep > 0}
-              style={{ padding: '14px', borderRadius: '12px', fontSize: '0.95rem', display: 'flex', justifyContent: 'center', gap: '8px', background: 'transparent', borderColor: '#ef4444', color: '#ef4444' }}
+              style={{ padding: '12px', borderRadius: '10px', fontSize: '0.9rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'transparent', borderColor: '#ef4444', color: '#ef4444' }}
             >
-              <Ic.Trash style={{ width: 18, height: 18 }} /> Reset All Data
+              <Ic.Trash style={{ width: 16, height: 16 }} /> Reset All Data
             </button>
           </div>
 
