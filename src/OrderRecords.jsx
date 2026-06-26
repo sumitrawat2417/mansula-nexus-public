@@ -10,6 +10,7 @@ import { useAlert } from './AlertDialog.jsx'
 
 // ── SVG Icon Library ──
 const I = {
+  Share: ({ s=15 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
   Back:      ({ s=18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
   Search:    ({ s=16 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
   Edit:      ({ s=15 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
@@ -237,7 +238,7 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
 }
 
 // ── Export Modal ──
-function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll }) {
+function ExportModal({ onClose, onExportCSV, onBackup, onShareBackup, onRestoreRef, onClearAll }) {
   useBackButton(onClose)
   const cardStyle = { padding: '12px 14px', gap: '10px' };
   const iconStyle = { width: 36, height: 36, flexShrink: 0 };
@@ -273,9 +274,14 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll 
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.orms</code> file containing all your order records. Keep it safe to restore later.</div>
               </div>
             </div>
-            <button className="bp-btn-primary" style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
-              <I.Download s={14} /> Download Backup
-            </button>
+            <div style={{ display: 'flex', gap: '8px', marginTop: 10 }}>
+              <button className="bp-btn-primary" style={{ flex: 1, background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
+                <I.Download s={14} /> Download
+              </button>
+              <button className="bp-btn-primary" style={{ flex: 1, background: '#25D366', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onShareBackup}>
+                <I.Share s={14} /> Share WA
+              </button>
+            </div>
           </div>
 
           <div className="bp-backup-card bp-backup-import" style={cardStyle}>
@@ -437,6 +443,16 @@ export default function OrderRecords({ onClose, currency, onEdit, onNavigate }) 
     URL.revokeObjectURL(url)
   }
 
+  const handleShareBackup = async () => {
+    const blob = await exportOrdersBackup()
+    if (!blob) return showAlert('Backup failed. Please try again.', { title: 'Backup Failed', type: 'danger', confirmText: 'OK' })
+    const d = new Date()
+    const dStr = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear()
+    const filename = `MansulaBOS_OrdersBackup_${dStr}.orms`
+    const res = await shareFile(blob, filename, 'Order Records Backup')
+    if (!res.success && !res.aborted) showAlert(res.message, { type: 'danger' })
+  }
+
   const handleRestore = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -485,6 +501,7 @@ export default function OrderRecords({ onClose, currency, onEdit, onNavigate }) 
           onClose={() => setExportModalOpen(false)} 
           onExportCSV={() => { exportCSV(); setExportModalOpen(false); }} 
           onBackup={() => { handleBackup(); setExportModalOpen(false); }} 
+          onShareBackup={() => { handleShareBackup(); setExportModalOpen(false); }}
           onRestoreRef={fileInputRef}
           onClearAll={handleClearAll}
         />

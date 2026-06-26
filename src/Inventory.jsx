@@ -68,7 +68,7 @@ function Modal({ title, onClose, children, wide }) {
 }
 
 // ── Export Modal ──
-function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll }) {
+function ExportModal({ onClose, onExportCSV, onBackup, onShareBackup, onRestoreRef, onClearAll }) {
   const cardStyle = { padding: '12px 14px', gap: '10px' };
   const iconStyle = { width: 36, height: 36, flexShrink: 0 };
 
@@ -103,9 +103,14 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll 
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.inms</code> file containing all your inventory stock, suppliers, and purchase logs.</div>
               </div>
             </div>
-            <button className="bp-btn-primary" style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
-              <span style={{ width: 14, height: 14, display: 'flex' }}><Ic.Download /></span> Download Backup
-            </button>
+            <div style={{ display: 'flex', gap: '8px', marginTop: 10 }}>
+              <button className="bp-btn-primary" style={{ flex: 1, background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
+                <span style={{ width: 14, height: 14, display: 'flex' }}><Ic.Download /></span> Download
+              </button>
+              <button className="bp-btn-primary" style={{ flex: 1, background: '#25D366', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onShareBackup}>
+                <span style={{ width: 14, height: 14, display: 'flex' }}><Ic.Share s={14} /></span> Share WA
+              </button>
+            </div>
           </div>
 
           <div className="bp-backup-card bp-backup-import" style={cardStyle}>
@@ -1324,6 +1329,15 @@ export default function Inventory({ onClose }) {
       a.download = `mansula-inventory-backup-${new Date().toISOString().slice(0, 10)}.inms`
       a.click()
       URL.revokeObjectURL(url)
+    }
+  }
+
+  const handleShareBackup = async () => {
+    const blob = await exportInventoryBackup()
+    if (blob) {
+      const filename = `mansula-inventory-backup-${new Date().toISOString().slice(0, 10)}.inms`
+      const res = await shareFile(blob, filename, 'Inventory Backup')
+      if (!res.success && !res.aborted) alert(res.message)
     }
   }
 

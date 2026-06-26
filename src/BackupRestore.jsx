@@ -6,6 +6,7 @@ import { requestNotificationPermission, getNotificationPermission, sendLocalNoti
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const Ic = {
+  Share: ({ s=18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
   ChevL:    (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>,
   Shield:   (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
   Download: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
@@ -140,14 +141,26 @@ export default function BackupRestore({ onClose }) {
     if (!blob) { showAlert('Failed to export backup.', { type: 'danger' }); return }
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
+    const dStr = new Date().toISOString().slice(0, 10)
     a.href = url
-    const d = new Date()
-    const dStr = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear()
     a.download = `MansulaBOS_FullBackup_${dStr}.msbos`
     a.click()
     URL.revokeObjectURL(url)
     localStorage.setItem('mn-last-backup-date', new Date().toDateString())
     showAlert('Backup exported successfully!', { type: 'success' })
+  }
+
+  const handleShareBackup = async () => {
+    const blob = await exportUltimateBackup()
+    if (!blob) { showAlert('Failed to export backup.', { type: 'danger' }); return }
+    const dStr = new Date().toISOString().slice(0, 10)
+    const filename = `MansulaBOS_FullBackup_${dStr}.msbos`
+    const res = await shareFile(blob, filename, 'Ultimate Backup')
+    if (res.success) {
+      localStorage.setItem('mn-last-backup-date', new Date().toDateString())
+    } else if (!res.aborted) {
+      showAlert(res.message, { type: 'danger' })
+    }
   }
 
   const handleBackupRestore = async (e) => {
@@ -308,9 +321,14 @@ export default function BackupRestore({ onClose }) {
           title="Create Full Backup"
           desc={<>Downloads a <code style={{ fontFamily: 'monospace', fontSize: '0.9em', background: 'var(--bg-surface-2)', padding: '1px 4px', borderRadius: 4, color: 'var(--brand-primary)' }}>.msbos</code> snapshot of your entire system.</>}
         >
-          <Pill color="#6366f1" onClick={handleBackupExport} disabled={resetStep > 0}>
-            <Ic.Download style={{ width: 13, height: 13 }} /> Download
-          </Pill>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <Pill color="#6366f1" onClick={handleBackupExport} disabled={resetStep > 0}>
+              <Ic.Download style={{ width: 13, height: 13 }} /> Download
+            </Pill>
+            <Pill color="#25D366" onClick={handleShareBackup} disabled={resetStep > 0}>
+              <Ic.Share style={{ width: 13, height: 13 }} /> Share
+            </Pill>
+          </div>
         </ActionRow>
 
         {/* Restore Backup */}

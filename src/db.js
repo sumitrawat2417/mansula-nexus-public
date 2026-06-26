@@ -1280,3 +1280,22 @@ export async function restoreUltimateBackup(file) {
     return false
   }
 }
+
+export async function shareFile(blob, filename, title) {
+  if (!navigator.canShare) {
+    return { success: false, message: 'File sharing is not supported by your browser.' }
+  }
+  const file = new File([blob], filename, { type: blob.type || 'application/octet-stream' })
+  if (!navigator.canShare({ files: [file] })) {
+    return { success: false, message: 'Your device does not support sharing this file type.' }
+  }
+  try {
+    await navigator.share({ title: title, files: [file] })
+    return { success: true }
+  } catch (err) {
+    if (err.name === 'AbortError') return { success: false, aborted: true }
+    console.error('Share failed:', err)
+    return { success: false, message: 'Failed to share the file.' }
+  }
+}
+
