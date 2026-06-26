@@ -115,7 +115,7 @@ const Icon = {
   Mailbox: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>,
   Phone: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>,
   Message: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>,
-  Backup: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  Backup: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>,
 }
 
 // ── Tool definitions ──
@@ -123,11 +123,11 @@ const TOOLS = [
   { id: 'business', name: 'Business Profile', desc: 'Setup info, menu & categories', Icon: Icon.Business, color: '#6366f1', bg: 'linear-gradient(135deg,#6366f1,#8b5cf6)', active: true },
   { id: 'records', name: 'Order Records', desc: 'View, edit & export all orders', Icon: Icon.OrderRec, color: '#10b981', bg: 'linear-gradient(135deg,#10b981,#059669)', active: true },
   { id: 'analytics', name: 'Analytics', desc: 'Sales trends & insights', Icon: Icon.Analytics, color: '#0ea5e9', bg: 'linear-gradient(135deg,#0ea5e9,#2dd4bf)', active: true },
+  { id: 'backup', name: 'Backup & Restore', desc: 'Secure your data safely', Icon: Icon.Backup, color: '#8b5cf6', bg: 'linear-gradient(135deg,#8b5cf6,#6c3de5)', active: true },
   { id: 'reports', name: 'Reports', desc: 'Daily, weekly & monthly', Icon: Icon.Reports, color: '#f59e0b', bg: 'linear-gradient(135deg,#f59e0b,#ef4444)', active: true },
+  { id: 'customers', name: 'Customers', desc: 'Contacts, CRM & Udhaar', Icon: Icon.Customers, color: '#0891b2', bg: 'linear-gradient(135deg,#0891b2,#0d9488)', active: true },
   { id: 'inventory', name: 'Inventory', desc: 'Stock, purchases & suppliers', Icon: Icon.Inventory, color: '#ec4899', bg: 'linear-gradient(135deg,#ec4899,#f43f5e)', active: true },
   { id: 'staff', name: 'Staff', desc: 'Team roles & shifts', Icon: Icon.Staff, color: '#06b6d4', bg: 'linear-gradient(135deg,#06b6d4,#0284c7)', active: true },
-  { id: 'customers', name: 'Customers', desc: 'Contacts, CRM & Udhaar', Icon: Icon.Customers, color: '#0891b2', bg: 'linear-gradient(135deg,#0891b2,#0d9488)', active: true },
-  { id: 'backup', name: 'Backup & Restore', desc: 'Secure your data safely', Icon: Icon.Backup, color: '#8b5cf6', bg: 'linear-gradient(135deg,#8b5cf6,#6c3de5)', active: true },
 ]
 
 // ── Full-Screen Settings ──
@@ -663,8 +663,8 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         return (
           <div className="hns-content-area">
             <div className="hns-about-hero">
-              <div className="hns-about-logo-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
+              <div className="hns-about-logo-wrap" style={{ padding: 4 }}>
+                <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               <div className="hns-about-name">ManSula BOS</div>
               <div className="hns-about-version">Business Operating System</div>
@@ -919,10 +919,10 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         </div>
       </div>
       {showThemeModal && (
-        <SettingsThemeModal 
-          currentTheme={theme} 
-          onChangeTheme={onToggleTheme} 
-          onClose={() => setShowThemeModal(false)} 
+        <SettingsThemeModal
+          currentTheme={theme}
+          onChangeTheme={onToggleTheme}
+          onClose={() => setShowThemeModal(false)}
         />
       )}
     </div>
@@ -1153,7 +1153,7 @@ export default function Home({
   const [businessName, setBusinessName] = useState('')
   const [businessLogo, setBusinessLogo] = useState('')
   const { alert: showAlert, confirm: showConfirm } = useAlert()
-  
+
   const lastBackupDate = localStorage.getItem('mn-last-backup-date')
   const needsBackup = lastBackupDate !== new Date().toDateString()
 
@@ -1202,6 +1202,8 @@ export default function Home({
     dbGet('mn-business').then(b => {
       if (b && b.name) setBusinessName(b.name)
       if (b && b.logo) setBusinessLogo(b.logo)
+      else setBusinessName("ManSula User")
+
     })
     return () => clearInterval(t)
   }, [])
@@ -1251,10 +1253,8 @@ export default function Home({
       {/* ── Topbar ── */}
       <header className="hn-topbar">
         <div className="hn-topbar-brand">
-          <div className="hn-logo-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" />
-            </svg>
+          <div className="hn-logo-icon" style={{ overflow: 'hidden' }}>
+            <img src="/logo.png" width="20" height="20" alt="Logo" style={{ objectFit: 'contain' }} />
           </div>
           <div>
             <div className="hn-brand-main">ManSula</div>
@@ -1285,7 +1285,7 @@ export default function Home({
       {/* ── POS Launch Card ── */}
       <div className="hn-body">
         {needsBackup && (
-          <div 
+          <div
             onClick={() => handleLaunch('backup')}
             style={{
               background: 'linear-gradient(135deg, #ef4444, #f43f5e)',
@@ -1384,8 +1384,8 @@ function SeoFooter() {
   const [expanded, setExpanded] = useState(false)
   return (
     <div className="hn-seo-footer" style={{ marginTop: '40px', padding: '20px', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.6', borderTop: '1px solid var(--border-color)' }}>
-      <div 
-        style={{ display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: '6px', cursor: 'pointer', padding: '4px 12px', borderRadius: '20px', background: 'transparent' }} 
+      <div
+        style={{ display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: '6px', cursor: 'pointer', padding: '4px 12px', borderRadius: '20px', background: 'transparent' }}
         onClick={() => setExpanded(!expanded)}
       >
         <span style={{ fontWeight: 600 }}>About ManSula BOS</span>
@@ -1393,7 +1393,7 @@ function SeoFooter() {
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </div>
-      
+
       {expanded && (
         <div style={{ marginTop: '16px', opacity: 1, transition: 'opacity 0.3s' }}>
           <p>
@@ -1440,10 +1440,10 @@ function SettingsThemeModal({ onClose, onChangeTheme, currentTheme }) {
           </button>
         </div>
         <div style={{ marginTop: '24px' }}>
-          <button 
+          <button
             type="button"
-            className="bp-btn-primary" 
-            style={{ width: '100%', padding: '14px', fontSize: '1.05rem', borderRadius: '12px' }} 
+            className="bp-btn-primary"
+            style={{ width: '100%', padding: '14px', fontSize: '1.05rem', borderRadius: '12px' }}
             onClick={(e) => { e.stopPropagation(); onClose(); }}
           >
             Close

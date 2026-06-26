@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'robots.txt'],
+      includeAssets: ['favicon.svg', 'favicon.ico', 'favicon-96x96.png', 'logo.png', 'apple-touch-icon.png', 'robots.txt'],
       manifest: {
         name: 'MS BOS',
         short_name: 'MS BOS',
