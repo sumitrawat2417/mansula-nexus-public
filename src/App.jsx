@@ -84,6 +84,25 @@ function OfflineBanner({ onDismiss }) {
   )
 }
 
+function InstallBanner({ onInstall, onDismiss }) {
+  return (
+    <div className="mn-offline-banner" style={{ bottom: 'auto', top: '20px', background: 'var(--brand-primary)', color: '#fff', border: 'none', zIndex: 999999 }}>
+      <div className="mn-offline-icon" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </div>
+      <div className="mn-offline-text" style={{ flex: 1 }}>
+        <strong>Install App</strong> — Add MS BOS to your home screen.
+      </div>
+      <button onClick={onInstall} style={{ background: '#fff', color: 'var(--brand-primary)', border: 'none', borderRadius: '20px', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', marginRight: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
+        Install
+      </button>
+      <button className="mn-offline-close" onClick={onDismiss} aria-label="Dismiss" style={{ color: '#fff', padding: 4 }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+      </button>
+    </div>
+  )
+}
+
 export const CURRENCIES = [
   { code: 'INR', symbol: '₹', rate: 1, decimals: 0 },
   { code: 'USD', symbol: '$', rate: 0.012, decimals: 2 },
@@ -122,6 +141,29 @@ export default function App() {
   })
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [dismissOffline, setDismissOffline] = useState(false)
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
+  const [showInstallBanner, setShowInstallBanner] = useState(false)
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+      setShowInstallBanner(true)
+    }
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+  }, [])
+
+  const handleInstallApp = async () => {
+    if (!deferredPrompt) return
+    deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+    if (outcome === 'accepted') {
+      setShowInstallBanner(false)
+    }
+    setDeferredPrompt(null)
+  }
+
   useEffect(() => {
     // Check if business profile is setup
     dbGet('mn-business').then(b => {
@@ -260,6 +302,12 @@ export default function App() {
       {renderScreen()}
       {!isOnline && !dismissOffline && (
         <OfflineBanner onDismiss={() => setDismissOffline(true)} />
+      )}
+      {showInstallBanner && (
+        <InstallBanner 
+          onInstall={handleInstallApp} 
+          onDismiss={() => setShowInstallBanner(false)} 
+        />
       )}
       <ReloadPrompt />
     </AlertProvider>
