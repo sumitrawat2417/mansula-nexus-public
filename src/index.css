@@ -1530,15 +1530,17 @@ select {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: white;
-  border-radius: 50%;
-  padding: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  width: 48px;
+  height: 48px;
+  background: #ffffff;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #6366f1;
+  overflow: hidden;
 }
+.upi-qr-logo img { width: 100%; height: 100%; object-fit: cover; }
 
 .upi-qr-meta {
   display: flex;
@@ -2653,13 +2655,15 @@ select {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
   flex-shrink: 0;
+  overflow: hidden;
 }
+.hn-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
 
 .hn-brand-main {
   font-size: 1rem;
@@ -3801,14 +3805,15 @@ select {
   width: 72px;
   height: 72px;
   border-radius: 22px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 10px 32px rgba(99,102,241,0.45);
+  overflow: hidden;
 }
 
-.hns-about-logo-wrap svg { width: 36px; height: 36px; }
+.hns-about-logo-wrap img { width: 100%; height: 100%; object-fit: cover; }
 
 .hns-about-name {
   font-size: 1.4rem;
@@ -4737,14 +4742,15 @@ select {
   width: 60px;
   height: 60px;
   border-radius: 18px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+  overflow: hidden;
 }
 
-.hns-about-logo-wrap svg { width: 30px; height: 30px; }
+.hns-about-logo-wrap img { width: 100%; height: 100%; object-fit: cover; }
 
 .hns-about-name {
   font-size: 1.2rem;
@@ -8407,21 +8413,16 @@ select {
   width: 76px;
   height: 76px;
   border-radius: 22px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
   transition: all 1s ease;
+  overflow: hidden;
 }
+.wel-logo img { width: 100%; height: 100%; object-fit: cover; }
 
-.wel-logo svg {
-  width: 36px;
-  height: 36px;
-}
+
 
 .wel-logo-ring {
   position: absolute;
