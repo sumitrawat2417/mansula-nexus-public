@@ -25,6 +25,19 @@ This project uses a dual-repository deployment strategy:
 
 ## Changelog
 
+### v1.7.0-alpha — Full Ecosystem: Inventory, Staff, Customers, Analytics & PWA
+*   **Feature: PWA Support** — Full Progressive Web App (PWA) configuration allowing offline installation on desktop and mobile devices via `vite-plugin-pwa`.
+*   **Feature: Customers & Udhaar Tool** — Track customers, view their order history, manage credit balances (Udhaar), and record partial or full settlements with complete logs.
+*   **Feature: Inventory & Suppliers Tool** — Comprehensive stock management with low-stock alerts. Create items, define units (kg, L, pcs), link to suppliers, and log purchases to auto-update stock and calculate raw material costs.
+*   **Feature: Staff & Attendance Tool** — Manage employees, set roles/wages, and let staff clock in/out for their shifts. Generates exportable CSV timesheets.
+*   **Feature: Analytics Dashboard** — A comprehensive analytics tool featuring revenue trend charts, a product performance podium (top sellers), and customer leaderboards.
+*   **Feature: Order Records & Reports Tools** — View, search, and export all historical orders. A dedicated Reports tool provides Daily Summaries, Profit & Loss analysis, and Item-wise Purchase Reports.
+*   **Feature: Customizable Home Grid** — Users can drag, drop, and save the order of their tools on the Home Hub.
+*   **Feature: Dedicated Backup Extensions** — Each tool now exports its own cleanly isolated backup file with custom extensions (`.bpms` for Business Profile, `.inms` for Inventory, `.orms` for Orders, `.crms` for Customers, and `.msbos` for Full System).
+*   **UI Polish: Unified Modals & Buttons** — Upgraded export/data modals across all tools with premium solid-color buttons for actions like restoring and wiping data, matching the unified `an-tab-container` design language.
+
+---
+
 ### v1.6.0-alpha — Persistent Data, Home UI & Business Setup
 *   **Feature: Home Hub** — A new premium Home screen with interactive tool cards. The app now boots to the Home screen instead of directly to the POS.
 *   **Feature: Business Profile Tool** — New tool to manage business name, logo, contact info, and tax/legal details. Includes a read-only profile view and an edit mode.

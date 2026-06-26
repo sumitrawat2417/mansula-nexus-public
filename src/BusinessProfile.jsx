@@ -864,16 +864,6 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
     URL.revokeObjectURL(url)
   }
 
-  const handleShareBackup = async () => {
-    const payload = { _version: 1, _exported: new Date().toISOString(), business, products, categories }
-    const json = JSON.stringify(payload, null, 2)
-    const blob = new Blob([json], { type: 'application/json' })
-    const name = (business.name || 'mansula-bos').replace(/\s+/g, '-').toLowerCase()
-    const filename = `${name}-backup-${new Date().toISOString().slice(0, 10)}.bpms`
-    const res = await shareFile(blob, filename, 'Business Profile Backup')
-    if (!res.success && !res.aborted) alert(res.message)
-  }
-
   // ── Import backup ──
   const handleImport = async (e) => {
     const file = e.target.files?.[0]
@@ -1129,14 +1119,9 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
               <div className="bp-backup-card-title">Save Backup to Device</div>
               <div className="bp-backup-card-desc">Downloads a <code>.bpms</code> file containing your business profile, full product catalogue, and category list. Keep it safe — you can restore everything from this file.</div>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="bp-btn-primary" style={{ flex: 1 }} onClick={handleExport}>
-                <Ic.Download /> Download
-              </button>
-              <button className="bp-btn-primary" style={{ flex: 1, background: '#25D366', color: '#fff', border: 'none' }} onClick={handleShareBackup}>
-                <Ic.Share s={16} /> Share WA
-              </button>
-            </div>
+            <button className="bp-btn-primary" onClick={handleExport}>
+              <Ic.Download /> Download Backup
+            </button>
           </div>
 
           {/* Import */}
@@ -1146,7 +1131,7 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
               <div className="bp-backup-card-title">Restore from Backup</div>
               <div className="bp-backup-card-desc">Upload a previously downloaded <code>.bpms</code> backup file to restore your business data, products, and categories. This will overwrite your current data.</div>
             </div>
-            <button className="bp-btn-outline" onClick={() => importRef.current?.click()}>
+            <button className="bp-btn-primary" style={{ background: '#10b981', color: '#fff', border: 'none' }} onClick={() => importRef.current?.click()}>
               <Ic.Upload /> Restore Backup
             </button>
           </div>

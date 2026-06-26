@@ -238,7 +238,7 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
 }
 
 // ── Export Modal ──
-function ExportModal({ onClose, onExportCSV, onBackup, onShareBackup, onRestoreRef, onClearAll }) {
+function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll }) {
   useBackButton(onClose)
   const cardStyle = { padding: '12px 14px', gap: '10px' };
   const iconStyle = { width: 36, height: 36, flexShrink: 0 };
@@ -274,14 +274,9 @@ function ExportModal({ onClose, onExportCSV, onBackup, onShareBackup, onRestoreR
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.orms</code> file containing all your order records. Keep it safe to restore later.</div>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '8px', marginTop: 10 }}>
-              <button className="bp-btn-primary" style={{ flex: 1, background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
-                <I.Download s={14} /> Download
-              </button>
-              <button className="bp-btn-primary" style={{ flex: 1, background: '#25D366', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onShareBackup}>
-                <I.Share s={14} /> Share WA
-              </button>
-            </div>
+            <button className="bp-btn-primary" style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
+              <I.Download s={14} /> Download Backup
+            </button>
           </div>
 
           <div className="bp-backup-card bp-backup-import" style={cardStyle}>
@@ -292,7 +287,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onShareBackup, onRestoreR
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.orms</code> backup file to restore your historical order records.</div>
               </div>
             </div>
-            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
+            <button className="bp-btn-primary" style={{ background: '#10b981', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
               <I.Upload s={14} /> Restore Backup
             </button>
           </div>
@@ -305,7 +300,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onShareBackup, onRestoreR
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Permanently delete all order records and reset the order counter to #1. This cannot be undone.</div>
               </div>
             </div>
-            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onClearAll}>
+            <button className="bp-btn-primary" style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onClearAll}>
               <I.Trash s={14} /> Reset Order Records
             </button>
           </div>
@@ -443,16 +438,6 @@ export default function OrderRecords({ onClose, currency, onEdit, onNavigate }) 
     URL.revokeObjectURL(url)
   }
 
-  const handleShareBackup = async () => {
-    const blob = await exportOrdersBackup()
-    if (!blob) return showAlert('Backup failed. Please try again.', { title: 'Backup Failed', type: 'danger', confirmText: 'OK' })
-    const d = new Date()
-    const dStr = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear()
-    const filename = `MansulaBOS_OrdersBackup_${dStr}.orms`
-    const res = await shareFile(blob, filename, 'Order Records Backup')
-    if (!res.success && !res.aborted) showAlert(res.message, { type: 'danger' })
-  }
-
   const handleRestore = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -501,7 +486,6 @@ export default function OrderRecords({ onClose, currency, onEdit, onNavigate }) 
           onClose={() => setExportModalOpen(false)} 
           onExportCSV={() => { exportCSV(); setExportModalOpen(false); }} 
           onBackup={() => { handleBackup(); setExportModalOpen(false); }} 
-          onShareBackup={() => { handleShareBackup(); setExportModalOpen(false); }}
           onRestoreRef={fileInputRef}
           onClearAll={handleClearAll}
         />

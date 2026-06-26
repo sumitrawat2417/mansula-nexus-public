@@ -121,7 +121,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onShareBackup, onRestoreR
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.inms</code> backup file to restore your inventory data.</div>
               </div>
             </div>
-            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
+            <button className="bp-btn-primary" style={{ background: '#10b981', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
               <span style={{ width: 14, height: 14, display: 'flex' }}><Ic.Upload /></span> Restore Backup
             </button>
           </div>
@@ -134,7 +134,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onShareBackup, onRestoreR
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Permanently delete all live stock, purchase logs, and suppliers. This cannot be undone.</div>
               </div>
             </div>
-            <button className="bp-btn-danger" style={{ background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onClearAll}>
+            <button className="bp-btn-primary" style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onClearAll}>
               <span style={{ width: 14, height: 14, display: 'flex' }}><Ic.Trash /></span> Reset Inventory
             </button>
           </div>

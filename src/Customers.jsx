@@ -1000,7 +1000,7 @@ function exportCustomersCSV(customers) {
 }
 
 // ── Customer Data Export Modal ──
-function CustomerDataExportModal({ onClose, onExportCSV, onBackup, onShareBackup, onRestoreRef, onClearAll }) {
+function CustomerDataExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll }) {
   useBackButton(onClose)
   const cardStyle = { padding: '12px 14px', gap: '10px' };
   const iconStyle = { width: 36, height: 36, flexShrink: 0 };
@@ -1049,7 +1049,7 @@ function CustomerDataExportModal({ onClose, onExportCSV, onBackup, onShareBackup
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.crms</code> backup file to restore customers.</div>
               </div>
             </div>
-            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
+            <button className="bp-btn-primary" style={{ background: '#10b981', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
               <Ic.Upload s={14} /> Restore Backup
             </button>
           </div>
@@ -1062,7 +1062,7 @@ function CustomerDataExportModal({ onClose, onExportCSV, onBackup, onShareBackup
                 <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Permanently delete all customers and udhaar entries. This cannot be undone.</div>
               </div>
             </div>
-            <button className="bp-btn-outline" style={{ background: 'transparent', color: '#ef4444', border: '1.5px solid #ef4444', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onClearAll}>
+            <button className="bp-btn-primary" style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onClearAll}>
               <Ic.Trash s={14} /> Reset Customer Records
             </button>
           </div>
@@ -1333,7 +1333,6 @@ export default function Customers({ onClose, onNavigate }) {
           onClose={() => setExportModalOpen(false)}
           onExportCSV={handleExportCSV}
           onBackup={handleBackup}
-          onShareBackup={handleShareBackup}
           onRestoreRef={fileInputRef}
           onClearAll={handleClearAll}
         />

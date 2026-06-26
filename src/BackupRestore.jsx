@@ -141,26 +141,14 @@ export default function BackupRestore({ onClose }) {
     if (!blob) { showAlert('Failed to export backup.', { type: 'danger' }); return }
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    const dStr = new Date().toISOString().slice(0, 10)
     a.href = url
+    const d = new Date()
+    const dStr = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear()
     a.download = `MansulaBOS_FullBackup_${dStr}.msbos`
     a.click()
     URL.revokeObjectURL(url)
     localStorage.setItem('mn-last-backup-date', new Date().toDateString())
     showAlert('Backup exported successfully!', { type: 'success' })
-  }
-
-  const handleShareBackup = async () => {
-    const blob = await exportUltimateBackup()
-    if (!blob) { showAlert('Failed to export backup.', { type: 'danger' }); return }
-    const dStr = new Date().toISOString().slice(0, 10)
-    const filename = `MansulaBOS_FullBackup_${dStr}.msbos`
-    const res = await shareFile(blob, filename, 'Ultimate Backup')
-    if (res.success) {
-      localStorage.setItem('mn-last-backup-date', new Date().toDateString())
-    } else if (!res.aborted) {
-      showAlert(res.message, { type: 'danger' })
-    }
   }
 
   const handleBackupRestore = async (e) => {
@@ -321,14 +309,9 @@ export default function BackupRestore({ onClose }) {
           title="Create Full Backup"
           desc={<>Downloads a <code style={{ fontFamily: 'monospace', fontSize: '0.9em', background: 'var(--bg-surface-2)', padding: '1px 4px', borderRadius: 4, color: 'var(--brand-primary)' }}>.msbos</code> snapshot of your entire system.</>}
         >
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <Pill color="#6366f1" onClick={handleBackupExport} disabled={resetStep > 0}>
-              <Ic.Download style={{ width: 13, height: 13 }} /> Download
-            </Pill>
-            <Pill color="#25D366" onClick={handleShareBackup} disabled={resetStep > 0}>
-              <Ic.Share style={{ width: 13, height: 13 }} /> Share
-            </Pill>
-          </div>
+          <Pill color="#6366f1" onClick={handleBackupExport} disabled={resetStep > 0}>
+            <Ic.Download style={{ width: 13, height: 13 }} /> Download
+          </Pill>
         </ActionRow>
 
         {/* Restore Backup */}
