@@ -377,6 +377,10 @@ export default function App() {
       return <Staff onClose={() => setScreen('home')} />
     }
 
+    if (screen === 'backup') {
+      return <BackupRestore onClose={() => setScreen('home')} />
+    }
+
     return (
       <Home
         onLaunch={setScreen}
