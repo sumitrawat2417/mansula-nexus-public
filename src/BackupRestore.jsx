@@ -14,7 +14,7 @@ const Ic = {
 
 export default function BackupRestore({ onClose }) {
   useBackButton(onClose)
-  const { showAlert, showConfirm } = useAlert()
+  const { alert: showAlert, confirm: showConfirm } = useAlert()
   const [resetStep, setResetStep] = useState(0)
   const fileInputRef = useRef(null)
   
