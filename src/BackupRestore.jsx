@@ -92,18 +92,16 @@ export default function BackupRestore({ onClose }) {
     <div className="bp-root">
       {/* Header */}
       <header className="bp-header">
-        <button className="bp-back-btn" onClick={onClose} disabled={resetStep > 0}>
-          <Ic.Close />
-        </button>
         <div className="bp-header-title">
           <div className="bp-header-main">Backup & Restore</div>
         </div>
+        <button className="bp-back-btn" onClick={onClose} disabled={resetStep > 0}>
+          <Ic.Close />
+        </button>
       </header>
 
-      <div className="bp-body" style={{ maxWidth: '600px', margin: '0 auto', width: '100%', padding: '20px 16px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          
-          {/* Status Panel */}
+      <div className="bp-body">
+        {/* Status Panel */}
           <div style={{ background: 'linear-gradient(135deg, #6c3de5, #8b5cf6)', borderRadius: '20px', padding: '24px', color: '#fff', boxShadow: '0 12px 32px rgba(108, 61, 229, 0.25)', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', right: '-20px', top: '-20px', opacity: 0.1, transform: 'scale(3)' }}><Ic.Shield /></div>
             <div style={{ position: 'relative', zIndex: 1 }}>
@@ -129,14 +127,25 @@ export default function BackupRestore({ onClose }) {
               <div className="bp-backup-card-title">Push Notifications</div>
               <div className="bp-backup-card-desc">Get native reminders for daily backups and when new app updates are available.</div>
             </div>
-            <button 
-              className={notifPerm === 'granted' ? "bp-btn-outline" : "bp-btn-primary"} 
-              onClick={handleEnableNotifications}
-              disabled={notifPerm === 'granted' || resetStep > 0}
-              style={notifPerm === 'granted' ? { color: '#10b981', borderColor: '#10b981', background: 'rgba(16, 185, 129, 0.08)', cursor: 'default' } : {}}
-            >
-              {notifPerm === 'granted' ? 'Enabled' : 'Enable'}
-            </button>
+            <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+              <button 
+                className={notifPerm === 'granted' ? "bp-btn-outline" : "bp-btn-primary"} 
+                onClick={handleEnableNotifications}
+                disabled={notifPerm === 'granted' || resetStep > 0}
+                style={notifPerm === 'granted' ? { flex: 1, color: '#10b981', borderColor: '#10b981', background: 'rgba(16, 185, 129, 0.08)', cursor: 'default' } : { flex: 1 }}
+              >
+                {notifPerm === 'granted' ? 'Enabled' : 'Enable Notifications'}
+              </button>
+              {notifPerm === 'granted' && (
+                <button 
+                  className="bp-btn-ghost" 
+                  onClick={() => sendLocalNotification('Test Notification', { body: 'Notifications are working perfectly!' })}
+                  disabled={resetStep > 0}
+                >
+                  Test
+                </button>
+              )}
+            </div>
           </div>
 
           <div style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '8px', color: 'var(--text-primary)' }}>Data Operations</div>
@@ -191,7 +200,6 @@ export default function BackupRestore({ onClose }) {
             </button>
           </div>
 
-        </div>
       </div>
       
       {resetStep === 2 && (
