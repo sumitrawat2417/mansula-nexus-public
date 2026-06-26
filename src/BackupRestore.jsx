@@ -6,13 +6,13 @@ import { requestNotificationPermission, getNotificationPermission, sendLocalNoti
 
 const Ic = {
   Close: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>,
-  Download: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
-  Upload: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+  Download: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>,
+  Upload: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>,
   Trash: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>,
   Check: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
-  Shield: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-  Alert: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
-  Bell: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+  Shield: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>,
+  Alert: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>,
+  Bell: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>,
 }
 
 export default function BackupRestore({ onClose }) {
@@ -21,7 +21,7 @@ export default function BackupRestore({ onClose }) {
   const [resetStep, setResetStep] = useState(0)
   const [notifPerm, setNotifPerm] = useState(getNotificationPermission())
   const fileInputRef = useRef(null)
-  
+
   const lastBackup = localStorage.getItem('mn-last-backup-date')
 
   const handleEnableNotifications = async () => {
@@ -48,11 +48,11 @@ export default function BackupRestore({ onClose }) {
     a.download = `MansulaBOS_FullBackup_${dStr}.msbos`
     a.click()
     URL.revokeObjectURL(url)
-    
+
     // Update last backup date
     const today = new Date().toDateString()
     localStorage.setItem('mn-last-backup-date', today)
-    
+
     showAlert('Backup exported successfully.', { type: 'success' })
   }
 
@@ -92,13 +92,13 @@ export default function BackupRestore({ onClose }) {
   return (
     <div className="bp-root">
       {/* Header */}
-      <header className="bp-header">
-        <div className="bp-header-title">
-          <div className="bp-header-main">Backup & Restore</div>
-        </div>
-        <button className="bp-back-btn" onClick={onClose} disabled={resetStep > 0}>
-          <Ic.Close />
+      <header className="or-header">
+        <button className="or-back-btn" onClick={onClose} disabled={resetStep > 0}>
+          <Ic.ChevL style={{ width: 24, height: 24 }} />
         </button>
+        <div className="or-header-title">
+          <Ic.Shield style={{ width: 19, height: 19 }} /> Backup & Restore
+        </div>
       </header>
 
       <div className="bp-body">
@@ -133,92 +133,92 @@ export default function BackupRestore({ onClose }) {
           </div>
         )}
 
-          <div style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '8px', color: 'var(--text-primary)' }}>System Preferences</div>
+        <div style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '8px', color: 'var(--text-primary)' }}>System Preferences</div>
 
-          {/* Notifications Card */}
-          <div className="bp-backup-card" style={{ marginBottom: 0 }}>
-            <div className="bp-backup-card-icon" style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--brand-primary)' }}>
-              <Ic.Bell />
-            </div>
-            <div className="bp-backup-card-info">
-              <div className="bp-backup-card-title">Push Notifications</div>
-              <div className="bp-backup-card-desc">Get native reminders for daily backups and when new app updates are available.</div>
-            </div>
-            <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-              <button 
-                className={notifPerm === 'granted' ? "bp-btn-outline" : "bp-btn-primary"} 
-                onClick={handleEnableNotifications}
-                disabled={notifPerm === 'granted' || resetStep > 0}
-                style={notifPerm === 'granted' ? { flex: 1, color: '#10b981', borderColor: '#10b981', background: 'rgba(16, 185, 129, 0.08)', cursor: 'default' } : { flex: 1 }}
+        {/* Notifications Card */}
+        <div className="bp-backup-card" style={{ marginBottom: 0 }}>
+          <div className="bp-backup-card-icon" style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--brand-primary)' }}>
+            <Ic.Bell />
+          </div>
+          <div className="bp-backup-card-info">
+            <div className="bp-backup-card-title">Push Notifications</div>
+            <div className="bp-backup-card-desc">Get native reminders for daily backups and when new app updates are available.</div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+            <button
+              className={notifPerm === 'granted' ? "bp-btn-outline" : "bp-btn-primary"}
+              onClick={handleEnableNotifications}
+              disabled={notifPerm === 'granted' || resetStep > 0}
+              style={notifPerm === 'granted' ? { flex: 1, color: '#10b981', borderColor: '#10b981', background: 'rgba(16, 185, 129, 0.08)', cursor: 'default' } : { flex: 1 }}
+            >
+              {notifPerm === 'granted' ? 'Enabled' : 'Enable Notifications'}
+            </button>
+            {notifPerm === 'granted' && (
+              <button
+                className="bp-btn-ghost"
+                onClick={() => sendLocalNotification('MS Bos - Test Notification', { body: 'Notifications are working perfectly!' })}
+                disabled={resetStep > 0}
               >
-                {notifPerm === 'granted' ? 'Enabled' : 'Enable Notifications'}
+                Test
               </button>
-              {notifPerm === 'granted' && (
-                <button 
-                  className="bp-btn-ghost" 
-                  onClick={() => sendLocalNotification('Test Notification', { body: 'Notifications are working perfectly!' })}
-                  disabled={resetStep > 0}
-                >
-                  Test
-                </button>
-              )}
-            </div>
+            )}
           </div>
+        </div>
 
-          <div style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '8px', color: 'var(--text-primary)' }}>Data Operations</div>
+        <div style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '8px', color: 'var(--text-primary)' }}>Data Operations</div>
 
-          {/* Export Card */}
-          <div className="bp-backup-card bp-backup-export" style={{ marginBottom: 0 }}>
-            <div className="bp-backup-card-icon"><Ic.Download /></div>
-            <div className="bp-backup-card-info">
-              <div className="bp-backup-card-title">Create Ultimate Backup</div>
-              <div className="bp-backup-card-desc">Downloads a full snapshot <code>.msbos</code> file of your entire system.</div>
-            </div>
-            <button 
-              className="bp-btn-primary" 
-              onClick={handleBackupExport}
-              disabled={resetStep > 0}
-            >
-              <Ic.Download /> Download Now
-            </button>
+        {/* Export Card */}
+        <div className="bp-backup-card bp-backup-export" style={{ marginBottom: 0 }}>
+          <div className="bp-backup-card-icon"><Ic.Download /></div>
+          <div className="bp-backup-card-info">
+            <div className="bp-backup-card-title">Create Ultimate Backup</div>
+            <div className="bp-backup-card-desc">Downloads a full snapshot <code>.msbos</code> file of your entire system.</div>
           </div>
+          <button
+            className="bp-btn-primary"
+            onClick={handleBackupExport}
+            disabled={resetStep > 0}
+          >
+            <Ic.Download /> Download Now
+          </button>
+        </div>
 
-          {/* Restore Card */}
-          <div className="bp-backup-card bp-backup-import" style={{ marginBottom: 0 }}>
-            <div className="bp-backup-card-icon"><Ic.Upload /></div>
-            <div className="bp-backup-card-info">
-              <div className="bp-backup-card-title">Restore Ultimate Backup</div>
-              <div className="bp-backup-card-desc">Upload a previously saved <code>.msbos</code> or <code>.json</code> file to overwrite and restore your data.</div>
-            </div>
-            <input type="file" accept=".json,.msbos" style={{ display: 'none' }} ref={fileInputRef} onChange={handleBackupRestore} />
-            <button 
-              className="bp-btn-outline" 
-              onClick={() => fileInputRef.current?.click()}
-              disabled={resetStep > 0}
-            >
-              <Ic.Upload /> Select Backup File
-            </button>
+        {/* Restore Card */}
+        <div className="bp-backup-card bp-backup-import" style={{ marginBottom: 0 }}>
+          <div className="bp-backup-card-icon"><Ic.Upload /></div>
+          <div className="bp-backup-card-info">
+            <div className="bp-backup-card-title">Restore Ultimate Backup</div>
+            <div className="bp-backup-card-desc">Upload a previously saved <code>.msbos</code> or <code>.json</code> file to overwrite and restore your data.</div>
           </div>
+          <input type="file" accept=".json,.msbos" style={{ display: 'none' }} ref={fileInputRef} onChange={handleBackupRestore} />
+          <button
+            className="bp-btn-outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={resetStep > 0}
+          >
+            <Ic.Upload /> Select Backup File
+          </button>
+        </div>
 
-          {/* Wipe Card */}
-          <div className="bp-backup-card" style={{ marginBottom: 0, borderColor: 'rgba(239, 68, 68, 0.2)', backgroundColor: 'rgba(239,68,68,0.02)' }}>
-            <div className="bp-backup-card-icon" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}><Ic.Trash /></div>
-            <div className="bp-backup-card-info">
-              <div className="bp-backup-card-title" style={{ color: '#ef4444' }}>Danger Zone</div>
-              <div className="bp-backup-card-desc">Permanently delete all your business data, products, and settings. Cannot be undone.</div>
-            </div>
-            <button 
-              className="bp-btn-outline" 
-              onClick={handleWipeData}
-              disabled={resetStep > 0}
-              style={{ color: '#ef4444', borderColor: '#ef4444', background: 'rgba(239, 68, 68, 0.08)' }}
-            >
-              <Ic.Trash style={{ width: 14, height: 14 }} /> Reset All Data
-            </button>
+        {/* Wipe Card */}
+        <div className="bp-backup-card" style={{ marginBottom: 0, borderColor: 'rgba(239, 68, 68, 0.2)', backgroundColor: 'rgba(239,68,68,0.02)' }}>
+          <div className="bp-backup-card-icon" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}><Ic.Trash /></div>
+          <div className="bp-backup-card-info">
+            <div className="bp-backup-card-title" style={{ color: '#ef4444' }}>Danger Zone</div>
+            <div className="bp-backup-card-desc">Permanently delete all your business data, products, and settings. Cannot be undone.</div>
           </div>
+          <button
+            className="bp-btn-outline"
+            onClick={handleWipeData}
+            disabled={resetStep > 0}
+            style={{ color: '#ef4444', borderColor: '#ef4444', background: 'rgba(239, 68, 68, 0.08)' }}
+          >
+            <Ic.Trash style={{ width: 14, height: 14 }} /> Reset All Data
+          </button>
+        </div>
 
       </div>
-      
+
       {resetStep === 2 && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '1.2rem', fontWeight: 700 }}>
           Processing... Please wait.
