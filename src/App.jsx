@@ -207,6 +207,8 @@ export const TAX_RATES = [
   { label: 'GST 28%', value: 0.28 },
 ]
 
+import { sendLocalNotification, getNotificationPermission } from './notificationUtils.js'
+
 const AGREEMENT_KEY = 'mn-agreement-accepted'
 
 export default function App() {
@@ -268,6 +270,28 @@ export default function App() {
         setOnboardingStep('spotlight-business')
       }
     })
+
+    // Background interval to check for daily backup (runs every 1 hour)
+    const checkBackupInterval = setInterval(() => {
+      if (getNotificationPermission() !== 'granted') return
+      
+      const lastBackupDate = localStorage.getItem('mn-last-backup-date')
+      const today = new Date().toDateString()
+      
+      // If we haven't backed up today, and it's past 18:00 (6 PM)
+      if (lastBackupDate !== today && new Date().getHours() >= 18) {
+        const lastNotified = localStorage.getItem('mn-backup-notified-date')
+        if (lastNotified !== today) {
+          sendLocalNotification('🛡️ Backup Recommended', {
+            body: 'You haven\'t backed up your data today. Take a secure snapshot now.',
+            tag: 'daily-backup'
+          })
+          localStorage.setItem('mn-backup-notified-date', today)
+        }
+      }
+    }, 1000 * 60 * 60) // every hour
+
+    return () => clearInterval(checkBackupInterval)
   }, [])
 
   useEffect(() => {

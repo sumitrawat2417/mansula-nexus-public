@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { APP_NAME, APP_VERSION } from './appInfo.js'
+import { sendLocalNotification } from './notificationUtils.js'
 
 export default function ReloadPrompt() {
   const {
@@ -15,6 +16,16 @@ export default function ReloadPrompt() {
       console.log('SW registration error', error)
     },
   })
+
+  useEffect(() => {
+    if (needRefresh) {
+      // Fire local native notification when update is available
+      sendLocalNotification(`Update Available`, {
+        body: `A new version of ${APP_NAME} is ready! Tap here to open and update.`,
+        tag: 'app-update'
+      })
+    }
+  }, [needRefresh])
 
   const close = () => {
     setOfflineReady(false)
