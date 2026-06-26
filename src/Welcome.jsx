@@ -105,7 +105,7 @@ export default function Welcome({ onComplete }) {
           <div className="wel-logo-ring wel-ring-outer" />
           <div className="wel-logo-ring wel-ring-inner" />
           <div className="wel-logo">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" style={{ width: '36px', height: '36px' }} />
+            <img src="/logo.png" alt="G" style={{ width: '42px', height: '42px', objectFit: 'contain' }} />
           </div>
         </div>
 

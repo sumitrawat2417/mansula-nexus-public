@@ -1505,7 +1505,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                                   />
                                 {/* UPI logo overlay */}
                                 <div className="upi-qr-logo">
-                                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
+                                  <img src="/logo.png" alt="Logo" width="24" height="24" style={{ objectFit: 'contain' }} />
                                 </div>
                               </div>
                               <div className="upi-qr-meta">
@@ -1670,7 +1670,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                                       className="upi-qr-img"
                                     />
                                     <div className="upi-qr-logo">
-                                      <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
+                                      <img src="/logo.png" alt="Logo" width="24" height="24" style={{ objectFit: 'contain' }} />
                                     </div>
                                   </div>
                                   <div style={{ textAlign: 'center', marginTop: 4, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>{business.upiId}</div>

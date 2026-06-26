@@ -528,7 +528,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup, onboarding
       await new Promise((res) => {
         logoImg.onload = () => { logoLoaded = true; res() }
         logoImg.onerror = res
-        logoImg.src = 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg'
+        logoImg.src = '/logo.png'
       })
 
       // ── TOP: Logo circle perfectly centered ──
@@ -774,7 +774,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup, onboarding
                     className="upi-qr-img"
                   />
                   <div className="upi-qr-logo">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" />
+                    <img src="/logo.png" alt="Logo" width="24" height="24" style={{ objectFit: 'contain' }} />
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
