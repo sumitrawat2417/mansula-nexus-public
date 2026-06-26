@@ -86,19 +86,106 @@ function OfflineBanner({ onDismiss }) {
 
 function InstallBanner({ onInstall, onDismiss }) {
   return (
-    <div className="mn-offline-banner" onClick={onInstall} style={{ bottom: 'auto', top: '20px', background: 'var(--brand-primary)', color: '#fff', border: 'none', zIndex: 999999, cursor: 'pointer' }}>
-      <div className="mn-offline-icon" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <div style={{
+      position: 'fixed',
+      top: '64px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: 'calc(100% - 32px)',
+      maxWidth: '460px',
+      zIndex: 999999,
+      animation: 'mn-install-slide-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+    }}>
+      <div style={{
+        background: 'linear-gradient(135deg, #6c3de5 0%, #8b5cf6 50%, #5b21b6 100%)',
+        borderRadius: '20px',
+        padding: '0',
+        boxShadow: '0 20px 60px rgba(108, 61, 229, 0.4), 0 8px 24px rgba(0,0,0,0.15)',
+        border: '1px solid rgba(255,255,255,0.15)',
+        overflow: 'hidden',
+        position: 'relative',
+      }}>
+        {/* Decorative glow blobs */}
+        <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-15px', left: '20px', width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px' }}>
+          {/* App Icon */}
+          <div style={{
+            width: '46px',
+            height: '46px',
+            borderRadius: '13px',
+            background: 'rgba(255,255,255,0.18)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <path d="M8 21h8M12 17v4"/>
+            </svg>
+          </div>
+
+          {/* Text */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '-0.01em', lineHeight: 1.2 }}>Install MS BOS</div>
+            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.76rem', marginTop: '2px', lineHeight: 1.3 }}>Add to home screen for the best experience</div>
+          </div>
+
+          {/* Install Button */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onInstall(e); }}
+            style={{
+              background: '#fff',
+              color: '#6c3de5',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '8px 16px',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              letterSpacing: '0.01em',
+              transition: 'transform 0.15s, box-shadow 0.15s',
+              flexShrink: 0,
+            }}
+            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
+            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            Install
+          </button>
+
+          {/* Dismiss */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onDismiss(e); }}
+            aria-label="Dismiss"
+            style={{
+              background: 'rgba(255,255,255,0.15)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '50%',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              cursor: 'pointer',
+              flexShrink: 0,
+              padding: 0,
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </button>
+        </div>
       </div>
-      <div className="mn-offline-text" style={{ flex: 1 }}>
-        <strong>Install App</strong> — Add MS BOS to your home screen.
-      </div>
-      <button onClick={onInstall} style={{ background: '#fff', color: 'var(--brand-primary)', border: 'none', borderRadius: '20px', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', marginRight: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
-        Install
-      </button>
-      <button className="mn-offline-close" onClick={onDismiss} aria-label="Dismiss" style={{ color: '#fff', padding: 4 }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-      </button>
     </div>
   )
 }
@@ -143,6 +230,7 @@ export default function App() {
   const [dismissOffline, setDismissOffline] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [showInstallBanner, setShowInstallBanner] = useState(false)
+  const [showInstallInfo, setShowInstallInfo] = useState(false)
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -171,9 +259,9 @@ export default function App() {
 
   const handleDismissBanner = (e) => {
     if (e && e.stopPropagation) e.stopPropagation()
-    // The user requested that clicking the cross button ALSO shows the install prompt
-    // So we will trigger handleInstallApp here as requested!
-    handleInstallApp(e)
+    setShowInstallBanner(false)
+    sessionStorage.setItem('mn-install-dismissed', 'true')
+    setShowInstallInfo(true)
   }
 
   useEffect(() => {
@@ -308,6 +396,16 @@ export default function App() {
 
   return (
     <AlertProvider>
+      <style>{`
+        @keyframes mn-install-slide-in {
+          from { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.95); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0)   scale(1); }
+        }
+        @keyframes mn-modal-fade-in {
+          from { opacity: 0; transform: scale(0.92); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
       {agreed && !hasPickedTheme && (
         <ThemeModal onConfirm={handleThemeConfirm} onChangeTheme={setTheme} currentTheme={theme} />
       )}
@@ -320,6 +418,18 @@ export default function App() {
           onInstall={handleInstallApp} 
           onDismiss={handleDismissBanner} 
         />
+      )}
+      {showInstallInfo && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000000, padding: '24px' }} onClick={() => setShowInstallInfo(false)}>
+          <div style={{ background: 'var(--bg-surface)', borderRadius: '24px', padding: '32px 24px 24px', maxWidth: '340px', width: '100%', textAlign: 'center', boxShadow: '0 32px 80px rgba(0,0,0,0.25)', animation: 'mn-modal-fade-in 0.3s ease both' }} onClick={e => e.stopPropagation()}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, #6c3de5, #8b5cf6)', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(108, 61, 229, 0.35)' }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <h3 style={{ margin: '0 0 10px', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)' }}>Install MS BOS</h3>
+            <p style={{ margin: '0 0 24px', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>MS BOS works best as an installed app. Tap your browser's menu and choose <strong>"Add to Home Screen"</strong> for a faster, full-screen experience — no internet needed!</p>
+            <button onClick={() => setShowInstallInfo(false)} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #6c3de5, #8b5cf6)', color: '#fff', border: 'none', borderRadius: '14px', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 6px 20px rgba(108, 61, 229, 0.4)' }}>Got it</button>
+          </div>
+        </div>
       )}
       <ReloadPrompt />
     </AlertProvider>
