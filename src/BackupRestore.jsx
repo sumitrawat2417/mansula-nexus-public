@@ -109,9 +109,30 @@ export default function BackupRestore({ onClose }) {
     : null
 
   const handleEnableNotifications = async () => {
-    const granted = await requestNotificationPermission()
-    setNotifPerm(getNotificationPermission())
-    if (!granted) showAlert('Notification permission denied or blocked by browser settings.', { type: 'warning' })
+    if (!('Notification' in window)) {
+      showAlert('Push notifications are not supported on this device/browser.', { type: 'danger' })
+      return
+    }
+    
+    try {
+      let handled = false
+      const handlePerm = (p) => {
+        if (handled) return
+        handled = true
+        setNotifPerm(p)
+        if (p !== 'granted') showAlert('Notification permission denied or blocked by browser settings.', { type: 'warning' })
+      }
+      
+      const promise = Notification.requestPermission(handlePerm)
+      if (promise && typeof promise.then === 'function') {
+        promise.then(handlePerm).catch(() => {
+          if (!handled) showAlert('Failed to request notification permission.', { type: 'danger' })
+        })
+      }
+    } catch (err) {
+      console.error(err)
+      showAlert('An error occurred while requesting permission.', { type: 'danger' })
+    }
   }
 
   const handleBackupExport = async () => {
