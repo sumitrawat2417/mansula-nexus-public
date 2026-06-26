@@ -235,7 +235,6 @@ export default function App() {
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault()
-      if (sessionStorage.getItem('mn-install-dismissed')) return
       setDeferredPrompt(e)
       setShowInstallBanner(true)
     }
@@ -247,20 +246,17 @@ export default function App() {
     if (e && e.stopPropagation) e.stopPropagation()
     if (!deferredPrompt) {
       setShowInstallBanner(false)
-      sessionStorage.setItem('mn-install-dismissed', 'true')
       return
     }
     deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
     setShowInstallBanner(false)
-    sessionStorage.setItem('mn-install-dismissed', 'true')
     setDeferredPrompt(null)
   }
 
   const handleDismissBanner = (e) => {
     if (e && e.stopPropagation) e.stopPropagation()
     setShowInstallBanner(false)
-    sessionStorage.setItem('mn-install-dismissed', 'true')
     setShowInstallInfo(true)
   }
 
