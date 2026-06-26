@@ -9,7 +9,7 @@ const playSound = (type) => {
   try {
     // Suppress console warning if user hasn't interacted yet
     if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
-    
+
     const AudioContext = window.AudioContext || window.webkitAudioContext
     if (!AudioContext) return
     const ctx = new AudioContext()
@@ -20,45 +20,45 @@ const playSound = (type) => {
       const gain = ctx.createGain()
       osc.connect(gain)
       gain.connect(ctx.destination)
-      
+
       osc.type = 'square'
       // Fast pitch sweep up
       osc.frequency.setValueAtTime(150, ctx.currentTime)
       osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.15)
-      
+
       gain.gain.setValueAtTime(0, ctx.currentTime)
       gain.gain.linearRampToValueAtTime(0.05 * vol, ctx.currentTime + 0.05)
       gain.gain.exponentialRampToValueAtTime(0.001 * vol, ctx.currentTime + 0.3)
-      
+
       osc.start(ctx.currentTime)
       osc.stop(ctx.currentTime + 0.3)
 
     } else if (type === 'burst') {
       // Big energetic synth impact/chord (C Major 9)
       const frequencies = [261.63, 329.63, 392.00, 493.88, 587.33] // C4, E4, G4, B4, D5
-      
+
       frequencies.forEach(freq => {
         const osc = ctx.createOscillator()
         const gain = ctx.createGain()
         const filter = ctx.createBiquadFilter()
-        
+
         osc.type = 'sawtooth'
         osc.frequency.setValueAtTime(freq, ctx.currentTime)
-        
+
         // Classic electronic filter sweep down
         filter.type = 'lowpass'
         filter.frequency.setValueAtTime(5000, ctx.currentTime)
         filter.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 1.2)
-        
+
         osc.connect(filter)
         filter.connect(gain)
         gain.connect(ctx.destination)
-        
+
         // Punchy attack, long fade out
         gain.gain.setValueAtTime(0, ctx.currentTime)
         gain.gain.linearRampToValueAtTime(0.03 * vol, ctx.currentTime + 0.02)
         gain.gain.exponentialRampToValueAtTime(0.001 * vol, ctx.currentTime + 2)
-        
+
         osc.start(ctx.currentTime)
         osc.stop(ctx.currentTime + 2)
       })
@@ -90,7 +90,7 @@ export default function Welcome({ onComplete }) {
 
   return (
     <div className={`wel-root ${stage === 4 ? 'exit' : ''}`}>
-      
+
       {/* ── Background Grid & Orbs ── */}
       <div className="wel-grid" />
       <div className={`wel-orb wel-orb-1 ${stage >= 1 ? 'active' : ''}`} />
@@ -99,13 +99,13 @@ export default function Welcome({ onComplete }) {
 
       {/* ── Main Content ── */}
       <div className="wel-content">
-        
+
         {/* Logo */}
         <div className={`wel-logo-wrap ${stage >= 1 ? 'show' : ''} ${stage >= 3 ? 'glow' : ''}`}>
           <div className="wel-logo-ring wel-ring-outer" />
           <div className="wel-logo-ring wel-ring-inner" />
           <div className="wel-logo">
-            <img src="/logo.png" alt="G" style={{ width: '42px', height: '42px', objectFit: 'contain' }} />
+            <img src="/logo.png" alt="G" style={{ width: '78px', height: '78px', objectFit: 'contain', borderRadius: '10px' }} />
           </div>
         </div>
 
@@ -115,7 +115,7 @@ export default function Welcome({ onComplete }) {
             <span className="wel-word">ManSula</span>
             <span className="wel-word wel-highlight">BOS</span>
           </h1>
-          
+
           <div className={`wel-subtitle-wrap ${stage >= 2 ? 'show' : ''}`}>
             <p className="wel-subtitle" style={{ fontSize: '0.85rem' }}>Empowering Commerce with Smart Technology</p>
             <div className="wel-loader-bar">
@@ -123,7 +123,7 @@ export default function Welcome({ onComplete }) {
             </div>
           </div>
         </div>
-        
+
       </div>
     </div>
   )
