@@ -11,6 +11,7 @@ const Ic = {
   Trash: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>,
   Check: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
   Shield: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  Alert: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
   Bell: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
 }
 
@@ -102,19 +103,35 @@ export default function BackupRestore({ onClose }) {
 
       <div className="bp-body">
         {/* Status Panel */}
-          <div style={{ background: 'linear-gradient(135deg, #6c3de5, #8b5cf6)', borderRadius: '20px', padding: '24px', color: '#fff', boxShadow: '0 12px 32px rgba(108, 61, 229, 0.25)', position: 'relative', overflow: 'hidden' }}>
+        {lastBackup === new Date().toDateString() ? (
+          <div style={{ background: 'linear-gradient(135deg, #10b981, #059669)', borderRadius: '20px', padding: '24px', color: '#fff', boxShadow: '0 12px 32px rgba(16, 185, 129, 0.25)', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', right: '-20px', top: '-20px', opacity: 0.1, transform: 'scale(3)' }}><Ic.Shield /></div>
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>System Status</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '16px' }}>
-                {lastBackup === new Date().toDateString() ? 'Data is secure today.' : 'Backup recommended.'}
+                Data is secure today.
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.2)', padding: '8px 12px', borderRadius: '10px', width: 'fit-content', backdropFilter: 'blur(10px)' }}>
                 <span style={{ width: 16, height: 16, display: 'flex' }}><Ic.Check /></span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Backed up today</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', borderRadius: '20px', padding: '24px', color: '#fff', boxShadow: '0 12px 32px rgba(245, 158, 11, 0.25)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', right: '-20px', top: '-20px', opacity: 0.1, transform: 'scale(3)' }}><Ic.Alert /></div>
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Action Required</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '16px' }}>
+                Backup recommended.
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.2)', padding: '8px 12px', borderRadius: '10px', width: 'fit-content', backdropFilter: 'blur(10px)' }}>
+                <span style={{ width: 16, height: 16, display: 'flex' }}><Ic.Alert /></span>
                 <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Last Backup: {lastBackup ? new Date(lastBackup).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Never'}</span>
               </div>
             </div>
           </div>
+        )}
 
           <div style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '8px', color: 'var(--text-primary)' }}>System Preferences</div>
 
