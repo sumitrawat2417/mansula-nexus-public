@@ -88,101 +88,101 @@ function InstallBanner({ onInstall, onDismiss }) {
   return (
     <div style={{
       position: 'fixed',
-      top: '64px',
+      bottom: '24px',
       left: '50%',
       transform: 'translateX(-50%)',
       width: 'calc(100% - 32px)',
-      maxWidth: '460px',
+      maxWidth: '420px',
       zIndex: 999999,
-      animation: 'mn-install-slide-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+      animation: 'mn-install-slide-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both',
     }}>
+      {/* Outer glow */}
       <div style={{
-        background: 'linear-gradient(135deg, #6c3de5 0%, #8b5cf6 50%, #5b21b6 100%)',
-        borderRadius: '20px',
-        padding: '0',
-        boxShadow: '0 20px 60px rgba(108, 61, 229, 0.4), 0 8px 24px rgba(0,0,0,0.15)',
-        border: '1px solid rgba(255,255,255,0.15)',
+        borderRadius: '22px',
+        background: 'var(--bg-surface, #ffffff)',
+        boxShadow: '0 8px 40px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(108,61,229,0.12)',
         overflow: 'hidden',
-        position: 'relative',
       }}>
-        {/* Decorative glow blobs */}
-        <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-15px', left: '20px', width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px' }}>
-          {/* App Icon */}
+        {/* Top accent line */}
+        <div style={{ height: '3px', background: 'linear-gradient(90deg, #6c3de5, #8b5cf6, #a78bfa)', borderRadius: '22px 22px 0 0' }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px 16px' }}>
+          {/* App icon badge */}
           <div style={{
-            width: '46px',
-            height: '46px',
-            borderRadius: '13px',
-            background: 'rgba(255,255,255,0.18)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.3)',
+            width: '44px',
+            height: '44px',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #6c3de5, #8b5cf6)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
+            boxShadow: '0 4px 12px rgba(108,61,229,0.35)',
           }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2"/>
-              <path d="M8 21h8M12 17v4"/>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
           </div>
 
           {/* Text */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '-0.01em', lineHeight: 1.2 }}>Install MS BOS</div>
-            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.76rem', marginTop: '2px', lineHeight: 1.3 }}>Add to home screen for the best experience</div>
+            <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary, #1a1a2e)', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+              Add MS BOS to Home Screen
+            </div>
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary, #6b7280)', marginTop: '3px', lineHeight: 1.35 }}>
+              Install for fast, offline access
+            </div>
           </div>
 
-          {/* Install Button */}
+          {/* Install CTA */}
           <button
             onClick={(e) => { e.stopPropagation(); onInstall(e); }}
             style={{
-              background: '#fff',
-              color: '#6c3de5',
+              background: 'linear-gradient(135deg, #6c3de5, #8b5cf6)',
+              color: '#fff',
               border: 'none',
-              borderRadius: '12px',
-              padding: '8px 16px',
-              fontSize: '0.82rem',
+              borderRadius: '10px',
+              padding: '9px 16px',
+              fontSize: '0.8rem',
               fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              letterSpacing: '0.01em',
-              transition: 'transform 0.15s, box-shadow 0.15s',
+              boxShadow: '0 4px 14px rgba(108,61,229,0.4)',
               flexShrink: 0,
+              transition: 'opacity 0.15s, transform 0.15s',
             }}
-            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
+            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
             onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
           >
             Install
           </button>
 
-          {/* Dismiss */}
+          {/* Dismiss ✕ */}
           <button
             onClick={(e) => { e.stopPropagation(); onDismiss(e); }}
             aria-label="Dismiss"
             style={{
-              background: 'rgba(255,255,255,0.15)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '50%',
+              background: 'transparent',
+              border: 'none',
               width: '28px',
               height: '28px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
+              color: 'var(--text-secondary, #9ca3af)',
               cursor: 'pointer',
+              borderRadius: '50%',
               flexShrink: 0,
               padding: 0,
-              transition: 'background 0.2s',
+              transition: 'background 0.15s, color 0.15s',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = 'var(--text-primary, #1a1a2e)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary, #9ca3af)'; }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
           </button>
         </div>
       </div>
@@ -394,8 +394,8 @@ export default function App() {
     <AlertProvider>
       <style>{`
         @keyframes mn-install-slide-in {
-          from { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.95); }
-          to   { opacity: 1; transform: translateX(-50%) translateY(0)   scale(1); }
+          from { opacity: 0; transform: translateX(-50%) translateY(24px) scale(0.96); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1); }
         }
         @keyframes mn-modal-fade-in {
           from { opacity: 0; transform: scale(0.92); }
