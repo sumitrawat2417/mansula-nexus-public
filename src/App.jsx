@@ -86,7 +86,7 @@ function OfflineBanner({ onDismiss }) {
 
 function InstallBanner({ onInstall, onDismiss }) {
   return (
-    <div className="mn-offline-banner" style={{ bottom: 'auto', top: '20px', background: 'var(--brand-primary)', color: '#fff', border: 'none', zIndex: 999999 }}>
+    <div className="mn-offline-banner" onClick={onInstall} style={{ bottom: 'auto', top: '20px', background: 'var(--brand-primary)', color: '#fff', border: 'none', zIndex: 999999, cursor: 'pointer' }}>
       <div className="mn-offline-icon" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </div>
@@ -147,6 +147,7 @@ export default function App() {
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault()
+      if (sessionStorage.getItem('mn-install-dismissed')) return
       setDeferredPrompt(e)
       setShowInstallBanner(true)
     }
@@ -154,14 +155,25 @@ export default function App() {
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
   }, [])
 
-  const handleInstallApp = async () => {
-    if (!deferredPrompt) return
+  const handleInstallApp = async (e) => {
+    if (e && e.stopPropagation) e.stopPropagation()
+    if (!deferredPrompt) {
+      setShowInstallBanner(false)
+      sessionStorage.setItem('mn-install-dismissed', 'true')
+      return
+    }
     deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
-    if (outcome === 'accepted') {
-      setShowInstallBanner(false)
-    }
+    setShowInstallBanner(false)
+    sessionStorage.setItem('mn-install-dismissed', 'true')
     setDeferredPrompt(null)
+  }
+
+  const handleDismissBanner = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation()
+    // The user requested that clicking the cross button ALSO shows the install prompt
+    // So we will trigger handleInstallApp here as requested!
+    handleInstallApp(e)
   }
 
   useEffect(() => {
@@ -303,10 +315,10 @@ export default function App() {
       {!isOnline && !dismissOffline && (
         <OfflineBanner onDismiss={() => setDismissOffline(true)} />
       )}
-      {showInstallBanner && (
+      {!showWelcome && agreed && showInstallBanner && (
         <InstallBanner 
           onInstall={handleInstallApp} 
-          onDismiss={() => setShowInstallBanner(false)} 
+          onDismiss={handleDismissBanner} 
         />
       )}
       <ReloadPrompt />
