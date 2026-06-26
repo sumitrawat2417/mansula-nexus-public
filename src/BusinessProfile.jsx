@@ -711,7 +711,7 @@ function ProfileView({ business, taxRateObj, onEdit, onRestoreBackup, onboarding
         <button className="bp-btn-outline" onClick={onRestoreBackup} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px', fontSize: '0.9rem' }}>
           <Ic.Upload /> Restore from Backup
         </button>
-        <div className="bp-profile-empty-sub" style={{ marginTop: 0 }}>Have a previously downloaded <code>.json</code> backup file? Upload it to restore all your data instantly.</div>
+        <div className="bp-profile-empty-sub" style={{ marginTop: 0 }}>Have a previously downloaded <code>.bpms</code> backup file? Upload it to restore all your data instantly.</div>
       </div>
     )
   }
@@ -859,7 +859,7 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
     const a = document.createElement('a')
     const name = (business.name || 'mansula-bos').replace(/\s+/g, '-').toLowerCase()
     a.href = url
-    a.download = `${name}-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `${name}-backup-${new Date().toISOString().slice(0, 10)}.bpms`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -934,7 +934,7 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
       )}
 
       {/* Hidden file input for import */}
-      <input ref={importRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
+      <input ref={importRef} type="file" accept=".bpms,.json" style={{ display: 'none' }} onChange={handleImport} />
 
       {/* Product form sheet */}
       {editProduct !== null && (
@@ -1117,7 +1117,7 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
             <div className="bp-backup-card-icon"><Ic.Download /></div>
             <div className="bp-backup-card-info">
               <div className="bp-backup-card-title">Save Backup to Device</div>
-              <div className="bp-backup-card-desc">Downloads a <code>.json</code> file containing your business profile, full product catalogue, and category list. Keep it safe — you can restore everything from this file.</div>
+              <div className="bp-backup-card-desc">Downloads a <code>.bpms</code> file containing your business profile, full product catalogue, and category list. Keep it safe — you can restore everything from this file.</div>
             </div>
             <button className="bp-btn-primary" onClick={handleExport}>
               <Ic.Download /> Download Backup
@@ -1129,7 +1129,7 @@ export default function BusinessProfile({ onClose, taxRateObj, onTaxRate, taxRat
             <div className="bp-backup-card-icon"><Ic.Upload /></div>
             <div className="bp-backup-card-info">
               <div className="bp-backup-card-title">Restore from Backup</div>
-              <div className="bp-backup-card-desc">Upload a previously downloaded <code>.json</code> backup file to restore your business data, products, and categories. This will overwrite your current data.</div>
+              <div className="bp-backup-card-desc">Upload a previously downloaded <code>.bpms</code> backup file to restore your business data, products, and categories. This will overwrite your current data.</div>
             </div>
             <button className="bp-btn-outline" onClick={() => importRef.current?.click()}>
               <Ic.Upload /> Restore Backup

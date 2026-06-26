@@ -100,7 +100,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll 
               <div className="bp-backup-card-icon" style={iconStyle}><span style={{ width: 18, height: 18, display: 'flex' }}><Ic.Download /></span></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Save Backup to Device</div>
-                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.json</code> file containing all your inventory stock, suppliers, and purchase logs.</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.inms</code> file containing all your inventory stock, suppliers, and purchase logs.</div>
               </div>
             </div>
             <button className="bp-btn-primary" style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
@@ -113,7 +113,7 @@ function ExportModal({ onClose, onExportCSV, onBackup, onRestoreRef, onClearAll 
               <div className="bp-backup-card-icon" style={iconStyle}><span style={{ width: 18, height: 18, display: 'flex' }}><Ic.Upload /></span></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Restore from Backup</div>
-                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.json</code> backup file to restore your inventory data.</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.inms</code> backup file to restore your inventory data.</div>
               </div>
             </div>
             <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
@@ -1321,7 +1321,7 @@ export default function Inventory({ onClose }) {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `mansula-inventory-backup-${new Date().toISOString().slice(0, 10)}.json`
+      a.download = `mansula-inventory-backup-${new Date().toISOString().slice(0, 10)}.inms`
       a.click()
       URL.revokeObjectURL(url)
     }
@@ -1445,7 +1445,7 @@ export default function Inventory({ onClose }) {
       {tab === 2 && <SuppliersTab suppliers={suppliers} onSuppliersChanged={loadSuppliers} />}
 
       {/* Hidden file input for restore */}
-      <input type="file" accept=".json" style={{ display: 'none' }} ref={restoreFileRef} onChange={handleRestore} />
+      <input type="file" accept=".inms,.json" style={{ display: 'none' }} ref={restoreFileRef} onChange={handleRestore} />
 
       {/* Export Modal */}
       {exportModalOpen && (

@@ -1032,7 +1032,7 @@ function CustomerDataExportModal({ onClose, onExportCSV, onBackup, onRestoreRef,
               <div className="bp-backup-card-icon" style={iconStyle}><Ic.Download s={18} /></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Save Backup to Device</div>
-                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.json</code> file containing all customer data.</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Downloads a <code>.crms</code> file containing all customer data.</div>
               </div>
             </div>
             <button className="bp-btn-primary" style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={onBackup}>
@@ -1045,7 +1045,7 @@ function CustomerDataExportModal({ onClose, onExportCSV, onBackup, onRestoreRef,
               <div className="bp-backup-card-icon" style={iconStyle}><Ic.Upload s={18} /></div>
               <div className="bp-backup-card-info">
                 <div className="bp-backup-card-title" style={{ fontSize: '0.85rem', marginBottom: 2 }}>Restore from Backup</div>
-                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.json</code> backup file to restore customers.</div>
+                <div className="bp-backup-card-desc" style={{ fontSize: '0.72rem', lineHeight: 1.3 }}>Upload a previously downloaded <code>.crms</code> backup file to restore customers.</div>
               </div>
             </div>
             <button className="bp-btn-outline" style={{ background: 'transparent', color: '#10b981', border: '1.5px solid #10b981', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }} onClick={() => onRestoreRef.current?.click()}>
@@ -1134,7 +1134,7 @@ export default function Customers({ onClose, onNavigate }) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `mansula-customers-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `mansula-customers-backup-${new Date().toISOString().slice(0, 10)}.crms`
     a.click()
     URL.revokeObjectURL(url)
     setExportModalOpen(false)
@@ -1337,7 +1337,7 @@ export default function Customers({ onClose, onNavigate }) {
         />
       )}
 
-      <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".json" onChange={handleRestore} />
+      <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".crms,.json" onChange={handleRestore} />
     </div>
   )
 }
