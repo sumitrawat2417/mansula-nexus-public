@@ -663,7 +663,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
         return (
           <div className="hns-content-area">
             <div className="hns-about-hero">
-              <div className="hns-about-logo-wrap" style={{ padding: 4 }}>
+              <div className="hns-about-logo-wrap">
                 <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               <div className="hns-about-name">ManSula BOS</div>
