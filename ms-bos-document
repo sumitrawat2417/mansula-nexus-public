@@ -1,0 +1,1161 @@
+# ManSula BOS — Software Requirements & Design Document
+### Enterprise-Grade SRDD · Revision 2.0
+
+---
+
+**Product:** ManSula BOS (Nexus)  
+**Version:** v1.7.0-alpha  
+**Build Date:** June 26, 2025  
+**Document Revision:** 2.0  
+**Status:** Active Development  
+
+**Organization:**
+| Field | Value |
+|---|---|
+| Company | ManSula Technologies |
+| Division | ManSula DivLabs |
+| Product | ManSula BOS (Nexus) |
+| Website | https://mansulatech.netlify.app |
+| Support Email | mansula.rwt@gmail.com |
+| Phone 1 | +91 98180 13446 |
+| Phone 2 | +91 88519 47954 |
+| Copyright | © 2024–2026 ManSula DivLabs & ManSula Technologies. All rights reserved. |
+| License | Proprietary — All Rights Reserved |
+| Tagline | *Empowering Commerce with Smart Technology* |
+
+---
+
+## 01. Executive Summary
+
+**ManSula BOS** (Business Operating System) is a privacy-first, offline-capable Point of Sale (POS) and Business Management Progressive Web Application (PWA). It targets retail shops, pop-up stores, cafes, and small-to-medium enterprises (SMEs) who require a fast, reliable billing system that works without a permanent internet connection.
+
+The application runs entirely in the browser using React.js and IndexedDB. All business data — products, inventory, orders, customers, financial history — is stored locally on the merchant's device. No user data is ever transmitted to external servers.
+
+**Core Differentiators:**
+- 100% Offline-First: Functions without internet after first load.
+- Zero Cloud Subscriptions: No SaaS fees, no monthly billing.
+- Privacy by Architecture: No external data transmission.
+- Hardware-Agnostic: Runs on any smartphone, tablet, or PC browser.
+- Dynamic UPI Integration: Generates exact-amount QR codes on the fly.
+
+---
+
+## 02. Business Requirements
+
+### Problem Statement
+Small retailers and cafe owners struggle with POS systems that:
+- Fail during internet outages.
+- Are too expensive (cloud SaaS subscription models).
+- Require proprietary hardware (tablets, receipt printers).
+- Send sensitive financial data to third-party cloud servers.
+
+### Proposed Solution
+A free, installable PWA that sits on the merchant's home screen and behaves like a native app. It works perfectly offline and stores all data securely on the device.
+
+### Market Positioning
+| Feature | ManSula BOS | Square / Shopify POS | Legacy Windows POS |
+|---|---|---|---|
+| Works Offline | ✅ Full | ❌ Limited | ✅ Full |
+| Free | ✅ Core Free | ❌ Transaction Fees | ❌ License Fee |
+| No Hardware Required | ✅ Any Browser | ❌ Needs Reader | ❌ Needs Dedicated PC |
+| Data Privacy | ✅ Local Only | ❌ Cloud Stored | ⚠️ Local but opaque |
+| Mobile-First | ✅ PWA | ✅ App | ❌ No |
+| Dynamic UPI | ✅ Built-in | ❌ No | ❌ No |
+
+### Unique Selling Points (USP)
+1. Works in complete internet blackouts.
+2. Dynamic UPI QR at exact checkout amount — no manual payment entry.
+3. Barcode scanning via phone camera with no additional hardware.
+4. Staff management module for small teams.
+5. Full backup/restore via downloadable `.msbos` file.
+6. Push notifications for backup reminders and app updates.
+
+### Revenue Model (Future Phases)
+- **Free Tier:** Full core POS, offline, local storage.
+- **Pro Plugin (Phase 2):** Optional cloud sync, WhatsApp receipts, thermal printer.
+- **Enterprise License (Phase 3):** White-label, multi-store, custom branding.
+
+---
+
+## 03. Functional Requirements
+
+### 3.1 POS & Checkout
+| Field | Detail |
+|---|---|
+| **Purpose** | Fast product billing for in-person customers |
+| **Inputs** | Tap-to-add product, barcode scan, custom entry |
+| **Outputs** | Order record, digital receipt, UPI QR, inventory deduction |
+| **Discount Types** | Flat amount (₹) — stored as `discountAmt` |
+| **Tax** | Configurable GST (0%, 5%, 12%, 18%, 28%) — stored as `taxAmt` |
+| **Delivery** | Optional delivery charge — stored as `deliveryCharge` |
+| **Payment Modes** | Cash, UPI, Card, Udhaar (Credit), Split (Cash+UPI simultaneously) |
+| **Multi-Order** | Up to N concurrent orders via the Order Console (table/tab management) |
+| **Watchdog Timer** | Alerts cashier if an order has been idle for X minutes (configurable: 2/5/10/15/30/custom) |
+| **Variants** | Products can have multi-group variants (size, add-ons, etc.) with price matrices |
+| **Barcode** | Camera-based scanning via WebRTC |
+
+### 3.2 Inventory Management
+| Field | Detail |
+|---|---|
+| **Purpose** | Track live stock levels for all products |
+| **Stock Ops** | Add stock (via Purchase Log), Deduct (via Checkout), Manual Adjust, Log Wastage |
+| **Low Stock Alerts** | Visual warnings when `currentQty <= lowStockThreshold` |
+| **Supplier Tracking** | Each purchase linked to a supplier with total spend synced automatically |
+| **Margin Calculation** | `Gross Margin = Selling Price - Cost Price` |
+
+### 3.3 Order Records
+| Field | Detail |
+|---|---|
+| **Purpose** | Full historical ledger of all past transactions |
+| **Features** | Date range filter, payment mode filter, keyword search, pagination |
+| **Post-Sale Edit** | Modify payment mode, items, notes on past orders |
+| **Delete & Refund** | Delete order and optionally restock inventory |
+| **CSV Export** | Export all orders in a date range as CSV |
+
+### 3.4 Customer CRM
+| Field | Detail |
+|---|---|
+| **Purpose** | Track customers, purchase history, credit |
+| **Features** | Add/Edit/Delete customers, phone search, visit count, total spent tracking |
+| **Udhaar** | Credit/tab system — log what a customer owes, mark as paid, balance auto-recalculates |
+
+### 3.5 Analytics Dashboard
+| Field | Detail |
+|---|---|
+| **Purpose** | Visualize business performance from local data |
+| **Metrics** | Gross Revenue, Net Profit, Average Order Value (AOV), Payment distribution |
+| **Charts** | Revenue over time (line chart), Top Products (podium), Customer Leaderboard |
+| **Timeframes** | Today, This Week, This Month, This Year, Custom Range |
+
+### 3.6 Business Profile & Settings
+| Field | Detail |
+|---|---|
+| **Purpose** | Configure all business-specific parameters |
+| **Covered in Section 08** | See Settings Module specification |
+
+### 3.7 Backup & Restore
+| Field | Detail |
+|---|---|
+| **Purpose** | Full data portability and disaster recovery |
+| **Format** | `.msbos` file (JSON, see Section 10 for schema) |
+| **Scope** | All IndexedDB stores + `localStorage` keys prefixed `mn-` |
+| **Restore** | File upload → schema validation → full overwrite → reload |
+| **Notifications** | Daily push notification at 18:00 if no backup has been taken that day |
+
+### 3.8 Staff Management
+| Field | Detail |
+|---|---|
+| **Purpose** | Manage team members (basic roster) |
+| **Features** | Add/Edit/Delete staff members, assign roles |
+| **Status** | Module in active development |
+
+### 3.9 Update System
+| Field | Detail |
+|---|---|
+| **Mechanism** | Vite PWA Service Worker polling |
+| **Detection** | `vite-plugin-pwa` `useRegisterSW` hook detects `needRefresh` state |
+| **In-App Prompt** | Shows a bottom banner when a new version is detected |
+| **Push Notification** | Also fires a push notification via Service Worker on update detection |
+| **User Action** | "Update Now" button calls `updateServiceWorker(true)` |
+| **Rollback** | Not supported in v1.x; user must clear site data if needed |
+| **Version Source** | `src/appInfo.js` → `APP_VERSION = 'v1.7.0-alpha'` |
+
+---
+
+## 04. User Roles & Permissions
+
+Current v1.x is single-tenant. All operations are performed by the Merchant Admin.
+
+| Role | Capability |
+|---|---|
+| **Merchant Admin** | Full access to all modules |
+
+**Planned for Phase 2:**
+| Role | Capability |
+|---|---|
+| **Cashier** | POS only (PIN-locked away from Settings, Analytics, Backup) |
+| **Inventory Manager** | Inventory + Purchases, read-only Orders |
+| **Viewer** | Analytics dashboard, read-only |
+
+---
+
+## 05. User Flows
+
+### 5.1 First-Time Onboarding
+```
+App Launch
+    ↓
+Splash Screen (Welcome animation)
+    ↓
+Privacy & Terms Agreement (Must accept to proceed)
+    ↓
+Theme Selection (Light / Dark)
+    ↓
+Home Dashboard
+    ↓
+Business Profile Setup Spotlight (shown if 'mn-business.name' is empty)
+```
+
+### 5.2 Standard Checkout Flow
+```
+POS Screen
+    ↓
+Browse Product Grid → Tap to Add / Scan Barcode / Custom Quick-Add
+    ↓
+[If product has Variants] → Variant Selection Modal
+    ↓
+Cart builds up with items
+    ↓
+Apply Discount (flat amount)
+    ↓
+Apply Delivery Charge
+    ↓
+Review Totals (Subtotal + Tax - Discount + Delivery = Total)
+    ↓
+Select Payment Mode [Cash / UPI / Card / Udhaar / Split]
+    ↓
+[If UPI] → Dynamic QR code generated from UPI ID + amount
+    ↓
+Confirm Checkout
+    ↓
+Order saved to IndexedDB orders store
+Inventory stock deducted for all items
+    ↓
+Success Modal shown (order summary, total, payment mode)
+    ↓
+Cart cleared → ready for next order
+```
+
+### 5.3 Backup Flow
+```
+Home → More Tools → Backup & Restore
+    ↓
+Status Card shows: Last backup date + System Secure / Action Required
+    ↓
+Tap "Download" → exportUltimateBackup()
+    ↓
+All IndexedDB stores fetched + localStorage mn- keys fetched
+    ↓
+JSON blob serialized → Saved as MansulaBOS_FullBackup_DD-MM-YYYY.msbos
+    ↓
+mn-last-backup-date updated in localStorage
+    ↓
+Backup complete toast shown
+```
+
+### 5.4 App Update Flow
+```
+App loads in background (PWA Service Worker running)
+    ↓
+Vite PWA detects new version deployed to hosting
+    ↓
+'needRefresh' becomes true → ReloadPrompt renders
+    ↓
+Push notification fires: "Update Available"
+    ↓
+In-app banner appears at bottom: "New ManSula BOS update available"
+    ↓
+User taps "Update Now"
+    ↓
+updateServiceWorker(true) called → page reloads with new version
+```
+
+---
+
+## 06. Screen Inventory
+
+### Screen 01 — Splash / Welcome (`Welcome.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | Cinematic brand intro |
+| **Trigger** | App launch (first render before agreement check) |
+| **Components** | Animated logo, brand name, tagline |
+| **Actions** | Auto-completes via `onComplete` callback after animation |
+| **State Guard** | `showWelcome` boolean in App.jsx |
+
+### Screen 02 — Privacy Agreement (`Agreement.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | Legal disclosure + offline data storage consent |
+| **Trigger** | After splash, if `mn-agreement-accepted !== 'true'` |
+| **Components** | Scrollable terms, Privacy Policy, ToS, Accept button |
+| **Actions** | Accept → sets `mn-agreement-accepted=true` in localStorage → unlocks app |
+| **Gate** | Cannot access any other screen without accepting |
+
+### Screen 03 — Home Dashboard (`Home.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | Central hub for navigation, settings, quick stats |
+| **Components** | Business header, Quick Action Grid (POS, Orders, Inventory, Analytics), More Tools grid (customizable drag-reorder), Settings panel |
+| **Settings Panel** | Theme toggle, Currency picker, App Permissions section (Camera, Notifications, Sound, Files) |
+| **Notifications** | Permission request via `Notification.requestPermission()` |
+| **Quick Stats** | Revenue summary chip |
+| **Install Banner** | PWA install prompt shown if `beforeinstallprompt` event fires |
+
+### Screen 04 — POS (`POS.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | Main billing interface |
+| **Layout** | Two-panel: Product grid (left/top) + Cart panel (right/bottom) |
+| **Components** | Category tabs, Product grid, Search, Barcode scanner toggle, Cart items, Discount/Delivery fields, Tax display, Payment mode selector, UPI QR modal, Order Console (multi-order manager), Settings drawer |
+| **Actions** | Add/Remove items, Custom entry, Checkout, Switch orders, New order, Watchdog timer |
+
+### Screen 05 — Inventory (`Inventory.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | Manage product catalog and stock levels |
+| **Tabs** | Inventory items, Purchase Log, Suppliers |
+| **Item Actions** | Add, Edit, Delete, Adjust stock, Log wastage |
+| **Purchase Actions** | Add purchase (auto-increments inventory), Edit, Delete (reverses inventory) |
+| **Supplier Actions** | Add, Edit, Delete; Total spend auto-synced from purchase logs |
+
+### Screen 06 — Order Records (`OrderRecords.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | Historical transaction ledger |
+| **Filters** | Date range (Today, Week, Month, Year, Custom), Payment mode, Search by order ID or item |
+| **Pagination** | 50 records per page, cursor-based IndexedDB query |
+| **Order Actions** | View details, Edit order, Delete order |
+| **Export** | CSV export of filtered results |
+
+### Screen 07 — Customer CRM (`Customers.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | Track customers and Udhaar (credit) balances |
+| **Features** | Customer list, add/edit/delete, search by name/phone, visit count, total spent |
+| **Udhaar** | Per-customer credit ledger: log new debt, log payment, balance auto-recalculated |
+
+### Screen 08 — Analytics (`Analytics.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | Visualize revenue, products, and customer trends |
+| **Filters** | Today, This Week, This Month, This Year, Custom Range |
+| **Charts** | Revenue line chart (time series), Product podium (top 3 + table), Customer Leaderboard |
+| **KPIs** | Total Revenue, Net Profit, AOV, Total Orders, Top Payment Mode |
+| **Data Source** | Queries IndexedDB `orders` store by `completedAt` index |
+
+### Screen 09 — Business Profile / Settings (`BusinessProfile.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | All business configuration settings |
+| **Covered in detail** | See Section 08 — Settings Module |
+
+### Screen 10 — Staff (`Staff.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | Basic staff roster management |
+| **Features** | Add/Edit/Delete staff records |
+| **Status** | v1 module; expanded role + PIN access control planned for Phase 2 |
+
+### Screen 11 — Backup & Restore (`BackupRestore.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | Data portability and disaster recovery |
+| **Components** | Status card (Secure/Action Required), Push Notifications toggle, Create Backup button, Restore from file, Reset All Data (Danger Zone), Pro Tip section |
+| **Status Card** | Green if backed up today (`mn-last-backup-date === today`), Amber otherwise |
+
+### Screen 12 — Modal Dialogs (`AlertDialog.jsx`)
+| Property | Value |
+|---|---|
+| **Purpose** | System alerts, confirms, and prompts |
+| **Types** | `alert` (info/success/warning/danger), `confirm` (with optional typed confirmation word), `prompt` (text input) |
+| **Global Access** | Available everywhere via `useAlert()` hook from `AlertProvider` context |
+
+---
+
+## 07. Settings Module Specification
+
+All settings are persisted in IndexedDB (`kv` store, key = `mn-business`) or `localStorage`.
+
+### 7.1 Business Profile Settings
+| Setting | Type | Key | Description |
+|---|---|---|---|
+| Business Name | String | `mn-business.name` | Appears on receipts and in the app header |
+| Business Address | String | `mn-business.address` | Printed on receipts |
+| GST / Tax Number | String | `mn-business.gstin` | Legal tax ID for GST compliance |
+| UPI ID | String | `mn-business.upiId` | Used for dynamic QR code generation |
+| Receipt Footer | String | `mn-business.receiptFooter` | Custom closing text on receipts (e.g., "Thank you!") |
+| Phone | String | `mn-business.phone` | Business contact |
+| Email | String | `mn-business.email` | Business contact |
+
+### 7.2 Appearance Settings
+| Setting | Type | Key | Default | Values |
+|---|---|---|---|---|
+| Theme | String | `mn-theme` | OS Preference | `'light'` / `'dark'` |
+| Currency | Object | `mn-currency` | `{ code: 'INR', symbol: '₹' }` | INR, USD, EUR, GBP, AUD |
+
+### 7.3 Tax Settings
+| Setting | Type | Key | Default | Values |
+|---|---|---|---|---|
+| Tax Rate | Object | `mn-taxrate` | `{ label: 'No Tax (0%)', value: 0 }` | No Tax, GST 5%, GST 12%, GST 18%, GST 28% |
+
+### 7.4 Sound Settings
+| Setting | Type | Key | Default |
+|---|---|---|---|
+| Sound Enabled | String | `mn-sound` | `'enabled'` |
+| Volume | Number (0–100) | `mn-volume` | `100` |
+
+### 7.5 POS Grid Settings
+| Setting | Type | Key | Default | Values |
+|---|---|---|---|---|
+| Product Grid Columns | String | `mn-cols` | `'auto'` | `'auto'`, `'2'`, `'3'`, `'4'`, `'5'` |
+
+### 7.6 Backup & Notification Settings
+| Setting | Type | Key | Description |
+|---|---|---|---|
+| Last Backup Date | String | `mn-last-backup-date` | `Date.toDateString()` of last successful export |
+| Last Backup Notification | String | `mn-backup-notified-date` | Prevents duplicate daily reminders |
+
+### 7.7 App Permissions (OS-Level)
+Managed in `Home.jsx` under the Settings panel:
+- **Camera:** Required for barcode scanning (`navigator.mediaDevices.getUserMedia`)
+- **Notifications:** For backup reminders and update alerts (`Notification.requestPermission`)
+- **Sound:** AudioContext unlock on user gesture
+- **Files / Persistent Storage:** `navigator.storage.persist()` to prevent IndexedDB eviction
+
+### 7.8 Supported Currencies
+| Code | Symbol | Rate (from INR) | Decimals |
+|---|---|---|---|
+| INR | ₹ | 1 | 0 |
+| USD | $ | 0.012 | 2 |
+| EUR | € | 0.011 | 2 |
+| GBP | £ | 0.0095 | 2 |
+| AUD | A$ | 0.018 | 2 |
+
+> **Note:** Currency conversion uses static rates stored in `App.jsx → CURRENCIES`. Rates are not fetched dynamically. A future phase will integrate a live exchange rate API.
+
+---
+
+## 08. Data Entity Models
+
+### 8.1 Product Entity (stored in `kv` store under `mn-menu`)
+```json
+{
+  "id": "uuid-string",
+  "name": "Margherita Pizza",
+  "emoji": "🍕",
+  "price": 299,
+  "category": "Pizza",
+  "badge": "popular",
+  "barcode": "1234567890",
+  "variants": [
+    {
+      "id": "var-group-1",
+      "name": "Size",
+      "type": "price",
+      "required": true,
+      "options": [
+        { "id": "opt-sm", "label": "Small", "priceAdj": 0 },
+        { "id": "opt-lg", "label": "Large", "priceAdj": 50 }
+      ]
+    }
+  ],
+  "variantsMatrix": { "opt-sm": 299, "opt-lg": 349 }
+}
+```
+
+### 8.2 Inventory Item Entity (stored in `inventory` IndexedDB store)
+```json
+{
+  "id": "uuid-string",
+  "name": "Tomato Sauce",
+  "category": "Raw Material",
+  "emoji": "🍅",
+  "unit": "kg",
+  "currentQty": 15,
+  "lowStockThreshold": 5,
+  "costPrice": 120,
+  "sellingPrice": 0,
+  "isLowStock": false,
+  "isMenuLinked": false,
+  "wastageLog": [
+    { "qty": 1, "reason": "Expired", "loggedAt": 1719408000000 }
+  ],
+  "createdAt": 1719300000000,
+  "updatedAt": 1719408000000
+}
+```
+
+### 8.3 Order Entity (stored in `orders` IndexedDB store)
+```json
+{
+  "orderId": "42-05/06/26",
+  "monthKey": "2026-06",
+  "completedAt": 1719408000000,
+  "createdAt": 1719407940000,
+  "items": [
+    {
+      "id": "uuid",
+      "name": "Margherita Pizza",
+      "emoji": "🍕",
+      "price": 299,
+      "qty": 2,
+      "variantKey": "opt-lg",
+      "variantLabel": "Large"
+    }
+  ],
+  "subtotal": 598,
+  "discountType": "none",
+  "discountAmt": 0,
+  "deliveryCharge": 40,
+  "taxLabel": "GST 5%",
+  "taxAmt": 29.9,
+  "total": 667.9,
+  "paymentMode": "upi",
+  "paymentDetails": null
+}
+```
+> **Payment Mode Values:** `'cash'` | `'upi'` | `'card'` | `'udhaar'` | `'split'` | `'other'`  
+> **Split Payment Detail:**  `"paymentDetails": { "cash": 300, "upi": 367.9 }`
+
+### 8.4 Order ID Format
+```
+{sequentialNumber}-{DD}/{MM}/{YY}
+
+Example: 42-05/06/26  (42nd order of the month, on June 5, 2026)
+```
+The sequential number is derived by querying IndexedDB for the max order number in the current `monthKey` and incrementing by 1.
+
+### 8.5 Customer Entity (stored in `customers` IndexedDB store)
+```json
+{
+  "customerId": "cust-lq4x2-abc12",
+  "name": "Rahul Sharma",
+  "phone": "9812345678",
+  "email": "rahul@example.com",
+  "address": "123 Main Street, Delhi",
+  "birthday": null,
+  "tags": ["regular", "vip"],
+  "notes": ["Prefers extra cheese", "Allergic to nuts"],
+  "totalSpent": 4500,
+  "visitCount": 12,
+  "lastVisitAt": 1719408000000,
+  "udhaarBalance": 200,
+  "createdAt": 1717200000000,
+  "updatedAt": 1719408000000
+}
+```
+
+### 8.6 Udhaar (Credit) Entry Entity (stored in `udhaar` IndexedDB store)
+```json
+{
+  "udhaarId": "udh-lq5y3-def34",
+  "customerId": "cust-lq4x2-abc12",
+  "orderId": "42-05/06/26",
+  "amount": 200,
+  "reason": "Pizza + Drinks",
+  "paidAt": null,
+  "paidAmt": 0,
+  "createdAt": 1719408000000
+}
+```
+> **Balance Formula:** `udhaarBalance = SUM(entry.amount - entry.paidAmt)` for all entries of a customer.
+
+### 8.7 Purchase Log Entity (stored in `purchases` IndexedDB store)
+```json
+{
+  "purchaseId": "PUR-202606-LQ4X2ABC",
+  "monthKey": "2026-06",
+  "supplierId": "sup-uuid",
+  "items": [
+    {
+      "productId": "inv-uuid",
+      "productName": "Tomato Sauce",
+      "qty": 10,
+      "unit": "kg",
+      "costPerUnit": 120,
+      "totalCost": 1200,
+      "isExpenseOnly": false
+    }
+  ],
+  "totalAmount": 1200,
+  "purchasedAt": 1719408000000,
+  "createdAt": 1719408000000
+}
+```
+
+### 8.8 Supplier Entity (stored in `kv` store under `mn-suppliers` as an Array)
+```json
+{
+  "id": "sup-uuid",
+  "name": "Delhi Wholesale Mart",
+  "phone": "9876543210",
+  "email": "dealer@example.com",
+  "address": "Azadpur Mandi, Delhi",
+  "totalSpend": 25000,
+  "lastPurchaseAt": 1719408000000,
+  "createdAt": 1717200000000,
+  "updatedAt": 1719408000000
+}
+```
+
+### 8.9 Business Profile Entity (stored in `kv` store under `mn-business`)
+```json
+{
+  "name": "My Cafe",
+  "address": "456 Market Road, Mumbai",
+  "phone": "9812345678",
+  "email": "mycafe@example.com",
+  "gstin": "27AABCU9603R1Z2",
+  "upiId": "mycafe@upi",
+  "receiptFooter": "Thank you for visiting!"
+}
+```
+
+---
+
+## 09. Financial Calculation Logic
+
+All calculations are performed client-side in the React component. The following formulas are the canonical, authoritative definitions:
+
+### 9.1 Cart Subtotal
+```
+Subtotal = SUM(item.price × item.qty)  for all items in cart
+```
+
+### 9.2 Tax Calculation
+```
+Tax Amount = Subtotal × taxRate.value
+
+Where taxRate.value ∈ { 0, 0.05, 0.12, 0.18, 0.28 }
+```
+Tax is applied on the subtotal **before** discount is subtracted.
+
+### 9.3 Discount Calculation
+```
+Total After Discount = Subtotal + Tax - discountAmt + deliveryCharge
+```
+- `discountAmt` is always a **flat currency value**, not a percentage.
+- Discounts cannot reduce Total below zero (enforced in POS UI).
+
+### 9.4 Order Total Formula (Canonical)
+```
+Total = Subtotal + taxAmt - discountAmt + deliveryCharge
+```
+
+**Stored fields in order record:**
+- `subtotal` = pre-tax, pre-discount item sum
+- `taxAmt` = calculated tax value (not rate)
+- `taxLabel` = human-readable label (e.g., "GST 18%")
+- `discountAmt` = flat discount applied
+- `deliveryCharge` = delivery fee
+- `total` = final payable amount
+
+### 9.5 Gross Profit (Inventory)
+```
+Gross Profit per Item = item.sellingPrice - item.costPrice
+Gross Margin % = (Gross Profit / sellingPrice) × 100
+```
+
+### 9.6 Net Profit (Analytics)
+```
+Net Profit = Total Revenue - Total Purchase Cost
+
+Where:
+  Total Revenue = SUM(order.total) for period
+  Total Purchase Cost = SUM(purchase.totalAmount) for period
+```
+
+### 9.7 Currency Formatting
+```
+Displayed Amount = base_amount × currency.rate
+Formatted String = currency.symbol + displayedAmount.toFixed(currency.decimals)
+
+Example (USD): $ + (299 × 0.012).toFixed(2) = "$3.59"
+```
+
+### 9.8 Variant Price Resolution
+```
+If product has variants:
+  1. Check priceGroups (type === 'price')
+  2. Build matrixKey = priceGroups.map(g => selections[g.id]).join('|')
+  3. resolvedBasePrice = variantsMatrix[matrixKey]
+  4. For each non-price variant: resolvedBasePrice += selectedOption.priceAdj
+  5. Final Price = resolvedBasePrice
+```
+
+### 9.9 Udhaar Balance Recalculation
+```
+udhaarBalance = MAX(0, SUM(entry.amount - entry.paidAmt))
+totalSpent = SUM(entry.amount)
+```
+This recalculation runs in `recalcUdhaarBalance(customerId)` any time a payment or new debt is recorded.
+
+---
+
+## 10. Backup Format Specification
+
+The `.msbos` file is a raw JSON blob with the following canonical schema:
+
+```json
+{
+  "type": "mansula_nexus_ultimate_backup",
+  "version": 1,
+  "timestamp": 1719408000000,
+  "kv": [
+    { "k": "mn-business", "v": { "name": "My Cafe", "..." : "..." } },
+    { "k": "mn-menu", "v": [] },
+    { "k": "mn-suppliers", "v": [] }
+  ],
+  "orders": [
+    { "orderId": "42-05/06/26", "..." : "..." }
+  ],
+  "inventory": [
+    { "id": "uuid", "name": "Tomato Sauce", "..." : "..." }
+  ],
+  "purchases": [
+    { "purchaseId": "PUR-202606-...", "..." : "..." }
+  ],
+  "customers": [
+    { "customerId": "cust-...", "..." : "..." }
+  ],
+  "udhaar": [
+    { "udhaarId": "udh-...", "..." : "..." }
+  ],
+  "localSettings": {
+    "mn-theme": "dark",
+    "mn-currency": "{\"code\":\"INR\",\"symbol\":\"₹\",...}",
+    "mn-taxrate": "{\"label\":\"GST 18%\",\"value\":0.18}",
+    "mn-last-backup-date": "Fri Jun 05 2026"
+  }
+}
+```
+
+**Validation Rule on Restore:**
+```javascript
+if (data.type !== 'mansula_nexus_ultimate_backup') {
+  throw new Error('Invalid backup file.')
+}
+```
+
+**Migration Strategy (Future Versions):**
+When `version` field is incremented, a migration function will transform old schemas before writing to IndexedDB. Developers must implement a `migrate(data)` function that handles all previous versions.
+
+---
+
+## 11. System Architecture
+
+### 11.1 Application Architecture Diagram
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Browser Environment                         │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │               React.js Frontend (v18)                │    │
+│  │                                                       │    │
+│  │  ┌──────────┐  ┌──────────┐  ┌───────────────────┐ │    │
+│  │  │   App    │  │ Screens  │  │ Alert / Confirm   │ │    │
+│  │  │  Router  │  │ (JSX)    │  │ Context (Global)  │ │    │
+│  │  └──────────┘  └──────────┘  └───────────────────┘ │    │
+│  └───────────────────────┬─────────────────────────────┘    │
+│                           │ async calls                        │
+│  ┌────────────────────────▼───────────────────────────────┐  │
+│  │              db.js — Data Access Layer                  │  │
+│  │  (IndexedDB abstraction — all CRUD operations)          │  │
+│  └──────────────────────┬────────────────────────────────┘  │
+│                          │                                     │
+│  ┌───────────────────────▼────────────────────────────────┐  │
+│  │           IndexedDB (Browser Native Storage)            │  │
+│  │  ┌──────┐ ┌────────┐ ┌──────────┐ ┌──────┐ ┌───────┐ │  │
+│  │  │  kv  │ │ orders │ │inventory │ │cust..│ │udhaar │ │  │
+│  │  └──────┘ └────────┘ └──────────┘ └──────┘ └───────┘ │  │
+│  └────────────────────────────────────────────────────────┘  │
+│                                                               │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │           Service Worker (PWA — Vite PWA Plugin)        │  │
+│  │  • Caches all static assets (HTML, CSS, JS, fonts)     │  │
+│  │  • Serves cached app when offline                       │  │
+│  │  • Triggers update notifications                        │  │
+│  │  • Delivers OS-level push notifications                 │  │
+│  └────────────────────────────────────────────────────────┘  │
+│                                                               │
+│  localStorage: mn- prefixed keys (settings, light state)     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 11.2 Technology Stack
+| Layer | Technology | Version |
+|---|---|---|
+| UI Framework | React | 18 |
+| Build Tool | Vite | 8.x |
+| PWA Plugin | vite-plugin-pwa | 1.3.0 |
+| Styling | Vanilla CSS (custom design system) | — |
+| Storage | IndexedDB (native browser API) | — |
+| QR Generation | qrcode.react | latest |
+| Fonts | Outfit (Google Fonts) | — |
+
+### 11.3 IndexedDB Schema Summary
+| Store | Key Path | Indexes |
+|---|---|---|
+| `kv` | `k` | — |
+| `orders` | `orderId` | `completedAt`, `monthKey` |
+| `inventory` | `id` | `category`, `isLowStock` |
+| `purchases` | `purchaseId` | `purchasedAt`, `supplierId`, `monthKey` |
+| `customers` | `customerId` | `phone`, `createdAt` |
+| `udhaar` | `udhaarId` | `customerId`, `createdAt` |
+
+**Database Name:** `mansula-nexus`  
+**Database Version:** 5  
+
+---
+
+## 12. Security & Privacy Architecture
+
+### 12.1 Data Privacy Guarantee
+This application is designed to minimize privacy risks. **No user data is transmitted to external servers.** Business data exists solely on the user's local device. There is no backend, no API, and no analytics SDK.
+
+> This architecture inherently reduces (but does not eliminate) GDPR/CCPA compliance risks. Merchants are still responsible for the physical security of their device.
+
+### 12.2 Permissions
+| Permission | Purpose | Method | Scope |
+|---|---|---|---|
+| Camera | Barcode scanning | `navigator.mediaDevices.getUserMedia` | In-session only, not stored |
+| Notifications | Backup reminders + update alerts | `Notification.requestPermission()` | Via Service Worker |
+| Persistent Storage | Prevent IndexedDB eviction | `navigator.storage.persist()` | Flags DB as persistent with OS |
+| Audio | UI sound effects | `AudioContext` | Local playback only |
+
+### 12.3 Data Backup Encryption
+v1.x: Backup files are plain JSON (`.msbos`). The file extension communicates the file type to the user.  
+**Planned for Phase 2:** AES-256 password-protected encryption before download, via the WebCrypto API.
+
+### 12.4 Update Integrity
+App updates are delivered via standard HTTPS to the hosting provider. The Service Worker caches assets with SHA hashes to ensure tamper detection. No user data is touched during an update.
+
+---
+
+## 13. UI/UX Design System
+
+### 13.1 Color System
+| Token | Light Mode Value | Dark Mode Value |
+|---|---|---|
+| `--bg-primary` | `#f8f9fe` | `#0f0f1a` |
+| `--bg-surface` | `#ffffff` | `#1a1a2e` |
+| `--bg-surface-2` | `#f1f2f7` | `#232340` |
+| `--text-primary` | `#1a1a2e` | `#e8e8f0` |
+| `--text-secondary` | `#4b5563` | `#9ca3af` |
+| `--text-muted` | `#9ca3af` | `#6b7280` |
+| `--brand-primary` | `#6366f1` (Indigo) | `#818cf8` |
+| `--brand-accent` | `#8b5cf6` (Violet) | `#a78bfa` |
+| `--brand-danger` | `#ef4444` (Red) | `#f87171` |
+| `--border-color` | `rgba(0,0,0,0.07)` | `rgba(255,255,255,0.06)` |
+
+### 13.2 Typography
+| Element | Font | Weight | Size |
+|---|---|---|---|
+| Primary Font | Outfit (Google Fonts) | 400–800 | — |
+| Section Headings | Outfit | 700 | 1.1rem |
+| Body Text | Outfit | 400 | 0.85rem |
+| Micro Labels | Outfit | 600 | 0.68–0.72rem |
+| Price / KPI Numbers | Outfit | 800 | 1.1–1.4rem |
+
+### 13.3 Spacing System
+| Token | Value |
+|---|---|
+| `--space-xs` | 4px |
+| `--space-sm` | 8px |
+| `--space-md` | 14px |
+| `--space-lg` | 24px |
+| `--space-xl` | 40px |
+
+### 13.4 Border Radius
+| Token | Value |
+|---|---|
+| `--radius-xs` | 6px |
+| `--radius-sm` | 10px |
+| `--radius-md` | 14px |
+| `--radius-lg` | 18px |
+| `--radius-xl` | 24px |
+
+### 13.5 Shadow Levels
+| Level | CSS |
+|---|---|
+| Flat | `none` |
+| Card | `0 1px 4px rgba(0,0,0,0.06)` |
+| Elevated | `0 4px 16px rgba(0,0,0,0.10)` |
+| Floating | `0 8px 32px rgba(0,0,0,0.15)` |
+| Status Glow | `0 8px 24px rgba(16,185,129,0.28)` (green) or `rgba(245,158,11,0.28)` (amber) |
+
+### 13.6 Animation Durations
+| Use Case | Duration | Easing |
+|---|---|---|
+| Micro interaction (hover) | 150ms | `ease` |
+| Button tap | 150ms | `ease` |
+| Modal appearance | 280–350ms | `cubic-bezier(0.34, 1.56, 0.64, 1)` (spring) |
+| Screen transition | 300ms | `ease-in-out` |
+| Install banner slide-in | 450ms | Spring cubic-bezier |
+| Success modal | 350ms | `ease both` |
+
+### 13.7 Sound System
+UI audio is generated via the Web AudioContext API (no audio files loaded):
+| Sound | Trigger | Waveform |
+|---|---|---|
+| Add to cart | Product tapped | Sine, 440Hz → 880Hz |
+| Remove from cart | Item removed | Sine, 300Hz → 150Hz |
+| Checkout success | Order completed | Triangle, C–E–G arpeggio |
+| Watchdog alarm | Order idle too long | Square wave pulse |
+
+---
+
+## 14. Notification System
+
+### 14.1 Notification Stack
+| Type | Mechanism | Conditions |
+|---|---|---|
+| Daily Backup Reminder | Service Worker Push | If no backup today AND hour ≥ 18:00 AND not notified today |
+| App Update Available | Service Worker Push | When `needRefresh = true` in `ReloadPrompt.jsx` |
+| In-App Toast | `AlertProvider` (React context) | Any operation success/failure |
+| In-App Reload Prompt | `ReloadPrompt.jsx` component | When `needRefresh = true` |
+
+### 14.2 Notification Payload Templates
+**Backup Reminder:**
+```json
+{
+  "title": "🛡️ Backup Recommended",
+  "body": "You haven't backed up your data today. Take a secure snapshot now.",
+  "tag": "daily-backup"
+}
+```
+**App Update:**
+```json
+{
+  "title": "Update Available",
+  "body": "A new version of ManSula BOS is ready! Tap here to open and update.",
+  "tag": "app-update"
+}
+```
+
+### 14.3 Notification Permission Flow
+1. User navigates to Settings (Home) → App Permissions → Notifications → "Allow".
+2. Or: User opens Backup & Restore → Push Notifications → "Enable".
+3. Both call `Notification.requestPermission()` directly in the click handler.
+4. Callback method used to support legacy Safari + modern Promise API simultaneously.
+5. Permission state read back via `Notification.permission` (`'granted'`, `'denied'`, `'default'`).
+
+---
+
+## 15. Update System
+
+### 15.1 Architecture
+The app uses `vite-plugin-pwa` with `generateSW` mode. On each new deployment:
+1. A new `sw.js` is generated with updated asset hashes.
+2. When a user opens the app, the browser compares the current Service Worker with the registered one.
+3. If they differ, the `needRefresh` state activates.
+
+### 15.2 Version Management
+All version metadata lives in a single file:
+
+**`src/appInfo.js`**
+```javascript
+export const APP_VERSION = 'v1.7.0-alpha'
+export const APP_BUILD_DATE = 'June 26, 2025'
+export const WHATS_NEW = [...]  // Array of { icon, label, detail }
+```
+
+### 15.3 Update Checklist (for developer shipping a new release)
+1. Update `APP_VERSION` in `src/appInfo.js`.
+2. Update `APP_BUILD_DATE`.
+3. Add new entries to `WHATS_NEW` array.
+4. Run `npm run build`.
+5. Deploy `dist/` to hosting.
+6. Service Worker auto-updates on next user open.
+
+### 15.4 Force Update
+Not supported in v1.x. Future versions will support a minimum-version enforcement mechanism where the app displays a hard-block screen if the installed version is below the server-required minimum.
+
+---
+
+## 16. Deployment Plan
+
+### 16.1 Environments
+| Environment | Purpose | URL |
+|---|---|---|
+| Private Dev Repo | Active development with secrets | github.com/sumitrawat2417/mansula-nexus |
+| Public Mirror Repo | Community/client-facing source | github.com/sumitrawat2417/mansula-nexus-public |
+| Production Hosting | Live app | mansulatech.netlify.app |
+
+### 16.2 Build & Deploy Steps
+```bash
+npm run build
+# → Outputs to dist/
+# → Vite PWA generates sw.js and workbox-*.js
+
+# Deploy dist/ to Netlify via Git push
+git add . && git commit -m "release: vX.X.X" && git push
+```
+
+### 16.3 Infrastructure
+- **Hosting:** Netlify (static site, CDN edge-cached).
+- **CI/CD:** Netlify auto-deploys from `main` branch push.
+- **Service Worker:** Generated by `vite-plugin-pwa`, served from root.
+
+---
+
+## 17. Error Handling
+
+### 17.1 Database Errors
+| Scenario | Behavior |
+|---|---|
+| IndexedDB unavailable | Falls back to `localStorage` for KV operations |
+| Storage quota exceeded | `navigator.storage.estimate()` result displayed as a warning |
+| Corrupted backup import | Schema validation throws; user sees error alert |
+
+### 17.2 User-Facing Error States
+| Error | Message Shown |
+|---|---|
+| Empty cart checkout | "Your cart is empty" (UI-level block) |
+| Notification denied | "Notification permission denied or blocked by browser settings." |
+| Camera denied | Barcode scanner shows manual entry fallback |
+| Restore invalid file | "Invalid backup file. This is not an Ultimate Backup file." |
+| Backup export failed | "Failed to export backup." |
+
+### 17.3 React Error Boundary
+No global error boundary exists in v1.x. Fatal React errors (e.g., undefined icon components) cause full app crash. Each screen should implement a local `ErrorBoundary` in Phase 2.
+
+---
+
+## 18. Testing Plan
+
+### 18.1 Unit Tests (Planned)
+- Financial calculation functions (`subtotal`, `taxAmt`, `total`).
+- Udhaar balance recalculation (`recalcUdhaarBalance`).
+- Order ID generation logic (`getNextOrderNum`).
+- Backup file validation.
+
+### 18.2 Performance Testing
+- Target: Time-to-Interactive (TTI) `< 1.5s` from cold start.
+- Target: Checkout operation completes in `< 50ms`.
+- Stress test: `injectStressTestData(10000)` function available in `db.js` to insert 10,000 synthetic orders.
+
+### 18.3 PWA Audit
+- Lighthouse PWA score target: `≥ 90`.
+- Offline mode: Full checkout functionality verified without network.
+- Service Worker: Verified registration and caching.
+
+### 18.4 Cross-Platform Testing
+- Chrome on Android.
+- Safari on iOS (PWA install + notifications).
+- Chrome on Desktop.
+- Small screen (360px wide) layout verification.
+
+---
+
+## 19. Future Plugin Architecture
+
+### 19.1 Core Modules (Current v1.x)
+| Module | Status |
+|---|---|
+| POS (Billing Engine) | ✅ Live |
+| Inventory Management | ✅ Live |
+| Order Records | ✅ Live |
+| Customer CRM + Udhaar | ✅ Live |
+| Analytics Dashboard | ✅ Live |
+| Staff Management | 🟡 Beta |
+| Backup & Restore | ✅ Live |
+
+### 19.2 Optional Plugin Modules (Roadmap)
+| Plugin | Phase | Description |
+|---|---|---|
+| AI Analytics | Phase 2 | Local heuristic-based demand prediction. Stock reorder recommendations. |
+| WhatsApp Receipts | Phase 2 | Generate shareable WhatsApp message with order summary and UPI link. |
+| Thermal Printer | Phase 2 | Web Bluetooth API integration for 58mm/80mm thermal receipt printers. |
+| Cloud Sync (E2EE) | Phase 3 | Opt-in. End-to-end encrypted P2P sync between devices using WebRTC DataChannel. No central server. |
+| Multi-Store | Phase 3 | Multiple business profiles on a single device. Per-store analytics and inventory. |
+| Cashier PIN Lock | Phase 2 | Role-based access. Cashier role locked to POS only via 4-digit PIN. |
+
+### 19.3 Plugin Interface (Proposed)
+```javascript
+// Future plugin registration API
+MansulaPlugin.register({
+  id: 'whatsapp-receipts',
+  name: 'WhatsApp Receipts',
+  version: '1.0.0',
+  hooks: {
+    onCheckoutComplete: (order) => { /* ... */ },
+  },
+  settings: [
+    { key: 'mn-plugin-wa-phone', label: 'WhatsApp Number' }
+  ]
+})
+```
+
+---
+
+## 20. Roadmap
+
+### Phase 1 (MVP) — Current: v1.7.0-alpha
+✅ Core offline POS, Inventory, Order History, Customer CRM, Analytics, Local Backup, Staff Roster, Push Notifications, App Update System.
+
+### Phase 2 — Growth (Target: Q3 2026)
+- Cashier PIN role access control.
+- AES-256 encrypted backup files.
+- Local AI-based restocking recommendations.
+- WhatsApp receipt sharing.
+- Bluetooth thermal printer support.
+- Live currency exchange rate fetching.
+- React Error Boundaries for all screens.
+
+### Phase 3 — Enterprise (Target: 2027)
+- Optional E2EE P2P cloud sync (no central server).
+- Multi-store support.
+- White-label builds for enterprise clients.
+- Offline-capable REST API for third-party integrations.
+
+---
+
+## 21. Risks & Mitigation
+
+| Risk | Severity | Mitigation |
+|---|---|---|
+| Device loss / theft | High | Weekly backup push notifications; `.msbos` export to cloud storage |
+| Browser clears IndexedDB | Medium | `navigator.storage.persist()` called on boot to mark DB as persistent |
+| Storage quota exceeded | Medium | Periodic monitoring via `navigator.storage.estimate()`; warn at 90% |
+| iOS Safari notification limitations | Medium | Direct `Notification.requestPermission()` call in click handler (not wrapped in async chain) |
+| Breaking schema changes | Medium | `version` field in backup format enables structured migration |
+
+---
+
+## 22. Appendix
+
+### A. Terminology
+| Term | Definition |
+|---|---|
+| **PWA** | Progressive Web App. A web app installable on a home screen that behaves like a native application. |
+| **IndexedDB** | Browser-native low-level structured data storage API. Persists across sessions. |
+| **Service Worker** | A background JavaScript thread that enables offline caching and push notifications. |
+| **`.msbos`** | ManSula Business Operating System backup file extension. Contains a full JSON data snapshot. |
+| **Udhaar** | South Asian term for store credit / an unpaid customer tab. |
+| **UPI** | Unified Payments Interface — Indian real-time payment system. |
+| **Watchdog Timer** | A configurable countdown that alerts the cashier if an order has been sitting idle too long. |
+| **KV Store** | The `kv` IndexedDB object store. Stores key-value pairs for settings, menus, and supplier lists. |
+
+### B. Change Log
+| Version | Date | Summary |
+|---|---|---|
+| v1.0.0 | 2024 | Initial release. Core POS, Inventory, Orders. |
+| v1.5.0 | Early 2026 | Analytics module, Customer CRM, Udhaar. |
+| v1.6.0 | May 2026 | Staff module, Push Notifications, Update system. |
+| v1.7.0-alpha | June 2026 | Backup & Restore redesign (premium UI), iOS Safari notification fix, Status card scroll fix, Customizable tools grid. |
+
+### C. Key Source Files Reference
+| File | Purpose |
+|---|---|
+| `src/appInfo.js` | Version, org info, What's New |
+| `src/db.js` | All IndexedDB operations |
+| `src/App.jsx` | Screen router, theme, currency, tax, install prompt |
+| `src/POS.jsx` | Complete billing engine |
+| `src/Inventory.jsx` | Stock management |
+| `src/OrderRecords.jsx` | Historical orders |
+| `src/Customers.jsx` | CRM + Udhaar |
+| `src/Analytics.jsx` | Dashboard charts |
+| `src/BusinessProfile.jsx` | Settings |
+| `src/BackupRestore.jsx` | Backup & Restore |
+| `src/ReloadPrompt.jsx` | Update detection + prompt |
+| `src/notificationUtils.js` | Push notification helpers |
+| `src/AlertDialog.jsx` | Global alert/confirm context |
+| `src/Home.jsx` | Dashboard, navigation, app permissions |
+| `src/index.css` | Full design system (~315KB custom CSS) |
+
+---
+
+*Document prepared by ManSula DivLabs & ManSula Technologies. For internal use by developers, designers, and investors.*  
+*Last Updated: June 27, 2026*

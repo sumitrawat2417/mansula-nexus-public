@@ -194,9 +194,17 @@ function StockCard({ item, purchaseLogs, onAdjust, onWastage, onEdit, onDelete, 
               const prices = myLogs.map(x => x.price)
               const minP = Math.min(...prices)
               const maxP = Math.max(...prices)
-              if (minP !== maxP) {
-                return <span className="inv-price-val inv-price-interactive" onClick={() => onShowPriceGraph(item, myLogs)}>{fmtCur(minP)} - {fmtCur(maxP)}</span>
-              }
+              const displayVal = minP !== maxP ? `${fmtCur(minP)} - ${fmtCur(maxP)}` : fmtCur(minP)
+              return (
+                <span 
+                  className="inv-price-val inv-price-interactive" 
+                  onClick={() => onShowPriceGraph(item, myLogs)}
+                  style={{ textDecoration: 'underline', textDecorationStyle: 'dotted', cursor: 'pointer', color: 'var(--brand-primary)' }}
+                  title="View Purchase History"
+                >
+                  {displayVal}
+                </span>
+              )
             }
             return <span className="inv-price-val">{fmtCur(item.costPrice)}</span>
           })()}
@@ -475,11 +483,52 @@ function PriceHistoryModal({ item, data, onClose }) {
         )}
       </div>
       {sorted.length > 0 && (
-        <div className="inv-price-graph-meta">
+        <div className="inv-price-graph-meta" style={{ marginBottom: 20 }}>
           <div><span className="inv-price-graph-badge">Lowest</span> <strong>{fmtCur(minP)}</strong></div>
           <div><span className="inv-price-graph-badge">Highest</span> <strong>{fmtCur(maxP)}</strong></div>
         </div>
       )}
+      
+      {/* Detailed Table */}
+      <div style={{ marginTop: '10px' }}>
+        <h4 style={{ fontSize: '0.9rem', marginBottom: 12, color: '#1e293b' }}>Detailed Purchase Logs</h4>
+        <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+          <table style={{ width: '100%', fontSize: '0.8rem', borderCollapse: 'collapse' }}>
+            <thead style={{ position: 'sticky', top: 0, background: '#f1f5f9', zIndex: 1 }}>
+              <tr style={{ textAlign: 'left' }}>
+                <th style={{ padding: '8px 12px', borderBottom: '1px solid #cbd5e1' }}>Date</th>
+                <th style={{ padding: '8px 12px', borderBottom: '1px solid #cbd5e1', textAlign: 'right' }}>Qty</th>
+                <th style={{ padding: '8px 12px', borderBottom: '1px solid #cbd5e1', textAlign: 'right' }}>Cost/Unit</th>
+                <th style={{ padding: '8px 12px', borderBottom: '1px solid #cbd5e1', textAlign: 'right' }}>Total Spent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.length === 0 ? (
+                <tr><td colSpan={4} style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>No records found.</td></tr>
+              ) : (
+                sorted.map((d, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                    <td style={{ padding: '8px 12px', color: '#475569' }}>{new Date(d.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 'bold', color: '#1e293b' }}>{d.qty}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', color: '#475569' }}>{fmtCur(d.price)}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 'bold', color: 'var(--brand-primary)' }}>{fmtCur(d.qty * d.price)}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+            {sorted.length > 0 && (
+              <tfoot style={{ position: 'sticky', bottom: 0, background: '#f8fafc', zIndex: 1 }}>
+                <tr>
+                  <td colSpan={3} style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 'bold', borderTop: '2px solid #cbd5e1' }}>Grand Total Consumed:</td>
+                  <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: '900', color: '#10b981', borderTop: '2px solid #cbd5e1' }}>
+                    {fmtCur(sorted.reduce((sum, d) => sum + (d.qty * d.price), 0))}
+                  </td>
+                </tr>
+              </tfoot>
+            )}
+          </table>
+        </div>
+      </div>
     </Modal>
   )
 }

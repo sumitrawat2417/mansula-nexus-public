@@ -123,7 +123,7 @@ const TOOLS = [
   { id: 'business', name: 'Business Profile', desc: 'Setup info, menu & categories', Icon: Icon.Business, color: '#6366f1', bg: 'linear-gradient(135deg,#6366f1,#8b5cf6)', active: true },
   { id: 'records', name: 'Order Records', desc: 'View, edit & export all orders', Icon: Icon.OrderRec, color: '#10b981', bg: 'linear-gradient(135deg,#10b981,#059669)', active: true },
   { id: 'analytics', name: 'Analytics', desc: 'Sales trends & insights', Icon: Icon.Analytics, color: '#0ea5e9', bg: 'linear-gradient(135deg,#0ea5e9,#2dd4bf)', active: true },
-  { id: 'reports', name: 'Reports', desc: 'Daily, weekly & monthly', Icon: Icon.Reports, color: '#f59e0b', bg: 'linear-gradient(135deg,#f59e0b,#ef4444)', active: false },
+  { id: 'reports', name: 'Reports', desc: 'Daily, weekly & monthly', Icon: Icon.Reports, color: '#f59e0b', bg: 'linear-gradient(135deg,#f59e0b,#ef4444)', active: true },
   { id: 'inventory', name: 'Inventory', desc: 'Stock, purchases & suppliers', Icon: Icon.Inventory, color: '#ec4899', bg: 'linear-gradient(135deg,#ec4899,#f43f5e)', active: true },
   { id: 'staff', name: 'Staff', desc: 'Team roles & shifts', Icon: Icon.Staff, color: '#06b6d4', bg: 'linear-gradient(135deg,#06b6d4,#0284c7)', active: true },
   { id: 'customers', name: 'Customers', desc: 'Contacts, CRM & Udhaar', Icon: Icon.Customers, color: '#0891b2', bg: 'linear-gradient(135deg,#0891b2,#0d9488)', active: true },

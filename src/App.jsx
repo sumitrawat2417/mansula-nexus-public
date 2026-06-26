@@ -10,6 +10,7 @@ import Customers from './Customers.jsx'
 import Analytics from './Analytics.jsx'
 import Staff from './Staff.jsx'
 import BackupRestore from './BackupRestore.jsx'
+import Reports from './Reports.jsx'
 import { AlertProvider, useAlert } from './AlertDialog.jsx'
 import ReloadPrompt from './ReloadPrompt.jsx'
 import { APP_NAME } from './appInfo.js'
@@ -403,6 +404,10 @@ export default function App() {
 
     if (screen === 'backup') {
       return <BackupRestore onClose={() => setScreen('home')} />
+    }
+
+    if (screen === 'reports') {
+      return <Reports onClose={() => setScreen('home')} currency={currency} />
     }
 
     return (
