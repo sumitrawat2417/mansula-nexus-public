@@ -28,6 +28,7 @@ function ActionRow({ icon, iconBg, iconColor, title, desc, children, danger }) {
       borderRadius: 14,
       border: `1px solid ${danger ? 'rgba(239,68,68,0.18)' : 'var(--border-color)'}`,
       transition: 'border-color 0.18s',
+      flexShrink: 0,
     }}>
       <div style={{
         width: 36, height: 36, borderRadius: 10, flexShrink: 0,
@@ -181,6 +182,7 @@ export default function BackupRestore({ onClose }) {
 
         {/* ── Status Card ── */}
         <div style={{
+          flexShrink: 0,
           background: statusBg,
           borderRadius: 18,
           padding: '16px 18px',
@@ -322,6 +324,7 @@ export default function BackupRestore({ onClose }) {
 
         {/* ── Tip ── */}
         <div style={{
+          flexShrink: 0,
           display: 'flex', gap: 10, padding: '10px 12px',
           background: 'rgba(99,102,241,0.06)',
           border: '1px solid rgba(99,102,241,0.15)',
