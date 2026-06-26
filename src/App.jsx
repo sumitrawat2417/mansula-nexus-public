@@ -9,6 +9,7 @@ import Inventory from './Inventory.jsx'
 import Customers from './Customers.jsx'
 import Analytics from './Analytics.jsx'
 import Staff from './Staff.jsx'
+import BackupRestore from './BackupRestore.jsx'
 import { AlertProvider, useAlert } from './AlertDialog.jsx'
 import ReloadPrompt from './ReloadPrompt.jsx'
 import { APP_NAME } from './appInfo.js'
@@ -45,9 +46,9 @@ function ThemeModal({ onConfirm, onChangeTheme, currentTheme }) {
           </button>
         </div>
         <div style={{ marginTop: '24px' }}>
-          <button 
-            className="bp-btn-primary" 
-            style={{ width: '100%', padding: '14px', fontSize: '1.05rem', borderRadius: '12px' }} 
+          <button
+            className="bp-btn-primary"
+            style={{ width: '100%', padding: '14px', fontSize: '1.05rem', borderRadius: '12px' }}
             onClick={onConfirm}
           >
             Continue
@@ -120,9 +121,9 @@ function InstallBanner({ onInstall, onDismiss }) {
             boxShadow: '0 4px 12px rgba(108,61,229,0.35)',
           }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
           </div>
 
@@ -338,10 +339,10 @@ export default function App() {
 
     if (screen === 'business') {
       return (
-        <BusinessProfile 
-          onClose={() => setScreen('home')} 
-          taxRateObj={taxRateObj} 
-          onTaxRate={setTaxRateObj} 
+        <BusinessProfile
+          onClose={() => setScreen('home')}
+          taxRateObj={taxRateObj}
+          onTaxRate={setTaxRateObj}
           taxRates={TAX_RATES}
           onboardingStep={onboardingStep}
           setOnboardingStep={setOnboardingStep}
@@ -410,19 +411,19 @@ export default function App() {
         <OfflineBanner onDismiss={() => setDismissOffline(true)} />
       )}
       {!showWelcome && agreed && showInstallBanner && (
-        <InstallBanner 
-          onInstall={handleInstallApp} 
-          onDismiss={handleDismissBanner} 
+        <InstallBanner
+          onInstall={handleInstallApp}
+          onDismiss={handleDismissBanner}
         />
       )}
       {showInstallInfo && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000000, padding: '24px' }} onClick={() => setShowInstallInfo(false)}>
           <div style={{ background: 'var(--bg-surface)', borderRadius: '24px', padding: '32px 24px 24px', maxWidth: '340px', width: '100%', textAlign: 'center', boxShadow: '0 32px 80px rgba(0,0,0,0.25)', animation: 'mn-modal-fade-in 0.3s ease both' }} onClick={e => e.stopPropagation()}>
             <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, #6c3de5, #8b5cf6)', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(108, 61, 229, 0.35)' }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
             </div>
-            <h3 style={{ margin: '0 0 10px', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)' }}>Install MS BOS</h3>
-            <p style={{ margin: '0 0 24px', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>MS BOS works best as an installed app. Tap your browser's menu and choose <strong>"Add to Home Screen"</strong> for a faster, full-screen experience — no internet needed!</p>
+            <h3 style={{ margin: '0 0 10px', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)' }}>Install ManSula BOS</h3>
+            <p style={{ margin: '0 0 24px', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>ManSula BOS works best as an installed app. Tap your browser's menu and choose <strong>"Add to Home Screen"</strong> for a faster, full-screen experience — no internet needed!</p>
             <button onClick={() => setShowInstallInfo(false)} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #6c3de5, #8b5cf6)', color: '#fff', border: 'none', borderRadius: '14px', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 6px 20px rgba(108, 61, 229, 0.4)' }}>Got it</button>
           </div>
         </div>

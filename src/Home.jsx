@@ -115,6 +115,7 @@ const Icon = {
   Mailbox: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>,
   Phone: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>,
   Message: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>,
+  Backup: (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
 }
 
 // ── Tool definitions ──
@@ -126,6 +127,7 @@ const TOOLS = [
   { id: 'inventory', name: 'Inventory', desc: 'Stock, purchases & suppliers', Icon: Icon.Inventory, color: '#ec4899', bg: 'linear-gradient(135deg,#ec4899,#f43f5e)', active: true },
   { id: 'staff', name: 'Staff', desc: 'Team roles & shifts', Icon: Icon.Staff, color: '#06b6d4', bg: 'linear-gradient(135deg,#06b6d4,#0284c7)', active: true },
   { id: 'customers', name: 'Customers', desc: 'Contacts, CRM & Udhaar', Icon: Icon.Customers, color: '#0891b2', bg: 'linear-gradient(135deg,#0891b2,#0d9488)', active: true },
+  { id: 'backup', name: 'Backup & Restore', desc: 'Secure your data safely', Icon: Icon.Backup, color: '#8b5cf6', bg: 'linear-gradient(135deg,#8b5cf6,#6c3de5)', active: true },
 ]
 
 // ── Full-Screen Settings ──
@@ -372,6 +374,8 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
     a.download = `MansulaBOS_FullBackup_${dStr}.msbos`
     a.click()
     URL.revokeObjectURL(url)
+    const today = new Date().toDateString()
+    localStorage.setItem('mn-last-backup-date', today)
     showAlert('Backup exported successfully.', { type: 'success' })
   }
 
@@ -631,7 +635,7 @@ function HomeSettings({ theme, onToggleTheme, currency, onCurrency, currencies, 
                   style={{ alignSelf: 'flex-start' }}
                   disabled={resetStep === 2}
                 >
-                  <Icon.Cloud style={{ width: 16, height: 16, marginRight: 6 }} /> Restore Ultimate Backup
+                  <Icon.Database style={{ width: 16, height: 16, marginRight: 6 }} /> Restore Ultimate Backup
                 </button>
               </div>
             </div>
@@ -1149,6 +1153,9 @@ export default function Home({
   const [businessName, setBusinessName] = useState('')
   const [businessLogo, setBusinessLogo] = useState('')
   const { alert: showAlert, confirm: showConfirm } = useAlert()
+  
+  const lastBackupDate = localStorage.getItem('mn-last-backup-date')
+  const needsBackup = lastBackupDate !== new Date().toDateString()
 
   const [toolsOrder, setToolsOrder] = useState([])
   const [orderedTools, setOrderedTools] = useState(TOOLS)
@@ -1277,6 +1284,33 @@ export default function Home({
 
       {/* ── POS Launch Card ── */}
       <div className="hn-body">
+        {needsBackup && (
+          <div 
+            onClick={() => handleLaunch('backup')}
+            style={{
+              background: 'linear-gradient(135deg, #ef4444, #f43f5e)',
+              color: '#fff',
+              padding: '12px 16px',
+              borderRadius: '16px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(239, 68, 68, 0.25)',
+              animation: 'mn-modal-fade-in 0.4s ease'
+            }}
+          >
+            <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Icon.Warn style={{ width: 20, height: 20 }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Backup Recommended</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>You haven't backed up your data today. Tap to secure it now.</div>
+            </div>
+            <Icon.ChevR style={{ width: 20, height: 20, opacity: 0.8 }} />
+          </div>
+        )}
         <div
           className="hn-pos-card"
           onClick={() => handleLaunch('pos')}
