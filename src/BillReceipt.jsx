@@ -396,6 +396,10 @@ export function BillDocument({
   paymentMode = 'UPI',
   hidden = true
 }) {
+  business = business || {}
+  math = math || {}
+  order = order || {}
+
   const isReceipt = type === 'receipt'
   const now = new Date()
   const dateStr = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
