@@ -3,7 +3,7 @@ import { useBackButton } from './useBackButton.js'
 import {
   getOrdersByDateRange, getStatsForDateRange,
   deleteOrderRecord, updateOrderRecord, getStorageEstimate, getAllOrderRecords, dbGet,
-  exportOrdersBackup, restoreOrdersBackup, clearAllOrderRecords, getUdhaarByOrderId, getCustomerById, getOrderRecordById
+  exportOrdersBackup, restoreOrdersBackup, clearAllOrderRecords, getUdhaarByOrderId, getCustomerById, getOrderRecordById, getCustomers
 } from './db.js'
 import DateFilterDrawer, { computeNavRange, computeQuick } from './DateFilterDrawer.jsx'
 import { useAlert } from './AlertDialog.jsx'
@@ -98,7 +98,7 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
 
   useEffect(() => {
     dbGet('business').then(setBusiness)
-    dbGet('customers').then(c => setCustomersList(c || []))
+    getCustomers().then(c => setCustomersList(c || []))
   }, [])
 
   useEffect(() => {
@@ -112,13 +112,20 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
   }, [record, customerInfo])
 
   const waFilteredCusts = (() => {
-    if (!customersList?.length) return []
+    if (!customersList || customersList.length === 0) return []
     const n = waName.trim().toLowerCase()
-    const p = waPhone.trim()
+    
+    // Clean phone input for robust matching
+    let p = waPhone.replace(/\D/g, '')
+    if (p.startsWith('91') && p.length > 10) p = p.substring(2)
+    p = p.replace(/^0+/, '')
+    
     if (!n && !p) return customersList.slice(0, 15)
+    
     return customersList.filter(c => {
-      const matchName = n ? (c.name || '').toLowerCase().includes(n) : true
-      const matchPhone = p ? (c.phone || '').includes(p) : true
+      const matchName = n ? String(c.name || '').toLowerCase().includes(n) : true
+      const dbPhone = String(c.phone || '').replace(/\D/g, '')
+      const matchPhone = p ? dbPhone.includes(p) : true
       return matchName && matchPhone
     }).slice(0, 15)
   })()
