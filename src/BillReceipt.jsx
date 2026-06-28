@@ -145,16 +145,20 @@ const DOC_STYLES = `
   .brd-meta-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     font-size: 13px;
+    gap: 16px;
   }
   .brd-meta-row span {
     color: #6b7280;
     font-weight: 500;
+    flex-shrink: 0;
   }
   .brd-meta-row strong {
     color: #1a1a2e;
     font-weight: 700;
+    text-align: right;
+    word-break: break-word;
   }
   .brd-meta-row strong.accent { color: #6366f1; }
   .brd-meta-row strong.warn { color: #d97706; }
@@ -454,7 +458,7 @@ export function BillDocument({
         <div className="brd-meta-grid">
           <div className="brd-meta-row"><span>Date</span><strong>{dateStr} {timeStr}</strong></div>
           {order.customer && <div className="brd-meta-row"><span>Customer</span><strong>{order.customer}</strong></div>}
-          {order.customerPhone && <div className="brd-meta-row"><span>Phone</span><strong>{order.customerPhone}</strong></div>}
+          {order.customerPhone && <div className="brd-meta-row"><span>Phone</span><strong>{order.customerPhone.startsWith('+') ? order.customerPhone : `+91 ${order.customerPhone}`}</strong></div>}
           <div className="brd-meta-row"><span>Status</span><strong className={isReceipt ? 'ok' : 'warn'}>{isReceipt ? paymentMode : 'Pending'}</strong></div>
         </div>
       </div>
