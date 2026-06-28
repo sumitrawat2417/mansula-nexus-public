@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { QRCodeCanvas } from 'qrcode.react'
+import { QRCodeSVG } from 'qrcode.react'
 
 // ─────────────────────────────────────────
 //  Shared styles injected once per render
@@ -424,7 +424,7 @@ export function BillDocument({
             <div className="brd-brand-main">{business.name || 'Your Business'}</div>
             <div className="brd-brand-sub">{business.tagline || 'Business Operating System'}</div>
             <div className="brd-brand-micro">
-              Verified Digital Invoice<br/>
+              Verified Digital Invoice<br />
               Powered by ManSula BOS
             </div>
           </div>
@@ -449,7 +449,7 @@ export function BillDocument({
           <div className="brd-meta-row"><span>Contact</span><strong>{business.contact ? `+91 ${business.contact}` : '—'}</strong></div>
           {business.gstNumber && <div className="brd-meta-row"><span>GST No</span><strong className="accent">{business.gstNumber}</strong></div>}
         </div>
-        
+
         <div className="brd-meta-heading" style={{ marginTop: 20 }}>Order Information</div>
         <div className="brd-meta-grid">
           <div className="brd-meta-row"><span>Date</span><strong>{dateStr} {timeStr}</strong></div>
@@ -538,12 +538,35 @@ export function BillDocument({
       ) : (
         <div className="brd-qr-section">
           <div className="brd-qr-wrap">
-            <QRCodeCanvas
-              value={upiString}
-              size={130}
-              level="H"
-              imageSettings={{ src: logo, height: 28, width: 28, excavate: true }}
-            />
+            <div style={{ position: 'relative', width: 130, height: 130 }}>
+              <QRCodeSVG
+                value={upiString}
+                size={130}
+                level="H"
+                imageSettings={{ 
+                  src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 
+                  height: 42, 
+                  width: 42, 
+                  excavate: true 
+                }}
+              />
+              <img 
+                src={logo} 
+                crossOrigin="anonymous"
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  border: '3px solid #ffffff',
+                  backgroundColor: '#ffffff',
+                  objectFit: 'cover'
+                }}
+              />
+            </div>
           </div>
           <div className="brd-qr-content">
             <div className="brd-qr-label">Scan to Pay</div>
@@ -567,12 +590,12 @@ export function BillDocument({
           Verified Digital Invoice
         </div>
       </div>
-      
+
       <div className="brd-footer">
         <div className="brd-footer-brand">
-          <strong>Powered by ManSula BOS</strong><br/>
-          Business Operating System<br/>
-          for Retail & Restaurants<br/>
+          <strong>Powered by ManSula BOS</strong><br />
+          Business Operating System<br />
+          for Retail & Restaurants<br />
           <div style={{ marginTop: 6, color: '#818cf8', fontWeight: 600 }}>mansulatech.netlify.app</div>
           <div style={{ marginTop: 8, fontSize: 9 }}>© {new Date().getFullYear()} ManSula DivLabs</div>
         </div>
@@ -611,7 +634,7 @@ const SAMPLE_BUSINESS = {
 }
 
 const SAMPLE_ORDER = {
-  id: '#N-29/06/26',
+  id: '#1234',
   customer: 'Sumit Rawat',
   gstPercent: 5,
   deliveryCharge: 40,
@@ -693,7 +716,7 @@ export default function BillReceiptPreview() {
               style={downloadBtnStyle('#d97706')}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
               </svg>
               Download Invoice
             </button>
@@ -724,7 +747,7 @@ export default function BillReceiptPreview() {
               style={downloadBtnStyle('#059669')}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
               </svg>
               Download Receipt
             </button>
