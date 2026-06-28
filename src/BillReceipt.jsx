@@ -461,8 +461,6 @@ export function BillDocument({
         <div className="brd-meta-heading" style={{ marginTop: 20 }}>Order Information</div>
         <div className="brd-meta-grid">
           <div className="brd-meta-row"><span>Date</span><strong>{dateStr} {timeStr}</strong></div>
-          {order.customer && <div className="brd-meta-row"><span>Customer</span><strong>{order.customer}</strong></div>}
-          {order.customerPhone && <div className="brd-meta-row"><span>Phone</span><strong>{order.customerPhone.startsWith('+') ? order.customerPhone : `+91 ${order.customerPhone}`}</strong></div>}
           <div className="brd-meta-row"><span>Status</span><strong className={isReceipt ? 'ok' : 'warn'}>{isReceipt ? paymentMode : 'Pending'}</strong></div>
         </div>
       </div>
