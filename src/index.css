@@ -11125,8 +11125,6 @@ select {
   cursor: pointer;
 }
 
-/* --- Permissions --- */
-.hns-perm-info-box {}
 
 .inv-supplier-card-meta {
   font-size: 0.73rem;
