@@ -69,6 +69,14 @@ const DOC_STYLES = `
     text-transform: uppercase;
     margin-top: 1px;
   }
+  .brd-brand-micro {
+    font-size: 9px;
+    color: #9ca3af;
+    margin-top: 6px;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+  
   .brd-doc-badge {
     text-align: right;
   }
@@ -79,6 +87,7 @@ const DOC_STYLES = `
     text-transform: uppercase;
     padding: 5px 14px;
     border-radius: 100px;
+    display: inline-block;
   }
   .brd-doc-type.invoice {
     color: #d97706;
@@ -90,6 +99,18 @@ const DOC_STYLES = `
     background: rgba(5,150,105,0.1);
     border: 1.5px solid rgba(5,150,105,0.25);
   }
+  .brd-status-badge {
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 8px;
+    margin-bottom: 2px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .brd-status-badge.pending { color: #d97706; }
+  .brd-status-badge.paid { color: #059669; }
+  
   .brd-doc-num {
     font-size: 11px;
     color: #9ca3af;
@@ -97,45 +118,34 @@ const DOC_STYLES = `
     font-weight: 500;
   }
 
-  /* ── META GRID ───────────────────── */
+  /* ── META INFO ───────────────────── */
   .brd-meta {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    margin: 0 32px 0;
-    background: #f9f9fe;
-    border: 1px solid #ebebf8;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-top: 20px;
+    margin: 24px 32px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
-  .brd-meta-cell {
-    padding: 11px 16px;
-    border-right: 1px solid #ebebf8;
-    border-bottom: 1px solid #ebebf8;
-  }
-  .brd-meta-cell:nth-child(even) { border-right: none; }
-  .brd-meta-cell:nth-last-child(-n+2) { border-bottom: none; }
-  .brd-meta-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: #9ca3af;
-    margin-bottom: 2px;
-  }
-  .brd-meta-value {
+  .brd-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 13px;
-    font-weight: 700;
-    color: #1a1a2e;
   }
-  .brd-meta-value.accent { color: #6366f1; }
-  .brd-meta-value.warn   { color: #d97706; }
-  .brd-meta-value.ok     { color: #059669; }
+  .brd-meta-row span {
+    color: #6b7280;
+    font-weight: 500;
+  }
+  .brd-meta-row strong {
+    color: #1a1a2e;
+    font-weight: 700;
+  }
+  .brd-meta-row strong.accent { color: #6366f1; }
+  .brd-meta-row strong.warn { color: #d97706; }
+  .brd-meta-row strong.ok { color: #059669; }
 
   /* ── ITEMS TABLE ─────────────────── */
   .brd-items {
-    margin: 20px 32px 0;
+    margin: 24px 32px 0;
   }
   .brd-items-head {
     display: grid;
@@ -197,23 +207,30 @@ const DOC_STYLES = `
   .brd-total-row.discount { color: #059669; font-weight: 600; }
   .brd-total-row.tax      { color: #d97706; font-weight: 600; }
   .brd-grand-total {
-    margin-top: 14px;
+    margin-top: 16px;
     background: #1a1a2e;
     border-radius: 12px;
-    padding: 16px 22px;
+    padding: 20px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 8px 16px rgba(26,26,46,0.15);
   }
   .brd-grand-label {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 800;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     color: #a5b4fc;
     text-transform: uppercase;
   }
+  .brd-grand-sub {
+    font-size: 11px;
+    color: #818cf8;
+    margin-top: 4px;
+    font-weight: 600;
+  }
   .brd-grand-amt {
-    font-size: 30px;
+    font-size: 32px;
     font-weight: 900;
     color: #ffffff;
     letter-spacing: -1px;
@@ -222,123 +239,127 @@ const DOC_STYLES = `
     font-size: 18px;
     font-weight: 700;
     color: #a5b4fc;
-    margin-right: 2px;
+    margin-right: 4px;
   }
 
   /* ── QR SECTION (Invoice) ─────────── */
   .brd-qr-section {
-    margin: 20px 32px 0;
-    background: #f9f9fe;
-    border: 1.5px dashed #c7d2fe;
-    border-radius: 14px;
-    padding: 18px;
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
-  .brd-qr-wrap {
-    position: relative;
-    flex-shrink: 0;
-    background: white;
-    padding: 8px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(99,102,241,0.1);
-  }
-  .brd-qr-meta {
-    flex: 1;
+    margin: 32px 32px 0;
+    text-align: center;
+    background: #fcfcff;
+    border: 1px solid #eef2ff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(99,102,241,0.05);
   }
   .brd-qr-label {
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 800;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
+    color: #1a1a2e;
+    margin-bottom: 16px;
+  }
+  .brd-qr-wrap {
+    display: inline-block;
+    padding: 12px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+  }
+  .brd-qr-amount {
+    font-size: 26px;
+    font-weight: 900;
     color: #6366f1;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+  }
+  .brd-qr-amount span {
+    font-size: 16px;
+    margin-right: 2px;
   }
   .brd-upi-id {
     font-size: 13px;
-    font-weight: 700;
-    color: #1a1a2e;
-    word-break: break-all;
-    margin-bottom: 8px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 16px;
   }
-  .brd-scan-note {
+  .brd-qr-accepted {
     font-size: 11px;
+    font-weight: 600;
     color: #9ca3af;
-    line-height: 1.5;
+    letter-spacing: 0.5px;
   }
-  .brd-amount-chip {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 2px;
-    margin-top: 6px;
-    background: #6366f1;
-    color: white;
-    border-radius: 100px;
-    padding: 4px 12px;
-    font-size: 15px;
-    font-weight: 800;
-  }
-  .brd-amount-chip span { font-size: 11px; font-weight: 600; opacity: 0.8; }
 
-  /* ── PAID STAMP (Receipt) ─────────── */
-  .brd-paid-stamp {
-    margin: 20px 32px 0;
-    background: #f0fdf4;
-    border: 1.5px solid #6ee7b7;
-    border-radius: 14px;
-    padding: 18px 22px;
+  /* ── TIMELINE (Receipt) ─────────── */
+  .brd-timeline {
+    margin: 24px 32px 0;
+    padding: 20px 24px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+  }
+  .brd-tl-item {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+    margin-bottom: 14px;
   }
-  .brd-paid-icon {
-    width: 44px;
-    height: 44px;
+  .brd-tl-item:last-child { margin-bottom: 0; }
+  .brd-tl-icon {
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: #059669;
+    background: #10b981;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
-  .brd-paid-title {
-    font-size: 16px;
-    font-weight: 900;
-    color: #065f46;
-    letter-spacing: 0.5px;
-  }
-  .brd-paid-sub {
-    font-size: 12px;
-    color: #6b7280;
-    margin-top: 2px;
+  .brd-tl-text {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
   }
 
-  /* ── FOOTER ──────────────────────── */
-  .brd-footer {
-    margin: 24px 32px 0;
-    border-top: 1px solid #f0f0f8;
-    padding: 20px 0 30px;
-    text-align: center;
-  }
-  .brd-footer-tagline {
-    font-size: 13px;
-    font-style: italic;
-    color: #9ca3af;
-    margin: 0 0 12px;
-  }
-  .brd-footer-links {
-    font-size: 10.5px;
-    color: #c4b5fd;
+  /* ── TRUST & FOOTER ──────────────── */
+  .brd-trust {
+    margin: 32px 32px 0;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.3px;
+    color: #10b981;
+  }
+  .brd-trust-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .brd-footer {
+    margin: 20px 32px 0;
+    border-top: 1px solid #f0f0f8;
+    padding: 24px 0 32px;
+    text-align: center;
   }
   .brd-footer-brand {
     font-size: 11px;
-    color: #d1d5db;
-    margin-top: 8px;
+    color: #9ca3af;
+    line-height: 1.6;
   }
 `
+
+function getItemIcon(name) {
+  const n = name.toLowerCase()
+  if (n.includes('coffee') || n.includes('brew') || n.includes('espresso') || n.includes('latte') || n.includes('tea')) return '☕'
+  if (n.includes('croissant') || n.includes('bread') || n.includes('bun') || n.includes('pastry')) return '🥐'
+  if (n.includes('water') || n.includes('bottle')) return '💧'
+  if (n.includes('burger') || n.includes('sandwich')) return '🍔'
+  if (n.includes('pizza')) return '🍕'
+  if (n.includes('cake') || n.includes('dessert') || n.includes('sweet')) return '🍰'
+  if (n.includes('salad')) return '🥗'
+  return '🔹'
+}
 
 // ─────────────────────────────────────────────────────────
 //  BillDocument — the printable/image document component
@@ -351,6 +372,7 @@ export function BillDocument({
   math = {},
   logo = '/logo.png',
   paymentMode = 'UPI',
+  hidden = true
 }) {
   const isReceipt = type === 'receipt'
   const now = new Date()
@@ -366,177 +388,181 @@ export function BillDocument({
   const delivery = order.deliveryCharge || 0
   const grandTotal = math.grandTotal || 0
 
-  return (
-    <div style={{ position: 'fixed', top: -9999, left: -9999, zIndex: 0, pointerEvents: 'none' }}>
-      <style>{DOC_STYLES}</style>
-      <div className="brd-root" ref={docRef}>
-        {/* ACCENT BAR */}
-        <div className="brd-accent-bar" />
+  const content = (
+    <div className="brd-root" ref={docRef}>
+      {/* ACCENT BAR */}
+      <div className="brd-accent-bar" />
 
-        {/* HEADER */}
-        <div className="brd-header">
-          <div className="brd-lockup">
-            <div className="brd-logo-wrap">
-              <img src={logo} className="brd-logo-img" alt="Logo" />
+      {/* HEADER */}
+      <div className="brd-header">
+        <div className="brd-lockup">
+          <div className="brd-logo-wrap">
+            <img src={logo} className="brd-logo-img" alt="Logo" />
+          </div>
+          <div>
+            <div className="brd-brand-main">{business.name || 'Your Business'}</div>
+            <div className="brd-brand-sub">{business.tagline || 'Business Operating System'}</div>
+            <div className="brd-brand-micro">
+              Verified Digital Invoice<br/>
+              Powered by ManSula BOS
             </div>
+          </div>
+        </div>
+        <div className="brd-doc-badge">
+          <div className={`brd-doc-type ${isReceipt ? 'receipt' : 'invoice'}`}>
+            {isReceipt ? 'Receipt' : 'Invoice'}
+          </div>
+          <div className={`brd-status-badge ${isReceipt ? 'paid' : 'pending'}`}>
+            [{isReceipt ? 'Completed' : 'Pending'}]
+          </div>
+          <div className="brd-doc-num">No. {orderId}</div>
+        </div>
+      </div>
+
+      {/* META INFO (Clean layout) */}
+      <div className="brd-meta">
+        <div className="brd-meta-row"><span>Business</span><strong>{business.name || '—'}</strong></div>
+        <div className="brd-meta-row"><span>Contact</span><strong>{business.contact ? `+91 ${business.contact}` : '—'}</strong></div>
+        {business.gstNumber && <div className="brd-meta-row"><span>GST No</span><strong className="accent">{business.gstNumber}</strong></div>}
+        <div className="brd-meta-row"><span>Order ID</span><strong className="accent">{orderId}</strong></div>
+        <div style={{ height: 4 }}></div>
+        <div className="brd-meta-row"><span>Date</span><strong>{dateStr} {timeStr}</strong></div>
+        <div className="brd-meta-row"><span>Status</span><strong className={isReceipt ? 'ok' : 'warn'}>{isReceipt ? paymentMode : 'Pending'}</strong></div>
+      </div>
+
+      {/* ITEMS */}
+      <div className="brd-items">
+        <div className="brd-items-head">
+          <span>Item / Description</span>
+          <span>Qty</span>
+          <span>Rate</span>
+          <span>Amount</span>
+        </div>
+        {items.map((item, i) => (
+          <div className="brd-item-row" key={i}>
             <div>
-              <div className="brd-brand-main">{business.name || 'Your Business'}</div>
-              <div className="brd-brand-sub">{business.tagline || 'Business Operating System'}</div>
+              <div className="brd-item-name">{getItemIcon(item.name)} {item.name}</div>
+              {item.modifiers && Object.values(item.modifiers).length > 0 && (
+                <div className="brd-item-mod">{Object.values(item.modifiers).join(' • ')}</div>
+              )}
             </div>
+            <div className="brd-item-cell">{item.qty}</div>
+            <div className="brd-item-cell">₹{Number(item.unitPrice).toFixed(2)}</div>
+            <div className="brd-item-total">₹{(item.qty * item.unitPrice).toFixed(2)}</div>
           </div>
-          <div className="brd-doc-badge">
-            <div className={`brd-doc-type ${isReceipt ? 'receipt' : 'invoice'}`}>
-              {isReceipt ? 'Receipt' : 'Invoice'}
-            </div>
-            <div className="brd-doc-num">No. {orderId}</div>
-          </div>
-        </div>
+        ))}
+      </div>
 
-        {/* META GRID */}
-        <div className="brd-meta">
-          <div className="brd-meta-cell">
-            <div className="brd-meta-label">Business</div>
-            <div className="brd-meta-value">{business.name || '—'}</div>
-          </div>
-          <div className="brd-meta-cell">
-            <div className="brd-meta-label">Contact</div>
-            <div className="brd-meta-value">{business.contact ? `+91 ${business.contact}` : '—'}</div>
-          </div>
-          {business.gstNumber && <>
-            <div className="brd-meta-cell">
-              <div className="brd-meta-label">GST No.</div>
-              <div className="brd-meta-value accent">{business.gstNumber}</div>
-            </div>
-            <div className="brd-meta-cell">
-              <div className="brd-meta-label">Order No.</div>
-              <div className="brd-meta-value accent">{orderId}</div>
-            </div>
-          </>}
-          {!business.gstNumber && <>
-            <div className="brd-meta-cell">
-              <div className="brd-meta-label">Order No.</div>
-              <div className="brd-meta-value accent">{orderId}</div>
-            </div>
-            <div className="brd-meta-cell">
-              <div className="brd-meta-label">Customer</div>
-              <div className="brd-meta-value">{order.customer || 'Walk-in'}</div>
-            </div>
-          </>}
-          <div className="brd-meta-cell">
-            <div className="brd-meta-label">Date & Time</div>
-            <div className="brd-meta-value">{dateStr} {timeStr}</div>
-          </div>
-          <div className="brd-meta-cell">
-            <div className="brd-meta-label">Payment</div>
-            <div className={`brd-meta-value ${isReceipt ? 'ok' : 'warn'}`}>
-              {isReceipt ? paymentMode : 'Awaiting Payment'}
-            </div>
-          </div>
+      {/* TOTALS */}
+      <div className="brd-totals">
+        <div className="brd-total-row">
+          <span>Subtotal</span>
+          <span>₹{subtotal.toFixed(2)}</span>
         </div>
-
-        {/* ITEMS */}
-        <div className="brd-items">
-          <div className="brd-items-head">
-            <span>Item / Description</span>
-            <span style={{ textAlign: 'right' }}>Qty</span>
-            <span style={{ textAlign: 'right' }}>Rate</span>
-            <span style={{ textAlign: 'right' }}>Amount</span>
-          </div>
-          {items.map((item, i) => (
-            <div className="brd-item-row" key={i}>
-              <div>
-                <div className="brd-item-name">{item.name}</div>
-                {item.modifiers && Object.values(item.modifiers).length > 0 && (
-                  <div className="brd-item-mod">{Object.values(item.modifiers).join(' • ')}</div>
-                )}
-              </div>
-              <div className="brd-item-cell">{item.qty}</div>
-              <div className="brd-item-cell">₹{Number(item.unitPrice).toFixed(2)}</div>
-              <div className="brd-item-total">₹{(item.qty * item.unitPrice).toFixed(2)}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* TOTALS */}
-        <div className="brd-totals">
-          <div className="brd-total-row">
-            <span>Subtotal</span>
-            <span>₹{subtotal.toFixed(2)}</span>
-          </div>
-          {discountAmt > 0 && (
-            <div className="brd-total-row discount">
-              <span>Discount</span>
-              <span>–₹{discountAmt.toFixed(2)}</span>
-            </div>
-          )}
-          {gstAmt > 0 && (
-            <div className="brd-total-row tax">
-              <span>GST ({order.gstPercent}%)</span>
-              <span>+₹{gstAmt.toFixed(2)}</span>
-            </div>
-          )}
-          {delivery > 0 && (
-            <div className="brd-total-row">
-              <span>Delivery</span>
-              <span>₹{delivery.toFixed(2)}</span>
-            </div>
-          )}
-          <div className="brd-grand-total">
-            <div>
-              <div className="brd-grand-label">{isReceipt ? 'Total Paid' : 'Amount Due'}</div>
-            </div>
-            <div className="brd-grand-amt">
-              <span>₹</span>{grandTotal.toFixed(2)}
-            </div>
-          </div>
-        </div>
-
-        {/* QR (Invoice) or PAID STAMP (Receipt) */}
-        {isReceipt ? (
-          <div className="brd-paid-stamp">
-            <div className="brd-paid-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            <div>
-              <div className="brd-paid-title">Payment Received</div>
-              <div className="brd-paid-sub">via {paymentMode} — Thank you for your business!</div>
-            </div>
-          </div>
-        ) : (
-          <div className="brd-qr-section">
-            <div className="brd-qr-wrap">
-              <QRCodeSVG
-                value={upiString}
-                size={110}
-                level="H"
-                imageSettings={{ src: logo, height: 24, width: 24, excavate: true }}
-              />
-            </div>
-            <div className="brd-qr-meta">
-              <div className="brd-qr-label">Scan & Pay via UPI</div>
-              <div className="brd-upi-id">{business.upiId || 'yourname@upi'}</div>
-              <div className="brd-scan-note">Scan this QR code with any UPI app to pay instantly</div>
-              <div className="brd-amount-chip">
-                <span>₹</span>{grandTotal.toFixed(2)}
-              </div>
-            </div>
+        {discountAmt > 0 && (
+          <div className="brd-total-row discount">
+            <span>Discount</span>
+            <span>–₹{discountAmt.toFixed(2)}</span>
           </div>
         )}
-
-        {/* FOOTER */}
-        <div className="brd-footer">
-          <p className="brd-footer-tagline">"Empowering your business with smart technology"</p>
-          <div className="brd-footer-links">mansulatech.netlify.app</div>
-          <div className="brd-footer-brand" style={{ lineHeight: '1.6' }}>
-            {isReceipt ? 'Receipt' : 'Invoice'} generated by ManSula Nexus<br/>
-            Developed by ManSula DivLabs<br/>
-            © {new Date().getFullYear()} ManSula Technologies & ManSula DivLabs
+        {gstAmt > 0 && (
+          <div className="brd-total-row tax">
+            <span>GST ({order.gstPercent || 0}%)</span>
+            <span>+₹{gstAmt.toFixed(2)}</span>
+          </div>
+        )}
+        {delivery > 0 && (
+          <div className="brd-total-row">
+            <span>Delivery</span>
+            <span>₹{delivery.toFixed(2)}</span>
+          </div>
+        )}
+        <div className="brd-grand-total">
+          <div>
+            <div className="brd-grand-label">{isReceipt ? 'Total Paid' : 'Amount Due'}</div>
+            {!isReceipt && <div className="brd-grand-sub">Due Now</div>}
+          </div>
+          <div className="brd-grand-amt">
+            <span>₹</span>{grandTotal.toFixed(2)}
           </div>
         </div>
       </div>
+
+      {/* QR (Invoice) or TIMELINE (Receipt) */}
+      {isReceipt ? (
+        <div className="brd-timeline">
+          <div className="brd-tl-item">
+            <div className="brd-tl-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
+            <div className="brd-tl-text">Invoice Created</div>
+          </div>
+          <div className="brd-tl-item">
+            <div className="brd-tl-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
+            <div className="brd-tl-text">QR Generated</div>
+          </div>
+          <div className="brd-tl-item">
+            <div className="brd-tl-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
+            <div className="brd-tl-text">Payment Received</div>
+          </div>
+          <div className="brd-tl-item">
+            <div className="brd-tl-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
+            <div className="brd-tl-text">Receipt Issued</div>
+          </div>
+        </div>
+      ) : (
+        <div className="brd-qr-section">
+          <div className="brd-qr-label">Scan to Pay</div>
+          <div className="brd-qr-wrap">
+            <QRCodeSVG
+              value={upiString}
+              size={140}
+              level="H"
+              imageSettings={{ src: logo, height: 32, width: 32, excavate: true }}
+            />
+          </div>
+          <div className="brd-qr-amount">
+            <span>₹</span>{grandTotal.toFixed(2)}
+          </div>
+          <div className="brd-upi-id">{business.upiId || 'yourname@upi'}</div>
+          <div className="brd-qr-accepted">Accepted: PhonePe • GPay • Paytm • BHIM</div>
+        </div>
+      )}
+
+      {/* TRUST & FOOTER */}
+      <div className="brd-trust">
+        <div className="brd-trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+          Secure UPI Payment
+        </div>
+        <div className="brd-trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+          Verified Digital Invoice
+        </div>
+      </div>
+      
+      <div className="brd-footer">
+        <div className="brd-footer-brand">
+          Powered by ManSula BOS<br/>
+          Verified Digital Invoice<br/>
+          © {new Date().getFullYear()} ManSula Technologies & ManSula DivLabs
+        </div>
+      </div>
     </div>
+  )
+
+  if (hidden) {
+    return (
+      <div style={{ position: 'fixed', top: -9999, left: -9999, zIndex: 0, pointerEvents: 'none' }}>
+        <style>{DOC_STYLES}</style>
+        {content}
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <style>{DOC_STYLES}</style>
+      {content}
+    </>
   )
 }
 
@@ -598,7 +624,7 @@ export default function BillReceiptPreview() {
     }}>
       <div style={{ maxWidth: 980, margin: '0 auto' }}>
         {/* Page title */}
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+        <div style={{ textAlign: 'center', margin: '0 0 40px 0' }}>
           <h1 style={{ color: '#fff', fontSize: 28, fontWeight: 900, margin: '0 0 8px', letterSpacing: -0.5 }}>
             Bill & Receipt Preview
           </h1>
@@ -618,15 +644,15 @@ export default function BillReceiptPreview() {
               border: '1px solid rgba(255,255,255,0.1)',
               padding: 16,
             }}>
-              <style>{DOC_STYLES}</style>
-              <div className="brd-root" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}>
+              <div style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.4)', borderRadius: '6px', overflow: 'hidden' }} ref={invoiceRef}>
                 {/* Render inline for preview */}
-                <InvoiceContent
+                <BillDocument
+                  type="invoice"
                   business={SAMPLE_BUSINESS}
                   order={SAMPLE_ORDER}
                   math={SAMPLE_MATH}
                   logo="/logo.png"
-                  orderId="#1042"
+                  hidden={false}
                 />
               </div>
             </div>
@@ -649,14 +675,15 @@ export default function BillReceiptPreview() {
               border: '1px solid rgba(255,255,255,0.1)',
               padding: 16,
             }}>
-              <div className="brd-root" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}>
-                <ReceiptContent
+              <div style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.4)', borderRadius: '6px', overflow: 'hidden' }} ref={receiptRef}>
+                <BillDocument
+                  type="receipt"
                   business={SAMPLE_BUSINESS}
                   order={SAMPLE_ORDER}
                   math={SAMPLE_MATH}
                   logo="/logo.png"
-                  orderId="#1042"
                   paymentMode="UPI"
+                  hidden={false}
                 />
               </div>
             </div>
@@ -670,29 +697,6 @@ export default function BillReceiptPreview() {
               Download Receipt
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Hidden refs for html2canvas capture */}
-      <div style={{ position: 'fixed', top: -9999, left: -9999, zIndex: 0 }}>
-        <div className="brd-root" ref={invoiceRef}>
-          <InvoiceContent
-            business={SAMPLE_BUSINESS}
-            order={SAMPLE_ORDER}
-            math={SAMPLE_MATH}
-            logo="/logo.png"
-            orderId="#1042"
-          />
-        </div>
-        <div className="brd-root" ref={receiptRef}>
-          <ReceiptContent
-            business={SAMPLE_BUSINESS}
-            order={SAMPLE_ORDER}
-            math={SAMPLE_MATH}
-            logo="/logo.png"
-            orderId="#1042"
-            paymentMode="UPI"
-          />
         </div>
       </div>
     </div>
@@ -715,164 +719,3 @@ const downloadBtnStyle = (color) => ({
   fontFamily: "'Inter', sans-serif",
   boxShadow: `0 4px 16px ${color}50`,
 })
-
-// ── Shared body content for Invoice ──
-function InvoiceContent({ business, order, math, logo, orderId }) {
-  const now = new Date()
-  const dateStr = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  const upiString = `upi://pay?pa=${business.upiId || 'test@ybl'}&pn=${encodeURIComponent(business.name || 'Business')}&am=${math.grandTotal || 0}&cu=INR`
-  return <>
-    <div className="brd-accent-bar" />
-    <div className="brd-header">
-      <div className="brd-lockup">
-        <div className="brd-logo-wrap"><img src={logo} className="brd-logo-img" alt="Logo" /></div>
-        <div>
-          <div className="brd-brand-main">{business.name}</div>
-          <div className="brd-brand-sub">{business.tagline}</div>
-        </div>
-      </div>
-      <div className="brd-doc-badge">
-        <div className="brd-doc-type invoice">Invoice</div>
-        <div className="brd-doc-num">No. {orderId}</div>
-      </div>
-    </div>
-    <div className="brd-meta">
-      <div className="brd-meta-cell"><div className="brd-meta-label">Business</div><div className="brd-meta-value">{business.name}</div></div>
-      <div className="brd-meta-cell"><div className="brd-meta-label">Contact</div><div className="brd-meta-value">+91 {business.contact}</div></div>
-      <div className="brd-meta-cell"><div className="brd-meta-label">GST No.</div><div className="brd-meta-value accent">{business.gstNumber}</div></div>
-      <div className="brd-meta-cell"><div className="brd-meta-label">Order No.</div><div className="brd-meta-value accent">{orderId}</div></div>
-      <div className="brd-meta-cell"><div className="brd-meta-label">Date & Time</div><div className="brd-meta-value">{dateStr} {timeStr}</div></div>
-      <div className="brd-meta-cell"><div className="brd-meta-label">Payment</div><div className="brd-meta-value warn">Awaiting Payment</div></div>
-    </div>
-    <div className="brd-items">
-      <div className="brd-items-head">
-        <span>Item / Description</span>
-        <span style={{textAlign:'right'}}>Qty</span>
-        <span style={{textAlign:'right'}}>Rate</span>
-        <span style={{textAlign:'right'}}>Amount</span>
-      </div>
-      {order.items.map((item, i) => (
-        <div className="brd-item-row" key={i}>
-          <div>
-            <div className="brd-item-name">{item.name}</div>
-            {item.modifiers && <div className="brd-item-mod">{Object.values(item.modifiers).join(' • ')}</div>}
-          </div>
-          <div className="brd-item-cell">{item.qty}</div>
-          <div className="brd-item-cell">₹{item.unitPrice.toFixed(2)}</div>
-          <div className="brd-item-total">₹{(item.qty * item.unitPrice).toFixed(2)}</div>
-        </div>
-      ))}
-    </div>
-    <div className="brd-totals">
-      <div className="brd-total-row"><span>Subtotal</span><span>₹{math.subtotal.toFixed(2)}</span></div>
-      {math.discountAmt > 0 && <div className="brd-total-row discount"><span>Discount</span><span>–₹{math.discountAmt.toFixed(2)}</span></div>}
-      <div className="brd-total-row tax"><span>GST ({order.gstPercent}%)</span><span>+₹{math.gstAmt.toFixed(2)}</span></div>
-      <div className="brd-total-row"><span>Delivery</span><span>₹{order.deliveryCharge.toFixed(2)}</span></div>
-      <div className="brd-grand-total">
-        <div><div className="brd-grand-label">Amount Due</div></div>
-        <div className="brd-grand-amt"><span>₹</span>{math.grandTotal.toFixed(2)}</div>
-      </div>
-    </div>
-    <div className="brd-qr-section">
-      <div className="brd-qr-wrap">
-        <QRCodeSVG value={upiString} size={110} level="H" imageSettings={{ src: logo, height: 24, width: 24, excavate: true }} />
-      </div>
-      <div className="brd-qr-meta">
-        <div className="brd-qr-label">Scan & Pay via UPI</div>
-        <div className="brd-upi-id">{business.upiId}</div>
-        <div className="brd-scan-note">Scan this QR code with any UPI app to pay instantly</div>
-        <div className="brd-amount-chip"><span>₹</span>{math.grandTotal.toFixed(2)}</div>
-      </div>
-    </div>
-    <div className="brd-footer">
-      <p className="brd-footer-tagline">"Empowering your business with smart technology"</p>
-      <div className="brd-footer-links">mansulatech.netlify.app</div>
-      <div className="brd-footer-brand" style={{ lineHeight: '1.6' }}>
-        Invoice generated by ManSula Nexus<br/>
-        Developed by ManSula DivLabs<br/>
-        © {new Date().getFullYear()} ManSula Technologies & ManSula DivLabs
-      </div>
-    </div>
-  </>
-}
-
-// ── Shared body content for Receipt ──
-function ReceiptContent({ business, order, math, logo, orderId, paymentMode }) {
-  const now = new Date()
-  const dateStr = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  return <>
-    <div className="brd-accent-bar" />
-    <div className="brd-header">
-      <div className="brd-lockup">
-        <div className="brd-logo-wrap"><img src={logo} className="brd-logo-img" alt="Logo" /></div>
-        <div>
-          <div className="brd-brand-main">{business.name}</div>
-          <div className="brd-brand-sub">{business.tagline}</div>
-        </div>
-      </div>
-      <div className="brd-doc-badge">
-        <div className="brd-doc-type receipt">Receipt</div>
-        <div className="brd-doc-num">No. {orderId}</div>
-      </div>
-    </div>
-    <div className="brd-meta">
-      <div className="brd-meta-cell"><div className="brd-meta-label">Business</div><div className="brd-meta-value">{business.name}</div></div>
-      <div className="brd-meta-cell"><div className="brd-meta-label">Contact</div><div className="brd-meta-value">+91 {business.contact}</div></div>
-      <div className="brd-meta-cell"><div className="brd-meta-label">GST No.</div><div className="brd-meta-value accent">{business.gstNumber}</div></div>
-      <div className="brd-meta-cell"><div className="brd-meta-label">Order No.</div><div className="brd-meta-value accent">{orderId}</div></div>
-      <div className="brd-meta-cell"><div className="brd-meta-label">Date & Time</div><div className="brd-meta-value">{dateStr} {timeStr}</div></div>
-      <div className="brd-meta-cell"><div className="brd-meta-label">Payment</div><div className="brd-meta-value ok">{paymentMode}</div></div>
-    </div>
-    <div className="brd-items">
-      <div className="brd-items-head">
-        <span>Item / Description</span>
-        <span style={{textAlign:'right'}}>Qty</span>
-        <span style={{textAlign:'right'}}>Rate</span>
-        <span style={{textAlign:'right'}}>Amount</span>
-      </div>
-      {order.items.map((item, i) => (
-        <div className="brd-item-row" key={i}>
-          <div>
-            <div className="brd-item-name">{item.name}</div>
-            {item.modifiers && <div className="brd-item-mod">{Object.values(item.modifiers).join(' • ')}</div>}
-          </div>
-          <div className="brd-item-cell">{item.qty}</div>
-          <div className="brd-item-cell">₹{item.unitPrice.toFixed(2)}</div>
-          <div className="brd-item-total">₹{(item.qty * item.unitPrice).toFixed(2)}</div>
-        </div>
-      ))}
-    </div>
-    <div className="brd-totals">
-      <div className="brd-total-row"><span>Subtotal</span><span>₹{math.subtotal.toFixed(2)}</span></div>
-      {math.discountAmt > 0 && <div className="brd-total-row discount"><span>Discount</span><span>–₹{math.discountAmt.toFixed(2)}</span></div>}
-      <div className="brd-total-row tax"><span>GST ({order.gstPercent}%)</span><span>+₹{math.gstAmt.toFixed(2)}</span></div>
-      <div className="brd-total-row"><span>Delivery</span><span>₹{order.deliveryCharge.toFixed(2)}</span></div>
-      <div className="brd-grand-total">
-        <div><div className="brd-grand-label">Total Paid</div></div>
-        <div className="brd-grand-amt"><span>₹</span>{math.grandTotal.toFixed(2)}</div>
-      </div>
-    </div>
-    <div className="brd-paid-stamp">
-      <div className="brd-paid-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      </div>
-      <div>
-        <div className="brd-paid-title">Payment Received</div>
-        <div className="brd-paid-sub">via {paymentMode} — Thank you for your business!</div>
-      </div>
-    </div>
-    <div className="brd-footer">
-      <p className="brd-footer-tagline">"Empowering your business with smart technology"</p>
-      <div className="brd-footer-links">mansulatech.netlify.app</div>
-      <div className="brd-footer-brand" style={{ lineHeight: '1.6' }}>
-        Receipt generated by ManSula Nexus<br/>
-        Developed by ManSula DivLabs<br/>
-        © {new Date().getFullYear()} ManSula Technologies & ManSula DivLabs
-      </div>
-    </div>
-  </>
-}
