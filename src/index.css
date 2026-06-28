@@ -2383,7 +2383,6 @@ select {
   width: 92%;
   max-width: 400px;
   max-height: 90vh;
-  overflow-y: auto;
   box-shadow:
     0 32px 64px rgba(0, 0, 0, 0.18),
     0 0 0 1px var(--border-color),
@@ -2393,6 +2392,13 @@ select {
   align-items: stretch;
   animation: successPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   overflow: hidden;
+}
+
+.success-scroll-area {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes successPop {

@@ -111,8 +111,20 @@ function CustomerDetailsForm({
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative' }}>
-      <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface)', border: '1.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)', transition: 'border-color 0.2s' }}>
-        <span style={{ padding: '0 0 0 14px', color: 'var(--brand-primary)', fontSize: '0.95rem', fontWeight: 600 }}>+91</span>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          background: 'var(--bg-surface-2)',
+          border: `1.5px solid ${focus ? 'var(--brand-primary)' : 'var(--border-color)'}`,
+          borderRadius: '12px',
+          overflow: 'hidden',
+          boxShadow: focus ? '0 0 0 4px var(--brand-primary-light)' : 'none',
+          transition: 'all 0.2s',
+          padding: '2px 0'
+        }}
+      >
+        <span style={{ padding: '0 0 0 16px', color: 'var(--brand-primary)', fontSize: '1rem', fontWeight: 700 }}>+91</span>
         <input
           type="tel"
           placeholder={phonePlaceholder}
@@ -121,11 +133,11 @@ function CustomerDetailsForm({
           onFocus={() => setFocus && setFocus(true)}
           onBlur={() => setFocus && setTimeout(() => setFocus(false), 200)}
           className="bp-input"
-          style={{ border: 'none', borderRadius: 0, paddingLeft: 10, background: 'transparent', boxShadow: 'none' }}
+          style={{ border: 'none', borderRadius: 0, paddingLeft: 12, background: 'transparent', boxShadow: 'none', fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}
         />
         {phone.length >= 10 && (
-          <div style={{ paddingRight: 14, color: '#10b981', display: 'flex' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <div style={{ paddingRight: 16, color: '#10b981', display: 'flex' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
         )}
       </div>
@@ -138,7 +150,17 @@ function CustomerDetailsForm({
         onFocus={() => setFocus && setFocus(true)}
         onBlur={() => setFocus && setTimeout(() => setFocus(false), 200)}
         className="bp-input"
-        style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}
+        style={{
+          background: 'var(--bg-surface-2)',
+          border: `1.5px solid ${focus ? 'var(--brand-primary)' : 'var(--border-color)'}`,
+          borderRadius: '12px',
+          padding: '14px 16px',
+          boxShadow: focus ? '0 0 0 4px var(--brand-primary-light)' : 'none',
+          transition: 'all 0.2s',
+          fontSize: '1rem',
+          fontWeight: 500,
+          color: 'var(--text-primary)'
+        }}
       />
 
       {filteredCusts && filteredCusts.length > 0 && (
@@ -353,102 +375,104 @@ function SuccessModal({ order, onClose, currency, taxRateObj, business, customer
           <p className="success-subtitle">{formatOrderId(order.id)} has been finalized.</p>
         </div>
 
-        {/* ── Order Details ── */}
-        <div className="success-body">
-          <div className="success-details">
-            {visibleItems.map(item => (
-              <div key={item.variantKey ? `${item.id}-${item.variantKey}` : item.id} className="success-item-row">
-                <div>
-                  <span>{item.qty}× {item.name}</span>
-                  {item.variantLabel && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '1.2rem', marginTop: 2 }}>{item.variantLabel}</div>}
+        {/* ── Order Details & Scrollable Area ── */}
+        <div className="success-scroll-area">
+          <div className="success-body">
+            <div className="success-details">
+              {visibleItems.map(item => (
+                <div key={item.variantKey ? `${item.id}-${item.variantKey}` : item.id} className="success-item-row">
+                  <div>
+                    <span>{item.qty}× {item.name}</span>
+                    {item.variantLabel && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '1.2rem', marginTop: 2 }}>{item.variantLabel}</div>}
+                  </div>
+                  <span style={{ fontWeight: 600, flexShrink: 0 }}>{fmt(item.price * item.qty, currency)}</span>
                 </div>
-                <span style={{ fontWeight: 600, flexShrink: 0 }}>{fmt(item.price * item.qty, currency)}</span>
-              </div>
-            ))}
-            {!expanded && hasMore && (
-              <button className="expand-items-btn" onClick={() => setExpanded(true)}>
-                + {order.items.length - previewCount} more items
-              </button>
-            )}
+              ))}
+              {!expanded && hasMore && (
+                <button className="expand-items-btn" onClick={() => setExpanded(true)}>
+                  + {order.items.length - previewCount} more items
+                </button>
+              )}
 
-            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ color: 'var(--text-muted)' }}>Subtotal</span>
-                <span>{fmt(sub, currency)}</span>
-              </div>
-              {tax > 0 && (
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ color: 'var(--text-muted)' }}>{order.taxLabel || taxRateObj.label}</span>
-                  <span>{fmt(tax, currency)}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>Subtotal</span>
+                  <span>{fmt(sub, currency)}</span>
                 </div>
-              )}
-              {discount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: 'var(--brand-danger)' }}>
-                  <span>Discount</span>
-                  <span>-{fmt(discount, currency)}</span>
-                </div>
-              )}
-              {delivery > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: 'var(--brand-accent)' }}>
-                  <span>Delivery</span>
-                  <span>+{fmt(delivery, currency)}</span>
-                </div>
-              )}
-            </div>
+                {tax > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span style={{ color: 'var(--text-muted)' }}>{order.taxLabel || taxRateObj.label}</span>
+                    <span>{fmt(tax, currency)}</span>
+                  </div>
+                )}
+                {discount > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: 'var(--brand-danger)' }}>
+                    <span>Discount</span>
+                    <span>-{fmt(discount, currency)}</span>
+                  </div>
+                )}
+                {delivery > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: 'var(--brand-accent)' }}>
+                    <span>Delivery</span>
+                    <span>+{fmt(delivery, currency)}</span>
+                  </div>
+                )}
+              </div>
 
-            <div className="success-total-row">
-              <span>Total</span>
-              <span className="success-total-val">{fmt(total, currency)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: '0.82rem' }}>
-              <span style={{ color: 'var(--text-muted)' }}>Payment Mode</span>
-              <span style={{ fontWeight: 700, color: 'var(--text-primary)', textTransform: 'capitalize' }}>
-                {order.paymentMode === 'split' && order.paymentDetails
-                  ? `Split (Cash: ${fmt(order.paymentDetails.cash, currency)}, UPI: ${fmt(order.paymentDetails.upi, currency)})`
-                  : order.paymentMode || 'Cash'}
-              </span>
+              <div className="success-total-row">
+                <span>Total</span>
+                <span className="success-total-val">{fmt(total, currency)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: '0.82rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Payment Mode</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-primary)', textTransform: 'capitalize' }}>
+                  {order.paymentMode === 'split' && order.paymentDetails
+                    ? `Split (Cash: ${fmt(order.paymentDetails.cash, currency)}, UPI: ${fmt(order.paymentDetails.upi, currency)})`
+                    : order.paymentMode || 'Cash'}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* ── Footer Actions ── */}
-        <div className="success-footer">
-          {/* WhatsApp Share Receipt */}
-          <button
-            onClick={() => setShowWAShare(v => !v)}
-            className={`success-wa-toggle ${showWAShare ? 'open' : ''}`}
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-              Share Receipt via WhatsApp
-            </span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform 0.25s', transform: showWAShare ? 'rotate(180deg)' : 'rotate(0deg)' }}><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
+          {/* ── Footer Actions ── */}
+          <div className="success-footer">
+            {/* WhatsApp Share Receipt */}
+            <button
+              onClick={() => setShowWAShare(v => !v)}
+              className={`success-wa-toggle ${showWAShare ? 'open' : ''}`}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                Share Receipt via WhatsApp
+              </span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform 0.25s', transform: showWAShare ? 'rotate(180deg)' : 'rotate(0deg)' }}><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
 
-          {showWAShare && (
-            <div className="success-wa-panel">
-              <CustomerDetailsForm
-                phone={waPhone}
-                setPhone={setWaPhone}
-                name={waName}
-                setName={setWaName}
-                filteredCusts={waFilteredCusts}
-                onPhoneChange={handlePhoneChange}
-                phonePlaceholder="Customer Phone"
-                namePlaceholder="Customer Name (Optional)"
-              />
-              <button onClick={handleWAShare} disabled={waSharing} className="success-send-btn">
-                {waSharing ? 'Generating…' : (
-                  <>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    Send Receipt
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+            {showWAShare && (
+              <div className="success-wa-panel">
+                <CustomerDetailsForm
+                  phone={waPhone}
+                  setPhone={setWaPhone}
+                  name={waName}
+                  setName={setWaName}
+                  filteredCusts={waFilteredCusts}
+                  onPhoneChange={handlePhoneChange}
+                  phonePlaceholder="Customer Phone"
+                  namePlaceholder="Customer Name (Optional)"
+                />
+                <button onClick={handleWAShare} disabled={waSharing} className="success-send-btn">
+                  {waSharing ? 'Generating…' : (
+                    <>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      Send Receipt
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
 
-          <button className="success-done-btn" onClick={onClose}>Done</button>
+            <button className="success-done-btn" onClick={onClose}>Done</button>
+          </div>
         </div>
 
         {/* Hidden receipt doc for WA share */}
