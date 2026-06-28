@@ -308,7 +308,9 @@ function SuccessModal({ order, onClose, currency, taxRateObj, business, customer
           a.click()
           URL.revokeObjectURL(url)
           const cleanPhone = waPhone.replace(/\s/g, '')
-          const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Hi${waName ? ' ' + waName : ''}, here is your receipt for Order ${order.id} from ${business?.name || 'us'}. Please find the image attached.`)}`
+          const bName = business?.name || 'Your Business'
+          const waText = `Thank you! *${bName}* has successfully received your payment.\n\n*Order ID:* ${order.id}\n*Amount Paid:* ₹${Number(total).toFixed(2)}\n\n*We hope you enjoy your order.*\n\nPowered by *ManSula BOS*`
+          const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(waText)}`
           window.open(waUrl, '_blank')
           // Auto close modal after successful share
           setTimeout(() => {
@@ -1489,7 +1491,9 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
           URL.revokeObjectURL(url)
           
           const cleanPhone = customerPhone.replace(/\s/g, '')
-          const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Here is your bill/invoice for Order ${currentOrderId} from ${business.name || APP_NAME}. I have downloaded the image for you to attach.`)}`
+          const bName = business.name || APP_NAME
+          const waText = `Thank you! *${bName}* has successfully received your payment.\n\n*Order ID:* ${currentOrderId}\n*Amount Paid:* ₹${Number(total).toFixed(2)}\n\n*We hope you enjoy your order.*\n\nPowered by *ManSula BOS*`
+          const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(waText)}`
           window.open(waUrl, '_blank')
           showToast('Downloaded image. Please attach it in WhatsApp.', 'info', true)
         } catch (e) {

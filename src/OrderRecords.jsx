@@ -157,7 +157,9 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
           a.click()
           URL.revokeObjectURL(url)
           const cleanPhone = waPhone.replace(/\s/g, '')
-          const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Hi${waName ? ' ' + waName : ''}, here is your receipt for Order ${record.orderId} from ${business?.name || 'us'}. Please find the image attached.`)}`
+          const bName = business?.name || 'Your Business'
+          const waText = `Thank you! *${bName}* has successfully received your payment.\n\n*Order ID:* ${record.orderId}\n*Amount Paid:* ₹${Number(record.total).toFixed(2)}\n\n*We hope you enjoy your order.*\n\nPowered by *ManSula BOS*`
+          const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(waText)}`
           window.open(waUrl, '_blank')
           setTimeout(() => {
             if (onClose) onClose()
