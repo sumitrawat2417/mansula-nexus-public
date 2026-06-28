@@ -97,7 +97,7 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
   const waRef = useRef(null)
 
   useEffect(() => {
-    dbGet('business').then(setBusiness)
+    dbGet('mn-business').then(setBusiness)
     getCustomers().then(c => setCustomersList(c || []))
   }, [])
 
