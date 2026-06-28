@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { QRCodeSVG } from 'qrcode.react'
+import { QRCodeCanvas } from 'qrcode.react'
 
 // ─────────────────────────────────────────
 //  Shared styles injected once per render
@@ -538,7 +538,7 @@ export function BillDocument({
       ) : (
         <div className="brd-qr-section">
           <div className="brd-qr-wrap">
-            <QRCodeSVG
+            <QRCodeCanvas
               value={upiString}
               size={130}
               level="H"
