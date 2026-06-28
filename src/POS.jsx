@@ -1369,13 +1369,13 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   const filteredCusts = useMemo(() => {
     const n = customerName.trim().toLowerCase()
     const p = customerPhone.trim()
-    if (!n && !p) return customersList.slice(0, 5)
+    if (!n && !p) return customersList.slice(0, 3)
 
     return customersList.filter(c => {
       const matchName = n ? (c.name || '').toLowerCase().includes(n) : true;
       const matchPhone = p ? (c.phone || '').includes(p) : true;
       return matchName && matchPhone;
-    }).slice(0, 5)
+    }).slice(0, 3)
   }, [customerName, customerPhone, customersList])
 
   const handlePhoneChange = (e) => {
