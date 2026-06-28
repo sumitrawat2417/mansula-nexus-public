@@ -543,12 +543,7 @@ export function BillDocument({
                 value={upiString}
                 size={130}
                 level="H"
-                imageSettings={{ 
-                  src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 
-                  height: 42, 
-                  width: 42, 
-                  excavate: true 
-                }}
+                fgColor="#3730a3"
               />
               <img 
                 src={logo} 
