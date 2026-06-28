@@ -453,6 +453,8 @@ export function BillDocument({
         <div className="brd-meta-heading" style={{ marginTop: 20 }}>Order Information</div>
         <div className="brd-meta-grid">
           <div className="brd-meta-row"><span>Date</span><strong>{dateStr} {timeStr}</strong></div>
+          {order.customer && <div className="brd-meta-row"><span>Customer</span><strong>{order.customer}</strong></div>}
+          {order.customerPhone && <div className="brd-meta-row"><span>Phone</span><strong>{order.customerPhone}</strong></div>}
           <div className="brd-meta-row"><span>Status</span><strong className={isReceipt ? 'ok' : 'warn'}>{isReceipt ? paymentMode : 'Pending'}</strong></div>
         </div>
       </div>
@@ -545,8 +547,8 @@ export function BillDocument({
                 level="H"
                 fgColor="#3730a3"
               />
-              <img 
-                src={logo} 
+              <img
+                src={logo}
                 crossOrigin="anonymous"
                 style={{
                   position: 'absolute',
@@ -556,7 +558,7 @@ export function BillDocument({
                   width: 36,
                   height: 36,
                   borderRadius: '50%',
-                  border: '3px solid #ffffff',
+                  border: '2px solid #ffffff',
                   backgroundColor: '#ffffff',
                   objectFit: 'cover'
                 }}
@@ -589,10 +591,9 @@ export function BillDocument({
       <div className="brd-footer">
         <div className="brd-footer-brand">
           <strong>Powered by ManSula BOS</strong><br />
-          Business Operating System<br />
-          for Retail & Restaurants<br />
-          <div style={{ marginTop: 6, color: '#818cf8', fontWeight: 600 }}>mansulatech.netlify.app</div>
-          <div style={{ marginTop: 8, fontSize: 9 }}>© {new Date().getFullYear()} ManSula DivLabs</div>
+          Business Operating System for Retail & Restaurants<br />
+          <div style={{ marginTop: 6, color: '#818cf8', fontWeight: 600 }}>mansulabos.netlify.app</div>
+          <div style={{ marginTop: 8, fontSize: 9 }}>© 2024 - {new Date().getFullYear()} ManSula DivLabs & ManSula</div>
         </div>
       </div>
     </div>

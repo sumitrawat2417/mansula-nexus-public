@@ -5,6 +5,7 @@ import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, KEY_PRODUCTS, KEY_CATEGORIES, KEY
 import { useBackButton } from './useBackButton.js'
 import { APP_NAME, APP_VERSION } from './appInfo.js'
 import { QRCodeSVG } from 'qrcode.react'
+import { BillDocument } from './BillReceipt.jsx'
 
 // ─────────────── DATA (loaded from IDB, fallback to defaults) ───────────────
 
@@ -804,6 +805,10 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   const totalCashReceived = Object.entries(cashNotes).reduce((sum, [amt, count]) => sum + (Number(amt) * count), 0)
   const searchRef = useRef(null)
 
+  // WA Share
+  const [isSharingWA, setIsSharingWA] = useState(false)
+  const waDocRef = useRef(null)
+
   // ── Orders — start with INIT_ORDER; ids get assigned proper monthly nums async ──
   const [orders, setOrders] = useState([INIT_ORDER])
   const [currentOrderId, setCurrentOrderId] = useState(INIT_ORDER.id)
@@ -1231,6 +1236,60 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
     handleCheckoutOrder(currentOrderId)
   }
 
+  // ── WhatsApp Share ──
+  const handleShareWA = async () => {
+    if (!customerPhone.trim()) {
+      showToast('Please enter customer phone number', 'error')
+      return
+    }
+    if (!waDocRef.current) return
+    
+    setIsSharingWA(true)
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      const canvas = await html2canvas(waDocRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      })
+      canvas.toBlob(async (blob) => {
+        try {
+          const file = new File([blob], `invoice-${currentOrderId.replace('/', '-')}.png`, { type: 'image/png' })
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: `Invoice ${currentOrderId}`,
+              text: `Here is your bill/invoice for Order ${currentOrderId} from ${business.name || APP_NAME}.`,
+              files: [file]
+            })
+            showToast('Shared successfully!')
+          } else {
+            // Fallback
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `invoice-${currentOrderId.replace('/', '-')}.png`
+            a.click()
+            URL.revokeObjectURL(url)
+            
+            const waUrl = `https://wa.me/91${customerPhone}?text=${encodeURIComponent(`Here is your bill/invoice for Order ${currentOrderId} from ${business.name || APP_NAME}. I have downloaded the image for you to attach.`)}`
+            window.open(waUrl, '_blank')
+            showToast('Downloaded image. Please attach it in WhatsApp.', 'info', true)
+          }
+        } catch (e) {
+          console.error(e)
+          if (e.name !== 'AbortError') showToast('Sharing failed or was cancelled.', 'error')
+        } finally {
+          setIsSharingWA(false)
+        }
+      }, 'image/png')
+    } catch (e) {
+      console.error(e)
+      showToast('Failed to generate invoice image', 'error')
+      setIsSharingWA(false)
+    }
+  }
+
   // ── Filter ──
   const filtered = useMemo(() => products.filter(p =>
     (activeCategory === 'All' || p.category === activeCategory) &&
@@ -1511,6 +1570,44 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                               <div className="upi-qr-meta">
                                 <span className="upi-qr-id">{business.upiId}</span>
                                 <span className="upi-qr-amount">Total: {fmt(total, currency)}</span>
+                              </div>
+                              
+                              {/* Share via WhatsApp section */}
+                              <div style={{ marginTop: 24, padding: 16, background: 'linear-gradient(145deg, rgba(37,211,102,0.05) 0%, rgba(18,140,126,0.05) 100%)', border: '1px solid rgba(37,211,102,0.2)', borderRadius: 12 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                                  <div style={{ background: '#25D366', color: '#fff', borderRadius: '50%', padding: '6px' }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                                  </div>
+                                  <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Share Bill via WhatsApp</div>
+                                </div>
+                                
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
+                                    <span style={{ padding: '10px 0 10px 12px', color: '#25D366', fontSize: '0.9rem', fontWeight: 600 }}>+91</span>
+                                    <input
+                                      type="tel"
+                                      placeholder="Customer Phone"
+                                      value={customerPhone}
+                                      onChange={handlePhoneChange}
+                                      style={{ padding: '10px 12px 10px 8px', background: 'transparent', border: 'none', fontSize: '0.9rem', width: '100%', outline: 'none' }}
+                                    />
+                                  </div>
+                                  <input
+                                    type="text"
+                                    placeholder="Customer Name (Optional)"
+                                    value={customerName}
+                                    onChange={e => setCustomerName(e.target.value)}
+                                    style={{ padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '0.9rem', outline: 'none' }}
+                                  />
+                                  <button 
+                                    onClick={handleShareWA} 
+                                    disabled={isSharingWA}
+                                    style={{ padding: '10px', background: '#25D366', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: isSharingWA ? 'not-allowed' : 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}
+                                  >
+                                    {isSharingWA ? 'Generating...' : 'Send Invoice'}
+                                    {!isSharingWA && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>}
+                                  </button>
+                                </div>
                               </div>
                             </>
                           ) : (
@@ -1804,6 +1901,27 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
         <button id="mobile-cart-fab" className="mobile-cart-fab" onClick={() => setCartOpen(o => !o)} aria-label={`Cart`}>
           <I.Cart s={24} />
         </button>
+      )}
+
+      {/* Hidden Bill Document for WhatsApp Share */}
+      {paymentMode === 'upi' && (
+        <BillDocument
+          docRef={waDocRef}
+          type="invoice"
+          business={business}
+          order={{ 
+            id: currentOrderId, 
+            items: cart, 
+            customer: customerName, 
+            customerPhone: customerPhone, 
+            gstPercent: taxRateObj.value * 100, 
+            deliveryCharge: delivery 
+          }}
+          math={{ subtotal, discountAmt, gstAmt: tax, grandTotal: total }}
+          logo="/logo.png"
+          paymentMode="UPI"
+          hidden={true}
+        />
       )}
     </>
   )
