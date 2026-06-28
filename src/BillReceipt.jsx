@@ -396,7 +396,10 @@ export function BillDocument({
   const now = new Date()
   const dateStr = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
   const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  const orderId = order.id || `#${Math.floor(10000 + Math.random() * 90000)}`
+  const dd = String(now.getDate()).padStart(2, '0')
+  const mm = String(now.getMonth() + 1).padStart(2, '0')
+  const yy = String(now.getFullYear()).slice(-2)
+  const orderId = order.id || `#N-${dd}/${mm}/${yy}`
   const upiString = `upi://pay?pa=${business.upiId || 'test@ybl'}&pn=${encodeURIComponent(business.name || 'Business')}&am=${math.grandTotal || 0}&cu=INR&tn=ManSula%20BOS`
 
   const items = order.items || []
@@ -537,9 +540,9 @@ export function BillDocument({
           <div className="brd-qr-wrap">
             <QRCodeSVG
               value={upiString}
-              size={100}
+              size={130}
               level="H"
-              imageSettings={{ src: logo, height: 22, width: 22, excavate: true }}
+              imageSettings={{ src: logo, height: 28, width: 28, excavate: true }}
             />
           </div>
           <div className="brd-qr-content">
@@ -570,7 +573,8 @@ export function BillDocument({
           <strong>Powered by ManSula BOS</strong><br/>
           Business Operating System<br/>
           for Retail & Restaurants<br/>
-          <div style={{ marginTop: 8, fontSize: 9 }}>© {new Date().getFullYear()} ManSula Technologies & ManSula DivLabs</div>
+          <div style={{ marginTop: 6, color: '#818cf8', fontWeight: 600 }}>mansulatech.netlify.app</div>
+          <div style={{ marginTop: 8, fontSize: 9 }}>© {new Date().getFullYear()} ManSula DivLabs</div>
         </div>
       </div>
     </div>
@@ -607,7 +611,7 @@ const SAMPLE_BUSINESS = {
 }
 
 const SAMPLE_ORDER = {
-  id: '#1042',
+  id: '#N-29/06/26',
   customer: 'Sumit Rawat',
   gstPercent: 5,
   deliveryCharge: 40,
