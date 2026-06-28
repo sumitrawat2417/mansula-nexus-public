@@ -342,84 +342,91 @@ function SuccessModal({ order, onClose, currency, taxRateObj, business, customer
 
   return (
     <div className="drawer-overlay open" style={{ zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
-      <div className="success-modal" onClick={e => e.stopPropagation()} style={{ maxHeight: '90vh', overflowY: 'auto' }}>
-        <div className="success-icon-wrap">
-          <svg className="success-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+      <div className="success-modal" onClick={e => e.stopPropagation()}>
+
+        {/* ── Green Hero ── */}
+        <div className="success-modal-hero">
+          <div className="success-icon-wrap">
+            <svg className="success-icon" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+          </div>
+          <h2 className="success-title">Order Complete!</h2>
+          <p className="success-subtitle">{formatOrderId(order.id)} has been finalized.</p>
         </div>
-        <h2 className="success-title">Order Complete!</h2>
-        <p className="success-subtitle">{formatOrderId(order.id)} has been finalized.</p>
 
-        <div className="success-details" style={{ textAlign: 'center' }}>
-          {visibleItems.map(item => (
-            <div key={item.variantKey ? `${item.id}-${item.variantKey}` : item.id} className="success-item-row" style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between' }}>
-              <div>
-                <span>{item.qty}× {item.name}</span>
-                {item.variantLabel && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '1.2rem', marginTop: 2 }}>{item.variantLabel}</div>}
+        {/* ── Order Details ── */}
+        <div className="success-body">
+          <div className="success-details">
+            {visibleItems.map(item => (
+              <div key={item.variantKey ? `${item.id}-${item.variantKey}` : item.id} className="success-item-row">
+                <div>
+                  <span>{item.qty}× {item.name}</span>
+                  {item.variantLabel && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '1.2rem', marginTop: 2 }}>{item.variantLabel}</div>}
+                </div>
+                <span style={{ fontWeight: 600, flexShrink: 0 }}>{fmt(item.price * item.qty, currency)}</span>
               </div>
-              <span>{fmt(item.price * item.qty, currency)}</span>
-            </div>
-          ))}
-          {!expanded && hasMore && (
-            <button className="expand-items-btn" onClick={() => setExpanded(true)}>
-              + {order.items.length - previewCount} more items
-            </button>
-          )}
+            ))}
+            {!expanded && hasMore && (
+              <button className="expand-items-btn" onClick={() => setExpanded(true)}>
+                + {order.items.length - previewCount} more items
+              </button>
+            )}
 
-          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border-color)', fontSize: '0.85rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ color: 'var(--text-muted)' }}>Subtotal</span>
-              <span>{fmt(sub, currency)}</span>
-            </div>
-            {tax > 0 && (
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border-color)', fontSize: '0.82rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ color: 'var(--text-muted)' }}>{order.taxLabel || taxRateObj.label}</span>
-                <span>{fmt(tax, currency)}</span>
+                <span style={{ color: 'var(--text-muted)' }}>Subtotal</span>
+                <span>{fmt(sub, currency)}</span>
               </div>
-            )}
-            {discount > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: 'var(--brand-danger)' }}>
-                <span>Discount</span>
-                <span>-{fmt(discount, currency)}</span>
-              </div>
-            )}
-            {delivery > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: 'var(--brand-accent)' }}>
-                <span>Delivery</span>
-                <span>+{fmt(delivery, currency)}</span>
-              </div>
-            )}
-          </div>
+              {tax > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>{order.taxLabel || taxRateObj.label}</span>
+                  <span>{fmt(tax, currency)}</span>
+                </div>
+              )}
+              {discount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: 'var(--brand-danger)' }}>
+                  <span>Discount</span>
+                  <span>-{fmt(discount, currency)}</span>
+                </div>
+              )}
+              {delivery > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: 'var(--brand-accent)' }}>
+                  <span>Delivery</span>
+                  <span>+{fmt(delivery, currency)}</span>
+                </div>
+              )}
+            </div>
 
-          <div className="success-total-row" style={{ textAlign: 'left', marginTop: 8, paddingTop: 8, borderTop: '1.5px solid var(--border-color)' }}>
-            <span>Total</span>
-            <span className="success-total-val">{fmt(total, currency)}</span>
-          </div>
-          <div className="success-payment-mode" style={{ textAlign: 'left', marginTop: 8, fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
-            <span>Payment Mode</span>
-            <span style={{ fontWeight: 700, color: 'var(--text-primary)', textTransform: 'capitalize' }}>
-              {order.paymentMode === 'split' && order.paymentDetails
-                ? `Split (Cash: ${fmt(order.paymentDetails.cash, currency)}, UPI: ${fmt(order.paymentDetails.upi, currency)})`
-                : order.paymentMode || 'Cash'}
-            </span>
+            <div className="success-total-row">
+              <span>Total</span>
+              <span className="success-total-val">{fmt(total, currency)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: '0.82rem' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Payment Mode</span>
+              <span style={{ fontWeight: 700, color: 'var(--text-primary)', textTransform: 'capitalize' }}>
+                {order.paymentMode === 'split' && order.paymentDetails
+                  ? `Split (Cash: ${fmt(order.paymentDetails.cash, currency)}, UPI: ${fmt(order.paymentDetails.upi, currency)})`
+                  : order.paymentMode || 'Cash'}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* WhatsApp Share Receipt */}
-        <div style={{ marginTop: 12 }}>
+        {/* ── Footer Actions ── */}
+        <div className="success-footer">
+          {/* WhatsApp Share Receipt */}
           <button
             onClick={() => setShowWAShare(v => !v)}
-            className="bp-btn-outline"
-            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px' }}
+            className={`success-wa-toggle ${showWAShare ? 'open' : ''}`}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
               Share Receipt via WhatsApp
             </span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform 0.2s', transform: showWAShare ? 'rotate(180deg)' : 'rotate(0deg)' }}><polyline points="6 9 12 15 18 9"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform 0.25s', transform: showWAShare ? 'rotate(180deg)' : 'rotate(0deg)' }}><polyline points="6 9 12 15 18 9"/></svg>
           </button>
 
           {showWAShare && (
-            <div style={{ marginTop: 8, padding: 16, background: 'var(--bg-surface-2)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="success-wa-panel">
               <CustomerDetailsForm
                 phone={waPhone}
                 setPhone={setWaPhone}
@@ -430,20 +437,19 @@ function SuccessModal({ order, onClose, currency, taxRateObj, business, customer
                 phonePlaceholder="Customer Phone"
                 namePlaceholder="Customer Name (Optional)"
               />
-              <button
-                onClick={handleWAShare}
-                disabled={waSharing}
-                className="bp-btn-primary"
-                style={{ width: '100%' }}
-              >
-                {waSharing ? 'Generating...' : 'Send Receipt'}
-                {!waSharing && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>}
+              <button onClick={handleWAShare} disabled={waSharing} className="success-send-btn">
+                {waSharing ? 'Generating…' : (
+                  <>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Send Receipt
+                  </>
+                )}
               </button>
             </div>
           )}
-        </div>
 
-        <button className="success-done-btn" onClick={onClose} style={{ marginTop: 12 }}>Done</button>
+          <button className="success-done-btn" onClick={onClose}>Done</button>
+        </div>
 
         {/* Hidden receipt doc for WA share */}
         <div style={{ position: 'fixed', left: '-9999px', top: 0, opacity: 0, pointerEvents: 'none' }}>
