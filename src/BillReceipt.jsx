@@ -475,6 +475,7 @@ export function BillDocument({
           <div className="brd-item-row" key={i}>
             <div>
               <div className="brd-item-name">{item.name}</div>
+              {item.variantLabel && <div className="brd-item-mod">{item.variantLabel}</div>}
               {item.modifiers && Object.values(item.modifiers).length > 0 && (
                 <div className="brd-item-mod">{Object.values(item.modifiers).join(' • ')}</div>
               )}
