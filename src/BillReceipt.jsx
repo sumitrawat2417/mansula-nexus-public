@@ -28,7 +28,7 @@ const DOC_STYLES = `
   .brd-header {
     padding: 28px 32px 20px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     border-bottom: 1px solid #f0f0f5;
   }
@@ -77,53 +77,70 @@ const DOC_STYLES = `
     font-weight: 600;
   }
   
-  .brd-doc-badge {
-    text-align: right;
-  }
-  .brd-doc-type {
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 5px 14px;
-    border-radius: 100px;
-    display: inline-block;
-  }
-  .brd-doc-type.invoice {
-    color: #d97706;
-    background: rgba(217,119,6,0.1);
-    border: 1.5px solid rgba(217,119,6,0.25);
-  }
-  .brd-doc-type.receipt {
-    color: #059669;
-    background: rgba(5,150,105,0.1);
-    border: 1.5px solid rgba(5,150,105,0.25);
-  }
-  .brd-status-badge {
-    font-size: 11px;
-    font-weight: 700;
-    margin-top: 8px;
-    margin-bottom: 2px;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .brd-status-badge.pending { color: #d97706; }
-  .brd-status-badge.paid { color: #059669; }
-  
-  .brd-doc-num {
-    font-size: 11px;
-    color: #9ca3af;
-    margin-top: 4px;
-    font-weight: 500;
-  }
-
-  /* ── META INFO ───────────────────── */
-  .brd-meta {
-    margin: 24px 32px 0;
+  .brd-doc-type-wrap {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  .brd-doc-type {
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #1a1a2e;
+  }
+  .brd-doc-type span {
+    color: #9ca3af;
+    margin-left: 4px;
+  }
+  .brd-status-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 100px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .brd-status-badge.pending {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+  }
+  .brd-status-badge.paid {
+    background: #f0fdf4;
+    color: #059669;
+    border: 1px solid #bbf7d0;
+  }
+  .brd-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .brd-status-dot.pending { background: #f59e0b; }
+  .brd-status-dot.paid { background: #10b981; }
+
+  /* ── META INFO ───────────────────── */
+  .brd-meta-section {
+    margin: 24px 32px 0;
+  }
+  .brd-meta-heading {
+    font-size: 10px;
+    font-weight: 800;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #f0f0f5;
+    padding-bottom: 6px;
+  }
+  .brd-meta-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
   .brd-meta-row {
     display: flex;
@@ -145,7 +162,7 @@ const DOC_STYLES = `
 
   /* ── ITEMS TABLE ─────────────────── */
   .brd-items {
-    margin: 24px 32px 0;
+    margin: 28px 32px 0;
   }
   .brd-items-head {
     display: grid;
@@ -224,10 +241,11 @@ const DOC_STYLES = `
     text-transform: uppercase;
   }
   .brd-grand-sub {
-    font-size: 11px;
+    font-size: 10px;
     color: #818cf8;
-    margin-top: 4px;
-    font-weight: 600;
+    margin-top: 2px;
+    font-weight: 500;
+    opacity: 0.8;
   }
   .brd-grand-amt {
     font-size: 32px;
@@ -244,69 +262,76 @@ const DOC_STYLES = `
 
   /* ── QR SECTION (Invoice) ─────────── */
   .brd-qr-section {
-    margin: 32px 32px 0;
-    text-align: center;
-    background: #fcfcff;
-    border: 1px solid #eef2ff;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 4px 20px rgba(99,102,241,0.05);
-  }
-  .brd-qr-label {
-    font-size: 14px;
-    font-weight: 800;
-    color: #1a1a2e;
-    margin-bottom: 16px;
+    margin: 24px 32px 0;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
   }
   .brd-qr-wrap {
-    display: inline-block;
-    padding: 12px;
+    flex-shrink: 0;
+    padding: 8px;
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    margin-bottom: 16px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .brd-qr-content {
+    flex: 1;
+  }
+  .brd-qr-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
   }
   .brd-qr-amount {
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 900;
-    color: #6366f1;
-    margin-bottom: 4px;
+    color: #1a1a2e;
+    margin-bottom: 2px;
+    letter-spacing: -0.5px;
   }
   .brd-qr-amount span {
     font-size: 16px;
+    color: #64748b;
     margin-right: 2px;
   }
   .brd-upi-id {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    color: #6b7280;
-    margin-bottom: 16px;
+    color: #6366f1;
+    margin-bottom: 8px;
   }
   .brd-qr-accepted {
-    font-size: 11px;
-    font-weight: 600;
-    color: #9ca3af;
-    letter-spacing: 0.5px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #94a3b8;
   }
 
   /* ── TIMELINE (Receipt) ─────────── */
   .brd-timeline {
     margin: 24px 32px 0;
-    padding: 20px 24px;
+    padding: 16px 20px;
     background: #f8fafc;
     border-radius: 12px;
-    border: 1px solid #f1f5f9;
+    border: 1px solid #e2e8f0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
   .brd-tl-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
+    gap: 10px;
   }
-  .brd-tl-item:last-child { margin-bottom: 0; }
   .brd-tl-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: #10b981;
     color: white;
@@ -316,7 +341,7 @@ const DOC_STYLES = `
     flex-shrink: 0;
   }
   .brd-tl-text {
-    font-size: 12.5px;
+    font-size: 11.5px;
     font-weight: 600;
     color: #334155;
   }
@@ -345,21 +370,14 @@ const DOC_STYLES = `
   .brd-footer-brand {
     font-size: 11px;
     color: #9ca3af;
-    line-height: 1.6;
+    line-height: 1.5;
+  }
+  .brd-footer-brand strong {
+    color: #6b7280;
+    font-weight: 700;
+    font-size: 12px;
   }
 `
-
-function getItemIcon(name) {
-  const n = name.toLowerCase()
-  if (n.includes('coffee') || n.includes('brew') || n.includes('espresso') || n.includes('latte') || n.includes('tea')) return '☕'
-  if (n.includes('croissant') || n.includes('bread') || n.includes('bun') || n.includes('pastry')) return '🥐'
-  if (n.includes('water') || n.includes('bottle')) return '💧'
-  if (n.includes('burger') || n.includes('sandwich')) return '🍔'
-  if (n.includes('pizza')) return '🍕'
-  if (n.includes('cake') || n.includes('dessert') || n.includes('sweet')) return '🍰'
-  if (n.includes('salad')) return '🥗'
-  return '🔹'
-}
 
 // ─────────────────────────────────────────────────────────
 //  BillDocument — the printable/image document component
@@ -408,26 +426,32 @@ export function BillDocument({
             </div>
           </div>
         </div>
-        <div className="brd-doc-badge">
-          <div className={`brd-doc-type ${isReceipt ? 'receipt' : 'invoice'}`}>
-            {isReceipt ? 'Receipt' : 'Invoice'}
+        <div className="brd-doc-type-wrap">
+          <div className="brd-doc-type">
+            {isReceipt ? 'Receipt' : 'Invoice'} <span>{orderId}</span>
           </div>
           <div className={`brd-status-badge ${isReceipt ? 'paid' : 'pending'}`}>
-            [{isReceipt ? 'Completed' : 'Pending'}]
+            <div className={`brd-status-dot ${isReceipt ? 'paid' : 'pending'}`}></div>
+            {isReceipt ? 'Completed' : 'Pending'}
           </div>
-          <div className="brd-doc-num">No. {orderId}</div>
         </div>
       </div>
 
       {/* META INFO (Clean layout) */}
-      <div className="brd-meta">
-        <div className="brd-meta-row"><span>Business</span><strong>{business.name || '—'}</strong></div>
-        <div className="brd-meta-row"><span>Contact</span><strong>{business.contact ? `+91 ${business.contact}` : '—'}</strong></div>
-        {business.gstNumber && <div className="brd-meta-row"><span>GST No</span><strong className="accent">{business.gstNumber}</strong></div>}
-        <div className="brd-meta-row"><span>Order ID</span><strong className="accent">{orderId}</strong></div>
-        <div style={{ height: 4 }}></div>
-        <div className="brd-meta-row"><span>Date</span><strong>{dateStr} {timeStr}</strong></div>
-        <div className="brd-meta-row"><span>Status</span><strong className={isReceipt ? 'ok' : 'warn'}>{isReceipt ? paymentMode : 'Pending'}</strong></div>
+      <div className="brd-meta-section">
+        <div className="brd-meta-heading">Business Information</div>
+        <div className="brd-meta-grid">
+          <div className="brd-meta-row"><span>Business</span><strong>{business.name || '—'}</strong></div>
+          {business.address && <div className="brd-meta-row"><span>Address</span><strong>{business.address}</strong></div>}
+          <div className="brd-meta-row"><span>Contact</span><strong>{business.contact ? `+91 ${business.contact}` : '—'}</strong></div>
+          {business.gstNumber && <div className="brd-meta-row"><span>GST No</span><strong className="accent">{business.gstNumber}</strong></div>}
+        </div>
+        
+        <div className="brd-meta-heading" style={{ marginTop: 20 }}>Order Information</div>
+        <div className="brd-meta-grid">
+          <div className="brd-meta-row"><span>Date</span><strong>{dateStr} {timeStr}</strong></div>
+          <div className="brd-meta-row"><span>Status</span><strong className={isReceipt ? 'ok' : 'warn'}>{isReceipt ? paymentMode : 'Pending'}</strong></div>
+        </div>
       </div>
 
       {/* ITEMS */}
@@ -441,7 +465,7 @@ export function BillDocument({
         {items.map((item, i) => (
           <div className="brd-item-row" key={i}>
             <div>
-              <div className="brd-item-name">{getItemIcon(item.name)} {item.name}</div>
+              <div className="brd-item-name">{item.name}</div>
               {item.modifiers && Object.values(item.modifiers).length > 0 && (
                 <div className="brd-item-mod">{Object.values(item.modifiers).join(' • ')}</div>
               )}
@@ -492,38 +516,40 @@ export function BillDocument({
       {isReceipt ? (
         <div className="brd-timeline">
           <div className="brd-tl-item">
-            <div className="brd-tl-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
+            <div className="brd-tl-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
             <div className="brd-tl-text">Invoice Created</div>
           </div>
           <div className="brd-tl-item">
-            <div className="brd-tl-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
-            <div className="brd-tl-text">QR Generated</div>
-          </div>
-          <div className="brd-tl-item">
-            <div className="brd-tl-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
+            <div className="brd-tl-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
             <div className="brd-tl-text">Payment Received</div>
           </div>
           <div className="brd-tl-item">
-            <div className="brd-tl-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
+            <div className="brd-tl-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
+            <div className="brd-tl-text">QR Generated</div>
+          </div>
+          <div className="brd-tl-item">
+            <div className="brd-tl-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></div>
             <div className="brd-tl-text">Receipt Issued</div>
           </div>
         </div>
       ) : (
         <div className="brd-qr-section">
-          <div className="brd-qr-label">Scan to Pay</div>
           <div className="brd-qr-wrap">
             <QRCodeSVG
               value={upiString}
-              size={140}
+              size={100}
               level="H"
-              imageSettings={{ src: logo, height: 32, width: 32, excavate: true }}
+              imageSettings={{ src: logo, height: 22, width: 22, excavate: true }}
             />
           </div>
-          <div className="brd-qr-amount">
-            <span>₹</span>{grandTotal.toFixed(2)}
+          <div className="brd-qr-content">
+            <div className="brd-qr-label">Scan to Pay</div>
+            <div className="brd-qr-amount">
+              <span>₹</span>{grandTotal.toFixed(2)}
+            </div>
+            <div className="brd-upi-id">{business.upiId || 'yourname@upi'}</div>
+            <div className="brd-qr-accepted">PhonePe • GPay • Paytm • BHIM</div>
           </div>
-          <div className="brd-upi-id">{business.upiId || 'yourname@upi'}</div>
-          <div className="brd-qr-accepted">Accepted: PhonePe • GPay • Paytm • BHIM</div>
         </div>
       )}
 
@@ -541,9 +567,10 @@ export function BillDocument({
       
       <div className="brd-footer">
         <div className="brd-footer-brand">
-          Powered by ManSula BOS<br/>
-          Verified Digital Invoice<br/>
-          © {new Date().getFullYear()} ManSula Technologies & ManSula DivLabs
+          <strong>Powered by ManSula BOS</strong><br/>
+          Business Operating System<br/>
+          for Retail & Restaurants<br/>
+          <div style={{ marginTop: 8, fontSize: 9 }}>© {new Date().getFullYear()} ManSula Technologies & ManSula DivLabs</div>
         </div>
       </div>
     </div>
@@ -572,7 +599,8 @@ export function BillDocument({
 // ─────────────────────────────────────────────────────────
 const SAMPLE_BUSINESS = {
   name: 'Rawat General Store',
-  tagline: 'Your Neighbourhood Shop',
+  tagline: 'Grocery & Daily Essentials',
+  address: 'Sector 18, Noida',
   contact: '9818013446',
   gstNumber: '07ABCDE1234F1Z5',
   upiId: 'rawatstore@ybl',
