@@ -92,12 +92,13 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
   const [waPhone, setWaPhone] = useState('')
   const [waName, setWaName] = useState('')
   const [waSharing, setWaSharing] = useState(false)
-  const [waFilteredCusts, setWaFilteredCusts] = useState([])
+  const [customersList, setCustomersList] = useState([])
   const [business, setBusiness] = useState(null)
   const waRef = useRef(null)
 
   useEffect(() => {
     dbGet('business').then(setBusiness)
+    dbGet('customers').then(c => setCustomersList(c || []))
   }, [])
 
   useEffect(() => {
@@ -110,15 +111,22 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
     }
   }, [record, customerInfo])
 
-  const handlePhoneChange = async (e) => {
-    const v = e.target.value.replace(/\D/g, '')
-    setWaPhone(v)
-    if (v.length >= 2) {
-      const allC = (await dbGet('customers')) || []
-      setWaFilteredCusts(allC.filter(c => c.phone.includes(v)))
-    } else {
-      setWaFilteredCusts([])
-    }
+  const waFilteredCusts = (() => {
+    if (!customersList?.length) return []
+    const n = waName.trim().toLowerCase()
+    const p = waPhone.trim()
+    if (!n && !p) return customersList.slice(0, 15)
+    return customersList.filter(c => {
+      const matchName = n ? (c.name || '').toLowerCase().includes(n) : true
+      const matchPhone = p ? (c.phone || '').includes(p) : true
+      return matchName && matchPhone
+    }).slice(0, 15)
+  })()
+
+  const handlePhoneChange = (e) => {
+    let val = e.target.value.replace(/\D/g, '')
+    if (val.startsWith('91') && val.length > 10) val = val.substring(2)
+    setWaPhone(val)
   }
 
   const handleWAShare = async () => {
