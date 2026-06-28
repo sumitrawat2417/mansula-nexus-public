@@ -263,9 +263,14 @@ const ordTotal = (order, taxRate) => {
 }
 
 // ─────────────── SUCCESS MODAL ───────────────
-function SuccessModal({ order, onClose, currency, taxRateObj }) {
+function SuccessModal({ order, onClose, currency, taxRateObj, business, customersList }) {
   useBackButton(onClose)
   const [expanded, setExpanded] = useState(false)
+  const [showWAShare, setShowWAShare] = useState(false)
+  const [waPhone, setWaPhone] = useState(order?.customerPhone || '')
+  const [waName, setWaName] = useState(order?.customer || '')
+  const [waSharing, setWaSharing] = useState(false)
+  const waRef = useRef(null)
   if (!order) return null
 
   // Use stored values if available, otherwise fallback to basic calculation
@@ -279,9 +284,65 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
   const hasMore = order.items.length > previewCount
   const visibleItems = expanded ? order.items : order.items.slice(0, previewCount)
 
+  const handleWAShare = async () => {
+    if (!waPhone.trim()) {
+      alert('Please enter customer phone number')
+      return
+    }
+    if (!waRef.current) return
+    setWaSharing(true)
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      const canvas = await html2canvas(waRef.current, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      })
+      canvas.toBlob(async (blob) => {
+        try {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `receipt-${order.id.replace('/', '-')}.png`
+          a.click()
+          URL.revokeObjectURL(url)
+          const cleanPhone = waPhone.replace(/\s/g, '')
+          const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Hi${waName ? ' ' + waName : ''}, here is your receipt for Order ${order.id} from ${business?.name || 'us'}. Please find the image attached.`)}`
+          window.open(waUrl, '_blank')
+        } catch (e) {
+          console.error(e)
+        } finally {
+          setWaSharing(false)
+        }
+      }, 'image/png')
+    } catch (e) {
+      console.error(e)
+      setWaSharing(false)
+    }
+  }
+
+  const handlePhoneChange = (e) => {
+    let val = e.target.value.replace(/\D/g, '')
+    if (val.startsWith('91') && val.length > 10) val = val.substring(2)
+    setWaPhone(val)
+  }
+
+  const waFilteredCusts = (() => {
+    if (!customersList?.length) return []
+    const n = waName.trim().toLowerCase()
+    const p = waPhone.trim()
+    if (!n && !p) return customersList.slice(0, 15)
+    return customersList.filter(c => {
+      const matchName = n ? (c.name || '').toLowerCase().includes(n) : true
+      const matchPhone = p ? (c.phone || '').includes(p) : true
+      return matchName && matchPhone
+    }).slice(0, 15)
+  })()
+
   return (
     <div className="drawer-overlay open" style={{ zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
-      <div className="success-modal" onClick={e => e.stopPropagation()}>
+      <div className="success-modal" onClick={e => e.stopPropagation()} style={{ maxHeight: '90vh', overflowY: 'auto' }}>
         <div className="success-icon-wrap">
           <svg className="success-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
         </div>
@@ -343,7 +404,67 @@ function SuccessModal({ order, onClose, currency, taxRateObj }) {
           </div>
         </div>
 
-        <button className="success-done-btn" onClick={onClose}>Done</button>
+        {/* WhatsApp Share Receipt */}
+        <div style={{ marginTop: 12 }}>
+          <button
+            onClick={() => setShowWAShare(v => !v)}
+            className="bp-btn-outline"
+            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px' }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              Share Receipt via WhatsApp
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform 0.2s', transform: showWAShare ? 'rotate(180deg)' : 'rotate(0deg)' }}><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+
+          {showWAShare && (
+            <div style={{ marginTop: 8, padding: 16, background: 'var(--bg-surface-2)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <CustomerDetailsForm
+                phone={waPhone}
+                setPhone={setWaPhone}
+                name={waName}
+                setName={setWaName}
+                filteredCusts={waFilteredCusts}
+                onPhoneChange={handlePhoneChange}
+                phonePlaceholder="Customer Phone"
+                namePlaceholder="Customer Name (Optional)"
+              />
+              <button
+                onClick={handleWAShare}
+                disabled={waSharing}
+                className="bp-btn-primary"
+                style={{ width: '100%' }}
+              >
+                {waSharing ? 'Generating...' : 'Send Receipt'}
+                {!waSharing && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>}
+              </button>
+            </div>
+          )}
+        </div>
+
+        <button className="success-done-btn" onClick={onClose} style={{ marginTop: 12 }}>Done</button>
+
+        {/* Hidden receipt doc for WA share */}
+        <div style={{ position: 'fixed', left: '-9999px', top: 0, opacity: 0, pointerEvents: 'none' }}>
+          <BillDocument
+            docRef={waRef}
+            type="receipt"
+            business={business}
+            order={{
+              id: order.id,
+              items: order.items.map(i => ({ ...i, unitPrice: i.price })),
+              customer: waName,
+              customerPhone: waPhone,
+              gstPercent: taxRateObj.value * 100,
+              deliveryCharge: delivery
+            }}
+            math={{ subtotal: sub, discountAmt: discount, gstAmt: tax, grandTotal: total }}
+            logo="/logo.png"
+            paymentMode={order.paymentMode || 'Cash'}
+            hidden={false}
+          />
+        </div>
       </div>
     </div>
   )
@@ -1404,7 +1525,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
       <div className={`cart-overlay ${cartOpen ? 'open' : ''}`} onClick={() => setCartOpen(false)} aria-hidden="true" />
 
       {/* Drawers & Modals */}
-      {successOrder && <SuccessModal order={successOrder} onClose={() => setSuccessOrder(null)} currency={currency} taxRateObj={taxRateObj} />}
+      {successOrder && <SuccessModal order={successOrder} onClose={() => setSuccessOrder(null)} currency={currency} taxRateObj={taxRateObj} business={business} customersList={customersList} />}
       {menuOpen && <SettingsDrawer cols={cols} onCols={setCols} onExit={onExit} onClose={() => setMenuOpen(false)} />}
       {ordersOpen && <OrderConsole orders={orders} currentOrderId={currentOrderId} onSwitch={switchOrder} onSuccess={handleCheckoutOrder} onNew={() => { createNewOrder(); setOrdersOpen(false) }} onClose={() => setOrdersOpen(false)} currency={currency} taxRateObj={taxRateObj} watchdogMins={watchdogMins} onWatchdogMins={(v) => { setWatchdogMins(v); localStorage.setItem('mn-watchdog', v); }} />}
       {variantProduct && (
