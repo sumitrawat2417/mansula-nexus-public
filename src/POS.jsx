@@ -1248,7 +1248,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
     try {
       const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(waDocRef.current, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         backgroundColor: '#ffffff',
         logging: false
