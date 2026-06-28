@@ -1255,27 +1255,17 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
       })
       canvas.toBlob(async (blob) => {
         try {
-          const file = new File([blob], `invoice-${currentOrderId.replace('/', '-')}.png`, { type: 'image/png' })
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              title: `Invoice ${currentOrderId}`,
-              text: `Here is your bill/invoice for Order ${currentOrderId} from ${business.name || APP_NAME}.`,
-              files: [file]
-            })
-            showToast('Shared successfully!')
-          } else {
-            // Fallback
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `invoice-${currentOrderId.replace('/', '-')}.png`
-            a.click()
-            URL.revokeObjectURL(url)
-            
-            const waUrl = `https://wa.me/91${customerPhone}?text=${encodeURIComponent(`Here is your bill/invoice for Order ${currentOrderId} from ${business.name || APP_NAME}. I have downloaded the image for you to attach.`)}`
-            window.open(waUrl, '_blank')
-            showToast('Downloaded image. Please attach it in WhatsApp.', 'info', true)
-          }
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `invoice-${currentOrderId.replace('/', '-')}.png`
+          a.click()
+          URL.revokeObjectURL(url)
+          
+          const cleanPhone = customerPhone.replace(/\s/g, '')
+          const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Here is your bill/invoice for Order ${currentOrderId} from ${business.name || APP_NAME}. I have downloaded the image for you to attach.`)}`
+          window.open(waUrl, '_blank')
+          showToast('Downloaded image. Please attach it in WhatsApp.', 'info', true)
         } catch (e) {
           console.error(e)
           if (e.name !== 'AbortError') showToast('Sharing failed or was cancelled.', 'error')
@@ -1911,7 +1901,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
           business={business}
           order={{ 
             id: currentOrderId, 
-            items: cart, 
+            items: cart.map(i => ({ ...i, unitPrice: i.price })), 
             customer: customerName, 
             customerPhone: customerPhone, 
             gstPercent: taxRateObj.value * 100, 
