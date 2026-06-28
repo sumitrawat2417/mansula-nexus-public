@@ -1492,7 +1492,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
           
           const cleanPhone = customerPhone.replace(/\s/g, '')
           const bName = business.name || APP_NAME
-          const waText = `Thank you! *${bName}* has successfully received your payment.\n\n*Order ID:* ${currentOrderId}\n*Amount Paid:* ₹${Number(total).toFixed(2)}\n\n*We hope you enjoy your order.*\n\nPowered by *ManSula BOS*`
+          const waText = `🧾 *Payment Request*\n\n*Merchant:* ${bName}\n*Invoice ID:* ${currentOrderId}\n*Amount Due:* ₹${Number(total).toFixed(2)}\n\nThe invoice is attached. Payment can be completed by scanning the QR code.\n\nPowered by *ManSula BOS*`
           const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(waText)}`
           window.open(waUrl, '_blank')
           showToast('Downloaded image. Please attach it in WhatsApp.', 'info', true)
