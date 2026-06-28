@@ -1572,36 +1572,37 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                                 <div style={{ marginTop: 24, padding: '0 16px' }}>
                                   <button 
                                     onClick={() => setShowWAShare(true)}
-                                    style={{ width: '100%', padding: '12px', background: '#25D366', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 600, cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, boxShadow: '0 4px 12px rgba(37,211,102,0.2)' }}
+                                    className="bp-btn-primary"
+                                    style={{ width: '100%' }}
                                   >
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                                     Share Bill via WhatsApp
                                   </button>
                                 </div>
                               ) : (
-                                <div style={{ marginTop: 16, padding: 16, background: 'linear-gradient(145deg, rgba(37,211,102,0.05) 0%, rgba(18,140,126,0.05) 100%)', border: '1px solid rgba(37,211,102,0.2)', borderRadius: 12 }}>
+                                <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-surface-2)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                      <div style={{ background: '#25D366', color: '#fff', borderRadius: '50%', padding: '6px' }}>
+                                      <div style={{ background: 'var(--brand-primary)', color: '#fff', borderRadius: '50%', padding: '6px', display: 'flex' }}>
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                                       </div>
                                       <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Share Bill</div>
                                     </div>
-                                    <button onClick={() => setShowWAShare(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', fontSize: '0.8rem', gap: 4 }}>
-                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                    <button onClick={() => setShowWAShare(false)} className="bp-btn-ghost" style={{ padding: '6px 10px', fontSize: '0.8rem', height: 'auto' }}>
                                       Cancel
                                     </button>
                                   </div>
                                   
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)', transition: 'border-color 0.2s' }}>
-                                      <span style={{ padding: '12px 0 12px 16px', color: '#25D366', fontSize: '0.95rem', fontWeight: 600 }}>+91</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface)', border: '1.5px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden' }}>
+                                      <span style={{ padding: '0 0 0 14px', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>+91</span>
                                       <input
                                         type="tel"
                                         placeholder="Customer Phone"
                                         value={customerPhone}
                                         onChange={handlePhoneChange}
-                                        style={{ padding: '12px 16px 12px 8px', background: 'transparent', border: 'none', fontSize: '0.95rem', width: '100%', outline: 'none', color: 'var(--text-primary)' }}
+                                        className="bp-input"
+                                        style={{ border: 'none', borderRadius: 0, paddingLeft: 8, background: 'transparent' }}
                                       />
                                     </div>
                                     <input
@@ -1609,12 +1610,13 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                                       placeholder="Customer Name (Optional)"
                                       value={customerName}
                                       onChange={e => setCustomerName(e.target.value)}
-                                      style={{ padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', fontSize: '0.95rem', outline: 'none', color: 'var(--text-primary)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}
+                                      className="bp-input"
                                     />
                                     <button 
                                       onClick={handleShareWA} 
                                       disabled={isSharingWA}
-                                      style={{ padding: '12px', background: '#25D366', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 600, cursor: isSharingWA ? 'not-allowed' : 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 4 }}
+                                      className="bp-btn-primary"
+                                      style={{ width: '100%', marginTop: 4 }}
                                     >
                                       {isSharingWA ? 'Generating...' : 'Send Invoice'}
                                       {!isSharingWA && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>}
