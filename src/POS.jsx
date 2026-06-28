@@ -807,6 +807,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
 
   // WA Share
   const [isSharingWA, setIsSharingWA] = useState(false)
+  const [showWAShare, setShowWAShare] = useState(false)
   const waDocRef = useRef(null)
 
   // ── Orders — start with INIT_ORDER; ids get assigned proper monthly nums async ──
@@ -1542,63 +1543,85 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
                           <div className="upi-qr-label">Scan &amp; Pay</div>
                           {business.upiId ? (
                             <>
-                              <div className="upi-qr-wrap">
-                                  <QRCodeSVG
-                                    value={`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ${APP_NAME}`)}`}
-                                    size={180}
-                                    fgColor="#3730a3"
-                                    bgColor="#ffffff"
-                                    level="M"
-                                    marginSize={1}
-                                    className="upi-qr-img"
-                                  />
-                                {/* UPI logo overlay */}
-                                <div className="upi-qr-logo">
-                                  <img src="/logo.png" alt="Logo" width="24" height="24" style={{ objectFit: 'contain' }} />
-                                </div>
-                              </div>
-                              <div className="upi-qr-meta">
-                                <span className="upi-qr-id">{business.upiId}</span>
-                                <span className="upi-qr-amount">Total: {fmt(total, currency)}</span>
-                              </div>
+                              {!showWAShare && (
+                                <>
+                                  <div className="upi-qr-wrap">
+                                      <QRCodeSVG
+                                        value={`upi://pay?pa=${business.upiId}&pn=${encodeURIComponent(business.name || APP_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent(`#${currentOrderId} | by ${APP_NAME}`)}`}
+                                        size={180}
+                                        fgColor="#3730a3"
+                                        bgColor="#ffffff"
+                                        level="M"
+                                        marginSize={1}
+                                        className="upi-qr-img"
+                                      />
+                                    {/* UPI logo overlay */}
+                                    <div className="upi-qr-logo">
+                                      <img src="/logo.png" alt="Logo" width="24" height="24" style={{ objectFit: 'contain' }} />
+                                    </div>
+                                  </div>
+                                  <div className="upi-qr-meta">
+                                    <span className="upi-qr-id">{business.upiId}</span>
+                                    <span className="upi-qr-amount">Total: {fmt(total, currency)}</span>
+                                  </div>
+                                </>
+                              )}
                               
-                              {/* Share via WhatsApp section */}
-                              <div style={{ marginTop: 24, padding: 16, background: 'linear-gradient(145deg, rgba(37,211,102,0.05) 0%, rgba(18,140,126,0.05) 100%)', border: '1px solid rgba(37,211,102,0.2)', borderRadius: 12 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                                  <div style={{ background: '#25D366', color: '#fff', borderRadius: '50%', padding: '6px' }}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                                  </div>
-                                  <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Share Bill via WhatsApp</div>
-                                </div>
-                                
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
-                                    <span style={{ padding: '10px 0 10px 12px', color: '#25D366', fontSize: '0.9rem', fontWeight: 600 }}>+91</span>
-                                    <input
-                                      type="tel"
-                                      placeholder="Customer Phone"
-                                      value={customerPhone}
-                                      onChange={handlePhoneChange}
-                                      style={{ padding: '10px 12px 10px 8px', background: 'transparent', border: 'none', fontSize: '0.9rem', width: '100%', outline: 'none' }}
-                                    />
-                                  </div>
-                                  <input
-                                    type="text"
-                                    placeholder="Customer Name (Optional)"
-                                    value={customerName}
-                                    onChange={e => setCustomerName(e.target.value)}
-                                    style={{ padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '0.9rem', outline: 'none' }}
-                                  />
+                              {/* Share via WhatsApp toggle / section */}
+                              {!showWAShare ? (
+                                <div style={{ marginTop: 24, padding: '0 16px' }}>
                                   <button 
-                                    onClick={handleShareWA} 
-                                    disabled={isSharingWA}
-                                    style={{ padding: '10px', background: '#25D366', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: isSharingWA ? 'not-allowed' : 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}
+                                    onClick={() => setShowWAShare(true)}
+                                    style={{ width: '100%', padding: '12px', background: '#25D366', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 600, cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, boxShadow: '0 4px 12px rgba(37,211,102,0.2)' }}
                                   >
-                                    {isSharingWA ? 'Generating...' : 'Send Invoice'}
-                                    {!isSharingWA && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>}
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                                    Share Bill via WhatsApp
                                   </button>
                                 </div>
-                              </div>
+                              ) : (
+                                <div style={{ marginTop: 16, padding: 16, background: 'linear-gradient(145deg, rgba(37,211,102,0.05) 0%, rgba(18,140,126,0.05) 100%)', border: '1px solid rgba(37,211,102,0.2)', borderRadius: 12 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                      <div style={{ background: '#25D366', color: '#fff', borderRadius: '50%', padding: '6px' }}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                                      </div>
+                                      <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Share Bill</div>
+                                    </div>
+                                    <button onClick={() => setShowWAShare(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', fontSize: '0.8rem', gap: 4 }}>
+                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                      Cancel
+                                    </button>
+                                  </div>
+                                  
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)', transition: 'border-color 0.2s' }}>
+                                      <span style={{ padding: '12px 0 12px 16px', color: '#25D366', fontSize: '0.95rem', fontWeight: 600 }}>+91</span>
+                                      <input
+                                        type="tel"
+                                        placeholder="Customer Phone"
+                                        value={customerPhone}
+                                        onChange={handlePhoneChange}
+                                        style={{ padding: '12px 16px 12px 8px', background: 'transparent', border: 'none', fontSize: '0.95rem', width: '100%', outline: 'none', color: 'var(--text-primary)' }}
+                                      />
+                                    </div>
+                                    <input
+                                      type="text"
+                                      placeholder="Customer Name (Optional)"
+                                      value={customerName}
+                                      onChange={e => setCustomerName(e.target.value)}
+                                      style={{ padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', fontSize: '0.95rem', outline: 'none', color: 'var(--text-primary)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}
+                                    />
+                                    <button 
+                                      onClick={handleShareWA} 
+                                      disabled={isSharingWA}
+                                      style={{ padding: '12px', background: '#25D366', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 600, cursor: isSharingWA ? 'not-allowed' : 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 4 }}
+                                    >
+                                      {isSharingWA ? 'Generating...' : 'Send Invoice'}
+                                      {!isSharingWA && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
                             </>
                           ) : (
                             <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>UPI ID not configured in Business Profile</div>
