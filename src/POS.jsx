@@ -97,7 +97,7 @@ const playSound = (type) => {
 }
 
 // ─────────────── CUSTOMER DETAILS FORM ───────────────
-function CustomerDetailsForm({
+export function CustomerDetailsForm({
   phone,
   setPhone,
   name,

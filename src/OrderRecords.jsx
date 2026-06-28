@@ -7,6 +7,8 @@ import {
 } from './db.js'
 import DateFilterDrawer, { computeNavRange, computeQuick } from './DateFilterDrawer.jsx'
 import { useAlert } from './AlertDialog.jsx'
+import { CustomerDetailsForm } from './POS.jsx'
+import { BillDocument } from './BillReceipt.jsx'
 
 // ── SVG Icon Library ──
 const I = {
@@ -85,6 +87,78 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
     }
   }, [record.paymentMode, record.orderId])
 
+  // WA Share state
+  const [showWAShare, setShowWAShare] = useState(false)
+  const [waPhone, setWaPhone] = useState('')
+  const [waName, setWaName] = useState('')
+  const [waSharing, setWaSharing] = useState(false)
+  const [waFilteredCusts, setWaFilteredCusts] = useState([])
+  const [business, setBusiness] = useState(null)
+  const waRef = useRef(null)
+
+  useEffect(() => {
+    dbGet('business').then(setBusiness)
+  }, [])
+
+  useEffect(() => {
+    if (record?.customerDetails) {
+      if (record.customerDetails.phone) setWaPhone(record.customerDetails.phone)
+      if (record.customerDetails.name) setWaName(record.customerDetails.name)
+    } else if (customerInfo) {
+      setWaPhone(customerInfo.phone || '')
+      setWaName(customerInfo.name || '')
+    }
+  }, [record, customerInfo])
+
+  const handlePhoneChange = async (e) => {
+    const v = e.target.value.replace(/\D/g, '')
+    setWaPhone(v)
+    if (v.length >= 2) {
+      const allC = (await dbGet('customers')) || []
+      setWaFilteredCusts(allC.filter(c => c.phone.includes(v)))
+    } else {
+      setWaFilteredCusts([])
+    }
+  }
+
+  const handleWAShare = async () => {
+    if (!waPhone.trim()) {
+      alert('Please enter customer phone number')
+      return
+    }
+    if (!waRef.current) return
+    setWaSharing(true)
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      const canvas = await html2canvas(waRef.current, {
+        scale: 3, useCORS: true, backgroundColor: '#ffffff', logging: false
+      })
+      canvas.toBlob(async (blob) => {
+        try {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `receipt-${record.orderId.replace('/', '-')}.png`
+          a.click()
+          URL.revokeObjectURL(url)
+          const cleanPhone = waPhone.replace(/\s/g, '')
+          const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Hi${waName ? ' ' + waName : ''}, here is your receipt for Order ${record.orderId} from ${business?.name || 'us'}. Please find the image attached.`)}`
+          window.open(waUrl, '_blank')
+          setTimeout(() => {
+            if (onClose) onClose()
+          }, 300)
+        } catch (e) {
+          console.error(e)
+        } finally {
+          setWaSharing(false)
+        }
+      }, 'image/png')
+    } catch (err) {
+      console.error(err)
+      setWaSharing(false)
+    }
+  }
+
   const sym = currency?.symbol || '₹'
   const items = record.items || []
   const subtotal = record.subtotal !== undefined ? record.subtotal : items.reduce((s, i) => s + i.price * i.qty, 0)
@@ -157,6 +231,33 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
               Cancel Editing
             </button>
           </div>
+        ) : showWAShare ? (
+          <div className="or-modal-body" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>Share Receipt</h3>
+              <button 
+                onClick={() => setShowWAShare(false)} 
+                style={{ background: 'var(--bg-surface-2)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <I.X s={16} />
+              </button>
+            </div>
+            
+            <CustomerDetailsForm
+              phone={waPhone}
+              setPhone={setWaPhone}
+              name={waName}
+              setName={setWaName}
+              filteredCusts={waFilteredCusts}
+              onPhoneChange={handlePhoneChange}
+              phonePlaceholder="Customer Phone"
+              namePlaceholder="Customer Name (Optional)"
+            />
+            
+            <button onClick={handleWAShare} disabled={waSharing} className="bp-btn-primary" style={{ marginTop: 8, width: '100%', padding: '12px', fontSize: '1rem' }}>
+              {waSharing ? 'Generating…' : 'Send Receipt'}
+            </button>
+          </div>
         ) : (
           <div className="or-modal-body">
           <div className="or-detail-section-label">Items</div>
@@ -225,13 +326,37 @@ function OrderDetailModal({ record, currency, onClose, onDelete, onEdit, onNavig
         </div>
         )}
 
-        {!editMode && (
+        {!editMode && !showWAShare && (
           <div className="or-modal-footer">
-            <button className="or-btn-danger" onClick={handleDelete}>
+            <button className="or-btn-secondary" onClick={() => setShowWAShare(true)} style={{ flex: 1, padding: '12px 16px', borderRadius: '12px', background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', border: '1px solid rgba(99, 102, 241, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontWeight: 600, cursor: 'pointer' }}>
+              <I.Share s={15} /> Share Receipt
+            </button>
+            <button className="or-btn-danger" onClick={handleDelete} style={{ flex: 1, padding: '12px 16px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontWeight: 600, cursor: 'pointer' }}>
               <I.Trash s={14} /> Delete
             </button>
           </div>
         )}
+
+        {/* Hidden receipt doc for WA share */}
+        <div style={{ position: 'fixed', left: '-9999px', top: 0, opacity: 0, pointerEvents: 'none' }}>
+          <BillDocument
+            docRef={waRef}
+            type="receipt"
+            business={business}
+            order={{
+              id: record.orderId,
+              items: items.map(i => ({ ...i, unitPrice: i.price })),
+              customer: waName,
+              customerPhone: waPhone,
+              gstPercent: (record.taxAmt > 0 && subtotal > 0) ? (record.taxAmt / subtotal) * 100 : 0,
+              deliveryCharge: record.deliveryCharge || 0
+            }}
+            math={{ subtotal, discountAmt: record.discountAmt || 0, gstAmt: record.taxAmt || 0, grandTotal: record.total }}
+            logo="/logo.png"
+            paymentMode={record.paymentMode || 'Cash'}
+            hidden={false}
+          />
+        </div>
       </div>
     </div>
   )
