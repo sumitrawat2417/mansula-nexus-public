@@ -450,7 +450,7 @@ export function BillDocument({
         <div className="brd-meta-grid">
           <div className="brd-meta-row"><span>Business</span><strong>{business.name || '—'}</strong></div>
           {business.address && <div className="brd-meta-row"><span>Address</span><strong>{business.address}</strong></div>}
-          <div className="brd-meta-row"><span>Contact</span><strong>{business.contact ? `+91 ${business.contact}` : '—'}</strong></div>
+          <div className="brd-meta-row"><span>Contact</span><strong>{business.phone ? (business.phone.startsWith('+') ? business.phone : `+91 ${business.phone}`) : '—'}</strong></div>
           {business.gstNumber && <div className="brd-meta-row"><span>GST No</span><strong className="accent">{business.gstNumber}</strong></div>}
         </div>
 
