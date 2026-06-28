@@ -144,10 +144,11 @@ function CustomerDetailsForm({
       {filteredCusts && filteredCusts.length > 0 && (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
           <div style={{ padding: '8px 12px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', background: 'var(--bg-surface-1)' }}>SUGGESTED CUSTOMERS</div>
-          {filteredCusts.map(c => (
-            <div
-              key={c.customerId}
-              style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: 12 }}
+          <div style={{ maxHeight: '180px', overflowY: 'auto' }}>
+            {filteredCusts.map(c => (
+              <div
+                key={c.customerId}
+                style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: 12 }}
               onMouseDown={(e) => {
                 e.preventDefault() // prevent blur
                 setName(c.name || '')
@@ -164,6 +165,7 @@ function CustomerDetailsForm({
               </div>
             </div>
           ))}
+          </div>
         </div>
       )}
     </div>
@@ -1369,13 +1371,13 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   const filteredCusts = useMemo(() => {
     const n = customerName.trim().toLowerCase()
     const p = customerPhone.trim()
-    if (!n && !p) return customersList.slice(0, 3)
+    if (!n && !p) return customersList.slice(0, 15)
 
     return customersList.filter(c => {
       const matchName = n ? (c.name || '').toLowerCase().includes(n) : true;
       const matchPhone = p ? (c.phone || '').includes(p) : true;
       return matchName && matchPhone;
-    }).slice(0, 3)
+    }).slice(0, 15)
   }, [customerName, customerPhone, customersList])
 
   const handlePhoneChange = (e) => {
