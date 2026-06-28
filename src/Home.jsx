@@ -1359,7 +1359,15 @@ export default function Home({
 
           <button
             className="or-btn-ghost"
-            style={{ width: '100%', marginTop: '20px', color: 'var(--text-muted)' }}
+            style={{ width: '100%', marginTop: '20px', color: 'var(--brand-primary)', fontWeight: 700 }}
+            onClick={() => onLaunch('bill-receipt-preview')}
+          >
+            🧾 Preview Bill & Receipt Design
+          </button>
+
+          <button
+            className="or-btn-ghost"
+            style={{ width: '100%', marginTop: '10px', color: 'var(--text-muted)' }}
             onClick={handleStressTest}
             disabled={stressing}
           >

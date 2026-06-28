@@ -11,6 +11,7 @@ import Analytics from './Analytics.jsx'
 import Staff from './Staff.jsx'
 import BackupRestore from './BackupRestore.jsx'
 import Reports from './Reports.jsx'
+import BillReceiptPreview from './BillReceipt.jsx'
 import { AlertProvider, useAlert } from './AlertDialog.jsx'
 import ReloadPrompt from './ReloadPrompt.jsx'
 import { APP_NAME } from './appInfo.js'
@@ -408,6 +409,10 @@ export default function App() {
 
     if (screen === 'reports') {
       return <Reports onClose={() => setScreen('home')} currency={currency} />
+    }
+
+    if (screen === 'bill-receipt-preview') {
+      return <BillReceiptPreview />
     }
 
     return (
