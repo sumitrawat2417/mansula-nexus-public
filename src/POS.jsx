@@ -141,8 +141,8 @@ function CustomerDetailsForm({
         style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}
       />
 
-      {focus && filteredCusts && filteredCusts.length > 0 && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', marginTop: 8, zIndex: 100, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
+      {filteredCusts && filteredCusts.length > 0 && (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
           <div style={{ padding: '8px 12px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', background: 'var(--bg-surface-1)' }}>SUGGESTED CUSTOMERS</div>
           {filteredCusts.map(c => (
             <div
@@ -1367,7 +1367,6 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
   const activeOrders = orders.filter(o => o.status === 'active')
 
   const filteredCusts = useMemo(() => {
-    if (!customerFocus) return []
     const n = customerName.trim().toLowerCase()
     const p = customerPhone.trim()
     if (!n && !p) return customersList.slice(0, 5)
@@ -1377,7 +1376,7 @@ export default function POS({ onExit, currency, taxRateObj, editingRecord, onCle
       const matchPhone = p ? (c.phone || '').includes(p) : true;
       return matchName && matchPhone;
     }).slice(0, 5)
-  }, [customerName, customerPhone, customersList, customerFocus])
+  }, [customerName, customerPhone, customersList])
 
   const handlePhoneChange = (e) => {
     let val = e.target.value.replace(/\D/g, '')
