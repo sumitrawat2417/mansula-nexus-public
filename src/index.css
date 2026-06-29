@@ -8693,8 +8693,19 @@ select {
 
 .wel-root.exit {
   opacity: 0;
-  transform: scale(1.05);
   pointer-events: none;
+}
+
+.wel-root.exit .wel-logo-wrap {
+  transform: scale(8);
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.8, 0, 0.2, 1) !important;
+}
+
+.wel-root.exit .wel-text-wrap {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.4s ease;
 }
 
 /* ── Grid ── */
