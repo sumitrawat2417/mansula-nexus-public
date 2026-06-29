@@ -5,9 +5,9 @@
 // ─────────────────────────────────────────────────
 
 export const APP_NAME = 'ManSula BOS'
-export const APP_VERSION = 'v1.7.0-alpha'
+export const APP_VERSION = 'v1.7.5'
 
-export const APP_BUILD_DATE = 'June 26, 2025'
+export const APP_BUILD_DATE = 'June 29, 2026'
 export const LEGAL_LAST_UPDATED = 'June 2026'
 /** What's New items for the current release.
  *  Each entry has:
@@ -17,38 +17,38 @@ export const LEGAL_LAST_UPDATED = 'June 2026'
  */
 export const WHATS_NEW = [
   {
-    icon: 'wrench',
-    label: 'Customizable Tools Grid',
+    icon: 'star',
+    label: 'Professional Bill & Receipt Generator',
     detail:
-      'You can now hold and drag any tool in the "More Tools" section to reorder them exactly how you like. The app will save your custom layout so your most-used tools are always right at the top!',
-  },
-  {
-    icon: 'analytics',
-    label: 'Analytics Module',
-    detail:
-      'A full-featured Analytics dashboard has been added to ManSula BOS. Track revenue trends, top-selling products, peak hours, and customer insights — all powered by your local data. The dashboard includes a Revenue Overview chart, a product performance Podium, and a Customer Leaderboard. AI-powered insights are coming in a future update.',
+      'Generate, preview, and download polished bills and receipts natively right from the POS or Order Records. Hand your customers a premium digital bill with your business branding intact.',
   },
   {
     icon: 'lightning',
-    label: 'Faster POS',
+    label: 'WhatsApp Invoice & Receipt Sharing',
     detail:
-      'The Point of Sale screen has been significantly optimized. Product search is now instant, the cart renders faster, and the checkout flow has fewer taps. Barcode scanning is more reliable across devices. Order confirmation animations are smoother and the receipt preview loads in under 100ms.',
+      'Instantly send professional transaction summaries or UPI payment requests directly to WhatsApp. Messages are auto-filled with order details and formatted beautifully for your customers.',
+  },
+  {
+    icon: 'wrench',
+    label: 'Premium Startup Experience',
+    detail:
+      'We\'ve revamped the Welcome screen with a sleek new aesthetic. Enjoy elevated audio chimes, a dynamic logo zoom-in animation, and your organization\'s branding proudly displayed on launch.',
   },
   {
     icon: 'check',
-    label: 'Bug Fixes',
+    label: 'Smart Customer Search & Fixes',
     detail:
-      'This release fixes several reported issues: offline sync edge cases, incorrect order totals when applying discounts on fractional quantities, a rare crash when switching themes mid-session, and a layout overflow bug on small screens. We also resolved an issue where the PWA update prompt sometimes did not appear after a new deployment.',
+      'Customer search by phone number is now much smarter, effortlessly handling varying formats and country codes. We also fixed a silent bug that prevented the customer list from loading properly on the Order Records screen.',
   },
 ]
 
 /** Organization / Company Info */
 export const ORG = {
-  name: 'ManSula DivLabs & ManSula Technologies',
+  name: 'ManSula DivLabs & ManSula',
   tagline: 'Empowering Commerce with Smart Technology',
   website: 'https://mansulatech.netlify.app',
   support: 'mansula.rwt@gmail.com',
   phone1: '+919818013446',
   phone2: '+918851947954',
-  copyright: `© 2024 - ${new Date().getFullYear()} ManSula DivLabs & ManSula Technologies. All rights reserved.`,
+  copyright: `© 2024 - ${new Date().getFullYear()} ManSula DivLabs & ManSula. All rights reserved.`,
 }
