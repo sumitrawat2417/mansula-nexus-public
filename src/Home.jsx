@@ -1161,7 +1161,7 @@ const playTestSound = (type) => {
         osc.frequency.setValueAtTime(150, ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.15);
         gain.gain.setValueAtTime(0, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.25 * vol, ctx.currentTime + 0.05);
+        gain.gain.linearRampToValueAtTime(0.8 * vol, ctx.currentTime + 0.05);
         gain.gain.exponentialRampToValueAtTime(0.001 * vol, ctx.currentTime + 0.3);
         osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.3);
       } else {
@@ -1172,7 +1172,7 @@ const playTestSound = (type) => {
           filter.type = 'lowpass'; filter.frequency.setValueAtTime(5000, ctx.currentTime); filter.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 1.2);
           osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
           gain.gain.setValueAtTime(0, ctx.currentTime);
-          gain.gain.linearRampToValueAtTime(0.12 * vol, ctx.currentTime + 0.02);
+          gain.gain.linearRampToValueAtTime(0.2 * vol, ctx.currentTime + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.001 * vol, ctx.currentTime + 2);
           osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 2);
         })
@@ -1182,20 +1182,20 @@ const playTestSound = (type) => {
       osc.connect(gain); gain.connect(ctx.destination);
       if (type === 'add') {
         osc.type = 'sine'; osc.frequency.setValueAtTime(440, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.7 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1);
         osc.start(); osc.stop(ctx.currentTime + 0.1);
       } else if (type === 'remove') {
         osc.type = 'sine'; osc.frequency.setValueAtTime(300, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.7 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1);
         osc.start(); osc.stop(ctx.currentTime + 0.1);
       } else if (type === 'checkout') {
         osc.type = 'triangle'; osc.frequency.setValueAtTime(440, ctx.currentTime); osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.12); osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.24);
-        gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.36);
+        gain.gain.setValueAtTime(0.8 * vol, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.36);
         osc.start(); osc.stop(ctx.currentTime + 0.36);
       } else if (type === 'alarm') {
         osc.type = 'square'; const t = ctx.currentTime;
         for (let i = 0; i < 6; i++) { osc.frequency.setValueAtTime(800, t + i * 0.5); osc.frequency.setValueAtTime(1200, t + i * 0.5 + 0.25); }
-        gain.gain.setValueAtTime(0.04 * vol, t); gain.gain.linearRampToValueAtTime(0.04 * vol, t + 3); gain.gain.linearRampToValueAtTime(0.01 * vol, t + 3.1);
+        gain.gain.setValueAtTime(0.4 * vol, t); gain.gain.linearRampToValueAtTime(0.4 * vol, t + 3); gain.gain.linearRampToValueAtTime(0.01 * vol, t + 3.1);
         osc.start(t); osc.stop(t + 3.1);
       }
     }

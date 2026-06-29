@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ORG, APP_VERSION } from './appInfo.js'
+import { ORG } from './appInfo.js'
 
 // ── Web Audio Synthesizer (Premium Chimes) ──
 const playSound = (type) => {
@@ -28,7 +28,7 @@ const playSound = (type) => {
       osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.15)
 
       gain.gain.setValueAtTime(0, ctx.currentTime)
-      gain.gain.linearRampToValueAtTime(0.25 * vol, ctx.currentTime + 0.05)
+      gain.gain.linearRampToValueAtTime(0.8 * vol, ctx.currentTime + 0.05)
       gain.gain.exponentialRampToValueAtTime(0.001 * vol, ctx.currentTime + 0.3)
 
       osc.start(ctx.currentTime)
@@ -57,7 +57,7 @@ const playSound = (type) => {
 
         // Punchy attack, long fade out
         gain.gain.setValueAtTime(0, ctx.currentTime)
-        gain.gain.linearRampToValueAtTime(0.12 * vol, ctx.currentTime + 0.02)
+        gain.gain.linearRampToValueAtTime(0.2 * vol, ctx.currentTime + 0.02)
         gain.gain.exponentialRampToValueAtTime(0.001 * vol, ctx.currentTime + 2)
 
         osc.start(ctx.currentTime)
@@ -115,7 +115,6 @@ export default function Welcome({ onComplete }) {
           <h1 className={`wel-title ${stage >= 2 ? 'show' : ''}`}>
             <span className="wel-word">ManSula</span>
             <span className="wel-word wel-highlight">BOS</span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--brand-primary)', marginLeft: '8px', fontWeight: 800, opacity: 0.9, verticalAlign: 'top', display: 'inline-block', marginTop: '4px' }}>{APP_VERSION}</span>
           </h1>
 
           <div className={`wel-subtitle-wrap ${stage >= 2 ? 'show' : ''}`}>

@@ -63,14 +63,14 @@ const playSound = (type) => {
       osc.type = 'sine'
       osc.frequency.setValueAtTime(440, audioCtx.currentTime)
       osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1)
-      gain.gain.setValueAtTime(0.1 * vol, audioCtx.currentTime)
+      gain.gain.setValueAtTime(0.7 * vol, audioCtx.currentTime)
       gain.gain.exponentialRampToValueAtTime(0.01 * vol, audioCtx.currentTime + 0.1)
       osc.start(); osc.stop(audioCtx.currentTime + 0.1)
     } else if (type === 'remove') {
       osc.type = 'sine'
       osc.frequency.setValueAtTime(300, audioCtx.currentTime)
       osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1)
-      gain.gain.setValueAtTime(0.1 * vol, audioCtx.currentTime)
+      gain.gain.setValueAtTime(0.7 * vol, audioCtx.currentTime)
       gain.gain.exponentialRampToValueAtTime(0.01 * vol, audioCtx.currentTime + 0.1)
       osc.start(); osc.stop(audioCtx.currentTime + 0.1)
     } else if (type === 'checkout') {
@@ -78,7 +78,7 @@ const playSound = (type) => {
       osc.frequency.setValueAtTime(440, audioCtx.currentTime)
       osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.12)
       osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.24)
-      gain.gain.setValueAtTime(0.1 * vol, audioCtx.currentTime)
+      gain.gain.setValueAtTime(0.8 * vol, audioCtx.currentTime)
       gain.gain.linearRampToValueAtTime(0.01 * vol, audioCtx.currentTime + 0.36)
       osc.start(); osc.stop(audioCtx.currentTime + 0.36)
     } else if (type === 'alarm') {
@@ -88,8 +88,8 @@ const playSound = (type) => {
         osc.frequency.setValueAtTime(800, t + i * 0.5)
         osc.frequency.setValueAtTime(1200, t + i * 0.5 + 0.25)
       }
-      gain.gain.setValueAtTime(0.04 * vol, t)
-      gain.gain.linearRampToValueAtTime(0.04 * vol, t + 3)
+      gain.gain.setValueAtTime(0.4 * vol, t)
+      gain.gain.linearRampToValueAtTime(0.4 * vol, t + 3)
       gain.gain.linearRampToValueAtTime(0.01 * vol, t + 3.1)
       osc.start(t); osc.stop(t + 3.1)
     }
