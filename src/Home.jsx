@@ -1045,7 +1045,7 @@ function HelpContent() {
             <p>ManSula BOS is an offline-first Business Operating System (BOS) that helps businesses manage sales, inventory, customers, staff, analytics, reporting, and operations from a unified platform. By using ManSula BOS ("the BOS"), you agree to the following terms and conditions. Please read them carefully.</p>
 
             <div className="hns-legal-h">1. License Grant</div>
-            <p>ManSula Technologies & ManSula DivLabs grant you a limited, non-exclusive, non-transferable, revocable license to use ManSula BOS in accordance with these Terms.</p>
+            <p>ManSula DivLabs or ManSula grant you a limited, non-exclusive, non-transferable, revocable license to use ManSula BOS in accordance with these Terms.</p>
 
             <div className="hns-legal-h">2. Acceptable Use</div>
             <p>You may use this BOS for lawful business purposes only. You are responsible for all data entered into the system, including product prices, customer records, and transaction history.</p>
@@ -1054,7 +1054,7 @@ function HelpContent() {
             <p>Certain features may require an account, internet connectivity, cloud storage, or subscription. Users are responsible for maintaining the security of their credentials and account access.</p>
 
             <div className="hns-legal-h">4. Data Responsibility</div>
-            <p>Users are responsible for maintaining accurate business records and backups. While ManSula BOS may provide backup, export, synchronization, or cloud-storage features, ManSula Technologies & ManSula DivLabs cannot guarantee recovery of lost, corrupted, or deleted data.</p>
+            <p>Users are responsible for maintaining accurate business records and backups. While ManSula BOS may provide backup, export, synchronization, or cloud-storage features, ManSula DivLabs or ManSula cannot guarantee recovery of lost, corrupted, or deleted data.</p>
 
             <div className="hns-legal-h">5. Reports & Analytics</div>
             <p>Reports, dashboards, analytics, forecasts, summaries, and recommendations are provided for informational purposes only and may contain inaccuracies. Users are solely responsible for validating information before making business decisions.</p>
@@ -1066,13 +1066,13 @@ function HelpContent() {
             <p>Users remain solely responsible for maintaining financial records and complying with applicable tax, accounting, invoicing, labor, and regulatory requirements.</p>
 
             <div className="hns-legal-h">8. No Warranty</div>
-            <p>The BOS is provided "as is" without any warranty, express or implied. ManSula Technologies & ManSula DivLabs do not guarantee uninterrupted or error-free operation. The BOS may be updated, modified, or discontinued at any time.</p>
+            <p>The BOS is provided "as is" without any warranty, express or implied. ManSula DivLabs or ManSula do not guarantee that operation will be either uninterrupted or error-free. The BOS may be updated, modified, or discontinued at any time.</p>
 
             <div className="hns-legal-h">9. Limitation of Liability</div>
-            <p>ManSula Technologies & ManSula DivLabs shall not be liable for any indirect, incidental, special, or consequential damages arising from your use or inability to use the BOS, including but not limited to business losses, data loss, or revenue loss.</p>
+            <p>ManSula DivLabs or ManSula shall not be liable for any indirect, incidental, special, or consequential damages arising from your use or inability to use the BOS, including but not limited to business losses, data loss, or revenue loss.</p>
 
             <div className="hns-legal-h">10. Intellectual Property</div>
-            <p>ManSula BOS and its UI, design, and code are the property of ManSula Technologies & ManSula DivLabs. You may not copy, redistribute, or reverse-engineer any part of the application without explicit written consent.</p>
+            <p>ManSula BOS and its UI, design, and code are the property of ManSula DivLabs or ManSula. You may not copy, redistribute, or reverse-engineer any part of the application without explicit written consent.</p>
 
             <div className="hns-legal-h">11. Subscriptions & Paid Features</div>
             <p>Certain features may require a paid subscription or one-time purchase. Pricing, billing terms, and feature availability may change from time to time.</p>
@@ -1105,7 +1105,7 @@ function HelpContent() {
             <p>All data — including orders, customer records, inventory, products, and settings — is stored locally on <strong>your device</strong> using browser IndexedDB and localStorage by default.</p>
 
             <div className="hns-legal-h"><Icon.Cloud style={{ width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom' }} /> Cloud Services</div>
-            <p>If cloud-based features are enabled, selected data may be securely transmitted and stored on servers operated by ManSula Technologies or trusted service providers for the purpose of providing those services.</p>
+            <p>If cloud-based features are enabled, selected data may be securely transmitted and stored on servers operated by ManSula DivLabs or trusted service providers for the purpose of providing those services.</p>
 
             <div className="hns-legal-h"><Icon.Sparkles style={{ width: 16, height: 16, marginRight: 6, display: 'inline-block', verticalAlign: 'text-bottom' }} /> AI Services</div>
             <p>Certain AI-powered features may process user-provided information to generate insights, recommendations, summaries, or forecasts. Data processing requirements will be disclosed before such features are used.</p>
@@ -1140,6 +1140,66 @@ function HelpContent() {
       )}
     </div>
   )
+}
+
+let devAudioCtx = null
+const playTestSound = (type) => {
+  const volStr = localStorage.getItem('mn-volume')
+  const vol = volStr !== null ? parseInt(volStr, 10) / 100 : 1
+  if (vol === 0 || localStorage.getItem('mn-sound') === 'disabled') return
+
+  try {
+    if (!devAudioCtx) devAudioCtx = new (window.AudioContext || window.webkitAudioContext)()
+    if (devAudioCtx.state === 'suspended') devAudioCtx.resume()
+    const ctx = devAudioCtx
+
+    if (type === 'reveal' || type === 'burst') {
+      if (type === 'reveal') {
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(150, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.25 * vol, ctx.currentTime + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001 * vol, ctx.currentTime + 0.3);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.3);
+      } else {
+        const frequencies = [261.63, 329.63, 392.00, 493.88, 587.33]
+        frequencies.forEach(freq => {
+          const osc = ctx.createOscillator(); const gain = ctx.createGain(); const filter = ctx.createBiquadFilter();
+          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(freq, ctx.currentTime);
+          filter.type = 'lowpass'; filter.frequency.setValueAtTime(5000, ctx.currentTime); filter.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 1.2);
+          osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.12 * vol, ctx.currentTime + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001 * vol, ctx.currentTime + 2);
+          osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 2);
+        })
+      }
+    } else {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      if (type === 'add') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(440, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1);
+        osc.start(); osc.stop(ctx.currentTime + 0.1);
+      } else if (type === 'remove') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(300, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1);
+        osc.start(); osc.stop(ctx.currentTime + 0.1);
+      } else if (type === 'checkout') {
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(440, ctx.currentTime); osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.12); osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.24);
+        gain.gain.setValueAtTime(0.1 * vol, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.36);
+        osc.start(); osc.stop(ctx.currentTime + 0.36);
+      } else if (type === 'alarm') {
+        osc.type = 'square'; const t = ctx.currentTime;
+        for (let i = 0; i < 6; i++) { osc.frequency.setValueAtTime(800, t + i * 0.5); osc.frequency.setValueAtTime(1200, t + i * 0.5 + 0.25); }
+        gain.gain.setValueAtTime(0.04 * vol, t); gain.gain.linearRampToValueAtTime(0.04 * vol, t + 3); gain.gain.linearRampToValueAtTime(0.01 * vol, t + 3.1);
+        osc.start(t); osc.stop(t + 3.1);
+      }
+    }
+  } catch (_) { }
 }
 
 export default function Home({
@@ -1357,22 +1417,56 @@ export default function Home({
             </DndContext>
           </div>
 
+        </div>
 
+        {/* ── Developer & Testing Section ── */}
+        <div className="hn-tools-section" style={{ marginTop: '30px' }}>
+          <div className="hn-tools-heading" style={{ color: 'var(--brand-primary)', borderBottom: '1px dashed var(--border-color)', paddingBottom: '10px' }}>
+            🛠️ For Developers & Testing
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
+            <button
+              className="or-btn-ghost"
+              style={{ width: '100%', color: 'var(--brand-primary)', fontWeight: 700 }}
+              onClick={() => onLaunch('bill-receipt-preview')}
+            >
+              🧾 Preview Bill & Receipt Design
+            </button>
 
-          <button
-            className="or-btn-ghost"
-            style={{ width: '100%', marginTop: '10px', color: 'var(--text-muted)' }}
-            onClick={handleStressTest}
-            disabled={stressing}
-          >
-            {stressing ? 'Injecting 10,000 orders...' : '⚙️ Run Stress Test (10k Orders)'}
-          </button>
+            <button
+              className="or-btn-ghost"
+              style={{ width: '100%', color: 'var(--text-muted)' }}
+              onClick={handleStressTest}
+              disabled={stressing}
+            >
+              {stressing ? 'Injecting 10,000 orders...' : '⚙️ Run Stress Test (10k Orders)'}
+            </button>
+
+            <div style={{ marginTop: '10px', padding: '12px', background: 'var(--bg-surface-2)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>🔊 Sound Testing</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {['add', 'remove', 'checkout', 'alarm', 'reveal', 'burst'].map(snd => (
+                  <button
+                    key={snd}
+                    onClick={() => playTestSound(snd)}
+                    style={{ 
+                      padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', 
+                      background: 'var(--bg-surface)', fontSize: '0.75rem', cursor: 'pointer', color: 'var(--text-secondary)' 
+                    }}
+                  >
+                    {snd}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="hn-footer">
           <div className="hn-footer-text" style={{ lineHeight: '1.5' }}>
             ManSula BOS · {APP_VERSION}<br />
-            {ORG?.copyright || `© 2024 - ${new Date().getFullYear()} ManSula Technologies. All rights reserved.`}
+            {ORG?.copyright || `© 2024 - ${new Date().getFullYear()} ManSula DivLabs. All rights reserved.`}
           </div>
         </div>
 
