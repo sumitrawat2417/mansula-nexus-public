@@ -28,7 +28,7 @@ const playSound = (type) => {
       osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.15)
 
       gain.gain.setValueAtTime(0, ctx.currentTime)
-      gain.gain.linearRampToValueAtTime(0.05 * vol, ctx.currentTime + 0.05)
+      gain.gain.linearRampToValueAtTime(0.25 * vol, ctx.currentTime + 0.05)
       gain.gain.exponentialRampToValueAtTime(0.001 * vol, ctx.currentTime + 0.3)
 
       osc.start(ctx.currentTime)
@@ -57,7 +57,7 @@ const playSound = (type) => {
 
         // Punchy attack, long fade out
         gain.gain.setValueAtTime(0, ctx.currentTime)
-        gain.gain.linearRampToValueAtTime(0.03 * vol, ctx.currentTime + 0.02)
+        gain.gain.linearRampToValueAtTime(0.12 * vol, ctx.currentTime + 0.02)
         gain.gain.exponentialRampToValueAtTime(0.001 * vol, ctx.currentTime + 2)
 
         osc.start(ctx.currentTime)
