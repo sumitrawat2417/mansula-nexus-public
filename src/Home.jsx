@@ -1212,6 +1212,7 @@ export default function Home({
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [businessName, setBusinessName] = useState('')
   const [businessLogo, setBusinessLogo] = useState('')
+  const [showDevTools, setShowDevTools] = useState(false)
   const { alert: showAlert, confirm: showConfirm } = useAlert()
 
   const lastBackupDate = localStorage.getItem('mn-last-backup-date')
@@ -1420,47 +1421,17 @@ export default function Home({
         </div>
 
         {/* ── Developer & Testing Section ── */}
-        <div className="hn-tools-section" style={{ marginTop: '30px' }}>
-          <div className="hn-tools-heading" style={{ color: 'var(--brand-primary)', borderBottom: '1px dashed var(--border-color)', paddingBottom: '10px' }}>
+        <div style={{ marginTop: '20px', padding: '0 20px', textAlign: 'center' }}>
+          <button
+            onClick={() => setShowDevTools(true)}
+            style={{
+              background: 'transparent', border: '1px dashed var(--brand-primary)',
+              color: 'var(--brand-primary)', padding: '10px 20px', borderRadius: '12px',
+              fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer'
+            }}
+          >
             🛠️ For Developers & Testing
-          </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
-            <button
-              className="or-btn-ghost"
-              style={{ width: '100%', color: 'var(--brand-primary)', fontWeight: 700 }}
-              onClick={() => onLaunch('bill-receipt-preview')}
-            >
-              🧾 Preview Bill & Receipt Design
-            </button>
-
-            <button
-              className="or-btn-ghost"
-              style={{ width: '100%', color: 'var(--text-muted)' }}
-              onClick={handleStressTest}
-              disabled={stressing}
-            >
-              {stressing ? 'Injecting 10,000 orders...' : '⚙️ Run Stress Test (10k Orders)'}
-            </button>
-
-            <div style={{ marginTop: '10px', padding: '12px', background: 'var(--bg-surface-2)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>🔊 Sound Testing</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                {['add', 'remove', 'checkout', 'alarm', 'reveal', 'burst'].map(snd => (
-                  <button
-                    key={snd}
-                    onClick={() => playTestSound(snd)}
-                    style={{ 
-                      padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', 
-                      background: 'var(--bg-surface)', fontSize: '0.75rem', cursor: 'pointer', color: 'var(--text-secondary)' 
-                    }}
-                  >
-                    {snd}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+          </button>
         </div>
 
         <div className="hn-footer">
@@ -1472,6 +1443,7 @@ export default function Home({
 
         <SeoFooter />
       </div>
+      {showDevTools && <DevToolsModal onClose={() => setShowDevTools(false)} onLaunch={onLaunch} handleStressTest={handleStressTest} stressing={stressing} />}
     </div>
   )
 }
@@ -1544,6 +1516,70 @@ function SettingsThemeModal({ onClose, onChangeTheme, currentTheme }) {
           >
             Close
           </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── DevToolsModal Component ──
+function DevToolsModal({ onClose, onLaunch, handleStressTest, stressing }) {
+  return (
+    <div className="hns-overlay" onClick={onClose}>
+      <div className="hns-root" onClick={e => e.stopPropagation()} role="dialog" aria-label="Developer Tools">
+        <header className="hns-topbar">
+          <div className="hns-topbar-left">
+            <button className="hns-topbar-back" onClick={onClose} aria-label="Back">
+              <Icon.Back />
+            </button>
+            <div className="hns-topbar-heading">🛠️ For Developers & Testing</div>
+          </div>
+        </header>
+
+        <div className="hns-body-wrapper" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}>
+          
+          <div style={{ background: 'var(--bg-surface-2)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px' }}>UI & Design Tests</div>
+            <button
+              className="or-btn-ghost"
+              style={{ width: '100%', color: 'var(--brand-primary)', fontWeight: 600, background: 'var(--bg-surface)' }}
+              onClick={() => { onClose(); onLaunch('bill-receipt-preview'); }}
+            >
+              🧾 Preview Bill & Receipt Design
+            </button>
+          </div>
+
+          <div style={{ background: 'var(--bg-surface-2)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px' }}>Performance Tests</div>
+            <button
+              className="or-btn-ghost"
+              style={{ width: '100%', color: 'var(--brand-danger)', fontWeight: 600, background: 'var(--bg-surface)' }}
+              onClick={handleStressTest}
+              disabled={stressing}
+            >
+              {stressing ? 'Injecting 10,000 orders...' : '⚙️ Run Stress Test (10k Orders)'}
+            </button>
+          </div>
+
+          <div style={{ background: 'var(--bg-surface-2)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px' }}>🔊 Sound Testing</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {['add', 'remove', 'checkout', 'alarm', 'reveal', 'burst'].map(snd => (
+                <button
+                  key={snd}
+                  onClick={() => playTestSound(snd)}
+                  style={{ 
+                    padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', 
+                    background: 'var(--bg-surface)', fontSize: '0.8rem', cursor: 'pointer', color: 'var(--text-primary)',
+                    flex: '1 1 auto', fontWeight: 500
+                  }}
+                >
+                  🔊 {snd}
+                </button>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
