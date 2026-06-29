@@ -1197,6 +1197,46 @@ const playTestSound = (type) => {
         for (let i = 0; i < 6; i++) { osc.frequency.setValueAtTime(800, t + i * 0.5); osc.frequency.setValueAtTime(1200, t + i * 0.5 + 0.25); }
         gain.gain.setValueAtTime(0.4 * vol, t); gain.gain.linearRampToValueAtTime(0.4 * vol, t + 3); gain.gain.linearRampToValueAtTime(0.01 * vol, t + 3.1);
         osc.start(t); osc.stop(t + 3.1);
+      } else if (type === 'success') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, ctx.currentTime); osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.6 * vol, ctx.currentTime + 0.05); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.6);
+        osc.start(); osc.stop(ctx.currentTime + 0.6);
+      } else if (type === 'error') {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, ctx.currentTime); osc.frequency.setValueAtTime(140, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.7 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.3);
+        osc.start(); osc.stop(ctx.currentTime + 0.3);
+      } else if (type === 'warning') {
+        osc.type = 'square'; osc.frequency.setValueAtTime(400, ctx.currentTime); osc.frequency.setValueAtTime(400, ctx.currentTime + 0.15); osc.frequency.setValueAtTime(400, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.5 * vol, ctx.currentTime); gain.gain.setValueAtTime(0.5 * vol, ctx.currentTime + 0.1); gain.gain.setValueAtTime(0, ctx.currentTime + 0.11); gain.gain.setValueAtTime(0.5 * vol, ctx.currentTime + 0.2); gain.gain.linearRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.4);
+        osc.start(); osc.stop(ctx.currentTime + 0.4);
+      } else if (type === 'click') {
+        osc.type = 'square'; osc.frequency.setValueAtTime(1000, ctx.currentTime);
+        gain.gain.setValueAtTime(0.6 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.05);
+        osc.start(); osc.stop(ctx.currentTime + 0.05);
+      } else if (type === 'pop') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(800, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.8 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.1);
+        osc.start(); osc.stop(ctx.currentTime + 0.1);
+      } else if (type === 'coin') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(987.77, ctx.currentTime); osc.frequency.setValueAtTime(1318.51, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.6 * vol, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.6 * vol, ctx.currentTime + 0.1); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.5);
+        osc.start(); osc.stop(ctx.currentTime + 0.5);
+      } else if (type === 'laser') {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(880, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.5 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.2);
+        osc.start(); osc.stop(ctx.currentTime + 0.2);
+      } else if (type === 'sweep-down') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(1200, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.4);
+        gain.gain.setValueAtTime(0.7 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.4);
+        osc.start(); osc.stop(ctx.currentTime + 0.4);
+      } else if (type === 'sweep-up') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(200, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.4);
+        gain.gain.setValueAtTime(0.7 * vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 0.4);
+        osc.start(); osc.stop(ctx.currentTime + 0.4);
+      } else if (type === 'chime') {
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(1046.50, ctx.currentTime);
+        gain.gain.setValueAtTime(0, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.8 * vol, ctx.currentTime + 0.05); gain.gain.exponentialRampToValueAtTime(0.01 * vol, ctx.currentTime + 1.2);
+        osc.start(); osc.stop(ctx.currentTime + 1.2);
       }
     }
   } catch (_) { }
@@ -1564,7 +1604,7 @@ function DevToolsModal({ onClose, onLaunch, handleStressTest, stressing }) {
           <div style={{ background: 'var(--bg-surface-2)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border-color)' }}>
             <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px' }}>🔊 Sound Testing</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {['add', 'remove', 'checkout', 'alarm', 'reveal', 'burst'].map(snd => (
+              {['add', 'remove', 'checkout', 'alarm', 'reveal', 'burst', 'success', 'error', 'warning', 'click', 'pop', 'coin', 'laser', 'sweep-down', 'sweep-up', 'chime'].map(snd => (
                 <button
                   key={snd}
                   onClick={() => playTestSound(snd)}
