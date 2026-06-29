@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { ORG } from './appInfo.js'
 
 // ── Web Audio Synthesizer (Premium Chimes) ──
 const playSound = (type) => {
@@ -117,9 +118,21 @@ export default function Welcome({ onComplete }) {
           </h1>
 
           <div className={`wel-subtitle-wrap ${stage >= 2 ? 'show' : ''}`}>
-            <p className="wel-subtitle" style={{ fontSize: '0.85rem' }}>Empowering Commerce with Smart Technology</p>
+            <p className="wel-subtitle" style={{ fontSize: '0.85rem' }}>{ORG.tagline}</p>
             <div className="wel-loader-bar">
               <div className="wel-loader-fill" />
+            </div>
+            <div className="wel-org" style={{ 
+              marginTop: '18px', 
+              fontSize: '0.62rem', 
+              fontWeight: 600, 
+              letterSpacing: '0.18em', 
+              textTransform: 'uppercase', 
+              color: 'var(--text-muted)', 
+              opacity: 0.7,
+              fontFamily: '"Outfit", sans-serif'
+            }}>
+              BY {ORG.name}
             </div>
           </div>
         </div>
